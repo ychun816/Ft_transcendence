@@ -1,29 +1,17 @@
 {
-  "name": "transcende_me_if_you_can",
-  "version": "1.0.0",
-  "description": "Ft_transcendence : 155",
-  "main": "index.js",
+  "name": "transcendence",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Canybardeloton/Transcende_me_if_you_can.git"
+  "devDependencies": {
+    "typescript": "~5.8.3"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Canybardeloton/Transcende_me_if_you_can/issues"
-  },
-  "homepage": "https://github.com/Canybardeloton/Transcende_me_if_you_can#readme",
   "dependencies": {
-    "@tailwindcss/vite": "^4.1.10",
-    "fastify": "^5.4.0",
-    "nodejs": "^0.0.0",
-    "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.7",
-    "tailwindcss": "^4.1.10",
-    "vite": "^6.3.5"
+    "vite": "^3.2.7"
   }
 }
