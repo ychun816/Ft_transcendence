@@ -1,47 +1,35 @@
 # Transcende_me_if_you_can
-Ft_transcendence
+Ft_transcendence : 155
 
-Web
-◦ Major module: Use a framework to build the backend.
-◦ Minor module: Use a framework or a toolkit to build the frontend.
-◦ Minor module: Use a database for the backend.
-◦ Major module: Store the score of a tournament in the Blockchain.
+General : 25
+- Docker
 
-User Management
-◦ Major module: Standard user management, authentication, users across tournaments.
-◦ Major module: Implementing a remote authentication.
+Web : 20
+- Major module: Use a framework to build the backend. // All
+- Minor module: Use a framework or a toolkit to build the frontend. // All
+- Minor module: Use a database for the backend. // Jojo
 
-Gameplay and user experience
-◦ Major module: Remote players
-◦ Major module: Multiplayer (more than 2 players in the same game).
-◦ Major module: Add another game with user history and matchmaking.
-◦ Minor module: Game customization options.
-◦ Major module: Live chat.
+User Management : 20
+- Major module: Standard user management, authentication, users across tournaments. // Armel
+- Major module: Implementing a remote authentication. // Armel - Arthur
 
-AI-Algo
-◦ Major module: Introduce an AI opponent.
-◦ Minor module: User and game stats dashboards
+Gameplay and user experience : 30
+- Major module: Remote players // Diego
+- Major module: Multiplayer (more than 2 players in the same game). // Diego
+- Major module: Live Chat // Jojo
 
-Cybersecurity
-◦ Major module: Implement WAF/ModSecurity with a hardened configuration and HashiCorp Vault for secrets management.
-◦ Minor module: GDPR compliance options with user anonymization, localdata management, and Account Deletion.
-◦ Major module: Implement Two-Factor Authentication (2FA) and JWT.
+AI-Algo : 15
+- Major module: Introduce an AI opponent. // Diego
+- Minor module: User and game stats dashboards // Diego
 
-Devops
-◦ Major module: Infrastructure setup for log management.
-◦ Minor module: Monitoring system.
-◦ Major module: Designing the backend as microservices.
+Cybersecurity : 20
+- Major module: Implement WAF/ModSecurity with a hardened configuration and HashiCorp Vault for secrets management. // Yichun
+- Major module: Implement Two-Factor Authentication (2FA) and JWT. // Yichun - Arthur
 
-Graphics
-◦ Major module: Use advanced 3D techniques.
+Devops : 15
+- Major module: Infrastructure setup for log management. // Arthur
+- Minor module: Monitoring system. // Arthur
 
-Accessibility
-◦ Minor module: Support on all devices.
-◦ Minor module: Expanding browser compatibility.
-◦ Minor module: Supports multiple languages.
-◦ Minor module: Add accessibility features for visually impaired users.
-◦ Minor module: Server-Side Rendering (SSR) integration.
-
-Server-Side Pong
-◦ Major module: Replace basic Pong with server-side Pong and implement an API.
-◦ Major module: Enabling Pong gameplay via CLI against web users with API integration.
+Accessibility : 10
+- Minor module: Supports multiple languages. 
+- Minor module: Server-Side Rendering (SSR) integration. // Jojo
