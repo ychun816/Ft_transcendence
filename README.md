@@ -3,6 +3,8 @@ Ft_transcendence : 155
 
 General : 25
 - Docker
+- Typescript
+- Mozilla
 
 Web : 20
 - Major module: Use a framework to build the backend. // All
