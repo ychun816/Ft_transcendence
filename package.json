@@ -9,9 +9,27 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "typescript": "~5.8.3"
+    "prettier": "3.5.3",
+    "prisma": "^6.10.0",
+    "typescript": "~5.8.3",
+    "vite": "^6.3.5"
   },
+  "main": "index.js",
   "dependencies": {
-    "vite": "^3.2.7"
-  }
+    "@prisma/client": "^6.10.0",
+    "esbuild": "^0.25.5",
+    "fdir": "^6.4.6",
+    "nanoid": "^3.3.11",
+    "nodejs": "^0.0.0",
+    "picocolors": "^1.1.1",
+    "picomatch": "^4.0.2",
+    "postcss": "^8.5.6",
+    "rollup": "^4.43.0",
+    "source-map-js": "^1.2.1",
+    "tinyglobby": "^0.2.14"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
 }
