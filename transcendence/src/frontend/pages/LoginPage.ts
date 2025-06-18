@@ -1,0 +1,28 @@
+export function createLoginPage(): HTMLElement {
+  const page = document.createElement('div');
+  page.className = 'login-page';
+  
+  page.innerHTML = `
+    <div class="login-container">
+      <h1>Transcendence</h1>
+      <form class="login-form">
+        <input type="text" placeholder="Username" id="username" required>
+        <input type="password" placeholder="Password" id="password" required>
+        <button type="submit">Se connecter</button>
+        <button type="button" id="register-btn">S'inscrire</button>
+      </form>
+    </div>
+  `;
+  
+
+  const form = page.querySelector('.login-form') as HTMLFormElement;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    // Connexion
+    import('../router/router.js').then(({ router }) => {
+      router.navigate('/home');
+    });
+  });
+  
+  return page;
+} 

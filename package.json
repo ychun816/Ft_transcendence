@@ -1,15 +1,17 @@
 {
-  "name": "transcende_me_if_you_can",
-  "version": "1.0.0",
-  "description": "Ft_transcendence : 155",
-  "main": "index.js",
+  "name": "transcendence",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "devDependencies": {
+    "typescript": "~5.8.3"
+  },
   "dependencies": {
-    "nodejs": "^0.0.0"
+    "vite": "^3.2.7"
   }
 }
