@@ -35,3 +35,6 @@ Devops : 15
 Accessibility : 10
 - Minor module: Supports multiple languages. 
 - Minor module: Server-Side Rendering (SSR) integration. // Jojo
+
+
+npm install to install all dependencies/librairies
