@@ -24,8 +24,11 @@ export function createProfilePage(): HTMLElement {
     </main>
   `;
   
-  // Navigation
   page.addEventListener('click', (e) => {
+    /*
+    This function is called when the user clicks on a button.
+    It finds the targeted route and navigates to it.
+    */
     const target = e.target as HTMLElement;
     const route = target.getAttribute('data-route');
     if (route) {
