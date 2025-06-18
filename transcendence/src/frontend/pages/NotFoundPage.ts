@@ -10,11 +10,15 @@ export function createNotFoundPage(): HTMLElement {
     </div>
   `;
   
-  // Navigation
+
   page.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
     const route = target.getAttribute('data-route');
     if (route) {
+      /*
+      This function is called when the user clicks on a button.
+      It finds the targeted route and navigates to it.
+      */
       import('../router/router.js').then(({ router }) => {
         router.navigate(route);
       });

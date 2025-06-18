@@ -7,7 +7,7 @@ import { createProfilePage } from "./pages/ProfilePage.ts";
 import { createChatPage } from "./pages/ChatPage.ts";
 import { createNotFoundPage } from "./pages/NotFoundPage.ts";
 
-// Configuration des routes
+// Add routes to the router
 router
   .addRoute('/', createLoginPage)
   .addRoute('/login', createLoginPage)
@@ -17,5 +17,4 @@ router
   .addRoute('/chat', createChatPage)
   .addRoute('/404', createNotFoundPage);
 
-// Démarrage de l'application
 router.start();

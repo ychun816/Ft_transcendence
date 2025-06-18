@@ -18,7 +18,10 @@ export function createLoginPage(): HTMLElement {
   const form = page.querySelector('.login-form') as HTMLFormElement;
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    // Connexion
+    /*
+    This function is called when the user clicks on a button.
+    It finds the targeted route and navigates to it.
+    */
     import('../router/router.js').then(({ router }) => {
       router.navigate('/home');
     });

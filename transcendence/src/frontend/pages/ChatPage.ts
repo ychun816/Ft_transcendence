@@ -18,8 +18,11 @@ export function createChatPage(): HTMLElement {
     </main>
   `;
   
-  // Navigation et logique de chat
   page.addEventListener('click', (e) => {
+    /*
+    This function is called when the user clicks on a button.
+    It finds the targeted route and navigates to it.
+    */
     const target = e.target as HTMLElement;
     const route = target.getAttribute('data-route');
     if (route) {

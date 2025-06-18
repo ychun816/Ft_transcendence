@@ -24,6 +24,7 @@ export function createHomePage(): HTMLElement {
     const target = e.target as HTMLElement;
     const route = target.getAttribute('data-route');
     if (route) {
+      // Find the targeted route and navigate to it
       import('../router/router.js').then(({ router }) => {
         router.navigate(route);
       });
