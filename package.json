@@ -1,13 +1,7 @@
 {
   "name": "transcendence",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
-  },
+  "version": "1.0.0",
+  "description": "Ft_transcendence : 155",
   "devDependencies": {
     "prettier": "3.5.3",
     "prisma": "^6.10.0",
@@ -27,9 +21,10 @@
     "rollup": "^4.43.0",
     "source-map-js": "^1.2.1",
     "tinyglobby": "^0.2.14"
-  },
+	},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"},
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "description": ""
+  "license": "ISC"
 }
