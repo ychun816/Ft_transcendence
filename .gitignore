@@ -8,7 +8,8 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
+./backend/dist
+./frontend/dist
 dist-ssr
 *.local
 
@@ -29,4 +30,4 @@ dist-ssr
 .env.test.local
 .env.production.local
 
-/src/generated/prisma
+/backend/generated/prisma
