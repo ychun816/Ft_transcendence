@@ -1,0 +1,27 @@
+{
+  "name": "transcendence",
+  "version": "1.0.0",
+  "description": "Ft_transcendence : 155",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Canybardeloton/Transcende_me_if_you_can.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Canybardeloton/Transcende_me_if_you_can/issues"
+  },
+  "homepage": "https://github.com/Canybardeloton/Transcende_me_if_you_can#readme",
+  "dependencies": {
+    "fastify": "^5.4.0",
+    "node": "^24.2.0",
+    "tailwind": "^4.0.0",
+    "typescript": "^5.8.3"
+  }
+}
