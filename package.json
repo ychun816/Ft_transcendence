@@ -29,7 +29,7 @@
   },
   "scripts": {
     "dev": "npm run dev:backend && npm run dev:frontend",
-    "dev:backend": "cd backend && tsc --watch & node --watch dist/server.js",
+    "dev:backend": "cd backend && tsc & node dist/server.js",
     "dev:frontend": "cd frontend && vite",
     "build": "npm run build:frontend && npm run build:backend",
     "build:backend": "cd backend && tsc",
