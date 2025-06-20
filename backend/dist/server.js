@@ -13,7 +13,7 @@ app.register(fastifyStatic, {
     prefix: '/',
 });
 app.setNotFoundHandler((_req, reply) => {
-    reply.sendFile('../frontend/public/index.html');
+    reply.sendFile('index.html');
 });
 app.listen({ port: port }, () => {
     console.log(`App is listening on port: ${port}`);

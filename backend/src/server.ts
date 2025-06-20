@@ -17,7 +17,7 @@ app.register(fastifyStatic, {
 });
 
 app.setNotFoundHandler((_req, reply) => {
-	reply.sendFile('../frontend/public/index.html');
+	reply.sendFile('index.html');
 });
 
 
