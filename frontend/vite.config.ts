@@ -7,7 +7,7 @@ export default defineConfig({
         outDir: '../dist',
         emptyOutDir: true,
         rollupOptions: {
-            input: 'src/main.ts'
+            input: 'index.html'
         }
     },
     server: {
