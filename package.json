@@ -5,17 +5,16 @@
   "description": "Ft_transcendence : 155",
   "devDependencies": {
     "@types/node": "^24.0.3",
+    "concurrently": "^9.1.2",
     "prettier": "3.5.3",
-    "prisma": "^6.10.0",
-    "typescript": "~5.8.3",
-    "vite": "^6.3.5"
+    "typescript": "~5.8.3"
   },
   "main": "index.js",
   "dependencies": {
-    "@fastify/static": "^8.2.0",
+    "@fastify/static": "^6.12.0",
     "@prisma/client": "^6.10.0",
     "esbuild": "^0.25.5",
-    "fastify": "^5.4.0",
+    "fastify": "^4.29.1",
     "fdir": "^6.4.6",
     "nanoid": "^3.3.11",
     "nodejs": "^0.0.0",
@@ -23,13 +22,15 @@
     "picocolors": "^1.1.1",
     "picomatch": "^4.0.2",
     "postcss": "^8.5.6",
+    "prisma": "^5.19.0",
     "rollup": "^4.43.0",
     "source-map-js": "^1.2.1",
-    "tinyglobby": "^0.2.14"
+    "tinyglobby": "^0.2.14",
+    "vite": "^4.5.0"
   },
   "scripts": {
-    "dev": "npm run dev:backend && npm run dev:frontend",
-    "dev:backend": "cd backend && tsc & node dist/server.js",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:backend": "cd backend && tsc && node dist/server.js",
     "dev:frontend": "cd frontend && vite",
     "build": "npm run build:frontend && npm run build:backend",
     "build:backend": "cd backend && tsc",
