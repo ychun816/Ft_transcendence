@@ -6,10 +6,12 @@ import { createGamePage } from "./pages/GamePage";
 import { createProfilePage } from "./pages/ProfilePage";
 import { createChatPage } from "./pages/ChatPage";
 import { createNotFoundPage } from "./pages/NotFoundPage";
+import { createSignUpPage } from "./pages/SignUpPage";
 
 router
     .addRoute('/', createLoginPage)
     .addRoute('/login', createLoginPage)
+	.addRoute('/signup', createSignUpPage)
     .addRoute('/home', createHomePage)
     .addRoute('/game', createGamePage)
     .addRoute('/profile', createProfilePage)
