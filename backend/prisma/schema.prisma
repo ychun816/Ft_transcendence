@@ -24,8 +24,8 @@ model User {
   createdAt				DateTime	@default(now())
   matchesAsPlayer1		Match[]		@relation("Player1")
   matchesAsPlayer2		Match[]		@relation("Player2")
-  friends          User[] @relation("UserFriends")
-  friendOf         User[] @relation("UserFriends")
+  friends				User[]		@relation("UserFriends")
+  friendOf				User[]		@relation("UserFriends")
 }
 
 model Match {
@@ -37,7 +37,5 @@ model Match {
   score1				Int
   score2				Int
   winnerId				Int      // FK vers User.id (le gagnant)
-  playedAt				DateTime @default(now())
+  playedAt				DateTime	@default(now())
 }
-
-
