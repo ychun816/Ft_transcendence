@@ -1,4 +1,4 @@
-import { UserSignUpCheck } from '../../backend/src/signup/signUpCheck.ts';
+import { UserSignUpCheck } from '@shared/signUpCheck';
 
 export function createSignUpPage(): HTMLElement{
 	const page = document.createElement('div');
@@ -19,31 +19,50 @@ export function createSignUpPage(): HTMLElement{
 			</form>
 		</div>
 		`;
-
 	const form = page.querySelector(".signup-form") as HTMLFormElement;
+	form.addEventListener("submit", (e) => {
+		e.preventDefault();
+	});
+	return page;
+}
+
+export async function sendSignUpInfo(page: HTMLDivElement): Promise<HTMLDivElement> {
+
 	form.addEventListener("submit", (e) => {
 		e.preventDefault();
 
 		const usernameInput = page.querySelector("#username") as HTMLInputElement;
 		const passwordInput = page.querySelector("#password") as HTMLInputElement;
 		const avatarInput = page.querySelector("#avatar") as HTMLInputElement;
+		const avatar = avatarInput.files?.[0];
 
 		const UserInfo = {
 			username: usernameInput.value,
 			password: passwordInput.value,
-			avatar: avatarInput.value,
+			avatar: avatar,
 		};
 
 		if (UserSignUpCheck(UserInfo)){
-			//push to backend
+			const user = UserInfo;
+			const formData = new FormData();
+			formData.append("username", user.username);
+			formData.append("password", user.password);
+			if (user.avatar) formData.append("avatar", user.avatar);
+
+			const response = await fetch("/api/signup", {
+				method: "POST",
+				body: formData,
+			});
+			if (response.ok){
+				import("../router/router.js").then(({ router }) => {
+					router.navigate('/login');
+				});
+			} else {
+				alert("Issue while registering");
+			}
 		}
 		else {
-			//error message
+			alert("Wrong user input");
 		}
-
-		import("../router/router.js").then(({ router }) => {
-			router.navigate('/login');
-		});
 	});
-	return page;
 }
