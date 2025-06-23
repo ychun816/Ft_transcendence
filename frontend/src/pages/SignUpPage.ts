@@ -20,49 +20,45 @@ export function createSignUpPage(): HTMLElement{
 		</div>
 		`;
 	const form = page.querySelector(".signup-form") as HTMLFormElement;
-	form.addEventListener("submit", (e) => {
+	form.addEventListener("submit", async (e) => {
 		e.preventDefault();
+		sendSignUpInfo(page)
 	});
 	return page;
 }
 
-export async function sendSignUpInfo(page: HTMLDivElement): Promise<HTMLDivElement> {
+export async function sendSignUpInfo(page: HTMLDivElement): Promise<void> {
+	const usernameInput = page.querySelector("#username") as HTMLInputElement;
+	const passwordInput = page.querySelector("#password") as HTMLInputElement;
+	const avatarInput = page.querySelector("#avatar") as HTMLInputElement;
+	const avatar = avatarInput.files?.[0];
 
-	form.addEventListener("submit", (e) => {
-		e.preventDefault();
+	const UserInfo = {
+		username: usernameInput.value,
+		password: passwordInput.value,
+		avatar: avatar,
+	};
 
-		const usernameInput = page.querySelector("#username") as HTMLInputElement;
-		const passwordInput = page.querySelector("#password") as HTMLInputElement;
-		const avatarInput = page.querySelector("#avatar") as HTMLInputElement;
-		const avatar = avatarInput.files?.[0];
+	if (UserSignUpCheck(UserInfo)){
+		const user = UserInfo;
+		const formData = new FormData();
+		formData.append("username", user.username);
+		formData.append("password", user.password);
+		if (user.avatar) formData.append("avatar", user.avatar);
 
-		const UserInfo = {
-			username: usernameInput.value,
-			password: passwordInput.value,
-			avatar: avatar,
-		};
-
-		if (UserSignUpCheck(UserInfo)){
-			const user = UserInfo;
-			const formData = new FormData();
-			formData.append("username", user.username);
-			formData.append("password", user.password);
-			if (user.avatar) formData.append("avatar", user.avatar);
-
-			const response = await fetch("/api/signup", {
-				method: "POST",
-				body: formData,
+		const response = await fetch("/api/signup", {
+			method: "POST",
+			body: formData,
+		});
+		if (response.ok){
+			import("../router/router.js").then(({ router }) => {
+				router.navigate('/login');
 			});
-			if (response.ok){
-				import("../router/router.js").then(({ router }) => {
-					router.navigate('/login');
-				});
-			} else {
-				alert("Issue while registering");
-			}
+		} else {
+			alert("Issue while registering");
 		}
-		else {
-			alert("Wrong user input");
-		}
-	});
+	}
+	else {
+		alert("Wrong user input");
+	}
 }
