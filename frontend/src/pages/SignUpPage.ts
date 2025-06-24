@@ -9,7 +9,7 @@ export function createSignUpPage(): HTMLElement{
 			<h1> Create your account </h1>
 			<form class="signup-form">
 				<input type="text" placeholder="Username" id="username" required>
-				<input type="text" placeholder="Password" id="password" required>
+				<input type="password" placeholder="Password" id="password" required>
 				<br>
 				<label for="avatar">Choose a profile picture:</label>
 				<input type="file" id="avatar" name="avatar" accept="image/png, image/jpeg" />
