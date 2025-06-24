@@ -43,7 +43,7 @@ export async function sendSignUpInfo(page: HTMLDivElement): Promise<void> {
 		avatar: avatar,
 	};
 
-	if (UserSignUpCheck(UserInfo)){
+	//if (UserSignUpCheck(UserInfo)){
 		const user = UserInfo;
 		const formData = new FormData();
 
@@ -68,8 +68,8 @@ export async function sendSignUpInfo(page: HTMLDivElement): Promise<void> {
 		} else {
 			alert("Issue while registering");
 		}
-	}
-	else {
-		alert("Wrong user input");
-	}
+	// }
+	// else {
+	// 	alert("Wrong user input");
+	// }
 }
