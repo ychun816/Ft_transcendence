@@ -34,7 +34,7 @@
   },
   "scripts": {
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
-    "dev:backend": "cd backend && tsc && node dist/server.js",
+    "dev:backend": "cd backend && tsc && node --trace-deprecation dist/server.js",
     "dev:frontend": "cd frontend && vite",
     "build": "npm run build:frontend && npm run build:backend",
     "build:backend": "cd backend && tsc",

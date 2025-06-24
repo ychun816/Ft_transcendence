@@ -12,6 +12,9 @@ const prisma = PrismaClient();
 function getFieldValue(field: any): string | undefined {
 	if (!field) return undefined;
 	if (Array.isArray(field)) field = field[0];
+	if (typeof field.value === 'string') return field.value;
+	if (Buffer.isBuffer(field.value)) return field.value.toString();
+	return undefined;
 }
 
 export async function registerNewUser(app: FastifyInstance) {
@@ -20,8 +23,12 @@ export async function registerNewUser(app: FastifyInstance) {
 		const data = await request.file();
 		if (data){
 			const { username, password } = data.fields;
-			const usernameValue = Array.isArray(username) ? username[0].value : username.value;
-			const passwordValue = Array.isArray(password) ? password[0].value : password.value;
+			const usernameValue = getFieldValue(username);
+			const passwordValue = getFieldValue(password);
+			// PRINT DEBUG SIGNUP FORM
+			console.log(`usernameValue: ${usernameValue}`);
+			console.log(`passwordValue: ${passwordValue}`);
+			// END PRINT DEBUG SIGNUP FORM
 			if (!usernameValue || !passwordValue){
 				reply.code(400).send({ error: "Invalid user info: missing username or password." });
 				return ;
