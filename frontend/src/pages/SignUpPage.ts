@@ -59,6 +59,7 @@ export async function sendSignUpInfo(page: HTMLDivElement): Promise<void> {
 			method: "POST",
 			body: formData,
 		});
+		console.log(response);
 		if (response.ok){
 			import("../router/router.js").then(({ router }) => {
 				router.navigate('/login');
