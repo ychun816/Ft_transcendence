@@ -1,5 +1,4 @@
-//import { UserSignUpCheck } from '../../backend/src/signup/signUpCheck.ts';
-import { UserSignUpCheck } from '@shared/signUpCheck';
+//import { UserSignUpCheck } from '@shared/signUpCheck';
 
 export function createSignUpPage(): HTMLElement{
 	const page = document.createElement('div');
