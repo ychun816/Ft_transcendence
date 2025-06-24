@@ -19,9 +19,12 @@ export function createSignUpPage(): HTMLElement{
 			</form>
 		</div>
 		`;
+
+	console.log("LOADING SIGNUP PAGE");
 	const form = page.querySelector(".signup-form") as HTMLFormElement;
 	form.addEventListener("submit", async (e) => {
 		e.preventDefault();
+		console.log("SUBMIT SIGNUP FORM");
 		sendSignUpInfo(page)
 	});
 	return page;
@@ -42,6 +45,12 @@ export async function sendSignUpInfo(page: HTMLDivElement): Promise<void> {
 	if (UserSignUpCheck(UserInfo)){
 		const user = UserInfo;
 		const formData = new FormData();
+
+		// PRINT DEBUG SIGNUP FORM
+		console.log(`USERNAME: ${user.username}`);
+		console.log(`PASSWORD: ${user.password}`);
+		// END PRINT DEBUG SIGNUP FORM
+
 		formData.append("username", user.username);
 		formData.append("password", user.password);
 		if (user.avatar) formData.append("avatar", user.avatar);
