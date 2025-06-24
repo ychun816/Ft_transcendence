@@ -1,7 +1,5 @@
 import fastifyMultipart from '@fastify/multipart';
-import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-const prisma = PrismaClient();
 //Add avatar file management with fastify-multipart
 function getFieldValue(field) {
     if (!field)
@@ -14,37 +12,52 @@ function getFieldValue(field) {
         return field.value.toString();
     return undefined;
 }
-export async function registerNewUser(app) {
+export async function registerNewUser(app, prisma) {
+    console.log("DEBUG");
     app.register(fastifyMultipart);
+    console.log("DEBUG2");
     app.post('/api/signup', async (request, reply) => {
-        const data = await request.file();
-        if (data) {
-            const { username, password } = data.fields;
-            const usernameValue = getFieldValue(username);
-            const passwordValue = getFieldValue(password);
-            // PRINT DEBUG SIGNUP FORM
-            console.log(`usernameValue: ${usernameValue}`);
-            console.log(`passwordValue: ${passwordValue}`);
-            // END PRINT DEBUG SIGNUP FORM
-            if (!usernameValue || !passwordValue) {
-                reply.code(400).send({ error: "Invalid user info: missing username or password." });
-                return;
+        console.log("DEBUG3");
+        const parts = request.parts();
+        const fields = {};
+        let avatarFile = null;
+        console.log("DEBUG4");
+        for await (const part of parts) {
+            if (part.type === 'file' && part.fieldname === 'avatar') {
+                avatarFile = part;
             }
-            const avatarFile = data.file;
-            const hashedPassword = await bcrypt.hash(passwordValue, 10);
-            try {
-                await prisma.user.create({
-                    data: {
-                        username: usernameValue,
-                        passwordHash: hashedPassword,
-                        //avatarUrl: avatarFile,
-                    }
-                });
-                reply.code(200).send({ sucess: true });
-            }
-            catch {
-                reply.code(400).send({ error: "Failed to import User data to the DB" });
+            else if (part.type === 'field') {
+                fields[part.fieldname] = part.value;
             }
         }
+        const usernameValue = fields.username;
+        const passwordValue = fields.password;
+        // PRINT DEBUG SIGNUP FORM
+        console.log(`usernameValue: ${usernameValue}`);
+        console.log(`passwordValue: ${passwordValue}`);
+        // END PRINT DEBUG SIGNUP FORM
+        if (!usernameValue || !passwordValue) {
+            reply.code(400).send({ error: "Invalid user info: missing username or password." });
+            return;
+        }
+        const hashedPassword = await bcrypt.hash(passwordValue, 10);
+        try {
+            const created = await prisma.user.create({
+                data: {
+                    username: usernameValue,
+                    passwordHash: hashedPassword,
+                    email: "",
+                    //avatarUrl: avatarFile,
+                }
+            });
+            console.log('Created user:', created);
+            console.log("User inserted correctly");
+            reply.code(200).send({ sucess: true });
+        }
+        catch (err) {
+            console.error("Erreur lors de la création de l'utilisateur :", err);
+            reply.code(400).send({ error: "Failed to import User data to the DB" });
+        }
+        console.log("DEBUG5");
     });
 }
