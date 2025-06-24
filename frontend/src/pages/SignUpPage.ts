@@ -1,4 +1,4 @@
-import { UserSignUpCheck } from '../../backend/src/signup/signUpCheck.ts';
+//import { UserSignUpCheck } from '../../backend/src/signup/signUpCheck.ts';
 
 export function createSignUpPage(): HTMLElement{
 	const page = document.createElement('div');
@@ -34,12 +34,12 @@ export function createSignUpPage(): HTMLElement{
 			avatar: avatarInput.value,
 		};
 
-		if (UserSignUpCheck(UserInfo)){
-			//push to backend
-		}
-		else {
-			//error message
-		}
+		// if (UserSignUpCheck(UserInfo)){
+		// 	//push to backend
+		// }
+		// else {
+		// 	//error message
+		// }
 
 		import("../router/router.js").then(({ router }) => {
 			router.navigate('/login');
