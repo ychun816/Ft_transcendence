@@ -1,6 +1,8 @@
 import { UserInfo } from "os";
 
-interface IUserInfo {
+//Add username unicity check
+
+export interface IUserInfo {
 	username: String,
 	password: String,
 	avatar: File | undefined,
@@ -22,7 +24,7 @@ function isAvatarDefined(user : IUserInfo): boolean {
 	return user.avatar === undefined || user.avatar instanceof File;
 };
 
-function UserSignUpCheck(user : IUserInfo): boolean {
+export function UserSignUpCheck(user : IUserInfo): boolean {
 	if (!isUsernameString(user)) {
 		alert("Username must be a string");
 		return false;

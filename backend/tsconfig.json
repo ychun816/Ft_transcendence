@@ -5,6 +5,8 @@
       "moduleResolution": "node",
       "outDir": "./dist",
       "rootDir": "./src",
+      "paths": {
+      	"@shared/*": ["../shared/*"]},
       "strict": true,
       "esModuleInterop": true,
       "allowSyntheticDefaultImports": true,
