@@ -1,5 +1,4 @@
 import { defineConfig } from 'vite';
-import path from 'path';
 
 export default defineConfig({
     root: './src',
@@ -14,11 +13,6 @@ export default defineConfig({
     server: {
         proxy: {
             '/api': 'http://localhost:3000'
-        }
-    },
-    resolve: {
-        alias: {
-            '@shared': path.resolve(__dirname, '../shared')
         }
     }
 });
