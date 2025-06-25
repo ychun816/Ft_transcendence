@@ -43,12 +43,6 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
 		username: usernameInput.value,
 		password: passwordInput.value,
 	};
-
-	console.log("DEBUGGING 4");
-	const formData = new FormData();
-	formData.append("username", UserInfo.username);
-	formData.append("password", UserInfo.password);
-
 	console.log("DEBUGGING 5");
 	const response = await fetch("/api/login", {
 		method: "POST",
@@ -60,6 +54,7 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
 	const data = await response.json();
 	console.log(response);
 	if (response.ok){
+		localStorage.setItem("jwt", data.token);
 		import("../router/router.js").then(({ router }) => {
 			router.navigate('/home');
 		});
