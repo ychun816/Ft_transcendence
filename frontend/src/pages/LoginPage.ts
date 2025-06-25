@@ -3,35 +3,67 @@ export function createLoginPage(): HTMLElement {
   page.className = 'login-page';
 
   page.innerHTML = `
-    <div class="login-container">
-      <h1>Transcendence</h1>
-      <form class="login-form">
-        <input type="text" placeholder="Username" id="username" required>
-        <input type="password" placeholder="Password" id="password" required>
-        <button type="submit">Log in</button>
+	<div class="login-container">
+	  <h1>Transcendence</h1>
+	  <form class="login-form">
+		<input type="text" placeholder="Username" id="username" required>
+		<input type="password" placeholder="Password" id="password" required>
+		<button type="submit">Log in</button>
 	  </form>
 	  <button type="button" id="register-btn">Sign up</button>
-    </div>
+	</div>
   `;
+	console.log("DEBUGGING LOGIN");
+	navigateToSignUp(page);
+	const form = page.querySelector('.login-form') as HTMLFormElement;
+	console.log("DEBUGGING 1");
+	form.addEventListener('submit', (e) => {
+		e.preventDefault();
+		console.log("DEBUGGING 2");
+		sendLogInInfo(page);
+	});
+	return page;
+}
 
+function navigateToSignUp(page: HTMLDivElement){
   const signupBtn = page.querySelector('#register-btn') as HTMLButtonElement;
   signupBtn.addEventListener("click", () => {
 	import("../router/router.js").then(({ router }) => {
 		router.navigate("/signup");
 		});
   	});
+}
 
-  const form = page.querySelector('.login-form') as HTMLFormElement;
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    /*
-    This function is called when the user clicks on a button.
-    It finds the targeted route and navigates to it.
-    */
-    import('../router/router.js').then(({ router }) => {
-      router.navigate('/home');
-    });
-  });
+async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
+	const usernameInput = page.querySelector("#username") as HTMLInputElement;
+	const passwordInput = page.querySelector("#password") as HTMLInputElement;
 
-  return page;
+	console.log("DEBUGGING 3");
+	const UserInfo = {
+		username: usernameInput.value,
+		password: passwordInput.value,
+	};
+
+	console.log("DEBUGGING 4");
+	const formData = new FormData();
+	formData.append("username", UserInfo.username);
+	formData.append("password", UserInfo.password);
+
+	console.log("DEBUGGING 5");
+	const response = await fetch("/api/login", {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json"
+		},
+		body: JSON.stringify(UserInfo),
+	});
+	const data = await response.json();
+	console.log(response);
+	if (response.ok){
+		import("../router/router.js").then(({ router }) => {
+			router.navigate('/home');
+		});
+	} else {
+		alert("Issue while logging in");
+	}
 }
