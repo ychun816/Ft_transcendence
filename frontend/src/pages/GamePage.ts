@@ -1,7 +1,7 @@
 export function createGamePage(): HTMLElement {
   const page = document.createElement('div');
   page.className = 'game-page';
-  
+
   page.innerHTML = `
     <header class="game-header">
       <button class="back-btn" data-route="/home">← Retour</button>
@@ -18,7 +18,7 @@ export function createGamePage(): HTMLElement {
       </div>
     </main>
   `;
-  
+
   page.addEventListener('click', (e) => {
     /*
     This function is called when the user clicks on a button.
@@ -32,6 +32,6 @@ export function createGamePage(): HTMLElement {
       });
     }
   });
-  
+
   return page;
-} 
+}
