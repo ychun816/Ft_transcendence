@@ -1,0 +1,29 @@
+{
+  "name": "transcendence cont",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "dev",
+  "workspaceFolder": "/app",
+  "shutdownAction": "stopCompose",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.vscode-typescript-next",
+        "bradlc.vscode-tailwindcss",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint"
+      ]
+    }
+  },
+  "forwardPorts": [3000, 5174],
+  "portsAttributes": {
+    "3000": {
+      "label": "Backend/Frontend",
+      "onAutoForward": "notify"
+    },
+    "5174": {
+      "label": "Vite Dev Server",
+      "onAutoForward": "notify"
+    }
+  }
+//   "postCreateCommand": "npm install"
+}
