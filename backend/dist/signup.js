@@ -1,17 +1,13 @@
 import fastifyMultipart from '@fastify/multipart';
 import * as bcrypt from 'bcrypt';
 //Add avatar file management with fastify-multipart
-function getFieldValue(field) {
-    if (!field)
-        return undefined;
-    if (Array.isArray(field))
-        field = field[0];
-    if (typeof field.value === 'string')
-        return field.value;
-    if (Buffer.isBuffer(field.value))
-        return field.value.toString();
-    return undefined;
-}
+// function getFieldValue(field: any): string | undefined {
+// 	if (!field) return undefined;
+// 	if (Array.isArray(field)) field = field[0];
+// 	if (typeof field.value === 'string') return field.value;
+// 	if (Buffer.isBuffer(field.value)) return field.value.toString();
+// 	return undefined;
+// }
 export async function registerNewUser(app, prisma) {
     console.log("DEBUG");
     app.register(fastifyMultipart);
@@ -50,8 +46,10 @@ export async function registerNewUser(app, prisma) {
                     //avatarUrl: avatarFile,
                 }
             });
+            // PRINT DEBUG DB USER CREATION
             console.log('Created user:', created);
             console.log("User inserted correctly");
+            // END PRINT DEBUG DB USER CREATION
             reply.code(200).send({ sucess: true });
         }
         catch (err) {
