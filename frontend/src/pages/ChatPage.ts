@@ -4,14 +4,14 @@ export function createChatPage(): HTMLElement {
   
   page.innerHTML = `
     <header class="page-header">
-      <button class="back-btn" data-route="/home">← Retour</button>
+      <button classname="text-blue-500 font-bold text-lg mb-4" data-route="/home">← Retour</button>
       <h2>Chat</h2>
     </header>
     <main class="chat-container">
       <div class="chat-messages" id="chat-messages">
         <!-- Messages apparaîtront ici -->
       </div>
-      <div class="chat-input">
+      <div classname="">
         <input type="text" placeholder="Tapez votre message..." id="message-input">
         <button id="send-message">Envoyer</button>
       </div>
