@@ -5,19 +5,17 @@
   "description": "Ft_transcendence : 155",
   "devDependencies": {
     "@types/node": "^24.0.3",
-    "@vitejs/plugin-react": "^4.6.0",
     "autoprefixer": "^10.4.21",
     "concurrently": "^9.1.2",
     "postcss": "^8.5.6",
     "prettier": "3.5.3",
     "tailwindcss": "^4.1.11",
-    "typescript": "~5.8.3",
-    "vite": "^7.0.0"
+    "typescript": "~5.8.3"
   },
   "main": "index.js",
   "dependencies": {
     "@fastify/static": "^6.12.0",
-    "@prisma/client": "^6.10.1",
+    "@prisma/client": "^6.10.0",
     "env-schema": "^6.0.1",
     "esbuild": "^0.25.5",
     "fastify": "^4.29.1",
@@ -27,10 +25,11 @@
     "path": "^0.12.7",
     "picocolors": "^1.1.1",
     "picomatch": "^4.0.2",
-    "prisma": "^6.10.1",
+    "prisma": "^5.19.0",
     "rollup": "^4.43.0",
     "source-map-js": "^1.2.1",
-    "tinyglobby": "^0.2.14"
+    "tinyglobby": "^0.2.14",
+    "vite": "^7.0.0"
   },
   "scripts": {
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
@@ -43,13 +42,5 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/TuroTheReal/Transcendence.git"
-  },
-  "bugs": {
-    "url": "https://github.com/TuroTheReal/Transcendence/issues"
-  },
-  "homepage": "https://github.com/TuroTheReal/Transcendence#readme"
+  "license": "ISC"
 }

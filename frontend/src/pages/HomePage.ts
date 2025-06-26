@@ -1,21 +1,21 @@
 export function createHomePage(): HTMLElement {
   const page = document.createElement('div');
-  page.className = 'home-page';
+  page.className = 'min-h-screen bg-gradient-to-br from-blue-100 to-purple-100';
   
   page.innerHTML = `
-    <header class="app-header">
-      <h1>Transcendence</h1>
-      <nav>
-        <button class="nav-btn" data-route="/game">Jouer</button>
-        <button class="nav-btn" data-route="/profile">Profil</button>
-        <button class="nav-btn" data-route="/chat">Chat</button>
-        <button class="nav-btn" data-route="/leaderboard">Classement</button>
+    <header class="bg-white shadow-sm p-4">
+      <h1 class="text-2xl font-bold text-center text-gray-900">Transcendence</h1>
+      <nav class="flex justify-center gap-4 mt-4">
+        <button class="btn" data-route="/game">Jouer</button>
+        <button class="btn" data-route="/profile">Profil</button>
+        <button class="btn" data-route="/chat">Chat</button>
+        <button class="btn" data-route="/leaderboard">Classement</button>
       </nav>
     </header>
-    <main class="home-content">
-      <h2>Bienvenue sur Transcendence</h2>
-      <p>Le jeu de Pong ultime !</p>
-      <button class="play-btn" data-route="/game">Commencer une partie</button>
+    <main class="flex flex-col items-center justify-center p-8">
+      <h2 class="text-3xl font-bold text-gray-900 mb-4">Bienvenue sur Transcendence</h2>
+      <p class="text-gray-600 mb-8">Le jeu de Pong ultime !</p>
+      <button class="btn text-lg px-8 py-3" data-route="/game">Commencer une partie</button>
     </main>
   `;
   
