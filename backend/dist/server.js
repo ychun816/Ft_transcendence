@@ -1,6 +1,7 @@
 import fastify from 'fastify';
 import { registerNewUser } from './signup.js';
 import { handleLogIn } from './login.js';
+import { registerProfileRoute } from './profile.js';
 import fastifyStatic from '@fastify/static';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -28,6 +29,8 @@ console.log("REGISTERING NEW USER");
 registerNewUser(app, prisma);
 console.log("LOGGING IN NEW USER");
 handleLogIn(app, prisma);
+console.log("GET USER INFO FOR FRONTEND");
+registerProfileRoute(app, prisma);
 const start = async () => {
     try {
         await app.listen({ port: port });

@@ -1,5 +1,8 @@
 import fastifyMultipart from '@fastify/multipart';
 import * as bcrypt from 'bcrypt';
+import fs from "fs";
+import path from "path";
+import { pipeline } from "stream/promises";
 //Add avatar file management with fastify-multipart
 // function getFieldValue(field: any): string | undefined {
 // 	if (!field) return undefined;
@@ -38,12 +41,25 @@ export async function registerNewUser(app, prisma) {
         }
         const hashedPassword = await bcrypt.hash(passwordValue, 10);
         try {
+            let avatarPath = "";
+            const avatarsDir = path.join(__dirname, "../../public/avatars");
+            if (!fs.existsSync(avatarsDir)) {
+                fs.mkdirSync(avatarsDir, { recursive: true });
+            }
+            const uploadPath = path.join(avatarsDir, `${usernameValue}.png`);
+            if (!avatarFile) {
+                avatarPath = "";
+            }
+            else {
+                await pipeline(avatarFile.file, fs.createWriteStream(uploadPath));
+                avatarPath = `/avatars/${usernameValue}.png`;
+            }
             const created = await prisma.user.create({
                 data: {
                     username: usernameValue,
                     passwordHash: hashedPassword,
                     email: "",
-                    //avatarUrl: avatarFile,
+                    avatarUrl: avatarPath,
                 }
             });
             // PRINT DEBUG DB USER CREATION

@@ -54,6 +54,7 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
 	const data = await response.json();
 	console.log(response);
 	if (response.ok){
+		localStorage.setItem("username", data.username);
 		localStorage.setItem("jwt", data.token);
 		import("../router/router.js").then(({ router }) => {
 			router.navigate('/home');
