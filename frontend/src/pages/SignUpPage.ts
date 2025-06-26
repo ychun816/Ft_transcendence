@@ -2,25 +2,25 @@
 
 export function createSignUpPage(): HTMLElement{
 	const page = document.createElement('div');
-	page.className = "signup-page";
+	page.className = "min-h-screen bg-gradient-to-br from-indigo-100 to-blue-100 flex items-center justify-center";
 
 	page.innerHTML = `
-		<div class="signup-container">
-			<h1> Create your account </h1>
-			<form class="signup-form">
-				<input type="text" placeholder="Username" id="username" required>
-				<input type="text" placeholder="Password" id="password" required>
-				<br>
-				<label for="avatar">Choose a profile picture:</label>
-				<input type="file" id="avatar" name="avatar" accept="image/png, image/jpeg" />
-				<p><img id="avatar" width="200" /></p>
-				<br>
-				<button type="submit">Sign up</button>
+		<div class="card max-w-md w-full">
+			<h1 class="text-3xl font-bold text-center text-gray-900 mb-8">Create your account</h1>
+			<form class="space-y-4">
+				<input type="text" placeholder="Username" id="username" required class="input">
+				<input type="password" placeholder="Password" id="password" required class="input">
+				<label for="avatar" class="block text-sm font-medium text-gray-700">Choose a profile picture:</label>
+				<input type="file" id="avatar" name="avatar" accept="image/png, image/jpeg" class="input" />
+				<div class="flex justify-center">
+					<img id="avatar-preview" width="200" class="border border-gray-300 rounded" />
+				</div>
+				<button type="submit" class="btn w-full">Sign up</button>
 			</form>
 		</div>
 		`;
 
-	const form = page.querySelector(".signup-form") as HTMLFormElement;
+	const form = page.querySelector("form") as HTMLFormElement;
 	form.addEventListener("submit", (e) => {
 		e.preventDefault();
 

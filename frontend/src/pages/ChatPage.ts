@@ -1,19 +1,19 @@
 export function createChatPage(): HTMLElement {
   const page = document.createElement('div');
-  page.className = 'chat-page';
+  page.className = 'min-h-screen bg-gradient-to-br from-purple-100 to-pink-100';
   
   page.innerHTML = `
-    <header class="page-header">
-      <button classname="text-blue-500 font-bold text-lg mb-4" data-route="/home">← Retour</button>
-      <h2>Chat</h2>
+    <header class="bg-white shadow-sm p-4 flex items-center gap-4">
+      <button class="btn" data-route="/home">← Retour</button>
+      <h2 class="text-2xl font-bold text-gray-900">Chat</h2>
     </header>
-    <main class="chat-container">
-      <div class="chat-messages" id="chat-messages">
+    <main class="flex flex-col h-[calc(100vh-80px)]">
+      <div class="flex-1 p-4 overflow-y-auto" id="chat-messages">
         <!-- Messages apparaîtront ici -->
       </div>
-      <div classname="">
-        <input type="text" placeholder="Tapez votre message..." id="message-input">
-        <button id="send-message">Envoyer</button>
+      <div class="bg-white border-t p-4 flex gap-2">
+        <input type="text" placeholder="Tapez votre message..." id="message-input" class="input flex-1">
+        <button id="send-message" class="btn">Envoyer</button>
       </div>
     </main>
   `;

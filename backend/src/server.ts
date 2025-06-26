@@ -8,7 +8,6 @@ const __dirname = path.dirname(__filename);
 
 const app = fastify();
 const port = 3000;
-const host = '0.0.0.0';
 
 let root = path.join(__dirname, 'frontend');
 console.log(root);
@@ -22,6 +21,6 @@ app.setNotFoundHandler((_req, reply) => {
 });
 
 
-app.listen({ port: port, host: host }, () => {
+app.listen({ port:port }, () => {
 	console.log(`App is listening on port: ${port}`);
 });

@@ -1,25 +1,27 @@
 export function createProfilePage(): HTMLElement {
   const page = document.createElement('div');
-  page.className = 'profile-page';
+  page.className = 'min-h-screen bg-gradient-to-br from-teal-100 to-cyan-100';
   
   page.innerHTML = `
-    <header class="page-header">
-      <button class="back-btn" data-route="/home">← Retour</button>
-      <h2>Mon Profil</h2>
+    <header class="bg-white shadow-sm p-4 flex items-center gap-4">
+      <button class="btn" data-route="/home">← Retour</button>
+      <h2 class="text-2xl font-bold text-gray-900">Mon Profil</h2>
     </header>
-    <main class="profile-content">
-      <div class="profile-info">
-        <div class="avatar">
-          <img src="/default-avatar.png" alt="Avatar" id="user-avatar">
+    <main class="p-8">
+      <div class="card max-w-2xl mx-auto">
+        <div class="flex items-center gap-6 mb-8">
+          <div class="w-24 h-24 rounded-full overflow-hidden bg-gray-200">
+            <img src="/default-avatar.png" alt="Avatar" id="user-avatar" class="w-full h-full object-cover">
+          </div>
+          <div>
+            <h3 id="username" class="text-2xl font-bold text-gray-900 mb-2">Nom d'utilisateur</h3>
+            <p id="user-stats" class="text-gray-600">Parties jouées: 0 | Victoires: 0</p>
+          </div>
         </div>
-        <div class="user-details">
-          <h3 id="username">Nom d'utilisateur</h3>
-          <p id="user-stats">Parties jouées: 0 | Victoires: 0</p>
+        <div class="flex gap-4">
+          <button id="edit-profile" class="btn">Modifier le profil</button>
+          <button id="change-avatar" class="btn bg-gray-500 hover:bg-gray-600">Changer l'avatar</button>
         </div>
-      </div>
-      <div class="profile-actions">
-        <button id="edit-profile">Modifier le profil</button>
-        <button id="change-avatar">Changer l'avatar</button>
       </div>
     </main>
   `;

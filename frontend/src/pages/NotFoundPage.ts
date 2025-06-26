@@ -1,12 +1,12 @@
 export function createNotFoundPage(): HTMLElement {
   const page = document.createElement('div');
-  page.className = 'not-found-page';
+  page.className = 'min-h-screen bg-gradient-to-br from-gray-100 to-slate-100 flex items-center justify-center';
   
   page.innerHTML = `
-    <div class="not-found-container">
-      <h1>404</h1>
-      <p>Page non trouvée</p>
-      <button class="home-btn" data-route="/home">Retour à l'accueil</button>
+    <div class="card text-center">
+      <h1 class="text-6xl font-bold text-gray-900 mb-4">404</h1>
+      <p class="text-xl text-gray-600 mb-8">Page non trouvée</p>
+      <button class="btn" data-route="/home">Retour à l'accueil</button>
     </div>
   `;
   
