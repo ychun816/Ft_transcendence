@@ -56,6 +56,9 @@ export async function sendSignUpInfo(page: HTMLDivElement): Promise<void> {
 		formData.append("password", user.password);
 		if (user.avatar) formData.append("avatar", user.avatar);
 
+		for (const [key, value] of formData.entries()){
+			console.log(key, value);
+		}
 		const response = await fetch("/api/signup", {
 			method: "POST",
 			body: formData,
