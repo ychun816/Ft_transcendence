@@ -16,8 +16,11 @@
   },
   "main": "index.js",
   "dependencies": {
+    "@fastify/multipart": "^9.0.3",
     "@fastify/static": "^6.12.0",
     "@prisma/client": "^6.10.0",
+    "@tailwindcss/postcss": "^4.1.11",
+    "bcrypt": "^6.0.0",
     "env-schema": "^6.0.1",
     "esbuild": "^0.25.5",
     "fastify": "^4.29.1",
@@ -28,20 +31,15 @@
     "path": "^0.12.7",
     "picocolors": "^1.1.1",
     "picomatch": "^4.0.2",
-    "prisma": "^5.19.0",
+    "prisma": "^6.10.0",
     "rollup": "^4.43.0",
     "source-map-js": "^1.2.1",
     "tinyglobby": "^0.2.14",
     "vite": "^7.0.0"
   },
   "scripts": {
-<<<<<<< HEAD
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && prisma generate && tsc && node --trace-deprecation dist/server.js",
-=======
-    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
-    "dev:backend": "cd backend && tsc && node dist/server.js",
->>>>>>> origin
     "dev:frontend": "cd frontend && vite --host",
     "build": "npm run build:frontend && npm run build:backend",
     "build:backend": "cd backend && tsc",

@@ -1,12 +1,13 @@
 import fastify from 'fastify';
-import { registerNewUser } from './signup.js';
 import { handleLogIn } from './login.js';
 import { registerProfileRoute } from './profile.js';
 import fastifyStatic from '@fastify/static';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { PrismaClient } from '@prisma/client';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const prisma = new PrismaClient();
 const app = fastify();
 const port = 3000;
 let root = path.join(__dirname, 'frontend');
@@ -18,11 +19,6 @@ app.register(fastifyStatic, {
 app.setNotFoundHandler((_req, reply) => {
     reply.sendFile('index.html');
 });
-app.listen({ port: port }, () => {
-    console.log(`App is listening on port: ${port}`);
-});
-console.log("REGISTERING NEW USER");
-registerNewUser(app, prisma);
 console.log("LOGGING IN NEW USER");
 handleLogIn(app, prisma);
 console.log("GET USER INFO FOR FRONTEND");
