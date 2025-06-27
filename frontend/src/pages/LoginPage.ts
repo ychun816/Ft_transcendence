@@ -9,14 +9,14 @@ export function createLoginPage(): HTMLElement {
       <form class="space-y-4">
         <input type="text" placeholder="Username" id="username" required class="input">
         <input type="password" placeholder="Password" id="password" required class="input">
-        <button type="submit" class="btn w-full">Log in</button>
+        <button type="submit" id="login-btn" class="btn w-full">Log in</button>
       </form>
       <button type="button" id="register-btn" class="btn w-full mt-4 bg-gray-500 hover:bg-gray-600">Sign up</button>
     </div>
   `;
 	console.log("DEBUGGING LOGIN");
 	navigateToSignUp(page);
-	const form = page.querySelector('.login-form') as HTMLFormElement;
+	const form = page.querySelector('.space-y-4') as HTMLFormElement;
 	console.log("DEBUGGING 1");
 	form.addEventListener('submit', (e) => {
 		e.preventDefault();
@@ -56,7 +56,7 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
 	console.log(response);
 	if (response.ok){
 		localStorage.setItem("username", data.username);
-		localStorage.setItem("jwt", data.token);
+		//localStorage.setItem("jwt", data.token);
 		import("../router/router.js").then(({ router }) => {
 			router.navigate('/home');
 		});

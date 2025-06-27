@@ -13,8 +13,8 @@ export async function handleLogIn(app, prisma) {
         const passwordCheck = await bcrypt.compare(password, user.passwordHash);
         if (!passwordCheck)
             return reply.status(401).send({ success: false, message: "Wrong password" });
-        const token = generateJWT(username, prisma);
-        reply.send({ success: true, token });
+        //const token = generateJWT(username,prisma);
+        reply.send({ success: true });
     });
 }
 async function generateJWT(username, prisma) {

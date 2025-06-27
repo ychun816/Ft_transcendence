@@ -53,6 +53,11 @@ export function createProfilePage(): HTMLElement {
 		e.preventDefault();
 		editAvatar(page);
 	});
+
+	page.addEventListener("edit-profile", (e) => {
+		e.preventDefault();
+		editAvatar(page);
+	});
 	return page;
 }
 

@@ -7,6 +7,10 @@ function isPasswordString(user) {
     return typeof user.password === "string";
 }
 ;
+function isUsernameAllowed(user) {
+    return user.password !== "admin";
+}
+;
 function isPasswordLong(user) {
     return user.password.length >= 5;
 }
@@ -22,6 +26,10 @@ function UserSignUpCheck(user) {
     }
     if (!isPasswordString(user)) {
         alert("Password must be a string");
+        return false;
+    }
+    if (!isUsernameAllowed(user)) {
+        alert("Username must not be admin");
         return false;
     }
     if (!isPasswordLong(user)) {
