@@ -11,20 +11,38 @@ export function createProfilePage(): HTMLElement {
 	  </header>
 	  <main class="w-full flex flex-col items-center">
 		<div class="flex items-center gap-6 mb-8">
-		  <div class="w-24 h-24 rounded-full overflow-hidden bg-gray-200">
-			<img src="/default-avatar.png" alt="Avatar" id="user-avatar" class="w-full h-full object-cover">
-			<button id="edit-avatar" title="Edit avatar" style="background:none; border:none; position:absolute; bottom:8px; right:8px; cursor:pointer;">
-			<img src="../assets/edit.svg" alt="Edit" style="width:20px; height:20px;">
-			</button>
-			<input type="file" id="avatar-file-input" accept="image/png, image/jpeg" style="display:none;" />
-		  </div>
-		  <div>
-			<h3 id="username" class="text-2xl font-bold text-gray-900 mb-2">Nom d'utilisateur</h3>
-			<button type="" id="edit-profile" title="Edit username" style="background:none; border:none; cursor:pointer;">
-			<img src="../assets/edit.svg" alt="Edit" style="width:18px; height:18px;">
-			</button>
+			<div class="w-24 h-24 rounded-full overflow-hidden bg-gray-200 avatar-container" style="position:relative;">
+				<img src="/default-avatar.png" alt="Avatar" id="user-avatar" class="w-full h-full object-cover">
+				<button id="edit-avatar" title="Edit avatar" class="edit-avatar-btn"
+					style="
+						background:rgba(255,255,255,0.8);
+						border:none;
+						position:absolute;
+						top:50%;
+						left:50%;
+						transform:translate(-50%,-50%);
+						cursor:pointer;
+						z-index:10;
+						border-radius:50%;
+						padding:8px;
+						display:flex;
+						align-items:center;
+						justify-content:center;
+						opacity:0;
+						pointer-events:none;
+						transition: opacity 0.2s;
+						">
+				<img src="../assets/edit.svg" alt="Edit" style="width:20px; height:20px;">
+				</button>
+				<input type="file" id="avatar-file-input" accept="image/png, image/jpeg" style="display:none;" />
+			</div>
+			<div style="display: flex; align-items: center; gap: 8px;">
+				<h3 id="username" class="text-2xl font-bold text-gray-900 mb-2">Nom d'utilisateur</h3>
+				<button id="edit-profile" title="Edit username" style="background:none; border:none; cursor:pointer; margin-bottom: 8px;">
+					<img src="../assets/edit.svg" alt="Edit" style="width:18px; height:18px;">
+				</button>
+			</div>
 			<p id="user-stats" class="text-gray-600">Parties jouées: 0 | Victoires: 0</p>
-		  </div>
 		</div>
 	  </main>
 	</div>
@@ -33,6 +51,7 @@ export function createProfilePage(): HTMLElement {
 	getUserInfo().then(data =>{
 		if (data){
 			const usernameElem = page.querySelector('#username');
+			console.log(data.username);
 			if (usernameElem) usernameElem.textContent = data.username;
 			const avatarElem = page.querySelector('#user-avatar')
 			if (avatarElem && data.avatarUrl) avatarElem.setAttribute('src', data.avatarUrl);
