@@ -4,6 +4,8 @@ import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import fs from "fs";
 import path from "path";
+import { dirname } from "path";
+import { fileURLToPath } from "url";
 import { pipeline } from "stream/promises";
 
 //Add avatar file management with fastify-multipart
@@ -15,6 +17,8 @@ import { pipeline } from "stream/promises";
 // 	if (Buffer.isBuffer(field.value)) return field.value.toString();
 // 	return undefined;
 // }
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export async function registerNewUser(app: FastifyInstance, prisma: PrismaClient) {
 	console.log("DEBUG");
