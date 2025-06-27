@@ -9,8 +9,8 @@ import { PrismaClient } from '@prisma/client';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const prisma = new PrismaClient();
 
+const prisma = new PrismaClient();
 const app = fastify();
 const port = 3000;
 
