@@ -5,11 +5,11 @@ import { registerProfileRoute } from './profile.js'
 import fastifyStatic from '@fastify/static';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '.prisma/client';
 
-const prisma = new PrismaClient();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const prisma = new PrismaClient();
 
 const app = fastify();
 const port = 3000;
@@ -21,16 +21,10 @@ app.register(fastifyStatic, {
 	prefix: '/',
 });
 
-app.setNotFoundHandler((req, reply) => {
-	if (req.raw.method === 'GET' && !req.raw.url?.startsWith('/api')) {
-		reply.sendFile('index.html');
-	} else {
-		reply.status(404).send({ error: 'Not found' });
-	}
+app.setNotFoundHandler((_req, reply) => {
+	reply.sendFile('index.html');
 });
 
-console.log("REGISTERING NEW USER")
-registerNewUser(app, prisma);
 
 console.log("LOGGING IN NEW USER")
 handleLogIn(app, prisma);
