@@ -1,10 +1,11 @@
 export function createLoginPage(): HTMLElement {
-  const page = document.createElement('div');
-  page.className = 'min-h-screen bg-gradient-to-br from-green-100 to-blue-100 flex items-center justify-center';
+	const page = document.createElement("div");
+	page.className =
+		"min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 to-blue-100";
 
-  page.innerHTML = `
+	page.innerHTML = `
     <div class="card max-w-md w-full bg-white">
-      <h1 class="text-3xl font-bold text-center text-gray-900 mb-8">Transcendence</h1>
+      <h1 class="text-6xl text-center text-blue-500 mb-8">Transcendence</h1>
       <form class="space-y-4">
         <input type="text" placeholder="Username" id="username" required class="input">
         <input type="password" placeholder="Password" id="password" required class="input">
@@ -14,24 +15,24 @@ export function createLoginPage(): HTMLElement {
     </div>
   `;
 
-  const signupBtn = page.querySelector('#register-btn') as HTMLButtonElement;
-  signupBtn.addEventListener("click", () => {
-    import("../router/router.js").then(({ router }) => {
-      router.navigate("/signup");
-    });
-  });
+	const signupBtn = page.querySelector("#register-btn") as HTMLButtonElement;
+	signupBtn.addEventListener("click", () => {
+		import("../router/router.js").then(({ router }) => {
+			router.navigate("/signup");
+		});
+	});
 
-  const form = page.querySelector('form') as HTMLFormElement;
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    /*
+	const form = page.querySelector("form") as HTMLFormElement;
+	form.addEventListener("submit", (e) => {
+		e.preventDefault();
+		/*
     This function is called when the user clicks on a button.
     It finds the targeted route and navigates to it.
     */
-    import('../router/router.js').then(({ router }) => {
-      router.navigate('/home');
-    });
-  });
+		import("../router/router.js").then(({ router }) => {
+			router.navigate("/home");
+		});
+	});
 
-  return page;
+	return page;
 }

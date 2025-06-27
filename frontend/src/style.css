@@ -4,30 +4,24 @@
 
 /* Simple base styles */
 @layer base {
-  body {
-    margin: 0;
-    padding: 0;
-    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-    color: #111827;
-    background-color: #dbeafe;
-  }
-
-  * {
-    box-sizing: border-box;
-  }
+	body {
+		margin: 0;
+		padding: 0;
+		font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+	}
 }
 
 /* Minimal component styles */
 @layer components {
-  .btn {
-    @apply px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors;
-  }
+	.btn {
+		@apply px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors;
+	}
 
-  .card {
-    @apply p-4 rounded-lg shadow-sm border border-gray-200;
-  }
+	.card {
+		@apply p-4 rounded-lg shadow-sm border border-gray-200;
+	}
 
-  .input {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500;
-  }
+	.input {
+		@apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500;
+	}
 }
