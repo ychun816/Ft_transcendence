@@ -1,3 +1,5 @@
+import { text } from 'stream/consumers';
+
 export function createProfilePage(): HTMLElement {
 	const page = document.createElement("div");
 	page.className =
@@ -77,11 +79,8 @@ export function createProfilePage(): HTMLElement {
 	});
 
 	editAvatar(page);
-
-	page.addEventListener("edit-profile", (e) => {
-		e.preventDefault();
-		editAvatar(page);
-	});
+	editUsername(page);
+	editPassword(page);
 	return page;
 }
 
@@ -101,9 +100,98 @@ async function getUserInfo(){
 
 //ADD EDIT USERNAME FUNCTION
 async function editUsername(page: HTMLDivElement){
+	const usernameElem = page.querySelector("username") as HTMLElement;
+	const editUsernameBtn = page.querySelector("edit-username") as HTMLButtonElement;
 
+	if (usernameElem && editUsernameBtn){
+		editUsernameBtn.addEventListener("click", () => {
+			enableInlineEdit({
+				element: usernameElem,
+				initialValue: usernameElem.textContent || "",
+				onValidate: async (newValue) => {
+					const response = fetch('/api/profile/username', {
+						method: "POST",
+						body: newValue,
+					});
+					usernameElem.textContent = newValue;
+				}
+			});
+		});
+	}
 }
 
+async function editPassword(page: HTMLDivElement){
+	const passwordElem = page.querySelector('#password') as HTMLElement;
+	const editPasswordBtn = page.querySelector('#edit-password') as HTMLButtonElement;
+	if (passwordElem && editPasswordBtn) {
+		editPasswordBtn.addEventListener("click", () => {
+			enableInlineEdit({
+				element: passwordElem,
+				initialValue: "",
+				inputType: "password",
+				onValidate: async (newValue) => {
+					const response = fetch('/api/profile/password', {
+						method: "POST",
+						body: newValue,
+					});
+					passwordElem.textContent = "Mdp: **********";
+				}
+			});
+		});
+	}
+}
+
+function enableInlineEdit({element, initialValue, onValidate, inputType = "text"} :
+	{
+		element: HTMLElement,
+		initialValue: string,
+		onValidate: (newValue: string) => Promise<void> | void,
+		inputType?: string,
+	}) {
+		const input = document.createElement("input");
+		input.type = inputType;
+		input.value = initialValue;
+		input.className = "input";
+		input.style.marginRight = "8px";
+		input.style.width = "auto";
+		input.style.display = "inline-block";
+
+		const validateBtn = document.createElement("button");
+		validateBtn.textContent = "Validate";
+		validateBtn.className = "btn";
+		validateBtn.type = "button";
+
+		const cancelBtn = document.createElement("button");
+		cancelBtn.textContent = "Cancel";
+		cancelBtn.className = "btn";
+		cancelBtn.type = "button";
+		cancelBtn.style.marginLeft = "8px";
+
+		const parent = element.parentElement;
+		const oldContent = element.cloneNode(true);
+
+		parent?.replaceChild(input, element);
+		parent?.appendChild(validateBtn);
+		parent?.appendChild(cancelBtn);
+
+		const cleanup = () => {
+			parent?.replaceChild(oldContent, input);
+			validateBtn.remove();
+			cancelBtn.remove();
+		};
+
+		validateBtn.onclick = async () => {
+			await onValidate(input.value);
+			cleanup();
+		};
+		cancelBtn.onclick = cleanup;
+
+		input.focus();
+		input.onkeydown = (e) => {
+			if (e.key === "Escape") cleanup();
+			if (e.key === "Enter") validateBtn.click();
+		};
+}
 
 //ADD EDIT PASSWORD
 //ADD CHANGE AVATAR FUNCTION

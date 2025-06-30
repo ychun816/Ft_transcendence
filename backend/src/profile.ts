@@ -16,6 +16,10 @@ export async function registerProfileRoute(app: FastifyInstance, prisma: PrismaC
 		const username = request.query.username as string; // RECUPERER LE USERNAME DU JWT
 		updateAvatar(prisma, username, request);
 	});
+
+	app.post('/api/profile/username', async (request, reply) => {
+
+	});
 }
 
 async function getUserInfo(username: string, prisma: PrismaClient){
