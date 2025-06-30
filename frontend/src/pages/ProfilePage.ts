@@ -57,6 +57,9 @@ export function createProfilePage(): HTMLElement {
 	  </main>
 	</div>
   `;
+  	editAvatar(page);
+	editUsername(page);
+	editPassword(page);
 
 	getUserInfo().then(data =>{
 		if (data){
@@ -72,21 +75,18 @@ export function createProfilePage(): HTMLElement {
 		const target = e.target as HTMLElement;
 		const route = target.getAttribute('data-route');
 		if (route) {
-		import('../router/router.js').then(({ router }) => {
-			router.navigate(route);
+			import('../router/router.js').then(({ router }) => {
+				router.navigate(route);
 		});
 		}
 	});
 
-	editAvatar(page);
-	editUsername(page);
-	editPassword(page);
 	return page;
 }
 
 async function getUserInfo(){
-	console.log(localStorage.getItem('username'));
 	const username = localStorage.getItem('username');
+	console.log(username);
 	if (username){
 		console.log(encodeURIComponent(username));
 		const response = await fetch(`/api/profile?username=${encodeURIComponent(username)}`);
@@ -100,20 +100,36 @@ async function getUserInfo(){
 
 //ADD EDIT USERNAME FUNCTION
 async function editUsername(page: HTMLDivElement){
-	const usernameElem = page.querySelector("username") as HTMLElement;
-	const editUsernameBtn = page.querySelector("edit-username") as HTMLButtonElement;
+	const usernameElem = page.querySelector("#username") as HTMLElement;
+	const editUsernameBtn = page.querySelector("#edit-username") as HTMLButtonElement;
 
 	if (usernameElem && editUsernameBtn){
 		editUsernameBtn.addEventListener("click", () => {
 			enableInlineEdit({
 				element: usernameElem,
 				initialValue: usernameElem.textContent || "",
+				inputType: "string",
 				onValidate: async (newValue) => {
-					const response = fetch('/api/profile/username', {
+					const UserInfo = {
+							username: usernameElem.textContent,
+							newUsername: newValue,
+					};
+					const response = await fetch('/api/profile/username', {
 						method: "POST",
-						body: newValue,
+						headers:{
+							"Content-Type": "application/json"
+						},
+						body: JSON.stringify(UserInfo),
 					});
-					usernameElem.textContent = newValue;
+					const data = await response.json();
+					if (data.ok || data.success){
+						console.log("Username succesfully edited!");
+						localStorage.removeItem('username');
+						localStorage.setItem('username', newValue);
+						usernameElem.textContent = newValue;
+					} else {
+						alert("Error editing username");
+					}
 				}
 			});
 		});
@@ -130,10 +146,23 @@ async function editPassword(page: HTMLDivElement){
 				initialValue: "",
 				inputType: "password",
 				onValidate: async (newValue) => {
-					const response = fetch('/api/profile/password', {
+					const UserInfo = {
+							username: localStorage.getItem('username'),
+							newPassword: newValue,
+					};
+					const response = await fetch('/api/profile/password', {
 						method: "POST",
-						body: newValue,
+						headers:{
+							"Content-Type": "application/json"
+						},
+						body: JSON.stringify(UserInfo),
 					});
+					const data = await response.json();
+					if (data.ok || data.success){
+						console.log("Password succesfully edited!");
+					} else {
+						alert("Error editing password");
+					}
 					passwordElem.textContent = "Mdp: **********";
 				}
 			});

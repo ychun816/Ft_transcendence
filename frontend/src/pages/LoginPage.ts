@@ -53,8 +53,7 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
 		body: JSON.stringify(UserInfo),
 	});
 	const data = await response.json();
-	console.log(data);
-	if (response.ok){
+	if (data.ok || data.success){
 		localStorage.setItem("username", UserInfo.username);
 		//localStorage.setItem("jwt", data.token);
 		import("../router/router.js").then(({ router }) => {
