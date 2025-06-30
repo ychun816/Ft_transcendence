@@ -7,7 +7,7 @@ export function createProfilePage(): HTMLElement {
 	<div class="card max-w-2xl w-full bg-white flex flex-col items-center">
 	  <header class="w-full flex items-center gap-4 mb-6">
 		<button class="btn" data-route="/home">← Retour</button>
-		<h2 class="text-2xl font-bold text-gray-900">Mon Profil</h2>
+		<h2 class="text-2xl font-bold text-gray-900">My profile</h2>
 	  </header>
 	  <main class="w-full flex flex-col items-center">
 		<div class="flex items-center gap-6 mb-8">
@@ -15,7 +15,7 @@ export function createProfilePage(): HTMLElement {
 				<img src="/default-avatar.png" alt="Avatar" id="user-avatar" class="w-full h-full object-cover">
 				<button id="edit-avatar" title="Edit avatar" class="edit-avatar-btn"
 					style="
-						background:rgba(255,255,255,0.8);
+						background:none;
 						border:none;
 						position:absolute;
 						top:50%;
@@ -28,21 +28,29 @@ export function createProfilePage(): HTMLElement {
 						display:flex;
 						align-items:center;
 						justify-content:center;
-						opacity:0;
-						pointer-events:none;
 						transition: opacity 0.2s;
 						">
 				<img src="../assets/edit.svg" alt="Edit" style="width:20px; height:20px;">
 				</button>
 				<input type="file" id="avatar-file-input" accept="image/png, image/jpeg" style="display:none;" />
 			</div>
-			<div style="display: flex; align-items: center; gap: 8px;">
-				<h3 id="username" class="text-2xl font-bold text-gray-900 mb-2">Nom d'utilisateur</h3>
-				<button id="edit-profile" title="Edit username" style="background:none; border:none; cursor:pointer; margin-bottom: 8px;">
-					<img src="../assets/edit.svg" alt="Edit" style="width:18px; height:18px;">
-				</button>
+			<div class="mb-8">
+				<div style="display: flex; align-items: center; gap: 8px;">
+					<h3 id="username" class="text-2xl font-bold text-gray-900 mb-2">Username</h3>
+					<button id="edit-username" title="Edit username" style="background:none; border:none; cursor:pointer; margin-bottom: 8px;">
+						<img src="../assets/edit.svg" alt="Edit" style="width:18px; height:18px;">
+					</button>
+				</div>
+				<div style="display: flex; align-items: center; gap: 8px;">
+					<h3 id="password" class="text-base text-gray-900 mb-2">Mdp: **********</h3>
+					<button id="edit-password" title="Edit password" style="background:none; border:none; cursor:pointer; margin-bottom: 8px;">
+						<img src="../assets/edit.svg" alt="Edit" style="width:18px; height:18px;">
+					</button>
+				</div>
+				<div style="display: flex; align-items: center; gap: 8px;">
+					<p id="user-stats" class="text-gray-600">Parties jouées: 0 | Victoires: 0</p>
+				</div>
 			</div>
-			<p id="user-stats" class="text-gray-600">Parties jouées: 0 | Victoires: 0</p>
 		</div>
 	  </main>
 	</div>
@@ -51,9 +59,9 @@ export function createProfilePage(): HTMLElement {
 	getUserInfo().then(data =>{
 		if (data){
 			const usernameElem = page.querySelector('#username');
-			console.log(data.username);
 			if (usernameElem) usernameElem.textContent = data.username;
 			const avatarElem = page.querySelector('#user-avatar')
+			//console.log("Avatar URL reçue :", data.avatarUrl);
 			if (avatarElem && data.avatarUrl) avatarElem.setAttribute('src', data.avatarUrl);
 		}
 	});
@@ -68,10 +76,7 @@ export function createProfilePage(): HTMLElement {
 		}
 	});
 
-	page.addEventListener("edit-avatar", (e) => {
-		e.preventDefault();
-		editAvatar(page);
-	});
+	editAvatar(page);
 
 	page.addEventListener("edit-profile", (e) => {
 		e.preventDefault();
@@ -81,8 +86,10 @@ export function createProfilePage(): HTMLElement {
 }
 
 async function getUserInfo(){
+	console.log(localStorage.getItem('username'));
 	const username = localStorage.getItem('username');
 	if (username){
+		console.log(encodeURIComponent(username));
 		const response = await fetch(`/api/profile?username=${encodeURIComponent(username)}`);
 		const data = await response.json();
 		return data;
@@ -92,8 +99,13 @@ async function getUserInfo(){
 	}
 }
 
-//ADD EDIT PROFIL FUNCTION
+//ADD EDIT USERNAME FUNCTION
+async function editUsername(page: HTMLDivElement){
 
+}
+
+
+//ADD EDIT PASSWORD
 //ADD CHANGE AVATAR FUNCTION
 async function editAvatar(page: HTMLDivElement){
 	const editAvatarBtn = page.querySelector("#edit-avatar") as HTMLButtonElement;
@@ -105,7 +117,7 @@ async function editAvatar(page: HTMLDivElement){
 			//e.preventDefault();
 			fileInput.click();
 		});
-		fileInput.addEventListener("Edit", (e) => {
+		fileInput.addEventListener("change", (e) => {
 			const file = fileInput.files?.[0];
 			if (file){
 				const reader = new FileReader;

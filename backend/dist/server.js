@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url';
 import { PrismaClient } from '@prisma/client';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+export const PROJECT_ROOT = path.resolve(__dirname, "../../");
 const prisma = new PrismaClient();
 const app = fastify();
 let root = path.join(__dirname, 'frontend');
@@ -18,6 +19,11 @@ app.register(fastifyStatic, {
 });
 app.setNotFoundHandler((_req, reply) => {
     reply.sendFile('index.html');
+});
+app.register(fastifyStatic, {
+    root: path.join(PROJECT_ROOT, './public/avatars'),
+    prefix: '/avatars/',
+    decorateReply: false,
 });
 console.log("REGISTERING NEW USER");
 registerNewUser(app, prisma);
