@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 export const PROJECT_ROOT = path.resolve(__dirname, "../../");
 
-const prisma = new PrismaClient();
+const prisma = await new PrismaClient();
 const app = fastify();
 
 let root = path.join(__dirname, 'frontend');

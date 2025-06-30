@@ -63,10 +63,10 @@ export function createProfilePage(): HTMLElement {
 
 	getUserInfo().then(data =>{
 		if (data){
-			const usernameElem = page.querySelector('#username');
+			const usernameElem = page.querySelector('#username') as HTMLElement;
 			if (usernameElem) usernameElem.textContent = data.username;
-			const avatarElem = page.querySelector('#user-avatar')
-			//console.log("Avatar URL reçue :", data.avatarUrl);
+			const avatarElem = page.querySelector('#user-avatar') as HTMLImageElement;
+			console.log("Avatar URL reçue :", data.avatarUrl);
 			if (avatarElem && data.avatarUrl) avatarElem.setAttribute('src', data.avatarUrl);
 		}
 	});
@@ -86,12 +86,16 @@ export function createProfilePage(): HTMLElement {
 
 async function getUserInfo(){
 	const username = localStorage.getItem('username');
-	console.log(username);
+	console.log("username: ", username);
 	if (username){
-		console.log(encodeURIComponent(username));
+		console.log("encodeURIComponent(username): ", encodeURIComponent(username));
 		const response = await fetch(`/api/profile?username=${encodeURIComponent(username)}`);
 		const data = await response.json();
-		return data;
+		if (data)
+		{
+			console.log("data.avatarUrl: ", data.avatarUrl)
+			return data;
+		}
 	} else {
 		console.error("Cant find user");
 		return null;
@@ -236,12 +240,17 @@ async function editAvatar(page: HTMLDivElement){
 		});
 		fileInput.addEventListener("change", (e) => {
 			const file = fileInput.files?.[0];
+			console.log("file: ", file);
 			if (file){
 				const reader = new FileReader;
-				reader.onload = function(evt){
+				reader.onload = async function(evt){
 					if (evt.target && typeof evt.target.result === "string")
-						avatarImg.src = evt.target.result;
-						updateDbAvatar(file);
+					{
+						const avatarUrl = await updateDbAvatar(file);
+						console.log('avatarUrl: ', avatarUrl);
+						if (avatarUrl)
+							avatarImg.src = avatarUrl;
+					}
 				}
 				reader.readAsDataURL(file);
 			}
@@ -260,8 +269,14 @@ async function updateDbAvatar(file: File){
 		body: formData,
 	});
 	if (response.ok){
+		const data = await response.json();
 		console.log('Avatar updated!');
-	} else {
-		console.error('Failed to update avatar');
+		if (data.avatarUrl) {
+			return data.avatarUrl;
+		} else {
+			console.error('Failed to update avatar');
+			return null;
+		}
 	}
+	return null;
 }
