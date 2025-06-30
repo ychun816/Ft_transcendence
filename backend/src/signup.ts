@@ -7,6 +7,7 @@ import path from "path";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { pipeline } from "stream/promises";
+import { PROJECT_ROOT } from './server.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -32,7 +33,8 @@ async function fillUserInArray(parts: AsyncIterableIterator<Multipart>, reply: F
 }
 
 async function saveAvatar(avatarFile: any, username: string): Promise<string> {
-	const avatarsDir = path.join(__dirname, "../../public/avatars");
+	console.log("PROJECT_ROOT", PROJECT_ROOT);
+	const avatarsDir = path.join(PROJECT_ROOT, "./public/avatars");
 	if (!fs.existsSync(avatarsDir)) {
 		fs.mkdirSync(avatarsDir, { recursive: true });
 	}

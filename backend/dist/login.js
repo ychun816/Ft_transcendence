@@ -5,6 +5,8 @@ export async function handleLogIn(app, prisma) {
     console.log("DEBUG LOGIN MANAGEMENT");
     app.post("/api/login", async (request, reply) => {
         const { username, password } = request.body;
+        console.log(username);
+        console.log(password);
         const user = await prisma.user.findUnique({
             where: { username }
         });

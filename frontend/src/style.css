@@ -27,4 +27,13 @@
 	.avatar-container {
 		@apply w-24 h-24 rounded-full overflow-hidden bg-gray-200 relative;
 	}
+	.avatar-container .edit-avatar-btn {
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0.2s;
+	}
+		.avatar-container:hover .edit-avatar-btn {
+		opacity: 1;
+		pointer-events: auto;
+	}
 }

@@ -9,6 +9,8 @@ export async function handleLogIn(app: FastifyInstance, prisma: PrismaClient){
 	app.post("/api/login", async (request, reply) => {
 			const { username, password } = request.body as { username: string; password: string };
 
+			console.log(username);
+			console.log(password);
 			const user = await prisma.user.findUnique({
 				where: { username }
 			});
