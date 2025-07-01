@@ -21,9 +21,9 @@ app.setNotFoundHandler((_req, reply) => {
     reply.sendFile('index.html');
 });
 app.register(fastifyStatic, {
-    root: path.join(PROJECT_ROOT, './public/avatars'),
-    prefix: '/avatars/',
-    decorateReply: false,
+    root: path.join(PROJECT_ROOT, 'public'),
+    prefix: '/public/',
+    decorateReply: false
 });
 console.log("REGISTERING NEW USER");
 registerNewUser(app, prisma);

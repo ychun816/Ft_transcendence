@@ -35,7 +35,7 @@ async function saveAvatar(avatarFile, username) {
     }
     const uploadPath = path.join(avatarsDir, `${username}.png`);
     await pipeline(avatarFile.file, fs.createWriteStream(uploadPath));
-    return `/avatars/${username}.png`;
+    return `./public/avatars/${username}.png`;
 }
 async function createUser(prisma, username, hashedPassword, avatarPath) {
     return await prisma.user.create({

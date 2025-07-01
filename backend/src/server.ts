@@ -16,6 +16,7 @@ const app = fastify();
 
 let root = path.join(__dirname, 'frontend');
 console.log(root);
+
 app.register(fastifyStatic, {
 	root: path.join(__dirname, '../../frontend/src'),
 	prefix: '/',
@@ -27,9 +28,9 @@ app.setNotFoundHandler((_req, reply) => {
 
 
 app.register(fastifyStatic, {
-  root: path.join(PROJECT_ROOT, './public/avatars'),
-  prefix: '/avatars/',
-  decorateReply: false,
+	root: path.join(PROJECT_ROOT, 'public'),
+	prefix: '/public/',
+	decorateReply: false
 });
 
 console.log("REGISTERING NEW USER")
