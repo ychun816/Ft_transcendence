@@ -1,5 +1,7 @@
 services:
   dev:
+    container_name: trans-dev
+    image: ima-dev
     build:
       context: ..
       dockerfile: .devcontainer/Dockerfile
@@ -7,28 +9,29 @@ services:
     volumes:
       - ..:/app
       - /app/node_modules
-    # ports:
-    # - "3000:3000"
-    # - "5173:5173"
-    command: ["npm", "run", "dev"]
+    ports:
+    - "3000:3000"
+    - "5173:5173"
     environment:
       - NODE_ENV=development
-    # profiles:
-    #   - dev
+      - DEBUG=true
+    restart: unless-stopped
+
+
+
 
   prod:
+    container_name: trans-prod
+    image: ima-prod
     build:
       context: ..
       dockerfile: .devcontainer/Dockerfile
       target: prod
-    volumes:
-      - ..:/app
-      - /app/node_modules
+    # volumes:
+    #   - ..:/app
+    # - /app/node_modules
     ports:
-    - "3000:3000"
-    - "5173:5173"
-    command: ["node", "dist/index.js"]
+    - "3000:3001"
+    command: ["npm", "start"]
     environment:
-      - NODE_ENV=development
-    # profiles:
-    #   - prod
+      - NODE_ENV=production
