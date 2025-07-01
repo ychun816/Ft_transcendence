@@ -11,9 +11,12 @@ export async function handleLogIn(app: FastifyInstance, prisma: PrismaClient){
 
 			console.log(username);
 			console.log(password);
+			console.log("Hello");
 			const user = await prisma.user.findUnique({
 				where: { username }
 			});
+			console.log("Hello2");
+			console.log(user);
 			if (!user)
 				return reply.status(401).send({success: false, message: "User not found"});
 			const passwordCheck = await bcrypt.compare(password, user.passwordHash);
