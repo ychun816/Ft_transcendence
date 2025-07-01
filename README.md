@@ -54,5 +54,5 @@ To run the docker:
 
 - To run server: npm run dev
 
-- Run the script if you want to reset docker images & containers, be aware, thihs script will remove
+- Run the script if you want to reset docker images & containers, be aware, this script will remove
 	all the Docker environment.
