@@ -59,6 +59,7 @@ export async function sendSignUpInfo(page: HTMLDivElement): Promise<void> {
 		for (const [key, value] of formData.entries()){
 			console.log(key, value);
 		}
+		console.log("About to send response");
 		const response = await fetch("/api/signup", {
 			method: "POST",
 			body: formData,

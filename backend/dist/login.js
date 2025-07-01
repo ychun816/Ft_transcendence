@@ -20,6 +20,7 @@ export async function handleLogIn(app, prisma) {
         }
     });
 }
+
 async function generateJWT(username, prisma) {
     const user = await prisma.user.findUnique({
         where: { username }
