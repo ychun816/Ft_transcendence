@@ -6,6 +6,13 @@ import fastifyStatic from '@fastify/static';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { PrismaClient } from '@prisma/client';
+/*To do AGT:
+ - Add Error management to signup and login;
+ - Add rules to passwords and username;
+ - Fix image display;
+ - Match History including 1v1 games, dates,  and relevant details, accessible to logged-in users.
+ - Implement Google Sign-In
+ */
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 export const PROJECT_ROOT = path.resolve(__dirname, "../../");

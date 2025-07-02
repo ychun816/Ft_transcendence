@@ -74,6 +74,27 @@ export async function registerProfileRoute(app: FastifyInstance, prisma: PrismaC
 		}
 	});
 
+	app.get("/api/profile/matches", async (request: FastifyRequest<{ Querystring: { username: string } }>, reply) => {
+		const username = request.query.username as string;
+		const user = await prisma.user.findUnique({where: {username}});
+		if (!user){ reply.status(404).send({ error: "User not found" });
+		} else {
+			const matches = await prisma.match.findMany({
+				where: {
+					OR: [
+						{ player1Id: user.id },
+						{ player2Id: user.id }
+					]
+				},
+				orderBy: { playedAt: 'desc' },
+				include: {
+					player1: { select: { username: true } },
+					player2: { select: { username: true } }
+				}
+			});
+			reply.status(200).send(matches);
+		}
+	});
 }
 
 async function getUserInfo(username: string, prisma: PrismaClient){
@@ -82,7 +103,14 @@ async function getUserInfo(username: string, prisma: PrismaClient){
 	}
 	const user = await prisma.user.findUnique({
 		where: { username },
-		select: { username: true, avatarUrl: true, passwordHash: true }
+		select: {
+			username: true,
+			avatarUrl: true,
+			passwordHash: true,
+			gamesPlayed: true,
+			wins: true,
+			losses: true,
+		 }
 	});
 	if (!user) {
 		return { code: 404, data: { error: "User not found" } };

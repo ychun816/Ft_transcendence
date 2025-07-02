@@ -44,30 +44,49 @@ export function createProfilePage(): HTMLElement {
 					</button>
 				</div>
 				<div style="display: flex; align-items: center; gap: 8px;">
-					<h3 id="password" class="text-base text-gray-900 mb-2">Mdp: **********</h3>
+					<h3 id="password" class="text-base text-gray-900 mb-2">Password: **********</h3>
 					<button id="edit-password" title="Edit password" style="background:none; border:none; cursor:pointer; margin-bottom: 8px;">
 						<img src="../assets/edit.svg" alt="Edit" style="width:18px; height:18px;">
 					</button>
 				</div>
 				<div style="display: flex; align-items: center; gap: 8px;">
-					<p id="user-stats" class="text-gray-600">Parties jouées: 0 | Victoires: 0</p>
+					<p id="user-stats" class="text-gray-600">Games played: 0 | Wins: 0 | Losses: 0</p>
 				</div>
 			</div>
 		</div>
 	  </main>
 	</div>
+	<div id="match-block" class="card max-w-2xl w-full bg-white flex flex-col items-end h-[80vh] mx-[5%]">
+		<header class="w-full flex items-center gap-4 mb-6">
+			<h2 class="text-2xl font-bold text-gray-900 justify-center">Match History</h2>
+		</header>
+		<main class="w-full flex flex-col items-center">
+
+		</main>
+	</div>
+
   `;
   	editAvatar(page);
 	editUsername(page);
 	editPassword(page);
+	displayMatchHistory(page);
 
 	getUserInfo().then(data =>{
 		if (data){
 			const usernameElem = page.querySelector('#username') as HTMLElement;
 			if (usernameElem) usernameElem.textContent = data.username;
+
 			const avatarElem = page.querySelector('#user-avatar') as HTMLImageElement;
 			console.log("Avatar URL reçue :", data.avatarUrl);
 			if (avatarElem && data.avatarUrl) avatarElem.setAttribute('src', data.avatarUrl);
+
+			const statElem = page.querySelector("#user-stats") as HTMLElement;
+			console.log("gamesPlayed reçue :", data.gamesPlayed);
+			console.log("wins reçue :", data.wins);
+			console.log("losses reçue :", data.losses);
+			if (statElem && data.gamesPlayed && data.wins &&  data.losses){
+				statElem.textContent = `Games played: ${data.gamesPlayed} | Wins: ${data.wins} | Losses: ${data.losses}`
+			}
 		}
 	});
 
@@ -167,7 +186,7 @@ async function editPassword(page: HTMLDivElement){
 					} else {
 						alert("Error editing password");
 					}
-					passwordElem.textContent = "Mdp: **********";
+					passwordElem.textContent = "Password: **********";
 				}
 			});
 		});
@@ -226,8 +245,7 @@ function enableInlineEdit({element, initialValue, onValidate, inputType = "text"
 		};
 }
 
-//ADD EDIT PASSWORD
-//ADD CHANGE AVATAR FUNCTION
+//CHANGE AVATAR FUNCTION
 async function editAvatar(page: HTMLDivElement){
 	const editAvatarBtn = page.querySelector("#edit-avatar") as HTMLButtonElement;
 	const fileInput = page.querySelector("#avatar-file-input") as HTMLInputElement;
@@ -282,4 +300,62 @@ async function updateDbAvatar(file: File){
 		}
 	}
 	return null;
+}
+
+
+async function getMatchHistory(){
+	const username = localStorage.getItem("username");
+	const response = await fetch("api/profile/matches", {
+		method: "POST",
+		headers: { "Content-Type": "text/plain" },
+		body: username,
+	});
+	if (response.ok)
+	{
+		const matches = await response.json();
+		console.log('Match history retrieved!', matches);
+		if (matches)
+			return matches;
+	} else {
+		console.error('Failed to retreive match history');
+		return null;
+	}
+}
+
+async function displayMatchHistory(page: HTMLDivElement)
+{
+	const username = localStorage.getItem("username");
+	const history = await getMatchHistory();
+	const histDiv = page.querySelector("#match-block");
+	if (!histDiv) return;
+
+	let html = `
+		<table class="min-w-full text-left">
+			<thead>
+				<tr>
+					<th>Date</th>
+					<th>Adversaire</th>
+					<th>Résultat</th>
+				</tr>
+			</thead>
+			<tbody>
+	`;
+
+	for (const match of history){
+		const isPlayer1 = match.player1.username === username;
+		const opponent = isPlayer1 ? match.player2.username : match.player1.username;
+		const result = match.winnerId === (isPlayer1 ? match.player1Id : match.player2Id) ? "Victory" : "Defeat";
+		const date = new Date(match.playedAt).toLocaleDateString();
+
+
+	html += `
+			<tr>
+				<td>${date}</td>
+				<td>${opponent}</td>
+				<td>${result}</td>
+			</tr>
+		`;
+	}
+	html += `</tbody></table>`;
+	histDiv.innerHTML = html;
 }
