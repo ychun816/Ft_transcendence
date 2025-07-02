@@ -42,14 +42,15 @@ async function saveAvatar(avatarFile, username) {
 async function createUser(prisma, username, hashedPassword, avatarPath) {
     console.log("About to create new user");
     console.log("avatarUrl: ", avatarPath);
-    return await prisma.user.create({
+    const user = await prisma.user.create({
         data: {
             username,
             passwordHash: hashedPassword,
             email: "",
-            avatarUrl: avatarPath,
+            avatarUrl: avatarPath || null,
         }
     });
+    return user;
 }
 export async function registerNewUser(app, prisma) {
     app.register(fastifyMultipart);
@@ -69,6 +70,7 @@ export async function registerNewUser(app, prisma) {
             reply.code(200).send({ success: true });
         }
         catch (err) {
+            console.error(err);
             reply.code(400).send({ error: "Failed to import User data to the DB" });
         }
     });

@@ -39,7 +39,7 @@
   },
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-	"dev:backend": "npx prisma generate --schema=./backend/prisma/schema.prisma && cd backend && tsc && node --trace-deprecation dist/server.js",
+	"dev:backend": "cd backend && prisma generate && tsc && node --trace-deprecation dist/server.js",
 	"dev:frontend": "cd frontend && npm install && vite --host",
     "build": "npm run build:frontend && npm run build:backend",
     "build:backend": "npx prisma generate --schema=./backend/prisma/schema.prisma && cd backend && tsc",

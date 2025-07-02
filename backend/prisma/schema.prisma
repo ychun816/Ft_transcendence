@@ -16,6 +16,9 @@ model User {
   email					String?
   passwordHash			String
   avatarUrl				String?
+  gamesPlayed			Int			@default(0)
+  wins					Int			@default(0)
+  losses				Int			@default(0)
   isTwoFactorEnabled	Boolean		@default(false)
   twoFactorSecret		String?
   twoFactorEnabled		Boolean		@default(false)

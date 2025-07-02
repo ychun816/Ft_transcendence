@@ -11,8 +11,7 @@ import { PrismaClient } from '@prisma/client';
  - Add Error management to signup and login;
  - Add rules to passwords and username;
  - Fix image display;
- - User profiles display stats, such as wins and losses.
- - Match History including 1v1 games, dates, and relevant details, accessible to logged-in users.
+ - Test Match History with data;
  - Implement Google Sign-In
  */
 

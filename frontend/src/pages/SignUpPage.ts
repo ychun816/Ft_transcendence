@@ -77,8 +77,11 @@ export async function sendSignUpInfo(page: HTMLDivElement): Promise<void> {
 			method: "POST",
 			body: formData,
 		});
+		console.log(formData.get("username"));
+		console.log(formData.get("password"));
 		console.log(response);
 		if (response.ok){
+			console.log("Signup successfull");
 			import("../router/router.js").then(({ router }) => {
 				router.navigate('/login');
 			});
