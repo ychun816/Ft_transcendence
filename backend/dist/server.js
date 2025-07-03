@@ -44,9 +44,6 @@ app.addHook('onResponse', async (request, reply) => {
         level: 'info'
     });
 });
-app.get('/test', async (request, reply) => {
-    return { message: 'Test route hit!' };
-});
 app.get('/metrics', async (request, reply) => {
     reply.type('text/plain');
     return await getMetrics();
