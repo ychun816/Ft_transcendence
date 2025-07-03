@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 import { PrismaClient } from '@prisma/client';
 
 import Fastify, { FastifyRequest, FastifyReply, FastifyInstance } from 'fastify';
-import { logger, sendLogToLogstash } from './utils/logger.js';
+import { logger } from './utils/logger.js';
 import { httpRequestsTotal, httpRequestDuration, getMetrics } from './utils/metrics.js';
 
 
@@ -32,60 +32,9 @@ declare module 'fastify' {
   }
 }
 
-
 const prisma = new PrismaClient();
 // logger.info(prisma);
 const app = fastify({ logger: false });
-
-app.addHook('onRequest', async (request) => {
-	request.startTime = Date.now()
-});
-
-app.addHook('onResponse', async (request, reply) => {
-	const duration = (Date.now() - (request.startTime || Date.now())) / 1000
-
-	httpRequestsTotal.inc({
-		method: request.method,
-		route: request.url || 'unknow',
-		status_code: reply.statusCode.toString()
-	});
-
-	httpRequestDuration.observe({
-		method: request.method,
-		route: request.url || 'unknow'
-	}, duration);
-
-	await sendLogToLogstash({
-		method: request.method,
-		url: request.url,
-		status: reply.statusCode,
-		duration: duration,
-		level: 'info'
-	});
-});
-
-app.get('/metrics', async (request: FastifyRequest, reply: FastifyReply) => {
-  reply.type('text/plain');
-  return await getMetrics();
-});
-
-app.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
-  logger.info('Home page accessed');
-  return { message: 'Transcendence with monitoring!' };
-});
-
-app.post('/api/test-log', async (request: FastifyRequest, reply: FastifyReply) => {
-  logger.info('Test log endpoint called');
-  await sendLogToLogstash({
-    message: 'Manual test log from API',
-    level: 'info',
-    user_action: 'test_endpoint_called'
-  });
-  return { success: true };
-});
-
-
-
 
 
 let root = path.join(__dirname, 'frontend');
@@ -120,7 +69,10 @@ const start = async () => {
 		await app.listen({ port: 3000, host: '0.0.0.0'});
 		logger.info(`App is listening on port: 3000`);
 	} catch (err) {
-		logger.error(err);
+		if (typeof err === 'string' )
+			logger.error(err)
+		else
+			console.error(err)
 		process.exit(1);
 	}
 };

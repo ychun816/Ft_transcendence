@@ -9,7 +9,7 @@ scrape_configs:
 
   - job_name: 'transcendence-app'
     static_configs:
-      - targets: ['host.docker.internal:3000']  # Port de ton app Fastify
+      - targets: ['dev:3000']  # Port de ton app Fastify
     metrics_path: '/metrics'
     scrape_interval: 5s
 
