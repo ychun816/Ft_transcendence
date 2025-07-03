@@ -1,0 +1,13 @@
+server.name: trans-kibana
+server.host: "0.0.0.0"
+server.port: 5601
+elasticsearch.hosts: ["http://elasticsearch:9200"]
+monitoring.ui.container.elasticsearch.enabled: true
+server.publicBaseUrl: "http://localhost:5601"
+logging.appenders.file.type: file
+logging.appenders.file.fileName: /usr/share/kibana/logs/kibana.log
+logging.appenders.file.layout.type: json
+logging.root.appenders: [default, file]
+xpack.reporting.encryptionKey: "a_random_string_of_at_least_32_characters"
+xpack.security.encryptionKey: "a_random_string_of_at_least_32_characters"
+xpack.encryptedSavedObjects.encryptionKey: "a_random_string_of_at_least_32_characters"
