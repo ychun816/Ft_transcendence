@@ -10,6 +10,7 @@ import { PrismaClient } from '@prisma/client';
 /*To do AGT:
  - Add Error management to signup and login;
  - Add rules to passwords and username;
+ - Users can add others as friends and view their online status.
  - Fix image display;
  - Test Match History with data;
  - Implement Google Sign-In
