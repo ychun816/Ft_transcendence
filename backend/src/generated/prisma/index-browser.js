@@ -127,6 +127,9 @@ exports.Prisma.UserScalarFieldEnum = {
   twoFactorSecret: 'twoFactorSecret',
   twoFactorEnabled: 'twoFactorEnabled',
   twoFactorEnabledAt: 'twoFactorEnabledAt',
+  gamesPlayed: 'gamesPlayed',
+  losses: 'losses',
+  wins: 'wins',
   createdAt: 'createdAt'
 };
 
@@ -138,6 +141,39 @@ exports.Prisma.MatchScalarFieldEnum = {
   score2: 'score2',
   winnerId: 'winnerId',
   playedAt: 'playedAt'
+};
+
+exports.Prisma.MessageScalarFieldEnum = {
+  id: 'id',
+  senderId: 'senderId',
+  receiverId: 'receiverId',
+  content: 'content',
+  createdAt: 'createdAt',
+  isRead: 'isRead'
+};
+
+exports.Prisma.BlockScalarFieldEnum = {
+  id: 'id',
+  blockerId: 'blockerId',
+  blockedId: 'blockedId',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.GameInviteScalarFieldEnum = {
+  id: 'id',
+  inviterId: 'inviterId',
+  inviteeId: 'inviteeId',
+  status: 'status',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.NotificationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  message: 'message',
+  createdAt: 'createdAt',
+  isRead: 'isRead'
 };
 
 exports.Prisma.SortOrder = {
@@ -153,7 +189,11 @@ exports.Prisma.NullsOrder = {
 
 exports.Prisma.ModelName = {
   User: 'User',
-  Match: 'Match'
+  Match: 'Match',
+  Message: 'Message',
+  Block: 'Block',
+  GameInvite: 'GameInvite',
+  Notification: 'Notification'
 };
 
 /**
