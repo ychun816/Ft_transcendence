@@ -1,27 +1,34 @@
 import pino from 'pino';
-import { Client } from '@elastic/elasticsearch';
+import net from 'net';
 
-const elasticsearchClient = new Client({
-  node: process.env.ELASTICSEARCH_URL || 'http://elasticsearch:9200',
-  tls: {
-    rejectUnauthorized: false
-  }
-});
-
-const sendToElasticsearch = async (logData: any): Promise<void> => {
+// 🔧 CHANGEMENT MINIMAL : Envoyer à Logstash au lieu d'Elasticsearch
+const sendToLogstash = async (logData: any): Promise<void> => {
   try {
-    const response = await elasticsearchClient.index({
-      index: `transcendence-logs-${new Date().toISOString().split('T')[0]}`,
-      body: {
-        ...logData,
-        '@timestamp': new Date().toISOString(),
-        service: 'transcendence',
-        environment: process.env.NODE_ENV || 'development'
-      }
+    // Logstash écoute généralement sur le port 5044 ou 5000
+    const logstashHost = process.env.LOGSTASH_HOST || 'logstash';
+    const logstashPort = parseInt(process.env.LOGSTASH_PORT || '5044');
+
+    const logEntry = {
+      ...logData,
+      '@timestamp': new Date().toISOString(),
+      service: 'transcendence',
+      environment: process.env.NODE_ENV || 'development'
+    };
+
+    const client = new net.Socket();
+
+    client.connect(logstashPort, logstashHost, () => {
+      client.write(JSON.stringify(logEntry) + '\n');
+      client.end();
     });
+
+    client.on('error', (error) => {
+      console.error('Failed to send log to Logstash:', error.message);
+    });
+
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Failed to send log to Elasticsearch:', errorMessage);
+    console.error('Failed to send log to Logstash:', errorMessage);
   }
 };
 
@@ -36,24 +43,44 @@ const pinoLogger = pino({
 });
 
 export const logger = {
-  info: (message: string, extra?: Record<string, any>) => {
-    const logData = { level: 'info', message, ...extra };
+  info: (message: string | object) => {
+    const logData = typeof message === 'string'
+      ? { level: 'info', message }
+      : { level: 'info', message: JSON.stringify(message), ...message };
+
     pinoLogger.info(logData);
-    setImmediate(() => sendToElasticsearch(logData));
+    setImmediate(() => sendToLogstash(logData));
   },
-  error: (message: string, extra?: Record<string, any>) => {
-    const logData = { level: 'error', message, ...extra };
+
+  error: (message: string | object) => {
+    const logData = typeof message === 'string'
+      ? { level: 'error', message }
+      : { level: 'error', message: JSON.stringify(message), ...message };
+
     pinoLogger.error(logData);
-    setImmediate(() => sendToElasticsearch(logData));
+    setImmediate(() => sendToLogstash(logData));
   },
-  warn: (message: string, extra?: Record<string, any>) => {
-    const logData = { level: 'warn', message, ...extra };
+
+  warn: (message: string | object) => {
+    const logData = typeof message === 'string'
+      ? { level: 'warn', message }
+      : { level: 'warn', message: JSON.stringify(message), ...message };
+
     pinoLogger.warn(logData);
-    setImmediate(() => sendToElasticsearch(logData));
+    setImmediate(() => sendToLogstash(logData));
   },
-  debug: (message: string, extra?: Record<string, any>) => {
-    const logData = { level: 'debug', message, ...extra };
+
+  debug: (message: string | object) => {
+    const logData = typeof message === 'string'
+      ? { level: 'debug', message }
+      : { level: 'debug', message: JSON.stringify(message), ...message };
+
     pinoLogger.debug(logData);
-    setImmediate(() => sendToElasticsearch(logData));
+    setImmediate(() => sendToLogstash(logData));
   }
+};
+
+// Version encore plus simple
+export const log = (message: string | object) => {
+  logger.info(message);
 };

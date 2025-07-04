@@ -27,26 +27,26 @@ services:
 
 
 
-  prod:
-    container_name: trans-prod
-    image: ima-prod
-    build:
-      context: ..
-      dockerfile: .devcontainer/Dockerfile
-      target: prod
-    # volumes:
-    #   - ..:/app
-    # - /app/node_modules
-    ports:
-      - "3000:3000"
-    command: ["npm", "start"]
-    environment:
-      - NODE_ENV=production
-      - LOGSTASH_URL=http://logstash:5044
-    depends_on:
-      - logstash
-    networks:
-      - app-network
+  # prod:
+  #   container_name: trans-prod
+  #   image: ima-prod
+  #   build:
+  #     context: ..
+  #     dockerfile: .devcontainer/Dockerfile
+  #     target: prod
+  #   # volumes:
+  #   #   - ..:/app
+  #   # - /app/node_modules
+  #   ports:
+  #     - "3000:3000"
+  #   command: ["npm", "start"]
+  #   environment:
+  #     - NODE_ENV=production
+  #     - LOGSTASH_URL=http://logstash:5044
+  #   depends_on:
+  #     - logstash
+  #   networks:
+  #     - app-network
 
 
 
@@ -107,6 +107,7 @@ services:
 
 
   kibana-init:
+    container_name: trans-init-kibana
     image: curlimages/curl:latest
     depends_on:
       - kibana
