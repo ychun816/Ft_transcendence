@@ -7,9 +7,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { PrismaClient } from '@prisma/client';
 
-import Fastify, { FastifyRequest, FastifyReply, FastifyInstance } from 'fastify';
 import { logger } from './utils/logger.js';
-import { httpRequestsTotal, httpRequestDuration, getMetrics } from './utils/metrics.js';
 
 
 /*To do AGT:
@@ -34,11 +32,11 @@ declare module 'fastify' {
 
 const prisma = new PrismaClient();
 // logger.info(prisma);
-const app = fastify({ logger: false });
+const app = fastify({ logger: false, disableRequestLogging: false });
 
 
 let root = path.join(__dirname, 'frontend');
-logger.info(root);
+logger.info(root); //info
 
 app.register(fastifyStatic, {
 	root: path.join(__dirname, '../../frontend/src'),
@@ -65,16 +63,16 @@ logger.info("GET USER INFO FOR FRONTEND")
 registerProfileRoute(app, prisma);
 
 const start = async () => {
-	try {
-		await app.listen({ port: 3000, host: '0.0.0.0'});
-		logger.info(`App is listening on port: 3000`);
-	} catch (err) {
-		if (typeof err === 'string' )
-			logger.error(err)
-		else
-			console.error(err)
-		process.exit(1);
-	}
+  try {
+    await app.listen({ port: 3000, host: '0.0.0.0'});
+    logger.info(`App is listening on port: 3000`);
+  } catch (err) {
+	if (typeof err === 'string')
+    	logger.error(err)
+	else
+		console.error(err)
+    process.exit(1);
+  }
 };
 
 start();
