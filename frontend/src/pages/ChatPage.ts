@@ -21,19 +21,107 @@ export function createChatPage(): HTMLElement {
     </div>
   `;
 
+	// WebSocket connection
+	let ws: WebSocket | null = null;
+	const messagesContainer = page.querySelector(
+		"#chat-messages"
+	) as HTMLElement;
+	const messageInput = page.querySelector(
+		"#message-input"
+	) as HTMLInputElement;
+	const sendButton = page.querySelector("#send-message") as HTMLButtonElement;
+
+	function connectWebSocket() {
+		ws = new WebSocket("ws://localhost:3001/ws/chat");
+
+		ws.onopen = () => {
+			console.log("🔗 WebSocket connected");
+			addMessage("Système", "Connecté au chat", "system");
+		};
+
+		ws.onmessage = (event) => {
+			try {
+				const data = JSON.parse(event.data);
+				console.log("📨 Received:", data);
+
+				if (data.type === "connection_established") {
+					addMessage("Système", data.message, "system");
+				} else if (data.type === "chat_message") {
+					addMessage("Vous", data.content, "user");
+				} else if (data.type === "error") {
+					addMessage("Erreur", data.message, "error");
+				}
+			} catch (error) {
+				console.error("❌ Error parsing message:", error);
+			}
+		};
+
+		ws.onclose = () => {
+			console.log("🔌 WebSocket disconnected");
+			addMessage("Système", "Déconnecté du chat", "system");
+		};
+
+		ws.onerror = (error) => {
+			console.error("❌ WebSocket error:", error);
+			addMessage("Erreur", "Erreur de connexion", "error");
+		};
+	}
+
+	function addMessage(
+		sender: string,
+		content: string,
+		type: "user" | "system" | "error"
+	) {
+		const messageDiv = document.createElement("div");
+		messageDiv.className = `mb-2 p-2 rounded ${
+			type === "system"
+				? "bg-blue-100 text-blue-800"
+				: type === "error"
+					? "bg-red-100 text-red-800"
+					: "bg-gray-100 text-gray-800"
+		}`;
+		messageDiv.innerHTML = `<strong>${sender}:</strong> ${content}`;
+		messagesContainer.appendChild(messageDiv);
+		messagesContainer.scrollTop = messagesContainer.scrollHeight;
+	}
+
+	function sendMessage() {
+		const message = messageInput.value.trim();
+		if (message && ws && ws.readyState === WebSocket.OPEN) {
+			const data = {
+				type: "chat_message",
+				content: message,
+				timestamp: new Date().toISOString(),
+			};
+			ws.send(JSON.stringify(data));
+			messageInput.value = "";
+		}
+	}
+
+	// Event listeners
+	sendButton.addEventListener("click", sendMessage);
+	messageInput.addEventListener("keypress", (e) => {
+		if (e.key === "Enter") {
+			sendMessage();
+		}
+	});
+
+	// Navigation
 	page.addEventListener("click", (e) => {
-		/*
-    This function is called when the user clicks on a button.
-    It finds the targeted route and navigates to it.
-    */
 		const target = e.target as HTMLElement;
 		const route = target.getAttribute("data-route");
 		if (route) {
+			if (ws) {
+				ws.close();
+			}
 			import("../router/router.js").then(({ router }) => {
 				router.navigate(route);
 			});
 		}
 	});
+
+	// Connect to WebSocket when page loads
+	connectWebSocket();
 
 	return page;
 }
