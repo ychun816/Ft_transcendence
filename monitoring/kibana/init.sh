@@ -1,6 +1,6 @@
 #!/bin/bash
 
-KIBANA_URL="http://localhost:5601"
+KIBANA_URL="http://kibana:5601"
 SAVED_OBJECTS_DIR="/usr/share/kibana/saved_objects"
 
 echo "Attente de Kibana..."
