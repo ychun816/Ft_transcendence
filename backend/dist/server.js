@@ -20,9 +20,9 @@ const __dirname = path.dirname(__filename);
 export const PROJECT_ROOT = path.resolve(__dirname, "../../");
 const prisma = new PrismaClient();
 // logger.info(prisma);
-const app = fastify({ logger: false });
+const app = fastify({ logger: false, disableRequestLogging: false });
 let root = path.join(__dirname, 'frontend');
-logger.info(root);
+logger.info(root); //info
 app.register(fastifyStatic, {
     root: path.join(__dirname, '../../frontend/src'),
     prefix: '/',

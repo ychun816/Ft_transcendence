@@ -106,6 +106,17 @@ services:
       - app-network
 
 
+  kibana-init:
+    image: curlimages/curl:latest
+    depends_on:
+      - kibana
+    volumes:
+      - ./../monitoring/kibana/saved_objects:/usr/share/kibana/saved_objects:ro
+      - ./../monitoring/kibana/init.sh:/init.sh:ro
+    command: ["sh", "/init.sh"]
+    restart: "no"
+    networks:
+      - app-network
 
 
 
@@ -115,8 +126,6 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./../monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ./../monitoring/prometheus/rules:/etc/prometheus/rules:ro
       - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -159,11 +168,6 @@ services:
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin42
       - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_PROVISIONING_PATH=/etc/grafana/provisioning
-      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/provisioning/dashboards/transcendence.json
-    volumes:
-      - ./../monitoring/grafana/grafana.ini:/etc/grafana/grafana.ini:ro
-      - ./../monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
     depends_on:
       - prometheus
     networks:
@@ -174,7 +178,6 @@ services:
 
 volumes:
   elasticsearch_data:
-  grafana_data:
   kibana_data:
   prometheus_data:
 
