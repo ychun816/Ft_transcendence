@@ -13,7 +13,6 @@ import chatWebSocketRoutes from "./routes/chat.js";
  - Add rules to passwords and username;
  - Users can add others as friends and view their online status.
  - Fix image display;
- - Test Match History with data;
  - Implement Google Sign-In
  */
 const __filename = fileURLToPath(import.meta.url);
@@ -54,8 +53,8 @@ await app.register(fastifyWebsocket, {
 await chatWebSocketRoutes(app);
 const start = async () => {
     try {
-        await app.listen({ port: 3001, host: "0.0.0.0" });
-        console.log(`App is listening on port: 3001`);
+        await app.listen({ port: 3000, host: "0.0.0.0" });
+        console.log(`App is listening on port: 3000`);
     }
     catch (err) {
         console.error(err);
