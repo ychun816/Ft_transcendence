@@ -27,6 +27,18 @@ services:
 
 
 
+
+
+# A FAIRE NEXT
+
+# archivage des logs trop anciens ou pas important
+# securite conteneur et donnees
+# prometheus et grafana
+
+
+
+
+
   # prod:
   #   container_name: trans-prod
   #   image: ima-prod
