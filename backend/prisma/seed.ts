@@ -20,6 +20,7 @@ async function main() {
 				passwordHash: hashedPassword,
 				avatarUrl:
 					"https://api.dicebear.com/7.x/avataaars/svg?seed=alice",
+				gamesPlayed: 23,
 				wins: 15,
 				losses: 8,
 			},
