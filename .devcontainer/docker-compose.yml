@@ -20,18 +20,18 @@ services:
 
 
 
-  prod:
-    container_name: trans-prod
-    image: ima-prod
-    build:
-      context: ..
-      dockerfile: .devcontainer/Dockerfile
-      target: prod
-    # volumes:
-    #   - ..:/app
-    # - /app/node_modules
-    ports:
-    - "3000:3001"
-    command: ["npm", "start"]
-    environment:
-      - NODE_ENV=production
+  # prod:
+  #   container_name: trans-prod
+  #   image: ima-prod
+  #   build:
+  #     context: ..
+  #     dockerfile: .devcontainer/Dockerfile
+  #     target: prod
+  #   # volumes:
+  #   #   - ..:/app
+  #   # - /app/node_modules
+  #   ports:
+  #   - "3000:3001"
+  #   command: ["npm", "start"]
+  #   environment:
+  #     - NODE_ENV=production
