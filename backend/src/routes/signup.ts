@@ -30,11 +30,9 @@ async function fillUserInArray(
 	console.log("usernameValue: ", usernameValue);
 	console.log("passwordValue: ", passwordValue);
 	if (!usernameValue || !passwordValue) {
-		reply
-			.code(400)
-			.send({
-				error: "Invalid user info: missing username or password.",
-			});
+		reply.code(400).send({
+			error: "Invalid user info: missing username or password.",
+		});
 		return null;
 	}
 	const hashedPassword = await bcrypt.hash(passwordValue, 10);
@@ -60,11 +58,15 @@ async function createUser(
 ) {
 	console.log("About to create new user");
 	console.log("avatarUrl: ", avatarPath);
+
+	// Generate a unique email based on username
+	const uniqueEmail = `${username}@transcendme.local`;
+
 	const user = await prisma.user.create({
 		data: {
 			username,
 			passwordHash: hashedPassword,
-			email: "",
+			email: uniqueEmail,
 			avatarUrl: avatarPath || null,
 		},
 	});

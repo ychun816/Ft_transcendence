@@ -18,10 +18,18 @@ export default defineConfig({
 			interval: 100,
 		},
 		hmr: {
-			port: 5173,
+			port: 5174,
 		},
 		proxy: {
-			"/api": "http://localhost:3001",
+			"/api": {
+				target: "http://localhost:3002",
+				changeOrigin: true,
+			},
+			"/ws": {
+				target: "ws://localhost:3002",
+				ws: true,
+				changeOrigin: true,
+			},
 		},
 	},
 	css: {

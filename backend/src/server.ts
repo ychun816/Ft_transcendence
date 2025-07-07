@@ -9,7 +9,7 @@ import { PrismaClient } from "@prisma/client";
 import { fastifyWebsocket } from "@fastify/websocket";
 import websocketPlugin from "./plugins/websocket.js";
 import chatWebSocketRoutes from "./routes/chat.js";
-
+import { registerNotificationRoutes } from "./routes/notifications.js";
 /*To do AGT:
  - Add Error management to signup and login;
  - Add rules to passwords and username;
@@ -63,14 +63,18 @@ await app.register(fastifyWebsocket, {
 });
 
 // Register WebSocket routes
-await chatWebSocketRoutes(app);
+await chatWebSocketRoutes(app, prisma);
+
+// Register WebSocket routes
+await registerNotificationRoutes(app, prisma);
 
 const start = async () => {
 	try {
-		await app.listen({ port: 3000, host: "0.0.0.0" });
-		console.log(`App is listening on port: 3000`);
+		const port = parseInt(process.env.PORT || "3002", 10);
+		await app.listen({ port, host: "0.0.0.0" });
+		console.log(`✅ App is listening on port: ${port}`);
 	} catch (err) {
-		console.error(err);
+		console.error("❌ Failed to start server:", err);
 		process.exit(1);
 	}
 };
