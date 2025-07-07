@@ -69,7 +69,6 @@ export function createProfilePage(): HTMLElement {
   	editAvatar(page);
 	editUsername(page);
 	editPassword(page);
-	displayMatchHistory(page);
 
 	getUserInfo().then(data =>{
 		if (data){
@@ -89,6 +88,8 @@ export function createProfilePage(): HTMLElement {
 			}
 		}
 	});
+
+	displayMatchHistory(page);
 
 	page.addEventListener('click', (e) => {
 		const target = e.target as HTMLElement;
@@ -304,18 +305,19 @@ async function updateDbAvatar(file: File){
 
 
 async function getMatchHistory(){
+	console.log("ENTER IN GET MATCH HISTORY");
 	const username = localStorage.getItem("username");
-	const response = await fetch("api/profile/matches", {
-		method: "POST",
-		headers: { "Content-Type": "text/plain" },
-		body: username,
+	if (!username) return null;
+	const response = await fetch(`/api/profile/matches?username=${encodeURIComponent(username)}`, {
+		method: "GET",
+		headers: { "Content-Type": "application/json" },
 	});
+	console.log("Match History Response: ", response);
 	if (response.ok)
 	{
 		const matches = await response.json();
 		console.log('Match history retrieved!', matches);
-		if (matches)
-			return matches;
+		return matches;
 	} else {
 		console.error('Failed to retreive match history');
 		return null;
@@ -324,8 +326,11 @@ async function getMatchHistory(){
 
 async function displayMatchHistory(page: HTMLDivElement)
 {
+	console.log("ENTER IN MATCH HISTORY");
 	const username = localStorage.getItem("username");
+	console.log("USERNAME RETRIEVED : ", username);
 	const history = await getMatchHistory();
+	console.log("HISTORY RETRIEVED : ", history);
 	const histDiv = page.querySelector("#match-block");
 	if (!histDiv) return;
 
@@ -334,8 +339,8 @@ async function displayMatchHistory(page: HTMLDivElement)
 			<thead>
 				<tr>
 					<th>Date</th>
-					<th>Adversaire</th>
-					<th>Résultat</th>
+					<th>Adversary</th>
+					<th>Result</th>
 				</tr>
 			</thead>
 			<tbody>

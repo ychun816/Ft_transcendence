@@ -109,6 +109,7 @@ export async function registerProfileRoute(
 		}
 	);
 
+	// HANDLE MATCH HISTORY DISPLAY
 	app.get(
 		"/api/profile/matches",
 		async (
@@ -130,6 +131,7 @@ export async function registerProfileRoute(
 						player2: { select: { username: true } },
 					},
 				});
+				console.log("Matches : ", matches);
 				reply.status(200).send(matches);
 			}
 		}
@@ -146,6 +148,7 @@ async function getUserInfo(username: string, prisma: PrismaClient) {
 			username: true,
 			avatarUrl: true,
 			passwordHash: true,
+			gamesPlayed:true,
 			wins: true,
 			losses: true,
 		},
