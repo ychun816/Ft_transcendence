@@ -74,11 +74,9 @@ export async function registerProfileRoute(
 				await updateUsername(prisma, username, newUsername);
 				reply.status(200).send({ success: true });
 			} catch (err) {
-				reply
-					.status(400)
-					.send({
-						error: "Username already exists or update failed",
-					});
+				reply.status(400).send({
+					error: "Username already exists or update failed",
+				});
 			}
 		}
 	);
@@ -145,10 +143,11 @@ async function getUserInfo(username: string, prisma: PrismaClient) {
 	const user = await prisma.user.findUnique({
 		where: { username },
 		select: {
+			id: true,
 			username: true,
 			avatarUrl: true,
 			passwordHash: true,
-			gamesPlayed:true,
+			gamesPlayed: true,
 			wins: true,
 			losses: true,
 		},
