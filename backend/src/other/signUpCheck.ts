@@ -1,5 +1,3 @@
-import { UserInfo } from "os";
-
 interface IUserInfo {
 	username: String,
 	password: String,
@@ -15,18 +13,18 @@ function isPasswordString(user : IUserInfo): boolean {
 };
 
 function isUsernameAllowed(user : IUserInfo): boolean {
-	return user.password !== "admin";
+	return user.username !== "admin";
 };
 
 function isPasswordLong(user : IUserInfo): boolean {
-	return user.password.length >= 5;
+	return user.password.length >= 8;
 };
 
 function isAvatarDefined(user : IUserInfo): boolean {
 	return user.avatar === undefined || user.avatar instanceof File;
 };
 
-function UserSignUpCheck(user : IUserInfo): boolean {
+export function UserSignUpCheck(user : IUserInfo): boolean {
 	if (!isUsernameString(user)) {
 		alert("Username must be a string");
 		return false;

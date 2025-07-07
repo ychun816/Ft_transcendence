@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { fastifyMultipart, Multipart } from "@fastify/multipart";
 import { PrismaClient } from "@prisma/client";
+import { UserSignUpCheck } from "../other/signUpCheck"
 import * as bcrypt from "bcrypt";
 import fs from "fs";
 import path from "path";
@@ -79,29 +80,29 @@ export async function registerNewUser(
 	app.post("/api/signup", async (request, reply) => {
 		const parts = request.parts();
 		const userData = await fillUserInArray(parts, reply);
-		console.log("userdata: ", userData);
 		if (!userData) return;
+		if (UserSignUpCheck(userData)){
+			const { usernameValue, passwordValue, hashedPassword, avatarFile } =
+				userData;
+			try {
+				let avatarPath = "";
+				if (avatarFile)
+					avatarPath = await saveAvatar(avatarFile, usernameValue);
+				const created = await createUser(
+					prisma,
+					usernameValue,
+					hashedPassword,
+					avatarPath
+				);
 
-		const { usernameValue, passwordValue, hashedPassword, avatarFile } =
-			userData;
-		try {
-			let avatarPath = "";
-			if (avatarFile)
-				avatarPath = await saveAvatar(avatarFile, usernameValue);
-			const created = await createUser(
-				prisma,
-				usernameValue,
-				hashedPassword,
-				avatarPath
-			);
-
-			console.log("Created user:", created);
-			reply.code(200).send({ success: true });
-		} catch (err) {
-			console.error(err);
-			reply
-				.code(400)
-				.send({ error: "Failed to import User data to the DB" });
+				console.log("Created user:", created);
+				reply.code(200).send({ success: true });
+			} catch (err) {
+				console.error(err);
+				reply
+					.code(400)
+					.send({ error: "Failed to import User data to the DB" });
+			}
 		}
 	});
 }
