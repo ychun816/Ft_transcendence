@@ -11,9 +11,9 @@ services:
     volumes:
       - ..:/app
       - /app/node_modules
-    # ports:
-    # - "3000:3000"
-    # - "5173:5173"
+    ports:
+    - "3000:3000"
+    - "5173:5173"
     environment:
       - NODE_ENV=development
       - DEBUG=true
@@ -126,10 +126,13 @@ services:
       - XPACK_SECURITY_ENABLED=true
       - XPACK_SECURITY_ENROLLMENT_ENABLED=false
       - LOGGING_ROOT_LEVEL=info
-      - KIBANA_TOKEN=${KIBANA_TOKEN}
+      # - KIBANA_TOKEN=${KIBANA_TOKEN}
     volumes:
       - ./../monitoring/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+      - ./../monitoring/kibana/entrypoint.sh:/usr/local/bin/entrypoint.sh:ro
+      - shared_data:/shared
       - kibana_data:/usr/share/kibana/data
+    entrypoint: ["/usr/local/bin/entrypoint.sh"]
     depends_on:
       - elasticsearch
     networks:
@@ -138,13 +141,19 @@ services:
 
   kibana-init:
     container_name: trans-init-kibana
-    image: curlimages/curl:latest
+    image: debian:bookworm-slim
+    user: root
     depends_on:
       - kibana
+    environment:
+      - ELASTIC_URL=${ELASTIC_URL}
+      - ELASTIC_USER=${ELASTIC_USER}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     volumes:
       - ./../monitoring/kibana/saved_objects:/usr/share/kibana/saved_objects:ro
       - ./../monitoring/kibana/init.sh:/init.sh:ro
-    command: ["sh", "/init.sh"]
+      - shared_data:/shared
+    command: ["sh", "-c", "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y curl jq && /init.sh"]
     restart: "no"
     networks:
       - app-network
@@ -212,8 +221,7 @@ volumes:
   elasticsearch_data:
   kibana_data:
   prometheus_data:
-
-
+  shared_data:
 
 
 networks:
