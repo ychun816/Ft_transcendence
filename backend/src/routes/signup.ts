@@ -9,6 +9,7 @@ import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { pipeline } from "stream/promises";
 import { PROJECT_ROOT } from "../server.js";
+import { createHash } from "crypto";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -48,9 +49,18 @@ async function saveAvatar(avatarFile: any, username: string): Promise<string> {
 	if (!fs.existsSync(avatarsDir)) {
 		fs.mkdirSync(avatarsDir, { recursive: true });
 	}
-	const uploadPath = path.join(avatarsDir, `${username}.png`);
+
+	const safeUsername = username.replace(/[^a-zA-Z0-9_-]/g, '');
+	const timestamp = Date.now();
+	const hash = createHash('md5').update(safeUsername + timestamp).digest('hex').substring(0, 8);
+
+	// Extension basée sur le type MIME
+	const ext = avatarFile.mimetype === 'image/jpeg' ? 'jpg' : 'png';
+
+	const fileName = `${safeUsername}_${hash}.${ext}`;
+	const uploadPath = path.join(avatarsDir, fileName);
 	await pipeline(avatarFile.file, fs.createWriteStream(uploadPath));
-	return `./public/avatars/${username}.png`;
+	return `./public/avatars/${fileName}`;
 }
 
 async function createUser(
@@ -59,6 +69,13 @@ async function createUser(
 	hashedPassword: string,
 	avatarPath: string
 ) {
+	const existingUser = await prisma.user.findUnique({
+		where: { username }
+	});
+
+	if (existingUser) {
+		throw new Error("Username already exists");
+	}
 	console.log("About to create new user");
 	console.log("avatarUrl: ", avatarPath);
 	const user = await prisma.user.create({
@@ -76,13 +93,24 @@ export async function registerNewUser(
 	app: FastifyInstance,
 	prisma: PrismaClient
 ) {
-	app.register(fastifyMultipart);
+	await app.register(fastifyMultipart, {
+		limits: {
+			fileSize: 5 * 1024 * 1024, // 5MB
+			files: 1
+		}
+	});
+
 	app.post("/api/signup", async (request, reply) => {
 		const parts = request.parts();
 		const userData = await fillUserInArray(parts, reply);
-		if (!userData) return;
-		if (UserSignUpCheck(userData)){
-			const { usernameValue, passwordValue, hashedPassword, avatarFile } =
+		if (!userData){return;}
+		const userInfoForValidation = {
+			username: userData.usernameValue,
+			password: userData.passwordValue,
+			avatar: userData.avatarFile
+		};
+		//if (UserSignUpCheck(userInfoForValidation)){
+			const { usernameValue, hashedPassword, avatarFile } =
 				userData;
 			try {
 				let avatarPath = "";
@@ -97,12 +125,16 @@ export async function registerNewUser(
 
 				console.log("Created user:", created);
 				reply.code(200).send({ success: true });
-			} catch (err) {
-				console.error(err);
-				reply
-					.code(400)
-					.send({ error: "Failed to import User data to the DB" });
+			} catch (err: any) {
+				console.error("Signup error:", err);
+				if (err.message === "Username already exists") {
+					reply.code(409).send({ error: "Username already exists" });
+				} else {
+					reply.code(500).send({
+						error: "Failed to create account. Please try again."
+					});
+				}
 			}
-		}
+		//}
 	});
 }
