@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { fastifyMultipart, Multipart } from "@fastify/multipart";
 import { PrismaClient } from "@prisma/client";
-import { UserSignUpCheck } from "../other/signUpCheck"
+import { UserSignUpCheck } from "../other/signUpCheck.js"
 import * as bcrypt from "bcrypt";
 import fs from "fs";
 import path from "path";
@@ -109,7 +109,7 @@ export async function registerNewUser(
 			password: userData.passwordValue,
 			avatar: userData.avatarFile
 		};
-		//if (UserSignUpCheck(userInfoForValidation)){
+		if (UserSignUpCheck(userInfoForValidation)){
 			const { usernameValue, hashedPassword, avatarFile } =
 				userData;
 			try {
@@ -135,6 +135,6 @@ export async function registerNewUser(
 					});
 				}
 			}
-		//}
+		}
 	});
 }
