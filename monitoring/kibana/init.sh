@@ -63,7 +63,7 @@ for file in "$SAVED_OBJECTS_DIR"/*.ndjson; do
     if [ -f "$file" ]; then
         echo "Import du fichier : $(basename "$file")"
         curl -X POST "$KIBANA_URL/api/saved_objects/_import" \
-			-u "${ELASTIC_USER}:${ELASTIC_PASSWORD}"
+			-u "${ELASTIC_USER}:${ELASTIC_PASSWORD}" \
             -H "kbn-xsrf: true" \
             -F "file=@$file"
         echo "Import de $(basename "$file") terminé"
