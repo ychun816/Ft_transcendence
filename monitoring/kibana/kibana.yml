@@ -4,7 +4,7 @@ server.port: ${KIBANA_PORT}
 server.publicBaseUrl: "http://localhost:${KIBANA_PORT}"
 
 elasticsearch.hosts: ["${ELASTIC_URL}"]
-elasticsearch.serviceAccountToken: "${KIBANA_TOKEN}"
+# elasticsearch.serviceAccountToken: "${TOKEN}" ne fonctionne pas dynamiquement
 
 monitoring.ui.container.elasticsearch.enabled: true
 
