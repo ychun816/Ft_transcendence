@@ -73,7 +73,7 @@ export async function handleLogIn(app: FastifyInstance, prisma: PrismaClient){
 		try {
 			const user = await prisma.user.findUnique({
 				where: { id: session.userId },
-				select: { id: true, username: true, email: true, avatarUrl: true }
+				select: { id: true, username: true, avatarUrl: true }
 			});
 
 			if (!user) {
