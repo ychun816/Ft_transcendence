@@ -15,7 +15,6 @@ import chatWebSocketRoutes from "./routes/chat.js";
  - Add rules to passwords and username;
  - Users can add others as friends and view their online status.
  - Fix image display;
- - Test Match History with data;
  - Implement Google Sign-In
  */
 
