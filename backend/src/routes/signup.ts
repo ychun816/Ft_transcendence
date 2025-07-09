@@ -53,8 +53,6 @@ async function saveAvatar(avatarFile: any, username: string): Promise<string> {
 	const safeUsername = username.replace(/[^a-zA-Z0-9_-]/g, '');
 	const timestamp = Date.now();
 	const hash = createHash('md5').update(safeUsername + timestamp).digest('hex').substring(0, 8);
-
-	// Extension basée sur le type MIME
 	const ext = avatarFile.mimetype === 'image/jpeg' ? 'jpg' : 'png';
 
 	const fileName = `${safeUsername}_${hash}.${ext}`;
@@ -93,13 +91,6 @@ export async function registerNewUser(
 	app: FastifyInstance,
 	prisma: PrismaClient
 ) {
-	await app.register(fastifyMultipart, {
-		limits: {
-			fileSize: 5 * 1024 * 1024, // 5MB
-			files: 1
-		}
-	});
-
 	app.post("/api/signup", async (request, reply) => {
 		const parts = request.parts();
 		const userData = await fillUserInArray(parts, reply);

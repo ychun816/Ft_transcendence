@@ -6,6 +6,7 @@ import path from "path";
 import { pipeline } from "stream/promises";
 import bcrypt from "bcrypt";
 import { PROJECT_ROOT } from "../server.js";
+import { createHash } from "crypto";
 
 function getFieldValue(field: any): string | undefined {
 	if (!field) return undefined;
@@ -208,24 +209,26 @@ async function updateAvatar(
 	username: string,
 	file: any
 ): Promise<string> {
-	const fileExtension = path.extname(file.filename) || ".png";
+	const ext = path.extname(file.filename) || ".png";
+	const safeUsername = username.replace(/[^a-zA-Z0-9_-]/g, '');
+	const timestamp = Date.now();
+	const hash = createHash('md5').update(safeUsername + timestamp).digest('hex').substring(0, 8);
+
+	const fileName = `${safeUsername}_${hash}.${ext}`;
 	const uploadPath = path.join(
 		PROJECT_ROOT,
-		"./public/avatars",
-		`${username}${fileExtension}`
+		"./public/avatars/",
+		`${fileName}`
 	);
 	console.log("uploadPath: ", uploadPath);
 
 	await pipeline(file, fs.createWriteStream(uploadPath));
-
 	if (fs.existsSync(uploadPath)) {
 		console.log("✅ Fichier sauvegardé avec succès");
 		const stats = fs.statSync(uploadPath);
 		console.log("📁 Taille du fichier:", stats.size, "bytes");
 	}
-
-	// 🔥 CHANGEMENT : Le chemin doit correspondre à la configuration static
-	const avatarPath = `/public/avatars/${username}${fileExtension}`;
+	const avatarPath = `/public/avatars/${fileName}`;
 	console.log("avatarPath: ", avatarPath);
 
 	await prisma.user.update({
