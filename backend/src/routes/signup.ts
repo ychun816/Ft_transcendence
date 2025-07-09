@@ -83,6 +83,12 @@ async function createUser(
 			email: "",
 			avatarUrl: avatarPath || null,
 		},
+        select: {
+            id: true,
+            username: true,
+            email: true,
+            avatarUrl: true
+        }
 	});
 	return user;
 }

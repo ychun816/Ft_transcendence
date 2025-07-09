@@ -114,6 +114,31 @@ export function requireAuth(sessionMap: Map<string, any>) {
 	};
 }
 
+export async function secureRoutes(app: FastifyInstance, prisma: PrismaClient) {
+    const authMiddleware = requireAuth(activeSessions);
+
+    // Appliquer le middleware aux routes protégées
+    app.addHook('preHandler', async (request, reply) => {
+        const protectedPaths = [
+            '/api/profile',
+            '/api/profile/avatar',
+            '/api/profile/username',
+            '/api/profile/password',
+            '/api/profile/matches',
+            '/api/game',
+            '/api/chat'
+        ];
+
+        const isProtected = protectedPaths.some(path => 
+            request.url.startsWith(path)
+        );
+
+        if (isProtected) {
+            await authMiddleware(request, reply);
+        }
+    });
+}
+
 // async function generateJWT(username: string, prisma: PrismaClient){
 // 	const user = await prisma.user.findUnique({
 // 		where: { username }

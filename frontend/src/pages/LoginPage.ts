@@ -1,3 +1,7 @@
+import { AuthService } from "../middleware/auth.js";
+
+const authService = new AuthService();
+
 export function createLoginPage(): HTMLElement {
 	const page = document.createElement("div");
 	page.className =
@@ -16,6 +20,8 @@ export function createLoginPage(): HTMLElement {
   `;
 	console.log("DEBUGGING LOGIN");
 	navigateToSignUp(page);
+	
+	
 	const form = page.querySelector('.space-y-4') as HTMLFormElement;
 	console.log("DEBUGGING 1");
 	form.addEventListener('submit', (e) => {
@@ -35,30 +41,50 @@ function navigateToSignUp(page: HTMLDivElement){
   	});
 }
 
-async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
-	const usernameInput = page.querySelector("#username") as HTMLInputElement;
-	const passwordInput = page.querySelector("#password") as HTMLInputElement;
+export async function requireAuth(): Promise<boolean> {
+    const user = await authService.getCurrentUser();
+    if (!user) {
+        import("../router/router.js").then(({ router }) => {
+            router.navigate('/login');
+        });
+        return false;
+    }
+    return true;
+}
 
-	console.log("DEBUGGING 3");
-	const UserInfo = {
-		username: usernameInput.value,
-		password: passwordInput.value,
-	};
-	console.log("DEBUGGING 5");
-	const response = await fetch("/api/login", {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json"
-		},
-		body: JSON.stringify(UserInfo),
-	});
-	const data = await response.json();
-	if (data.ok || data.success){
-		//localStorage.setItem("jwt", data.token);
-		import("../router/router.js").then(({ router }) => {
-			router.navigate('/home');
-		});
-	} else {
-		alert("Issue while logging in");
-	}
+async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
+    const usernameInput = page.querySelector("#username") as HTMLInputElement;
+    const passwordInput = page.querySelector("#password") as HTMLInputElement;
+
+    const UserInfo = {
+        username: usernameInput.value,
+        password: passwordInput.value,
+    };
+
+    try {
+        const response = await fetch("/api/login", {
+            method: "POST",
+            credentials: 'include',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(UserInfo),
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+            // Récupérer les infos utilisateur après connexion
+            await authService.getCurrentUser();
+            
+            import("../router/router.js").then(({ router }) => {
+                router.navigate('/home');
+            });
+        } else {
+            alert("Erreur lors de la connexion: " + (data.message || "Identifiants incorrects"));
+        }
+    } catch (error) {
+        console.error("Login error:", error);
+        alert("Erreur de connexion. Veuillez réessayer.");
+    }
 }
