@@ -8,6 +8,8 @@ import { createChatPage } from "./pages/ChatPage";
 import { createNotFoundPage } from "./pages/NotFoundPage";
 import { createSignUpPage } from "./pages/SignUpPage";
 
+router.startAuthCheck();
+
 router
     .addRoute('/', createLoginPage)
     .addRoute('/login', createLoginPage)

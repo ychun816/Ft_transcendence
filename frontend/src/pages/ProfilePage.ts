@@ -104,22 +104,31 @@ export function createProfilePage(): HTMLElement {
 	return page;
 }
 
-async function getUserInfo(){
-	const username = localStorage.getItem('username');
-	console.log("username: ", username);
-	if (username){
-		console.log("encodeURIComponent(username): ", encodeURIComponent(username));
-		const response = await fetch(`/api/profile?username=${encodeURIComponent(username)}`);
-		const data = await response.json();
-		if (data)
-		{
-			console.log("data.avatarUrl: ", data.avatarUrl)
-			return data;
-		}
-	} else {
-		console.error("Cant find user");
-		return null;
-	}
+async function getUserInfo() {
+    try {
+        const response = await fetch('/api/me', {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            const userData = await response.json();
+            console.log("User data retrieved:", userData);
+            return userData;
+        } else {
+            console.error("Failed to get user info");
+            import('../router/router.js').then(({ router }) => {
+                router.navigate('/login');
+            });
+            return null;
+        }
+    } catch (error) {
+        console.error("Error fetching user info:", error);
+        return null;
+    }
 }
 
 //ADD EDIT USERNAME FUNCTION
@@ -304,24 +313,29 @@ async function updateDbAvatar(file: File){
 }
 
 
-async function getMatchHistory(){
-	console.log("ENTER IN GET MATCH HISTORY");
-	const username = localStorage.getItem("username");
-	if (!username) return null;
-	const response = await fetch(`/api/profile/matches?username=${encodeURIComponent(username)}`, {
-		method: "GET",
-		headers: { "Content-Type": "application/json" },
-	});
-	console.log("Match History Response: ", response);
-	if (response.ok)
-	{
-		const matches = await response.json();
-		console.log('Match history retrieved!', matches);
-		return matches;
-	} else {
-		console.error('Failed to retreive match history');
-		return null;
-	}
+async function getMatchHistory() {
+    try {
+        const user = await getUserInfo();
+        if (!user) return null;
+
+        const response = await fetch(`/api/profile/matches?username=${encodeURIComponent(user.username)}`, {
+            method: "GET",
+            credentials: 'include',
+            headers: { "Content-Type": "application/json" },
+        });
+
+        if (response.ok) {
+            const matches = await response.json();
+            console.log('Match history retrieved!', matches);
+            return matches;
+        } else {
+            console.error('Failed to retrieve match history');
+            return null;
+        }
+    } catch (error) {
+        console.error('Error fetching match history:', error);
+        return null;
+    }
 }
 
 async function displayMatchHistory(page: HTMLDivElement)
