@@ -1,5 +1,4 @@
 import { FastifyInstance } from "fastify";
-import "@fastify/websocket";
 
 export default async function chatWebSocketRoutes(fastify: FastifyInstance) {
 	console.log("🔧 Registering WebSocket route: /ws/chat");
@@ -23,7 +22,7 @@ export default async function chatWebSocketRoutes(fastify: FastifyInstance) {
 
 				// Save message to database
 				if (data.type === "chat_message") {
-                    
+
 					console.log("💾 Saving message to database:", data.content);
 				}
 

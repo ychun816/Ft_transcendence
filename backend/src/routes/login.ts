@@ -1,22 +1,20 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { PrismaClient } from '@prisma/client';
-import type { FastifyCookieOptions } from '@fastify/cookie'
-import cookie from '@fastify/cookie'
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { randomBytes } from 'crypto';
-import { APIBuilder } from 'fdir/dist/builder/api-builder';
-import { request } from 'http';
-const secretKey = 'abcde12345';
 
 const activeSessions = new Map<string, { userId: number; username: string; expiresAt: Date }>();
 
+const secretKey = process.env.COOKIE_SECRET;
+
 export async function handleLogIn(app: FastifyInstance, prisma: PrismaClient){
 	console.log("DEBUG LOGIN MANAGEMENT");
-	app.register(cookie, {
-		secret: process.env.COOKIE_SECRET,
-		parseOptions: {},
-	} as FastifyCookieOptions);
+	// app.register(cookie, {
+	// 	secret: secretKey,
+	// 	parseOptions: {},
+	// } as FastifyCookieOptions);
+	// console.log("DEBUG LOGIN MANAGEMENT 2");
 
 	app.post("/api/login", async (request: FastifyRequest, reply: FastifyReply) => {
 			const { username, password } = request.body as { username: string; password: string };
@@ -116,15 +114,15 @@ export function requireAuth(sessionMap: Map<string, any>) {
 	};
 }
 
-async function generateJWT(username: string, prisma: PrismaClient){
-	const user = await prisma.user.findUnique({
-		where: { username }
-	});
-	const token = jwt.sign({
-		id: user?.id,
-		username: user?.username},
-		secretKey,
-		{ expiresIn: '1h' }
-	);
-	return token;
-}
+// async function generateJWT(username: string, prisma: PrismaClient){
+// 	const user = await prisma.user.findUnique({
+// 		where: { username }
+// 	});
+// 	const token = jwt.sign({
+// 		id: user?.id,
+// 		username: user?.username},
+// 		secretKey,
+// 		{ expiresIn: '1h' }
+// 	);
+// 	return token;
+// }
