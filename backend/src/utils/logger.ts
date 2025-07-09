@@ -40,11 +40,29 @@ const pinoLogger = pino({
   }
 });
 
+
+const RETENTION_POLICY = {
+	error: { days: 60, category: 'critical' },
+	warn: { days: 30, category: 'important' },
+	info: { days: 10, category: 'standard' },
+	debug: { days: 5, category: 'temporary' },
+}
 export const logger = {
   info: (message: string | object) => {
     const logData = typeof message === 'string'
-      ? { level: 'info', message }
-      : { level: 'info', message: JSON.stringify(message), ...message };
+		? {
+			level: 'info',
+			message,
+			retention: RETENTION_POLICY.info,
+			index_pattern: 'logs-info'
+		}
+		: {
+			level: 'info',
+			message: JSON.stringify(message),
+			retention: RETENTION_POLICY.info,
+			index_pattern: 'logs-info',
+			...message
+		};
 
     pinoLogger.info(logData);
     setImmediate(() => sendToLogstash(logData));
@@ -52,8 +70,19 @@ export const logger = {
 
   error: (message: string | object) => {
     const logData = typeof message === 'string'
-      ? { level: 'error', message }
-      : { level: 'error', message: JSON.stringify(message), ...message };
+		? {
+			level: 'error',
+			message,
+			retention: RETENTION_POLICY.error,
+			index_pattern: 'logs-error'
+		}
+		: {
+			level: 'error',
+			message: JSON.stringify(message),
+			retention: RETENTION_POLICY.error,
+			index_pattern: 'logs-error',
+			...message
+		};
 
     pinoLogger.error(logData);
     setImmediate(() => sendToLogstash(logData));
@@ -61,8 +90,19 @@ export const logger = {
 
   warn: (message: string | object) => {
     const logData = typeof message === 'string'
-      ? { level: 'warn', message }
-      : { level: 'warn', message: JSON.stringify(message), ...message };
+		? {
+			level: 'warn',
+			message,
+			retention: RETENTION_POLICY.warn,
+			index_pattern: 'logs-warn'
+		}
+		: {
+			level: 'warn',
+			message: JSON.stringify(message),
+			retention: RETENTION_POLICY.warn,
+			index_pattern: 'logs-warn',
+			...message
+		};
 
     pinoLogger.warn(logData);
     setImmediate(() => sendToLogstash(logData));
@@ -70,8 +110,19 @@ export const logger = {
 
   debug: (message: string | object) => {
     const logData = typeof message === 'string'
-      ? { level: 'debug', message }
-      : { level: 'debug', message: JSON.stringify(message), ...message };
+		? {
+			level: 'debug',
+			message,
+			retention: RETENTION_POLICY.debug,
+			index_pattern: 'logs-debug'
+		}
+		: {
+			level: 'debug',
+			message: JSON.stringify(message),
+			retention: RETENTION_POLICY.debug,
+			index_pattern: 'logs-debug',
+			...message
+		};
 
     pinoLogger.debug(logData);
     setImmediate(() => sendToLogstash(logData));
