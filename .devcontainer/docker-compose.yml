@@ -31,7 +31,6 @@ services:
 
 # A FAIRE NEXT
 
-# checker pb lie aux modifs des logs retention policy: logstash config ? heure au lieu de minute ?
 # continuer archivage des logs
 # prometheus et grafana
 
@@ -84,22 +83,22 @@ services:
 
   log-cleanup:
     image: debian:bookworm-slim
-    user: root
     container_name: trans-log-cleanup
+    user: root
     environment:
     - ELASTIC_URL=${ELASTIC_URL}
     - ELASTIC_USER=${ELASTIC_USER}
     - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     depends_on:
-    - elasticsearch
+      - elasticsearch
     volumes:
-    - ./../monitoring/scripts/logs-cleanup.sh:/usr/local/bin/logs-cleanup.sh:ro
-    - log_cleanup_data:/var/log
-    - ./../monitoring/scripts/logs-cleanup:/etc/cron.d/logs-cleanup:ro
-    command: ["sh", "-c", "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y curl procps cron && cron -f"]
+      - ./../monitoring/scripts/logs-cleanup.sh:/usr/local/bin/logs-cleanup.sh:ro
+      - log_cleanup_data:/var/log
+      - ./monitoring/scripts/logs-cleanup:/usr/local/bin/logs-cleanup:ro
+    command: ["sh", "-c", "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y curl procps cron rsyslog && rsyslogd && cron -f"]
     restart: unless-stopped
     networks:
-    - app-network
+      - app-network
 
 
   logstash:

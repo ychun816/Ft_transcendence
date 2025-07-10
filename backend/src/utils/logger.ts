@@ -40,27 +40,16 @@ const pinoLogger = pino({
   }
 });
 
-
-const RETENTION_POLICY = {
-	error: { days: 60, category: 'critical' },
-	warn: { days: 30, category: 'important' },
-	info: { days: 10, category: 'standard' },
-	debug: { days: 5, category: 'temporary' },
-}
 export const logger = {
   info: (message: string | object) => {
     const logData = typeof message === 'string'
 		? {
 			level: 'info',
 			message,
-			retention: RETENTION_POLICY.info,
-			index_pattern: 'logs-info'
 		}
 		: {
 			level: 'info',
 			message: JSON.stringify(message),
-			retention: RETENTION_POLICY.info,
-			index_pattern: 'logs-info',
 			...message
 		};
 
@@ -73,14 +62,10 @@ export const logger = {
 		? {
 			level: 'error',
 			message,
-			retention: RETENTION_POLICY.error,
-			index_pattern: 'logs-error'
 		}
 		: {
 			level: 'error',
 			message: JSON.stringify(message),
-			retention: RETENTION_POLICY.error,
-			index_pattern: 'logs-error',
 			...message
 		};
 
@@ -93,14 +78,10 @@ export const logger = {
 		? {
 			level: 'warn',
 			message,
-			retention: RETENTION_POLICY.warn,
-			index_pattern: 'logs-warn'
 		}
 		: {
 			level: 'warn',
 			message: JSON.stringify(message),
-			retention: RETENTION_POLICY.warn,
-			index_pattern: 'logs-warn',
 			...message
 		};
 
@@ -113,14 +94,10 @@ export const logger = {
 		? {
 			level: 'debug',
 			message,
-			retention: RETENTION_POLICY.debug,
-			index_pattern: 'logs-debug'
 		}
 		: {
 			level: 'debug',
 			message: JSON.stringify(message),
-			retention: RETENTION_POLICY.debug,
-			index_pattern: 'logs-debug',
 			...message
 		};
 
@@ -129,7 +106,6 @@ export const logger = {
   }
 };
 
-// Version encore plus simple
 export const log = (message: string | object) => {
   logger.info(message);
 };
