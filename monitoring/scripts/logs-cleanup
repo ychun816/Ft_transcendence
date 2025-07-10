@@ -1,8 +1,2 @@
-crontab -e
 
-# 7/7j à 2h
-# 0 2 * * * root /usr/local/bin/logs-cleanup.sh >> /var/log/transcendence-cleanup.log 2>&1
-
-
-# toutes les minutes pour test
-* * * * * /usr/local/bin/logs-cleanup.sh >> /var/log/transcendence-cleanup.log 2>&1
+* * * * * root /usr/local/bin/logs-cleanup.sh >> /var/log/transcendence-cleanup.log 2>&1

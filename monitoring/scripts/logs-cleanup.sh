@@ -8,6 +8,10 @@ INDEX_PATTERN="transcendence-logs-*"
 LOG_FILE="/var/log/transcendence-cleanup.log"
 METRICS_FILE="/var/log/transcendence-cleanup-metrics.log"
 
+export TZ="Europe/Paris"
+
+echo "Script exécuté à $(date)" >> "$LOG_FILE"
+
 # Fonction de logging avec timestamp
 log_message() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
@@ -31,7 +35,7 @@ cleanup_by_retention() {
     log_message "Nettoyage des logs de catégorie '$category' avec rétention de $retention_days jours"
 
     # Construire la requête de suppression
-    local query='{j
+    local query='{
         "query": {
             "bool": {
                 "must": [
@@ -50,7 +54,7 @@ cleanup_by_retention() {
 
     local count=$(echo "$count_result" | grep -o '"count":[0-9]*' | cut -d':' -f2)
 
-    if [ "$count" -gt 0 ]; then
+	if [[ "$count" =~ ^[0-9]+$ ]] && [ "$count" -gt 0 ]; then
         log_message "Suppression de $count documents de catégorie '$category'"
 
         # Effectuer la suppression
@@ -90,12 +94,12 @@ cleanup_empty_indices() {
 
 # Fonction pour calculer l'espace libéré
 calculate_space_freed() {
-    local before_size=$(curl -s -u "$ELASTIC_USER:$ELASTIC_PASSWORD" \
-        "$ELASTIC_URL/_cat/indices/$INDEX_PATTERN?h=store.size" | \
+    local total_bytes=$(curl -s -u "$ELASTIC_USER:$ELASTIC_PASSWORD" \
+        "$ELASTIC_URL/_cat/indices/$INDEX_PATTERN?h=store.size&bytes=b" | \
         awk '{sum += $1} END {print sum}')
-
-    echo "$before_size"
+    echo "$total_bytes"
 }
+
 
 # Fonction principale
 main() {
