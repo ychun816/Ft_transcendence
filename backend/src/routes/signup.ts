@@ -106,9 +106,12 @@ export async function registerNewUser(
 			password: userData.passwordValue,
 			avatar: userData.avatarFile
 		};
-		if (UserSignUpCheck(userInfoForValidation)){
+		console.log("userInfoForValidation: ", userInfoForValidation);
+		const checkResult = UserSignUpCheck(userInfoForValidation);
+		if (checkResult === true){
 			const { usernameValue, hashedPassword, avatarFile } =
 				userData;
+			console.log("AFTER USER SIGNUP CHECK");
 			try {
 				let avatarPath = "";
 				if (avatarFile)
@@ -132,6 +135,9 @@ export async function registerNewUser(
 					});
 				}
 			}
+		} else {
+			reply.code(400).send({ error: checkResult });
+			return ;
 		}
 	});
 }

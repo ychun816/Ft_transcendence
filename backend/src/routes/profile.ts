@@ -7,6 +7,7 @@ import { pipeline } from "stream/promises";
 import bcrypt from "bcrypt";
 import { PROJECT_ROOT } from "../server.js";
 import { createHash } from "crypto";
+import { activeSessions } from "./login.js";
 
 function getFieldValue(field: any): string | undefined {
 	if (!field) return undefined;
@@ -26,6 +27,10 @@ export async function registerProfileRoute(
 			request: FastifyRequest<{ Querystring: { username: string } }>,
 			reply
 		) => {
+			const token = request.cookies.sessionId;
+			console.log("TOKEN CHECK PROFILE: ", token);
+			if (!token) {
+				return reply.status(401).send({ error: 'Unauthorized' })};
 			const username = request.query.username as string; // RECUPERER LE USERNAME DU JWT
 			if (!username) {
 				reply.status(400).send({ error: "Username is required" });
@@ -38,19 +43,30 @@ export async function registerProfileRoute(
 
 	// HANDLE AVATAR REQUEST
 	app.post("/api/profile/avatar", async (request: FastifyRequest, reply) => {
+		const token = request.cookies.sessionId;
+		console.log("TOKEN CHECK AVATAR: ", token);
+		if (!token) {
+			return reply.status(401).send({ error: 'Unauthorized' })};
 		const file = await request.file();
 		console.log("file: ", file);
 		if (!file) {
 			reply.status(400).send({ error: "Avatar file is required" });
 			return;
 		}
-		const username = getFieldValue(file.fields.username);
+		const session = activeSessions.get(token);
+        if (!session) {
+	        reply.code(401).send({ error: "Invalid session" });
+	        return;
+        }
+        const username = session.username;
 		console.log("username: ", username);
 		if (!username) {
 			reply.status(400).send({ error: "Username is required" });
 			return;
 		}
-		const avatarPath = await updateAvatar(prisma, username, file.file);
+		console.log("ABOUT TO UPDATE AVATAR");
+		const avatarPath = await updateAvatar(prisma, username, file);
+		console.log("avatarPath: ", avatarPath);
 		reply.status(200).send({ success: true, avatarPath });
 	});
 
@@ -63,6 +79,10 @@ export async function registerProfileRoute(
 			}>,
 			reply
 		) => {
+			const token = request.cookies.sessionId;
+			console.log("TOKEN CHECK USERNAME: ", token);
+			if (!token) {
+				return reply.status(401).send({ error: 'Unauthorized' })};
 			const { username, newUsername } = request.body as {
 				username: string;
 				newUsername: string;
@@ -93,6 +113,10 @@ export async function registerProfileRoute(
 			}>,
 			reply
 		) => {
+			const token = request.cookies.sessionId;
+			console.log("TOKEN CHECK PASSWORD: ", token);
+			if (!token) {
+				return reply.status(401).send({ error: 'Unauthorized' })};
 			const { username, newPassword } = request.body as {
 				username: string;
 				newPassword: string;
@@ -117,6 +141,10 @@ export async function registerProfileRoute(
 			request: FastifyRequest<{ Querystring: { username: string } }>,
 			reply
 		) => {
+			const token = request.cookies.sessionId;
+			console.log("TOKEN CHECK MATCHES: ", token);
+			if (!token) {
+				return reply.status(401).send({ error: 'Unauthorized' })};
 			const username = request.query.username as string;
 			const user = await prisma.user.findUnique({ where: { username } });
 			if (!user) {
@@ -214,7 +242,7 @@ async function updateAvatar(
 	const timestamp = Date.now();
 	const hash = createHash('md5').update(safeUsername + timestamp).digest('hex').substring(0, 8);
 
-	const fileName = `${safeUsername}_${hash}.${ext}`;
+	const fileName = `${safeUsername}_${hash}${ext}`;
 	const uploadPath = path.join(
 		PROJECT_ROOT,
 		"./public/avatars/",

@@ -23,7 +23,6 @@ export class AuthService {
 
             if (response.ok) {
                 this.currentUser = await response.json();
-                // Stocker les infos utilisateur de manière sécurisée
                 this.updateUserInfo(this.currentUser);
                 return this.currentUser;
             } else {
@@ -77,7 +76,6 @@ export class AuthService {
 
     getUser() {
         if (!this.currentUser) {
-            // Essayer de récupérer depuis sessionStorage
             const stored = sessionStorage.getItem('currentUser');
             if (stored) {
                 this.currentUser = JSON.parse(stored);
@@ -86,7 +84,6 @@ export class AuthService {
         return this.currentUser;
     }
 
-    // Méthode pour vérifier si l'utilisateur a accès à une route
     async canAccess(route: string): Promise<boolean> {
         const protectedRoutes = ['/home', '/profile', '/game', '/chat', '/leaderboard'];
         

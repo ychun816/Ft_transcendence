@@ -4,7 +4,7 @@ import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { randomBytes } from 'crypto';
 
-const activeSessions = new Map<string, { userId: number; username: string; expiresAt: Date }>();
+export const activeSessions = new Map<string, { userId: number; username: string; expiresAt: Date }>();
 
 const secretKey = process.env.COOKIE_SECRET;
 
@@ -42,13 +42,11 @@ export async function handleLogIn(app: FastifyInstance, prisma: PrismaClient){
 
 				reply.setCookie('sessionId', sessionToken, {
 					httpOnly: true,
-					secure: process.env.NODE_ENV === 'production',
+					secure: true,
 					sameSite: 'strict',
-					maxAge: 24 * 60 * 60 * 1000,
+					maxAge: 24 * 60 * 60,
 					path: '/'
-				});
-
-				reply.send({success: true});
+				}).send({success: true});
 
 			} catch (err) {
 				console.error('Login error:', err);
@@ -120,6 +118,7 @@ export async function secureRoutes(app: FastifyInstance, prisma: PrismaClient) {
     // Appliquer le middleware aux routes protégées
     app.addHook('preHandler', async (request, reply) => {
         const protectedPaths = [
+            '/api/login',
             '/api/profile',
             '/api/profile/avatar',
             '/api/profile/username',

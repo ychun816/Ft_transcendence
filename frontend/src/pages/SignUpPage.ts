@@ -74,7 +74,7 @@ export async function sendSignUpInfo(page: HTMLDivElement): Promise<void> {
 		}
 		console.log("About to send response");
 		const response = await fetch("/api/signup", {
-			method: "POST",
+			method: "POST",                            
 			body: formData,
 		});
 		console.log(formData.get("username"));
@@ -86,7 +86,8 @@ export async function sendSignUpInfo(page: HTMLDivElement): Promise<void> {
 				router.navigate('/login');
 			});
 		} else {
-			alert("Issue while registering");
+			const data = await response.json();
+			alert(data.error || "Issue while registering");
 		}
 	// }
 	// else {

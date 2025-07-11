@@ -72,19 +72,16 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
         });
 
         const data = await response.json();
-        
         if (data.success) {
-            // Récupérer les infos utilisateur après connexion
             await authService.getCurrentUser();
-            
             import("../router/router.js").then(({ router }) => {
                 router.navigate('/home');
             });
         } else {
-            alert("Erreur lors de la connexion: " + (data.message || "Identifiants incorrects"));
+            alert("Error while logging in: " + (data.message || "Credentials are incorrect"));
         }
     } catch (error) {
         console.error("Login error:", error);
-        alert("Erreur de connexion. Veuillez réessayer.");
+        alert("Error while logging in: " + (error || "Please try again."));
     }
 }
