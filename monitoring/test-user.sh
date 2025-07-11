@@ -3,7 +3,7 @@
 # Configuration - adaptez selon votre environnement
 ELASTIC_URL="http://elasticsearch:9200"
 ELASTIC_USER="elastic"
-ELASTIC_PASSWORD="ASD*()890"
+ELASTIC_PASSWORD="987654321qweQWE!@"
 INDEX_NAME="transcendence-logs-$(date +%Y.%m.%d)"
 
 # Fonction pour créer un log de test avec une date spécifique
