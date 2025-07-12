@@ -10,6 +10,7 @@ import { fileURLToPath } from "url";
 import { PrismaClient } from "@prisma/client";
 import chatWebSocketRoutes from "./routes/chat.js";
 import cookie from '@fastify/cookie';
+import { registerNotificationRoutes } from "./routes/notifications.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 export const PROJECT_ROOT = path.resolve(__dirname, "../../");
@@ -62,7 +63,9 @@ const start = async () => {
         console.log("GET USER INFO FOR FRONTEND");
         registerProfileRoute(app, prisma);
         console.log("🔌 Registering WebSocket routes...");
-        await chatWebSocketRoutes(app);
+        await chatWebSocketRoutes(app, prisma);
+        // Register WebSocket routes
+        await registerNotificationRoutes(app, prisma);
         console.log("🎧 Starting to listen...");
         await app.listen({
             port: 3000,

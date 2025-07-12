@@ -76,11 +76,16 @@ async function createUser(
 	}
 	console.log("About to create new user");
 	console.log("avatarUrl: ", avatarPath);
+	// Générer un email unique avec timestamp et random
+	const timestamp = Date.now();
+	const random = Math.random().toString(36).substring(2, 8);
+	const uniqueEmail = `${username}_${timestamp}_${random}@transcendence.local`;
+
 	const user = await prisma.user.create({
 		data: {
 			username,
 			passwordHash: hashedPassword,
-			email: "",
+			email: uniqueEmail,
 			avatarUrl: avatarPath || null,
 		},
         select: {

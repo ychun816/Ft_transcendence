@@ -71,6 +71,11 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
             body: JSON.stringify(UserInfo),
         });
 
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP ${response.status}: ${errorText}`);
+        }
+        
         const data = await response.json();
         if (data.success) {
             await authService.getCurrentUser();

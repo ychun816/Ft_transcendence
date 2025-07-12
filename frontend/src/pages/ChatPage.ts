@@ -53,7 +53,17 @@ export function createChatPage(): HTMLElement {
   `;
 
 	// Get current user info
-	const username = localStorage.getItem("username");
+	const currentUser = sessionStorage.getItem("currentUser");
+	let username = null;
+	
+	if (currentUser) {
+		try {
+			const user = JSON.parse(currentUser);
+			username = user.username;
+		} catch (e) {
+			console.error("Error parsing user data:", e);
+		}
+	}
 
 	if (!username) {
 		page.innerHTML = `
@@ -135,38 +145,25 @@ export function createChatPage(): HTMLElement {
  * Get user info from server with timeout
  */
 async function getUserInfo() {
-	const username = localStorage.getItem("username");
-	console.log("username: ", username);
-	if (username) {
-		console.log(
-			"encodeURIComponent(username): ",
-			encodeURIComponent(username)
-		);
-
-		// Ajouter un timeout à la requête fetch
-		const controller = new AbortController();
-		const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 secondes max
-
-		try {
-			const response = await fetch(
-				`/api/profile?username=${encodeURIComponent(username)}`,
-				{ signal: controller.signal }
-			);
-			clearTimeout(timeoutId);
-
-			const data = await response.json();
-			if (data) {
-				console.log("data retrieved: ", data);
-				return data;
+	try {
+		const response = await fetch('/api/me', {
+			method: 'GET',
+			credentials: 'include',
+			headers: {
+				'Content-Type': 'application/json'
 			}
-		} catch (error) {
-			clearTimeout(timeoutId);
-			console.error("❌ Error fetching user info:", error);
-			throw error;
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP ${response.status}`);
 		}
-	} else {
-		console.error("Cant find user");
-		return null;
+
+		const userData = await response.json();
+		console.log("✅ User data from /api/me:", userData);
+		return userData;
+	} catch (error) {
+		console.error("❌ Error fetching user info:", error);
+		throw error;
 	}
 }
 
@@ -205,7 +202,7 @@ function initializeChat(page: HTMLElement, userData: any) {
 	function connectWebSocket() {
 		// Utiliser l'URL complète du serveur backend
 		ws = new WebSocket(
-			`ws://localhost:3003/ws/chat?username=${encodeURIComponent(userData.username)}&userId=${userData.id}`
+			`ws://localhost:3000/ws/chat?username=${encodeURIComponent(userData.username)}&userId=${userData.id}`
 		);
 
 		ws.onopen = () => {
