@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var prisma_1 = require("../src/generated/prisma");
+var prisma_1 = require("@prisma/client");
 var bcrypt = require("bcrypt");
 var prisma = new prisma_1.PrismaClient();
 function main() {
