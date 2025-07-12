@@ -235,7 +235,7 @@ function initializeChat(page: HTMLElement, userData: any) {
 						handleNewMessage(data);
 						break;
 					case "user_profile":
-						showUserProfile(data.profile);
+						displayUserProfile(data.profile);
 						break;
 					case "online_users":
 						console.log("👥 Online users:", data.users);
@@ -435,11 +435,34 @@ function initializeChat(page: HTMLElement, userData: any) {
 						<span class="text-xs text-green-600">En ligne</span>
 					</div>
 				</div>
+				<div class="flex flex-col gap-1">
+					<button class="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600" data-action="chat">
+						💬
+					</button>
+					<button class="text-xs bg-gray-500 text-white px-2 py-1 rounded hover:bg-gray-600" data-action="profile">
+						👤
+					</button>
+				</div>
 			</div>
 		`;
 
-		userDiv.addEventListener("click", () => {
-			startConversationWithUser(user.username);
+		userDiv.addEventListener("click", (e) => {
+			const target = e.target as HTMLElement;
+			const action = target.getAttribute('data-action');
+			
+			if (action === 'chat') {
+				e.stopPropagation();
+				startConversationWithUser(user.username);
+			} else if (action === 'profile') {
+				e.stopPropagation();
+				// Navigate to user profile
+				import("../router/router.js").then(({ router }) => {
+					router.navigate(`/profile/${user.username}`);
+				});
+			} else if (!action) {
+				// Click on the main area starts conversation
+				startConversationWithUser(user.username);
+			}
 		});
 
 		// Remove "Aucun utilisateur en ligne" message if it exists
@@ -769,6 +792,14 @@ function initializeChat(page: HTMLElement, userData: any) {
 				})
 			);
 		}
+	}
+
+	function displayUserProfile(profile: any) {
+		// For now, just log the profile. In the future, this could open a modal or navigate to profile page
+		console.log("📄 User profile received:", profile);
+		
+		// You could display this in a modal or navigate to the profile page
+		alert(`Profil de ${profile.username}:\nPartites jouées: ${profile.gamesPlayed}\nVictoires: ${profile.wins}\nDéfaites: ${profile.losses}`);
 	}
 
 	function blockUser(username: string) {
