@@ -42,11 +42,20 @@ export async function handleLogIn(app: FastifyInstance, prisma: PrismaClient){
 
 				reply.setCookie('sessionId', sessionToken, {
 					httpOnly: true,
-					secure: true,
+					secure: process.env.NODE_ENV === 'production',
 					sameSite: 'strict',
 					maxAge: 24 * 60 * 60,
 					path: '/'
-				}).send({success: true});
+				});
+				
+				return reply.send({
+					success: true,
+					user: {
+						id: user.id,
+						username: user.username,
+						avatarUrl: user.avatarUrl
+					}
+				});
 
 			} catch (err) {
 				console.error('Login error:', err);

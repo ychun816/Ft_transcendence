@@ -13,7 +13,9 @@ function isPasswordString(user : IUserInfo): boolean {
 };
 
 function isUsernameAllowed(user : IUserInfo): boolean {
-	return user.username !== "admin";
+	const username = user.username.toString();
+	const forbiddenNames = ["admin", "root", "system", "null", "undefined"];
+	return !forbiddenNames.includes(username.toLowerCase()) && username.length >= 2;
 };
 
 function isPasswordLong(user : IUserInfo): boolean {

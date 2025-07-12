@@ -1,7 +1,27 @@
 import { FastifyInstance } from "fastify";
 import "@fastify/websocket";
+import { PrismaClient } from "@prisma/client";
 
-export default async function chatWebSocketRoutes(fastify: FastifyInstance) {
+// Store active connections with user information
+const activeConnections = new Map<
+	string,
+	{
+		connection: any;
+		userId: number;
+		username: string;
+	}
+>();
+
+/**
+ * Enhanced chat WebSocket routes with direct messaging, blocking, and notifications
+ *
+ * @param fastify - Fastify instance
+ * @param prisma - Prisma client instance
+ */
+export default async function chatWebSocketRoutes(
+	fastify: FastifyInstance,
+	prisma: PrismaClient
+) {
 	console.log("🔧 Registering WebSocket route: /ws/chat");
 
 	fastify.get("/ws/chat", { websocket: true }, async (connection, req) => {
@@ -91,20 +111,59 @@ export default async function chatWebSocketRoutes(fastify: FastifyInstance) {
 				const data = JSON.parse(message.toString());
 				console.log("🔧 Received message:", data);
 
-				// Save message to database
-				if (data.type === "chat_message") {
-                    
-					console.log("💾 Saving message to database:", data.content);
+				switch (data.type) {
+					case "direct_message":
+						await handleDirectMessage(
+							data,
+							username,
+							user.id,
+							prisma
+						);
+						break;
+					case "block_user":
+						await handleBlockUser(data, user.id, prisma);
+						break;
+					case "unblock_user":
+						await handleUnblockUser(data, user.id, prisma);
+						break;
+					case "get_user_profile":
+						await handleGetUserProfile(data, connection, prisma);
+						break;
+					case "get_conversations":
+						await handleGetConversations(
+							user.id,
+							connection,
+							prisma
+						);
+						break;
+					case "get_messages":
+						console.log(
+							"🔧 Processing get_messages with data:",
+							data
+						);
+						await handleGetMessages(
+							data,
+							user.id,
+							connection,
+							prisma
+						);
+						break;
+					case "get_online_users":
+						await handleGetOnlineUsers(
+							connection,
+							prisma,
+							username
+						);
+						break;
+					default:
+						console.log("🔧 Unknown message type:", data.type);
+						connection.send(
+							JSON.stringify({
+								type: "error",
+								message: "Unknown message type",
+							})
+						);
 				}
-
-				// Renvoyer le message
-				connection.send(
-					JSON.stringify({
-						type: "chat_message",
-						content: data.content,
-						timestamp: data.timestamp,
-					})
-				);
 			} catch (error) {
 				console.error("❌ Error processing message:", error);
 				connection.send(

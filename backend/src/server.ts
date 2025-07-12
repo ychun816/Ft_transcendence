@@ -80,7 +80,7 @@ const start = async () => {
         registerProfileRoute(app, prisma);
         
         console.log("🔌 Registering WebSocket routes...");
-        await chatWebSocketRoutes(app);
+        await chatWebSocketRoutes(app, prisma);
         // Register WebSocket routes
         await registerNotificationRoutes(app, prisma);
         console.log("🎧 Starting to listen...");

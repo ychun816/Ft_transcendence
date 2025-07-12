@@ -77,7 +77,9 @@ class Router {
             }
         }
 
-        // Rediriger vers /home si déjà authentifié et tentative d'accès à login/signup
+        // Permettre l'accès à login/signup même si connecté (pour permettre logout et nouveau compte)
+        // Commenté pour permettre à un utilisateur connecté d'accéder à signup/login
+        /*
         if (route === '/login' || route === '/signup') {
             const user = await authService.getCurrentUser();
             if (user) {
@@ -85,6 +87,7 @@ class Router {
                 return;
             }
         }
+        */
 
         this.currentRoute = route;
         this.renderRoute(route);

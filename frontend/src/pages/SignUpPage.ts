@@ -86,7 +86,9 @@ export async function sendSignUpInfo(page: HTMLDivElement): Promise<void> {
 				router.navigate('/login');
 			});
 		} else {
-			const data = await response.json();
+			const errorText = await response.text();
+			console.error("Signup error response:", errorText);
+			const data = JSON.parse(errorText);
 			alert(data.error || "Issue while registering");
 		}
 	// }
