@@ -2,6 +2,7 @@ import { authService } from '../middleware/auth.js';
 
 class Router {
     private routes: Map<string, () => HTMLElement> = new Map();
+    private dynamicRoutes: Array<{pattern: string, handler: () => HTMLElement}> = [];
     private protectedRoutes: Set<string> = new Set();
     private currentRoute: string = '/';
 
@@ -19,6 +20,20 @@ class Router {
         this.protectedRoutes.add('/chat');
         this.protectedRoutes.add('/leaderboard');
     }
+
+    private isProtectedRoute(route: string): boolean {
+        // Check exact matches
+        if (this.protectedRoutes.has(route)) {
+            return true;
+        }
+        
+        // Check pattern matches for dynamic routes like /profile/:username
+        if (route.startsWith('/profile/') && route.length > '/profile/'.length) {
+            return true;
+        }
+        
+        return false;
+    }
     
     addRoute(path: string, component: () => HTMLElement) {
       /*
@@ -27,6 +42,11 @@ class Router {
       */
       this.routes.set(path, component);
       return this;
+    }
+
+    addDynamicRoute(pattern: string, handler: () => HTMLElement) {
+        this.dynamicRoutes.push({ pattern, handler });
+        return this;
     }
     
     private handleRoute() {
@@ -69,7 +89,7 @@ class Router {
 
     async navigate(route: string): Promise<void> {
         // Vérifier l'authentification pour les routes protégées
-        if (this.protectedRoutes.has(route)) {
+        if (this.isProtectedRoute(route)) {
             const user = await authService.getCurrentUser();
             if (!user) {
                 this.navigate('/login');
@@ -95,7 +115,19 @@ class Router {
     }
 
     private async renderRoute(route: string): Promise<void> {
-        const routeHandler = this.routes.get(route);
+        // Check exact routes first
+        let routeHandler = this.routes.get(route);
+        
+        // If no exact match, check dynamic routes
+        if (!routeHandler) {
+            for (const dynamicRoute of this.dynamicRoutes) {
+                if (this.matchesPattern(route, dynamicRoute.pattern)) {
+                    routeHandler = dynamicRoute.handler;
+                    break;
+                }
+            }
+        }
+        
         if (!routeHandler) {
             this.navigate('/404');
             return;
@@ -108,6 +140,13 @@ class Router {
         }
     }
 
+    private matchesPattern(route: string, pattern: string): boolean {
+        // Convert pattern like "/profile/:username" to regex
+        const regexPattern = pattern.replace(/:[^/]+/g, '[^/]+');
+        const regex = new RegExp(`^${regexPattern}$`);
+        return regex.test(route);
+    }
+
     private handlePopState(): void {
         window.addEventListener('popstate', async () => {
             await this.navigate(window.location.pathname);
@@ -117,7 +156,7 @@ class Router {
     // Méthode pour vérifier périodiquement l'état d'authentification
     startAuthCheck(): void {
         setInterval(async () => {
-            if (this.protectedRoutes.has(this.currentRoute)) {
+            if (this.isProtectedRoute(this.currentRoute)) {
                 const user = await authService.getCurrentUser();
                 if (!user) {
                     this.navigate('/login');

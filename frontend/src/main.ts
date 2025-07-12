@@ -7,6 +7,7 @@ import { createProfilePage } from "./pages/ProfilePage";
 import { createChatPage } from "./pages/ChatPage";
 import { createNotFoundPage } from "./pages/NotFoundPage";
 import { createSignUpPage } from "./pages/SignUpPage";
+import { createUserProfilePage } from "./pages/UserProfilePage";
 
 router.startAuthCheck();
 
@@ -19,5 +20,8 @@ router
     .addRoute('/profile', createProfilePage)
     .addRoute('/chat', createChatPage)
     .addRoute('/404', createNotFoundPage);
+
+// Route dynamique pour les profils utilisateur
+router.addDynamicRoute('/profile/:username', createUserProfilePage);
 
 router.start();
