@@ -43,12 +43,26 @@ export default async function chatWebSocketRoutes(
 			return;
 		}
 
-		const userIdNum = parseInt(userId);
+		// Get the actual user ID from database
+		const user = await prisma.user.findUnique({
+			where: { username: username },
+		});
 
-		// Store connection with user info
+		if (!user) {
+			connection.send(
+				JSON.stringify({
+					type: "error",
+					message: "User not found in database",
+				})
+			);
+			connection.close();
+			return;
+		}
+
+		// Store connection with actual user info from database
 		activeConnections.set(username, {
 			connection,
-			userId: userIdNum,
+			userId: user.id,
 			username,
 		});
 
@@ -102,22 +116,22 @@ export default async function chatWebSocketRoutes(
 						await handleDirectMessage(
 							data,
 							username,
-							userIdNum,
+							user.id,
 							prisma
 						);
 						break;
 					case "block_user":
-						await handleBlockUser(data, userIdNum, prisma);
+						await handleBlockUser(data, user.id, prisma);
 						break;
 					case "unblock_user":
-						await handleUnblockUser(data, userIdNum, prisma);
+						await handleUnblockUser(data, user.id, prisma);
 						break;
 					case "get_user_profile":
 						await handleGetUserProfile(data, connection, prisma);
 						break;
 					case "get_conversations":
 						await handleGetConversations(
-							userIdNum,
+							user.id,
 							connection,
 							prisma
 						);
@@ -129,7 +143,7 @@ export default async function chatWebSocketRoutes(
 						);
 						await handleGetMessages(
 							data,
-							userIdNum,
+							user.id,
 							connection,
 							prisma
 						);
@@ -212,7 +226,7 @@ async function handleDirectMessage(
 		if (!receiver) {
 			sendToUser(senderUsername, {
 				type: "error",
-				message: "User not found",
+				message: "Receiver user not found",
 			});
 			return;
 		}
@@ -226,9 +240,19 @@ async function handleDirectMessage(
 		});
 
 		if (isBlocked) {
+			console.log(
+				"🔧 Sender is blocked by receiver ",
+				senderUsername,
+				"by",
+				receiverUsername
+			);
 			sendToUser(senderUsername, {
 				type: "error",
-				message: "You cannot send messages to this user",
+				message:
+					"You cannot send messages to the user " +
+					receiverUsername +
+					" because you are " +
+					senderUsername,
 			});
 			return;
 		}
@@ -252,10 +276,15 @@ async function handleDirectMessage(
 			isRead: false,
 		};
 
-		// Send confirmation to sender
+		// Send message to sender (so they see it in their conversation)
 		sendToUser(senderUsername, {
-			...messageData,
-			type: "message_sent", // Different type for sender
+			type: "direct_message",
+			id: savedMessage.id,
+			sender: "me", // Show as "me" for the sender
+			receiver: receiverUsername,
+			content: content,
+			timestamp: savedMessage.createdAt.toISOString(),
+			isRead: true, // Mark as read for sender since they sent it
 		});
 
 		// Send to receiver if online

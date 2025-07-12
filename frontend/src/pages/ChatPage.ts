@@ -205,7 +205,7 @@ function initializeChat(page: HTMLElement, userData: any) {
 	function connectWebSocket() {
 		// Utiliser l'URL complète du serveur backend
 		ws = new WebSocket(
-			`ws://localhost:3002/ws/chat?username=${encodeURIComponent(userData.username)}&userId=${userData.id}`
+			`ws://localhost:3003/ws/chat?username=${encodeURIComponent(userData.username)}&userId=${userData.id}`
 		);
 
 		ws.onopen = () => {
@@ -499,6 +499,7 @@ function initializeChat(page: HTMLElement, userData: any) {
 			convDiv.className = `p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${
 				conv.unreadCount > 0 ? "bg-blue-50" : ""
 			}`;
+			convDiv.setAttribute('data-username', conv.partner.username);
 			convDiv.innerHTML = `
 				<div class="flex items-center gap-3">
 					<img src="${conv.partner.avatarUrl || "/public/default-avatar.png"}" 
@@ -525,6 +526,9 @@ function initializeChat(page: HTMLElement, userData: any) {
 
 	function selectConversation(username: string) {
 		currentConversation = username;
+
+		// Clear notification badge immediately for this conversation
+		clearNotificationBadge(username);
 
 		// Update header
 		chatHeader.innerHTML = `
@@ -568,6 +572,30 @@ function initializeChat(page: HTMLElement, userData: any) {
 				})
 			);
 		}
+	}
+
+	function clearNotificationBadge(username: string) {
+		// Find the specific conversation div using data-username attribute
+		const conversationElement = conversationsList.querySelector(`[data-username="${username}"]`);
+		if (conversationElement) {
+			// Remove the blue background indicating unread messages
+			conversationElement.classList.remove('bg-blue-50');
+			// Remove the red notification badge
+			const badge = conversationElement.querySelector('.bg-red-500');
+			if (badge) {
+				badge.remove();
+			}
+		}
+
+		// Clear any cached received messages for this conversation to prevent duplication
+		if (receivedMessages.has(username)) {
+			receivedMessages.set(username, []);
+		}
+
+		// Reload conversations after a short delay to allow server to mark messages as read
+		setTimeout(() => {
+			loadConversations();
+		}, 500);
 	}
 
 	function displayMessages(messages: any[]) {
@@ -674,14 +702,15 @@ function initializeChat(page: HTMLElement, userData: any) {
 		if (
 			currentConversation &&
 			(data.sender === currentConversation ||
-				data.receiver === currentConversation)
+				data.receiver === currentConversation ||
+				data.sender === "me")
 		) {
 			const messageDiv = document.createElement("div");
-			messageDiv.className = `mb-4 flex ${data.sender === userData.username ? "justify-end" : "justify-start"}`;
+			messageDiv.className = `mb-4 flex ${data.sender === "me" || data.sender === userData.username ? "justify-end" : "justify-start"}`;
 
 			messageDiv.innerHTML = `
 				<div class="max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-					data.sender === userData.username
+					data.sender === "me" || data.sender === userData.username
 						? "bg-blue-500 text-white"
 						: "bg-gray-200 text-gray-800"
 				}">
