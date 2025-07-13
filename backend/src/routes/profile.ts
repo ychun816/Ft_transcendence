@@ -7,7 +7,9 @@ import { pipeline } from "stream/promises";
 import bcrypt from "bcrypt";
 import { PROJECT_ROOT } from "../server.js";
 import { createHash } from "crypto";
-import { activeSessions } from "./login.js";
+import jwt from "jsonwebtoken";
+
+const secretKey = process.env.COOKIE_SECRET;
 
 function getFieldValue(field: any): string | undefined {
 	if (!field) return undefined;
@@ -15,6 +17,22 @@ function getFieldValue(field: any): string | undefined {
 	if (typeof field.value === "string") return field.value;
 	if (Buffer.isBuffer(field.value)) return field.value.toString();
 	return undefined;
+}
+
+function extractTokenFromRequest(request: FastifyRequest): { userId: number; username: string } | null {
+	const authHeader = request.headers.authorization;
+	if (!authHeader || !authHeader.startsWith('Bearer ')) {
+		return null;
+	}
+	
+	const token = authHeader.substring(7);
+	try {
+		const decoded = jwt.verify(token, secretKey || 'fallback-secret-key') as any;
+		return { userId: decoded.id, username: decoded.username };
+	} catch (error) {
+		console.error('JWT verification error:', error);
+		return null;
+	}
 }
 
 export async function registerProfileRoute(
@@ -27,11 +45,12 @@ export async function registerProfileRoute(
 			request: FastifyRequest<{ Querystring: { username: string } }>,
 			reply
 		) => {
-			const token = request.cookies.sessionId;
-			console.log("TOKEN CHECK PROFILE: ", token);
-			if (!token) {
-				return reply.status(401).send({ error: 'Unauthorized' })};
-			const username = request.query.username as string; // RECUPERER LE USERNAME DU JWT
+			const auth = extractTokenFromRequest(request);
+			if (!auth) {
+				return reply.status(401).send({ error: 'Unauthorized' });
+			}
+			
+			const username = request.query.username as string;
 			if (!username) {
 				reply.status(400).send({ error: "Username is required" });
 				return;
@@ -43,22 +62,19 @@ export async function registerProfileRoute(
 
 	// HANDLE AVATAR REQUEST
 	app.post("/api/profile/avatar", async (request: FastifyRequest, reply) => {
-		const token = request.cookies.sessionId;
-		console.log("TOKEN CHECK AVATAR: ", token);
-		if (!token) {
-			return reply.status(401).send({ error: 'Unauthorized' })};
+		const auth = extractTokenFromRequest(request);
+		if (!auth) {
+			return reply.status(401).send({ error: 'Unauthorized' });
+		}
+		
 		const file = await request.file();
 		console.log("file: ", file);
 		if (!file) {
 			reply.status(400).send({ error: "Avatar file is required" });
 			return;
 		}
-		const session = activeSessions.get(token);
-        if (!session) {
-	        reply.code(401).send({ error: "Invalid session" });
-	        return;
-        }
-        const username = session.username;
+		
+		const username = auth.username;
 		console.log("username: ", username);
 		if (!username) {
 			reply.status(400).send({ error: "Username is required" });
@@ -79,20 +95,24 @@ export async function registerProfileRoute(
 			}>,
 			reply
 		) => {
-			const token = request.cookies.sessionId;
-			console.log("TOKEN CHECK USERNAME: ", token);
-			if (!token) {
-				return reply.status(401).send({ error: 'Unauthorized' })};
+			const auth = extractTokenFromRequest(request);
+			if (!auth) {
+				return reply.status(401).send({ error: 'Unauthorized' });
+			}
+			
 			const { username, newUsername } = request.body as {
 				username: string;
 				newUsername: string;
-			}; // RECUPERER LE USERNAME DU JWT
-			if (!username) {
+			};
+			
+			// Use the username from the JWT token for security
+			const currentUsername = auth.username;
+			if (!currentUsername || !newUsername) {
 				reply.status(400).send({ error: "Username is required" });
 				return;
 			}
 			try {
-				await updateUsername(prisma, username, newUsername);
+				await updateUsername(prisma, currentUsername, newUsername);
 				reply.status(200).send({ success: true });
 			} catch (err) {
 				reply
@@ -113,20 +133,24 @@ export async function registerProfileRoute(
 			}>,
 			reply
 		) => {
-			const token = request.cookies.sessionId;
-			console.log("TOKEN CHECK PASSWORD: ", token);
-			if (!token) {
-				return reply.status(401).send({ error: 'Unauthorized' })};
+			const auth = extractTokenFromRequest(request);
+			if (!auth) {
+				return reply.status(401).send({ error: 'Unauthorized' });
+			}
+			
 			const { username, newPassword } = request.body as {
 				username: string;
 				newPassword: string;
-			}; // RECUPERER LE USERNAME DU JWT
-			if (!username) {
-				reply.status(400).send({ error: "Username is required" });
+			};
+			
+			// Use the username from the JWT token for security
+			const currentUsername = auth.username;
+			if (!currentUsername || !newPassword) {
+				reply.status(400).send({ error: "Username and password are required" });
 				return;
 			}
 			try {
-				await updatePassword(prisma, username, newPassword);
+				await updatePassword(prisma, currentUsername, newPassword);
 				reply.status(200).send({ success: true });
 			} catch (err) {
 				reply.status(400).send({ error: "Update failed" });
@@ -141,10 +165,11 @@ export async function registerProfileRoute(
 			request: FastifyRequest<{ Querystring: { username: string } }>,
 			reply
 		) => {
-			const token = request.cookies.sessionId;
-			console.log("TOKEN CHECK MATCHES: ", token);
-			if (!token) {
-				return reply.status(401).send({ error: 'Unauthorized' })};
+			const auth = extractTokenFromRequest(request);
+			if (!auth) {
+				return reply.status(401).send({ error: 'Unauthorized' });
+			}
+			
 			const username = request.query.username as string;
 			const user = await prisma.user.findUnique({ where: { username } });
 			if (!user) {

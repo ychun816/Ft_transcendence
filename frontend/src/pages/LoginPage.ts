@@ -1,45 +1,63 @@
 import { AuthService } from "../middleware/auth.js";
+import { i18n } from "../services/i18n.js";
+import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
 
 // Créer une instance locale (pas de singleton)
 const authService = new AuthService();
 
 export function createLoginPage(): HTMLElement {
 	const page = document.createElement("div");
-	page.className =
-		"min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 to-blue-100";
+	page.className = "page-centered fade-in";
 
-	page.innerHTML = `
-    <div class="card max-w-md w-full bg-white">
-      <h1 class="text-6xl text-center text-blue-500 mb-8">Transcendence</h1>
-      <form class="space-y-4">
-        <input type="text" placeholder="Username" id="username" required class="input">
-        <input type="password" placeholder="Password" id="password" required class="input">
-        <button type="submit" id="login-btn" class="btn w-full">Log in</button>
-      </form>
-      <button type="button" id="register-btn" class="btn w-full mt-4 bg-gray-500 hover:bg-gray-600">Sign up</button>
-    </div>
-  `;
-	console.log("DEBUGGING LOGIN");
-	navigateToSignUp(page);
+	const renderContent = () => {
+		page.innerHTML = `
+			<div class="absolute top-4 right-4" id="language-switcher-container"></div>
+			<div class="card max-w-md w-full slide-up">
+				<h1 class="page-title text-4xl text-center mb-8">${i18n.t('auth.login_title')}</h1>
+				<form class="space-y-4">
+					<input type="text" placeholder="${i18n.t('auth.username')}" id="username" required class="input">
+					<input type="password" placeholder="${i18n.t('auth.password')}" id="password" required class="input">
+					<button type="submit" id="login-btn" class="btn-primary w-full">${i18n.t('common.login')}</button>
+				</form>
+				<button type="button" id="register-btn" class="btn-secondary w-full mt-4">${i18n.t('common.register')}</button>
+			</div>
+		`;
+		
+		// Add language switcher
+		const languageSwitcherContainer = page.querySelector('#language-switcher-container');
+		if (languageSwitcherContainer) {
+			languageSwitcherContainer.appendChild(createLanguageSwitcher());
+		}
+		
+		// Re-attach event listeners after re-render
+		attachEventListeners();
+	};
 	
+	const attachEventListeners = () => {
+		const form = page.querySelector('.space-y-4') as HTMLFormElement;
+		const signupBtn = page.querySelector('#register-btn') as HTMLButtonElement;
+		
+		if (form) {
+			form.addEventListener('submit', (e) => {
+				e.preventDefault();
+				sendLogInInfo(page);
+			});
+		}
+		
+		if (signupBtn) {
+			signupBtn.addEventListener("click", () => {
+				import("../router/router.js").then(({ router }) => {
+					router.navigate("/signup");
+				});
+			});
+		}
+	};
 	
-	const form = page.querySelector('.space-y-4') as HTMLFormElement;
-	console.log("DEBUGGING 1");
-	form.addEventListener('submit', (e) => {
-		e.preventDefault();
-		console.log("DEBUGGING 2");
-		sendLogInInfo(page);
-	});
+	renderContent();
+	
+	// Re-render when language changes
+	window.addEventListener('languageChanged', renderContent);
 	return page;
-}
-
-function navigateToSignUp(page: HTMLDivElement){
-  const signupBtn = page.querySelector('#register-btn') as HTMLButtonElement;
-  signupBtn.addEventListener("click", () => {
-	import("../router/router.js").then(({ router }) => {
-		router.navigate("/signup");
-		});
-  	});
 }
 
 export async function requireAuth(): Promise<boolean> {
@@ -99,10 +117,10 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
                 router.navigate('/home');
             });
         } else {
-            alert("Error while logging in: " + (data.message || "Credentials are incorrect"));
+            alert(i18n.t('auth.login_error') + ": " + (data.message || i18n.t('auth.invalid_credentials')));
         }
     } catch (error) {
         console.error("Login error:", error);
-        alert("Error while logging in: " + (error || "Please try again."));
+        alert(i18n.t('auth.login_error') + ": " + (error || "Please try again."));
     }
 }

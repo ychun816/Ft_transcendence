@@ -1,28 +1,55 @@
-// import { UserSignUpCheck } from '../../backend/src/signup/signUpCheck.ts';
+import { i18n } from "../services/i18n.js";
+import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
 
 export function createSignUpPage(): HTMLElement {
 	const page = document.createElement("div");
-	page.className =
-		"min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-blue-100";
+	page.className = "page-centered fade-in";
 
-	page.innerHTML = `
-		<div class="card max-w-md w-full bg-white flex flex-col items-center">
-			<header class="w-full flex items-center gap-4 mb-6">
-				<button class="btn" data-route="/login">← Return to login</button>
-			</header>
-			<h1 class="text-4xl font-bold text-center text-red-500 mb-8">Create your account</h1>
-			<form class="space-y-4 w-full">
-				<input type="text" placeholder="Username" id="username" required class="input">
-				<input type="password" placeholder="Password" id="password" required class="input">
-				<label for="avatar" class="block text-sm font-medium text-gray-700">Choose a profile picture:</label>
-				<input type="file" id="avatar" name="avatar" accept="image/png, image/jpeg" class="input" />
-				<div class="flex justify-center">
-					<img id="avatar-preview" width="200" class="border border-gray-300 rounded" />
-				</div>
-				<button type="submit" class="btn w-full">Sign up</button>
-			</form>
-		</div>
-	`;
+	const renderContent = () => {
+		page.innerHTML = `
+			<div class="absolute top-4 right-4" id="language-switcher-container"></div>
+			<div class="card max-w-md w-full flex flex-col items-center slide-up">
+				<header class="nav-header w-full">
+					<button class="btn-ghost" data-route="/login">${i18n.t('signup.back_to_login')}</button>
+				</header>
+				<h1 class="page-title text-center mb-8">${i18n.t('signup.title')}</h1>
+				<form class="space-y-4 w-full">
+					<input type="text" placeholder="${i18n.t('signup.username')}" id="username" required class="input">
+					<input type="password" placeholder="${i18n.t('signup.password')}" id="password" required class="input">
+					<label for="avatar" class="block text-sm font-medium text-muted">${i18n.t('signup.avatar_label')}</label>
+					<input type="file" id="avatar" name="avatar" accept="image/png, image/jpeg" class="input" />
+					<div class="flex justify-center">
+						<img id="avatar-preview" width="200" class="border-accent rounded-modern shadow-soft" style="display: none;" />
+					</div>
+					<button type="submit" class="btn-primary w-full">${i18n.t('signup.create_account')}</button>
+				</form>
+			</div>
+		`;
+		
+		// Add language switcher
+		const languageSwitcherContainer = page.querySelector('#language-switcher-container');
+		if (languageSwitcherContainer) {
+			languageSwitcherContainer.appendChild(createLanguageSwitcher());
+		}
+		
+		// Re-attach event listeners
+		attachEventListeners();
+	};
+	
+	const attachEventListeners = () => {
+		const form = page.querySelector(".space-y-4") as HTMLFormElement;
+		if (form) {
+			form.addEventListener("submit", async (e) => {
+				e.preventDefault();
+				sendSignUpInfo(page);
+			});
+		}
+	};
+	
+	renderContent();
+	
+	// Re-render when language changes
+	window.addEventListener('languageChanged', renderContent);
 
 	page.addEventListener('click', (e) => {
 		const target = e.target as HTMLElement;
@@ -89,7 +116,7 @@ export async function sendSignUpInfo(page: HTMLDivElement): Promise<void> {
 			const errorText = await response.text();
 			console.error("Signup error response:", errorText);
 			const data = JSON.parse(errorText);
-			alert(data.error || "Issue while registering");
+			alert(data.error || i18n.t('signup.signup_error'));
 		}
 	// }
 	// else {

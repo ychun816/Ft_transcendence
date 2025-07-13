@@ -8,20 +8,27 @@ import { createChatPage } from "./pages/ChatPage";
 import { createNotFoundPage } from "./pages/NotFoundPage";
 import { createSignUpPage } from "./pages/SignUpPage";
 import { createUserProfilePage } from "./pages/UserProfilePage";
+import { i18n } from "./services/i18n";
 
-// Plus besoin de startAuthCheck - chaque page gère sa propre auth
+// Initialize app
+async function initApp() {
+  // Initialize i18n before starting router
+  await i18n.init();
+  
+  router
+      .addRoute('/', createLoginPage)
+      .addRoute('/login', createLoginPage)
+      .addRoute('/signup', createSignUpPage)
+      .addRoute('/home', createHomePage)
+      .addRoute('/game', createGamePage)
+      .addRoute('/profile', createProfilePage)
+      .addRoute('/chat', createChatPage)
+      .addRoute('/404', createNotFoundPage);
 
-router
-    .addRoute('/', createLoginPage)
-    .addRoute('/login', createLoginPage)
-	.addRoute('/signup', createSignUpPage)
-    .addRoute('/home', createHomePage)
-    .addRoute('/game', createGamePage)
-    .addRoute('/profile', createProfilePage)
-    .addRoute('/chat', createChatPage)
-    .addRoute('/404', createNotFoundPage);
+  // Route dynamique pour les profils utilisateur
+  router.addDynamicRoute('/profile/:username', createUserProfilePage);
 
-// Route dynamique pour les profils utilisateur
-router.addDynamicRoute('/profile/:username', createUserProfilePage);
+  router.start();
+}
 
-router.start();
+initApp().catch(console.error);

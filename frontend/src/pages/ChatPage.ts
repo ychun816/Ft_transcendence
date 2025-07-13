@@ -1,25 +1,30 @@
+import { i18n } from "../services/i18n.js";
+import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
+
 export function createChatPage(): HTMLElement {
 	const page = document.createElement("div");
 	page.className =
 		"min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-100 to-pink-100";
 
-	page.innerHTML = `
-    <div class="card max-w-6xl w-full bg-white flex flex-col items-center">
-      <header class="w-full flex items-center gap-4 mb-6">
-        <button class="btn" data-route="/home">← Retour</button>
-        <h2 class="text-2xl font-bold text-gray-900">Chat</h2>
-      </header>
+	const renderContent = () => {
+		page.innerHTML = `
+		<div class="absolute top-4 right-4" id="language-switcher-container"></div>
+		<div class="card max-w-6xl w-full bg-white flex flex-col items-center">
+		  <header class="w-full flex items-center gap-4 mb-6">
+			<button class="btn" data-route="/home">${i18n.t('chat.back')}</button>
+			<h2 class="text-2xl font-bold text-gray-900">${i18n.t('chat.title')}</h2>
+		  </header>
       <main class="w-full flex flex-col items-center">
         <div class="flex w-full h-96">
           <!-- Online Users -->
           <div class="w-1/4 border-r border-gray-200 flex flex-col">
             <div class="p-4 border-b border-gray-200">
-              <h3 class="font-semibold text-gray-700">Utilisateurs en ligne</h3>
+              <h3 class="font-semibold text-gray-700">${i18n.t('chat.online_users')}</h3>
             </div>
             <div class="flex-1 overflow-y-auto" id="online-users-list">
               <div class="p-4 text-gray-500 text-center">
                 <div class="animate-spin inline-block w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full mb-2"></div>
-                <div>Connexion en cours...</div>
+                <div>${i18n.t('chat.connecting')}</div>
               </div>
             </div>
           </div>
@@ -27,7 +32,7 @@ export function createChatPage(): HTMLElement {
           <!-- Conversations List -->
           <div class="w-1/3 border-r border-gray-200 flex flex-col">
             <div class="p-4 border-b border-gray-200">
-              <h3 class="font-semibold text-gray-700">Conversations</h3>
+              <h3 class="font-semibold text-gray-700">${i18n.t('chat.conversations')}</h3>
             </div>
             <div class="flex-1 overflow-y-auto" id="conversations-list">
               <!-- Conversations will appear here -->
@@ -37,20 +42,32 @@ export function createChatPage(): HTMLElement {
           <!-- Chat Area -->
           <div class="flex-1 flex flex-col">
             <div class="p-4 border-b border-gray-200" id="chat-header">
-              <h3 class="font-semibold text-gray-700">Sélectionnez une conversation</h3>
+              <h3 class="font-semibold text-gray-700">${i18n.t('chat.select_conversation')}</h3>
             </div>
             <div class="flex-1 p-4 overflow-y-auto" id="chat-messages">
               <!-- Messages will appear here -->
             </div>
             <div class="bg-white border-t p-4 flex gap-2">
-              <input type="text" placeholder="Tapez votre message..." id="message-input" class="input flex-1">
-              <button id="send-message" class="btn">Envoyer</button>
+              <input type="text" placeholder="${i18n.t('chat.type_message')}" id="message-input" class="input flex-1">
+              <button id="send-message" class="btn">${i18n.t('chat.send')}</button>
             </div>
           </div>
         </div>
       </main>
     </div>
-  `;
+		`;
+		
+		// Add language switcher
+		const languageSwitcherContainer = page.querySelector('#language-switcher-container');
+		if (languageSwitcherContainer) {
+			languageSwitcherContainer.appendChild(createLanguageSwitcher());
+		}
+	};
+	
+	renderContent();
+	
+	// Re-render when language changes
+	window.addEventListener('languageChanged', renderContent);
 
 	// Get current user info
 	const currentUser = sessionStorage.getItem("currentUser");
