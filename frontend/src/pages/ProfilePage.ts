@@ -106,11 +106,16 @@ export function createProfilePage(): HTMLElement {
 
 async function getUserInfo() {
     try {
+        const token = sessionStorage.getItem('authToken');
+        if (!token) {
+            throw new Error('No auth token found');
+        }
+
         const response = await fetch('/api/me', {
             method: 'GET',
-            credentials: 'include',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             }
         });
 
@@ -157,8 +162,8 @@ async function editUsername(page: HTMLDivElement){
 					const data = await response.json();
 					if (data.ok || data.success){
 						console.log("Username succesfully edited!");
-						localStorage.removeItem('username');
-						localStorage.setItem('username', newValue);
+						sessionStorage.removeItem('username');
+						sessionStorage.setItem('username', newValue);
 						usernameElem.textContent = newValue;
 					} else {
 						alert("Error editing username");
@@ -180,7 +185,7 @@ async function editPassword(page: HTMLDivElement){
 				inputType: "password",
 				onValidate: async (newValue) => {
 					const UserInfo = {
-							username: localStorage.getItem('username'),
+							username: sessionStorage.getItem('username'),
 							newPassword: newValue,
 					};
 					const response = await fetch('/api/profile/password', {
@@ -288,7 +293,7 @@ async function editAvatar(page: HTMLDivElement){
 
 async function updateDbAvatar(file: File){
 	const formData = new FormData;
-	const username = localStorage.getItem("username");
+	const username = sessionStorage.getItem("username");
 	formData.append('avatar', file);
 	formData.append('username', username || '');
 
@@ -341,7 +346,7 @@ async function getMatchHistory() {
 async function displayMatchHistory(page: HTMLDivElement)
 {
 	console.log("ENTER IN MATCH HISTORY");
-	const username = localStorage.getItem("username");
+	const username = sessionStorage.getItem("username");
 	console.log("USERNAME RETRIEVED : ", username);
 	const history = await getMatchHistory();
 	console.log("HISTORY RETRIEVED : ", history);

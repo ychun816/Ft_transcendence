@@ -1,5 +1,6 @@
 import { AuthService } from "../middleware/auth.js";
 
+// Créer une instance locale (pas de singleton)
 const authService = new AuthService();
 
 export function createLoginPage(): HTMLElement {
@@ -62,6 +63,8 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
     };
 
     try {
+        console.log("🔍 Sending login request with:", UserInfo);
+        
         const response = await fetch("/api/login", {
             method: "POST",
             credentials: 'include',
@@ -70,6 +73,9 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
             },
             body: JSON.stringify(UserInfo),
         });
+        
+        console.log("🔍 Login response status:", response.status);
+        console.log("🔍 Login response headers:", response.headers);
 
         if (!response.ok) {
             const errorText = await response.text();
@@ -77,7 +83,17 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
         }
         
         const data = await response.json();
+        console.log("🔍 Login response data:", data);
+        
         if (data.success) {
+            // Store the JWT token in sessionStorage
+            sessionStorage.setItem('authToken', data.token);
+            // Store username for convenience
+            sessionStorage.setItem('username', data.user.username);
+            
+            console.log("🔑 Login success - Stored token:", data.token);
+            console.log("🔑 Login success - Stored username:", data.user.username);
+            
             await authService.getCurrentUser();
             import("../router/router.js").then(({ router }) => {
                 router.navigate('/home');

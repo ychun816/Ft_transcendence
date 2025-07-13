@@ -90,7 +90,7 @@ export function createChatPage(): HTMLElement {
 
 	// Optimiser le chargement : démarrer la connexion WebSocket immédiatement
 	// avec un timeout pour getUserInfo
-	const userId = localStorage.getItem("userId");
+	const userId = sessionStorage.getItem("userId");
 	if (userId) {
 		// Si on a déjà l'userId en cache, on peut démarrer plus vite
 		const userData = {
@@ -109,7 +109,7 @@ export function createChatPage(): HTMLElement {
 			.then((userData) => {
 				if (userData && userData.id) {
 					console.log("✅ User info retrieved:", userData);
-					localStorage.setItem("userId", userData.id.toString());
+					sessionStorage.setItem("userId", userData.id.toString());
 					initializeChat(page, userData);
 				} else {
 					throw new Error("Invalid user data");
@@ -146,11 +146,16 @@ export function createChatPage(): HTMLElement {
  */
 async function getUserInfo() {
 	try {
+		const token = sessionStorage.getItem('authToken');
+		if (!token) {
+			throw new Error('No auth token found');
+		}
+
 		const response = await fetch('/api/me', {
 			method: 'GET',
-			credentials: 'include',
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${token}`
 			}
 		});
 
@@ -202,7 +207,7 @@ function initializeChat(page: HTMLElement, userData: any) {
 	function connectWebSocket() {
 		// Utiliser l'URL complète du serveur backend
 		ws = new WebSocket(
-			`ws://localhost:3000/ws/chat?username=${encodeURIComponent(userData.username)}&userId=${userData.id}`
+			`ws://localhost:3002/ws/chat?username=${encodeURIComponent(userData.username)}&userId=${userData.id}`
 		);
 
 		ws.onopen = () => {
@@ -576,7 +581,10 @@ function initializeChat(page: HTMLElement, userData: any) {
 		) as HTMLButtonElement;
 
 		viewProfileBtn.addEventListener("click", () => {
-			showUserProfile(username);
+			// Navigate directly to user profile page
+			import("../router/router.js").then(({ router }) => {
+				router.navigate(`/profile/${username}`);
+			});
 		});
 
 		blockUserBtn.addEventListener("click", () => {

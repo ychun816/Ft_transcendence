@@ -9,7 +9,7 @@ import { createNotFoundPage } from "./pages/NotFoundPage";
 import { createSignUpPage } from "./pages/SignUpPage";
 import { createUserProfilePage } from "./pages/UserProfilePage";
 
-router.startAuthCheck();
+// Plus besoin de startAuthCheck - chaque page gère sa propre auth
 
 router
     .addRoute('/', createLoginPage)
