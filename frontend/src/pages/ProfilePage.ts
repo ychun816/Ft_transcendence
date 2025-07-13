@@ -1,21 +1,23 @@
-import { text } from 'stream/consumers';
+import { i18n } from "../services/i18n.js";
+import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
 
 export function createProfilePage(): HTMLElement {
 	const page = document.createElement("div");
-	page.className =
-		"min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-100 to-cyan-100";
+	page.className = "page-container fade-in";
 
-	page.innerHTML = `
-	<div class="card max-w-2xl w-full bg-white flex flex-col items-center">
-	  <header class="w-full flex items-center gap-4 mb-6">
-		<button class="btn" data-route="/home">← Retour</button>
-		<h2 class="text-2xl font-bold text-gray-900">My profile</h2>
-	  </header>
+	const renderContent = () => {
+		page.innerHTML = `
+		<div class="absolute top-4 right-4" id="language-switcher-container"></div>
+		<div class="card max-w-2xl w-full flex flex-col items-center slide-up">
+		  <header class="nav-header w-full">
+			<button class="btn-ghost" data-route="/home">${i18n.t('profile.back')}</button>
+			<h2 class="page-title">${i18n.t('profile.my_profile')}</h2>
+		  </header>
 	  <main class="w-full flex flex-col items-center">
-		<div class="flex items-center gap-6 mb-8">
-			<div class="w-24 h-24 rounded-full overflow-hidden bg-gray-200 avatar-container" style="position:relative;">
+		<div class="flex items-center gap-8 mb-8">
+			<div class="avatar-container">
 				<img src="/default-avatar.png" alt="Avatar" id="user-avatar" class="w-full h-full object-cover">
-				<button id="edit-avatar" title="Edit avatar" class="edit-avatar-btn"
+				<button id="edit-avatar" title="${i18n.t('profile.edit_avatar')}" class="edit-avatar-btn"
 					style="
 						background:none;
 						border:none;
@@ -36,36 +38,48 @@ export function createProfilePage(): HTMLElement {
 				</button>
 				<input type="file" id="avatar-file-input" accept="image/png, image/jpeg" style="display:none;" />
 			</div>
-			<div class="mb-8">
-				<div style="display: flex; align-items: center; gap: 8px;">
-					<h3 id="username" class="text-2xl font-bold text-gray-900 mb-2">Username</h3>
-					<button id="edit-username" title="Edit username" style="background:none; border:none; cursor:pointer; margin-bottom: 8px;">
-						<img src="../assets/edit.svg" alt="Edit" style="width:18px; height:18px;">
+			<div class="flex-1">
+				<div class="flex items-center gap-3 mb-3">
+					<h3 id="username" class="section-title mb-0">Username</h3>
+					<button id="edit-username" title="${i18n.t('profile.edit_username')}" class="btn-ghost btn-small">
+						<img src="../assets/edit.svg" alt="Edit" style="width:16px; height:16px;">
 					</button>
 				</div>
-				<div style="display: flex; align-items: center; gap: 8px;">
-					<h3 id="password" class="text-base text-gray-900 mb-2">Password: **********</h3>
-					<button id="edit-password" title="Edit password" style="background:none; border:none; cursor:pointer; margin-bottom: 8px;">
-						<img src="../assets/edit.svg" alt="Edit" style="width:18px; height:18px;">
+				<div class="flex items-center gap-3 mb-3">
+					<span id="password" class="text-muted">${i18n.t('profile.password_display')}</span>
+					<button id="edit-password" title="${i18n.t('profile.edit_password')}" class="btn-ghost btn-small">
+						<img src="../assets/edit.svg" alt="Edit" style="width:16px; height:16px;">
 					</button>
 				</div>
-				<div style="display: flex; align-items: center; gap: 8px;">
-					<p id="user-stats" class="text-gray-600">Games played: 0 | Wins: 0 | Losses: 0</p>
+				<div class="bg-surface p-4 rounded-modern border">
+					<p id="user-stats" class="text-muted text-sm">${i18n.t('profile.games_played_stats', {games: '0', wins: '0', losses: '0'})}</p>
 				</div>
 			</div>
 		</div>
 	  </main>
 	</div>
-	<div id="match-block" class="card max-w-2xl w-full bg-white flex flex-col items-end h-[80vh] mx-[5%]">
-		<header class="w-full flex items-center gap-4 mb-6">
-			<h2 class="text-2xl font-bold text-gray-900 justify-center">Match History</h2>
+	<div id="match-block" class="card max-w-2xl w-full flex flex-col h-[80vh] mx-[5%] slide-up">
+		<header class="nav-header w-full">
+			<h2 class="section-title mb-0">${i18n.t('profile.match_history')}</h2>
 		</header>
-		<main class="w-full flex flex-col items-center">
+		<main class="w-full flex-1 overflow-y-auto">
 
 		</main>
 	</div>
 
-  `;
+		`;
+		
+		// Add language switcher
+		const languageSwitcherContainer = page.querySelector('#language-switcher-container');
+		if (languageSwitcherContainer) {
+			languageSwitcherContainer.appendChild(createLanguageSwitcher());
+		}
+	};
+	
+	renderContent();
+	
+	// Re-render when language changes
+	window.addEventListener('languageChanged', renderContent);
   	editAvatar(page);
 	editUsername(page);
 	editPassword(page);
@@ -84,7 +98,11 @@ export function createProfilePage(): HTMLElement {
 			console.log("wins reçue :", data.wins);
 			console.log("losses reçue :", data.losses);
 			if (statElem && data.gamesPlayed && data.wins &&  data.losses){
-				statElem.textContent = `Games played: ${data.gamesPlayed} | Wins: ${data.wins} | Losses: ${data.losses}`
+				statElem.textContent = i18n.t('profile.games_played_stats', {
+					games: data.gamesPlayed.toString(),
+					wins: data.wins.toString(),
+					losses: data.losses.toString()
+				});
 			}
 		}
 	});
@@ -166,7 +184,7 @@ async function editUsername(page: HTMLDivElement){
 						sessionStorage.setItem('username', newValue);
 						usernameElem.textContent = newValue;
 					} else {
-						alert("Error editing username");
+						alert(i18n.t('profile.username_error'));
 					}
 				}
 			});
@@ -199,9 +217,9 @@ async function editPassword(page: HTMLDivElement){
 					if (data.ok || data.success){
 						console.log("Password succesfully edited!");
 					} else {
-						alert("Error editing password");
+						alert(i18n.t('profile.password_error'));
 					}
-					passwordElem.textContent = "Password: **********";
+					passwordElem.textContent = i18n.t('profile.password_display');
 				}
 			});
 		});
@@ -224,12 +242,12 @@ function enableInlineEdit({element, initialValue, onValidate, inputType = "text"
 		input.style.display = "inline-block";
 
 		const validateBtn = document.createElement("button");
-		validateBtn.textContent = "Validate";
+		validateBtn.textContent = i18n.t('profile.validate');
 		validateBtn.className = "btn";
 		validateBtn.type = "button";
 
 		const cancelBtn = document.createElement("button");
-		cancelBtn.textContent = "Cancel";
+		cancelBtn.textContent = i18n.t('profile.cancel');
 		cancelBtn.className = "btn";
 		cancelBtn.type = "button";
 		cancelBtn.style.marginLeft = "8px";
@@ -323,10 +341,17 @@ async function getMatchHistory() {
         const user = await getUserInfo();
         if (!user) return null;
 
+        const token = sessionStorage.getItem('authToken');
+        if (!token) {
+            throw new Error('No auth token found');
+        }
+
         const response = await fetch(`/api/profile/matches?username=${encodeURIComponent(user.username)}`, {
             method: "GET",
-            credentials: 'include',
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
         });
 
         if (response.ok) {
@@ -354,12 +379,12 @@ async function displayMatchHistory(page: HTMLDivElement)
 	if (!histDiv) return;
 
 	let html = `
-		<table class="min-w-full text-left">
+		<table class="data-table">
 			<thead>
 				<tr>
-					<th>Date</th>
-					<th>Adversary</th>
-					<th>Result</th>
+					<th>${i18n.t('profile.date')}</th>
+					<th>${i18n.t('profile.opponent')}</th>
+					<th>${i18n.t('profile.result')}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -368,15 +393,15 @@ async function displayMatchHistory(page: HTMLDivElement)
 	for (const match of history){
 		const isPlayer1 = match.player1.username === username;
 		const opponent = isPlayer1 ? match.player2.username : match.player1.username;
-		const result = match.winnerId === (isPlayer1 ? match.player1Id : match.player2Id) ? "Victory" : "Defeat";
+		const result = match.winnerId === (isPlayer1 ? match.player1Id : match.player2Id) ? i18n.t('profile.victory') : i18n.t('profile.defeat');
 		const date = new Date(match.playedAt).toLocaleDateString();
-
+		const statusClass = result === i18n.t('profile.victory') ? "status-victory" : "status-defeat";
 
 	html += `
 			<tr>
 				<td>${date}</td>
 				<td>${opponent}</td>
-				<td>${result}</td>
+				<td><span class="${statusClass}">${result}</span></td>
 			</tr>
 		`;
 	}
