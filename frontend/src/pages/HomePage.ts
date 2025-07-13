@@ -1,4 +1,9 @@
 export function createHomePage(): HTMLElement {
+	// Debug: vérifier les tokens de sessionStorage
+	console.log("🏠 HomePage - authToken:", sessionStorage.getItem('authToken'));
+	console.log("🏠 HomePage - username:", sessionStorage.getItem('username'));
+	console.log("🏠 HomePage - currentUser:", sessionStorage.getItem('currentUser'));
+
 	const page = document.createElement("div");
 	page.className =
 		"min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-100";

@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import * as jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { randomBytes } from 'crypto';
 
 export const activeSessions = new Map<string, { userId: number; username: string; expiresAt: Date }>();
@@ -30,26 +30,24 @@ export async function handleLogIn(app: FastifyInstance, prisma: PrismaClient){
 				const passwordCheck = await bcrypt.compare(password, user.passwordHash);
 				if (!passwordCheck)
 					return reply.status(401).send({success: false, message: "Wrong password"});
-				//const token = generateJWT(username,prisma);
-				const sessionToken = randomBytes(32).toString('hex');
-				const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-
-				activeSessions.set(sessionToken, {
-					userId: user.id,
-					username: user.username,
-					expiresAt,
+				// JWT generation
+				console.log("🔑 Generating JWT for user:", user.username);
+				console.log("🔑 Secret key:", secretKey || 'fallback-secret-key');
+				
+				const token = jwt.sign({
+					id: user.id,
+					username: user.username
+				}, secretKey || 'fallback-secret-key', { 
+					expiresIn: '24h' 
 				});
+				
+				console.log("🔑 Generated token:", token);
 
-				reply.setCookie('sessionId', sessionToken, {
-					httpOnly: true,
-					secure: process.env.NODE_ENV === 'production',
-					sameSite: 'strict',
-					maxAge: 24 * 60 * 60,
-					path: '/'
-				});
+				// Plus besoin de activeSessions Map ni de cookies
 				
 				return reply.send({
 					success: true,
+					token: token, // Envoyer le JWT au frontend
 					user: {
 						id: user.id,
 						username: user.username,
@@ -67,64 +65,64 @@ export async function handleLogIn(app: FastifyInstance, prisma: PrismaClient){
 	});
 
 	app.get("/api/me", async (request: FastifyRequest, reply: FastifyReply) =>{
-		const sessionId = request.cookies.sessionId;
-		if (!sessionId)
+		// Read JWT from header Authorization
+		const authHeader = request.headers.authorization;
+		if (!authHeader || !authHeader.startsWith('Bearer ')) {
 			return reply.status(401).send({success: false, message: "Not authenticated"});
-		const session = activeSessions.get(sessionId);
-		if (!session || session.expiresAt < new Date()) {
-			activeSessions.delete(sessionId);
-			return reply.status(401).send({ error: "Session expired" });
 		}
+
+		const token = authHeader.substring(7); // Remove "Bearer "
+		
 		try {
+			// Verify and decode the JWT
+			const decoded = jwt.verify(token, secretKey || 'fallback-secret-key') as any;
+			
+			// Get the user from the DB
 			const user = await prisma.user.findUnique({
-				where: { id: session.userId },
+				where: { id: decoded.id },
 				select: { id: true, username: true, avatarUrl: true }
 			});
 
 			if (!user) {
-				activeSessions.delete(sessionId);
 				return reply.status(401).send({ error: "User not found" });
 			}
+			
 			reply.send(user);
 		} catch (error) {
-			console.error('Get user error:', error);
-			reply.status(500).send({ error: "Internal server error" });
+			console.error('JWT verification error:', error);
+			reply.status(401).send({ error: "Invalid token" });
 		}
 	});
 
-	app.post("/api/logout", async (request, reply) => {
-		const sessionId = request.cookies.sessionId;
-
-		if (sessionId) {
-			activeSessions.delete(sessionId);
-		}
-		reply.clearCookie('sessionId');
+	app.post("/api/logout", async (request: FastifyRequest, reply: FastifyReply) => {
+		// JWT = Logout on client side
 		reply.send({ success: true });
 	});
 }
 
-export function requireAuth(sessionMap: Map<string, any>) {
+export function requireAuth() {
 	return async (request: any, reply: any) => {
-		const sessionId = request.cookies.sessionId;
-
-		if (!sessionId) {
+		const authHeader = request.headers.authorization;
+		
+		if (!authHeader || !authHeader.startsWith('Bearer ')) {
 			return reply.status(401).send({ error: "Authentication required" });
 		}
 
-		const session = sessionMap.get(sessionId);
-		if (!session || session.expiresAt < new Date()) {
-			sessionMap.delete(sessionId);
-			return reply.status(401).send({ error: "Session expired" });
+		const token = authHeader.substring(7);
+		
+		try {
+			const decoded = jwt.verify(token, secretKey || 'fallback-secret-key') as any;
+			request.user = { userId: decoded.id, username: decoded.username };
+		} catch (error) {
+			return reply.status(401).send({ error: "Invalid token" });
 		}
-
-		request.user = session;
 	};
 }
 
 export async function secureRoutes(app: FastifyInstance, prisma: PrismaClient) {
-    const authMiddleware = requireAuth(activeSessions);
+    const authMiddleware = requireAuth();
 
-    // Appliquer le middleware aux routes protégées
+    // Apply the middleware to the protected routes
     app.addHook('preHandler', async (request, reply) => {
         const protectedPaths = [
             '/api/login',

@@ -3,9 +3,11 @@ export function createUserProfilePage(): HTMLElement {
 	page.className =
 		"min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-100 to-cyan-100";
 
-	// Get username from URL path
-	const pathParts = window.location.pathname.split('/');
-	const targetUsername = pathParts[2]; // /profile/username
+	// Get username from route parameters
+	const routeParams = (window as any).routeParams || {};
+	const targetUsername = routeParams.username;
+	console.log("targetUsername", targetUsername);
+	console.log("routeParams", routeParams);
 
 	if (!targetUsername) {
 		page.innerHTML = `

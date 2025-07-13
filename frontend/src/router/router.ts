@@ -1,4 +1,3 @@
-import { authService } from '../middleware/auth.js';
 
 class Router {
     private routes: Map<string, () => HTMLElement> = new Map();
@@ -88,27 +87,6 @@ class Router {
 //   }
 
     async navigate(route: string): Promise<void> {
-        // Vérifier l'authentification pour les routes protégées
-        if (this.isProtectedRoute(route)) {
-            const user = await authService.getCurrentUser();
-            if (!user) {
-                this.navigate('/login');
-                return;
-            }
-        }
-
-        // Permettre l'accès à login/signup même si connecté (pour permettre logout et nouveau compte)
-        // Commenté pour permettre à un utilisateur connecté d'accéder à signup/login
-        /*
-        if (route === '/login' || route === '/signup') {
-            const user = await authService.getCurrentUser();
-            if (user) {
-                this.navigate('/home');
-                return;
-            }
-        }
-        */
-
         this.currentRoute = route;
         this.renderRoute(route);
         history.pushState({}, '', route);
@@ -117,12 +95,15 @@ class Router {
     private async renderRoute(route: string): Promise<void> {
         // Check exact routes first
         let routeHandler = this.routes.get(route);
+        let routeParams: any = {};
         
         // If no exact match, check dynamic routes
         if (!routeHandler) {
             for (const dynamicRoute of this.dynamicRoutes) {
-                if (this.matchesPattern(route, dynamicRoute.pattern)) {
+                const params = this.extractParams(route, dynamicRoute.pattern);
+                if (params) {
                     routeHandler = dynamicRoute.handler;
+                    routeParams = params;
                     break;
                 }
             }
@@ -136,6 +117,8 @@ class Router {
         const app = document.getElementById('app');
         if (app) {
             app.innerHTML = '';
+            // Store route params globally so components can access them
+            (window as any).routeParams = routeParams;
             app.appendChild(routeHandler());
         }
     }
@@ -147,22 +130,35 @@ class Router {
         return regex.test(route);
     }
 
+    private extractParams(route: string, pattern: string): any | null {
+        // Extract parameters from route using pattern
+        const patternParts = pattern.split('/');
+        const routeParts = route.split('/');
+        
+        if (patternParts.length !== routeParts.length) {
+            return null;
+        }
+        
+        const params: any = {};
+        for (let i = 0; i < patternParts.length; i++) {
+            const patternPart = patternParts[i];
+            const routePart = routeParts[i];
+            
+            if (patternPart.startsWith(':')) {
+                const paramName = patternPart.substring(1);
+                params[paramName] = routePart;
+            } else if (patternPart !== routePart) {
+                return null;
+            }
+        }
+        
+        return params;
+    }
+
     private handlePopState(): void {
         window.addEventListener('popstate', async () => {
             await this.navigate(window.location.pathname);
         });
-    }
-
-    // Méthode pour vérifier périodiquement l'état d'authentification
-    startAuthCheck(): void {
-        setInterval(async () => {
-            if (this.isProtectedRoute(this.currentRoute)) {
-                const user = await authService.getCurrentUser();
-                if (!user) {
-                    this.navigate('/login');
-                }
-            }
-        }, 60000); // Vérifier toutes les minutes
     }
 }
 

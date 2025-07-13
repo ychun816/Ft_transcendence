@@ -13,11 +13,18 @@ export class AuthService {
 
     private async checkAuthStatus(): Promise<any> {
         try {
+            // Get the JWT token from sessionStorage
+            const token = sessionStorage.getItem('authToken');
+            if (!token) {
+                this.clearUserInfo();
+                return null;
+            }
+
             const response = await fetch('/api/me', {
                 method: 'GET',
-                credentials: 'include',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` // Send JWT in header
                 }
             });
 
@@ -45,6 +52,7 @@ export class AuthService {
     private clearUserInfo(): void {
         this.currentUser = null;
         sessionStorage.removeItem('currentUser');
+        sessionStorage.removeItem('authToken'); // Remove the JWT token
     }
 
     async logout(): Promise<boolean> {
@@ -57,7 +65,7 @@ export class AuthService {
             this.clearUserInfo();
             
             if (response.ok) {
-                // Rediriger vers la page de login après déconnexion
+                // Redirect to login page after logout
                 import('../router/router.js').then(({ router }) => {
                     router.navigate('/login');
                 });
@@ -96,4 +104,5 @@ export class AuthService {
     }
 }
 
-export const authService = new AuthService();
+// Pas de singleton - chaque page crée sa propre instance
+// export const authService = new AuthService();

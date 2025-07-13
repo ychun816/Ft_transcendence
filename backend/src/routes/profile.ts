@@ -180,6 +180,7 @@ async function getUserInfo(username: string, prisma: PrismaClient) {
 			gamesPlayed:true,
 			wins: true,
 			losses: true,
+			createdAt: true,
 		},
 	});
 	if (!user) {
