@@ -22,7 +22,7 @@ export function createProfilePage(): HTMLElement {
 						<main class="w-full flex flex-col items-center">
 							<div class="flex items-center gap-8 mb-8">
 								<div class="avatar-container">
-									<img src="/default-avatar.png" alt="Avatar" id="user-avatar" class="w-full h-full object-cover">
+									<img src="/default-avatar.png" id="user-avatar" class="w-full h-full object-cover">
 									<button id="edit-avatar" title="${i18n.t('profile.edit_avatar')}" class="edit-avatar-btn"
 										style="
 											background:none;
@@ -179,6 +179,10 @@ async function getUserInfo() {
 
 //ADD EDIT USERNAME FUNCTION
 async function editUsername(page: HTMLDivElement){
+	const token = sessionStorage.getItem('authToken');
+	if (!token) {
+		throw new Error('No auth token found');
+	}
 	const usernameElem = page.querySelector("#username") as HTMLElement;
 	const editUsernameBtn = page.querySelector("#edit-username") as HTMLButtonElement;
 
@@ -196,7 +200,8 @@ async function editUsername(page: HTMLDivElement){
 					const response = await fetch('/api/profile/username', {
 						method: "POST",
 						headers:{
-							"Content-Type": "application/json"
+							"Content-Type": "application/json",
+							'Authorization': `Bearer ${token}`
 						},
 						body: JSON.stringify(UserInfo),
 					});
@@ -216,6 +221,10 @@ async function editUsername(page: HTMLDivElement){
 }
 
 async function editPassword(page: HTMLDivElement){
+	const token = sessionStorage.getItem('authToken');
+	if (!token) {
+		throw new Error('No auth token found');
+	}
 	const passwordElem = page.querySelector('#password') as HTMLElement;
 	const editPasswordBtn = page.querySelector('#edit-password') as HTMLButtonElement;
 	if (passwordElem && editPasswordBtn) {
@@ -232,7 +241,8 @@ async function editPassword(page: HTMLDivElement){
 					const response = await fetch('/api/profile/password', {
 						method: "POST",
 						headers:{
-							"Content-Type": "application/json"
+							"Content-Type": "application/json",
+							'Authorization': `Bearer ${token}`
 						},
 						body: JSON.stringify(UserInfo),
 					});
@@ -333,6 +343,10 @@ async function editAvatar(page: HTMLDivElement){
 }
 
 async function updateDbAvatar(file: File){
+	const token = sessionStorage.getItem('authToken');
+	if (!token) {
+		throw new Error('No auth token found');
+	}
 	const formData = new FormData;
 	const username = sessionStorage.getItem("username");
 	formData.append('avatar', file);
@@ -340,16 +354,19 @@ async function updateDbAvatar(file: File){
 
 	const response = await fetch('/api/profile/avatar', {
 		method: 'POST',
+		headers:{
+			'Authorization': `Bearer ${token}`
+		},
 		body: formData,
 	});
 	if (response.ok){
 		const data = await response.json();
 		console.log('Avatar updated!', data);
 		if (data.avatarPath && typeof data.avatarPath === 'string') {
-			// 🔍 Ajout d'un timestamp pour éviter le cache
+/* 			// 🔍 Ajout d'un timestamp pour éviter le cache
 			const timestampedUrl = `${data.avatarPath}?t=${Date.now()}`;
-			console.log('URL avec timestamp:', timestampedUrl);
-			return timestampedUrl;
+			console.log('URL avec timestamp:', timestampedUrl); */
+			return data.avatarPath;
 		} else {
 			console.error('Failed to update avatar');
 			return null;
