@@ -3,81 +3,103 @@ import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
 
 export function createProfilePage(): HTMLElement {
 	const page = document.createElement("div");
-	page.className = "page-container fade-in";
+	page.className = "page-container fade-in flex flex-col items-center gap-6";
 
 	const renderContent = () => {
 		page.innerHTML = `
-		<div class="absolute top-4 right-4" id="language-switcher-container"></div>
-		<div class="card max-w-2xl w-full flex flex-col items-center slide-up">
-		  <header class="nav-header w-full">
-			<button class="btn-ghost" data-route="/home">${i18n.t('profile.back')}</button>
-			<h2 class="page-title">${i18n.t('profile.my_profile')}</h2>
-		  </header>
-	  <main class="w-full flex flex-col items-center">
-		<div class="flex items-center gap-8 mb-8">
-			<div class="avatar-container">
-				<img src="/default-avatar.png" alt="Avatar" id="user-avatar" class="w-full h-full object-cover">
-				<button id="edit-avatar" title="${i18n.t('profile.edit_avatar')}" class="edit-avatar-btn"
-					style="
-						background:none;
-						border:none;
-						position:absolute;
-						top:50%;
-						left:50%;
-						transform:translate(-50%,-50%);
-						cursor:pointer;
-						z-index:10;
-						border-radius:50%;
-						padding:8px;
-						display:flex;
-						align-items:center;
-						justify-content:center;
-						transition: opacity 0.2s;
-						">
-				<img src="../assets/edit.svg" alt="Edit" style="width:20px; height:20px;">
-				</button>
-				<input type="file" id="avatar-file-input" accept="image/png, image/jpeg" style="display:none;" />
-			</div>
-			<div class="flex-1">
-				<div class="flex items-center gap-3 mb-3">
-					<h3 id="username" class="section-title mb-0">Username</h3>
-					<button id="edit-username" title="${i18n.t('profile.edit_username')}" class="btn-ghost btn-small">
-						<img src="../assets/edit.svg" alt="Edit" style="width:16px; height:16px;">
-					</button>
-				</div>
-				<div class="flex items-center gap-3 mb-3">
-					<span id="password" class="text-muted">${i18n.t('profile.password_display')}</span>
-					<button id="edit-password" title="${i18n.t('profile.edit_password')}" class="btn-ghost btn-small">
-						<img src="../assets/edit.svg" alt="Edit" style="width:16px; height:16px;">
-					</button>
-				</div>
-				<div class="bg-surface p-4 rounded-modern border">
-					<p id="user-stats" class="text-muted text-sm">${i18n.t('profile.games_played_stats', {games: '0', wins: '0', losses: '0'})}</p>
-				</div>
-			</div>
-		</div>
-	  </main>
-	</div>
-	<div id="match-block" class="card max-w-2xl w-full flex flex-col h-[80vh] mx-[5%] slide-up">
-		<header class="nav-header w-full">
-			<h2 class="section-title mb-0">${i18n.t('profile.match_history')}</h2>
-		</header>
-		<main class="w-full flex-1 overflow-y-auto">
+			<div class="absolute top-4 right-4" id="language-switcher-container"></div>
 
-		</main>
-	</div>
+			<!-- Conteneur principal avec disposition côte à côte - centré -->
+			<div class="flex gap-10 items-start" style="height: 80vh; max-width: 1300px; width: 95%;">
+				<!-- Colonne de gauche : Profile + Friends - largeur fixe (moitié du match history) -->
+				<div class="flex flex-col gap-6 h-full" style="width: 600px;">
+					<!-- Bloc Profile Principal -->
+					<div class="card w-full flex flex-col items-center slide-up flex-shrink-0">
+						<header class="nav-header w-full">
+							<button class="btn-ghost" data-route="/home">${i18n.t('profile.back')}</button>
+							<h2 class="page-title">${i18n.t('profile.my_profile')}</h2>
+						</header>
+						<main class="w-full flex flex-col items-center">
+							<div class="flex items-center gap-8 mb-8">
+								<div class="avatar-container">
+									<img src="/default-avatar.png" alt="Avatar" id="user-avatar" class="w-full h-full object-cover">
+									<button id="edit-avatar" title="${i18n.t('profile.edit_avatar')}" class="edit-avatar-btn"
+										style="
+											background:none;
+											border:none;
+											position:absolute;
+											top:50%;
+											left:50%;
+											transform:translate(-50%,-50%);
+											cursor:pointer;
+											z-index:10;
+											border-radius:50%;
+											padding:8px;
+											display:flex;
+											align-items:center;
+											justify-content:center;
+											transition: opacity 0.2s;
+										">
+										<img src="../assets/edit.svg" alt="Edit" style="width:20px; height:20px;">
+									</button>
+									<input type="file" id="avatar-file-input" accept="image/png, image/jpeg" style="display:none;" />
+								</div>
+								<div class="flex-1">
+									<div class="flex items-center gap-3 mb-3">
+										<h3 id="username" class="section-title mb-0">Username</h3>
+										<button id="edit-username" title="${i18n.t('profile.edit_username')}" class="btn-ghost btn-small">
+											<img src="../assets/edit.svg" alt="Edit" style="width:16px; height:16px;">
+										</button>
+									</div>
+									<div class="flex items-center gap-3 mb-3">
+										<span id="password" class="text-muted">${i18n.t('profile.password_display')}</span>
+										<button id="edit-password" title="${i18n.t('profile.edit_password')}" class="btn-ghost btn-small">
+											<img src="../assets/edit.svg" alt="Edit" style="width:16px; height:16px;">
+										</button>
+									</div>
+									<div class="bg-surface p-4 rounded-modern border">
+										<p id="user-stats" class="text-muted text-sm">${i18n.t('profile.games_played_stats', {games: '0', wins: '0', losses: '0'})}</p>
+									</div>
+								</div>
+							</div>
+						</main>
+					</div>
 
+					<!-- Bloc Friends List - occupe le reste de l'espace -->
+					<div id="friends-block" class="card w-full flex flex-col slide-up flex-1">
+						<header class="nav-header w-full flex-shrink-0">
+							<h2 class="section-title mb-0">${i18n.t('profile.friends_list')}</h2>
+						</header>
+						<main class="w-full flex-1 overflow-y-auto p-4">
+							<!-- Le contenu de la liste d'amis sera ajouté ici -->
+							<!-- Plus d'amis peuvent être ajoutés ici -->
+						</main>
+					</div>
+				</div>
+
+				<!-- Colonne de droite : Match History - largeur fixe -->
+				<div class="h-full" style="width: 800px;">
+					<div id="match-block" class="card w-full flex flex-col h-full slide-up">
+						<header class="nav-header w-full">
+							<h2 class="section-title mb-0">${i18n.t('profile.match_history')}</h2>
+						</header>
+						<main class="w-full flex-1 overflow-y-auto">
+							<!-- Le contenu de l'historique des matchs sera ajouté ici -->
+						</main>
+					</div>
+				</div>
+			</div>
 		`;
-		
-		// Add language switcher
-		const languageSwitcherContainer = page.querySelector('#language-switcher-container');
-		if (languageSwitcherContainer) {
-			languageSwitcherContainer.appendChild(createLanguageSwitcher());
-		}
 	};
-	
+
 	renderContent();
-	
+
+	// Insérer le commutateur de langue
+	const languageSwitcherContainer = page.querySelector('#language-switcher-container');
+	if (languageSwitcherContainer) {
+		languageSwitcherContainer.appendChild(createLanguageSwitcher());
+	}
+
 	// Re-render when language changes
 	window.addEventListener('languageChanged', renderContent);
   	editAvatar(page);
@@ -108,6 +130,7 @@ export function createProfilePage(): HTMLElement {
 	});
 
 	displayMatchHistory(page);
+	displayFriendsList(page);
 
 	page.addEventListener('click', (e) => {
 		const target = e.target as HTMLElement;
@@ -123,35 +146,35 @@ export function createProfilePage(): HTMLElement {
 }
 
 async function getUserInfo() {
-    try {
-        const token = sessionStorage.getItem('authToken');
-        if (!token) {
-            throw new Error('No auth token found');
-        }
+	try {
+		const token = sessionStorage.getItem('authToken');
+		if (!token) {
+			throw new Error('No auth token found');
+		}
 
-        const response = await fetch('/api/me', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        });
+		const response = await fetch('/api/me', {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${token}`
+			}
+		});
 
-        if (response.ok) {
-            const userData = await response.json();
-            console.log("User data retrieved:", userData);
-            return userData;
-        } else {
-            console.error("Failed to get user info");
-            import('../router/router.js').then(({ router }) => {
-                router.navigate('/login');
-            });
-            return null;
-        }
-    } catch (error) {
-        console.error("Error fetching user info:", error);
-        return null;
-    }
+		if (response.ok) {
+			const userData = await response.json();
+			console.log("User data retrieved:", userData);
+			return userData;
+		} else {
+			console.error("Failed to get user info");
+			import('../router/router.js').then(({ router }) => {
+				router.navigate('/login');
+			});
+			return null;
+		}
+	} catch (error) {
+		console.error("Error fetching user info:", error);
+		return null;
+	}
 }
 
 //ADD EDIT USERNAME FUNCTION
@@ -337,35 +360,35 @@ async function updateDbAvatar(file: File){
 
 
 async function getMatchHistory() {
-    try {
-        const user = await getUserInfo();
-        if (!user) return null;
+	try {
+		const user = await getUserInfo();
+		if (!user) return null;
 
-        const token = sessionStorage.getItem('authToken');
-        if (!token) {
-            throw new Error('No auth token found');
-        }
+		const token = sessionStorage.getItem('authToken');
+		if (!token) {
+			throw new Error('No auth token found');
+		}
 
-        const response = await fetch(`/api/profile/matches?username=${encodeURIComponent(user.username)}`, {
-            method: "GET",
-            headers: { 
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            },
-        });
+		const response = await fetch(`/api/profile/matches?username=${encodeURIComponent(user.username)}`, {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+				"Authorization": `Bearer ${token}`
+			},
+		});
 
-        if (response.ok) {
-            const matches = await response.json();
-            console.log('Match history retrieved!', matches);
-            return matches;
-        } else {
-            console.error('Failed to retrieve match history');
-            return null;
-        }
-    } catch (error) {
-        console.error('Error fetching match history:', error);
-        return null;
-    }
+		if (response.ok) {
+			const matches = await response.json();
+			console.log('Match history retrieved!', matches);
+			return matches;
+		} else {
+			console.error('Failed to retrieve match history');
+			return null;
+		}
+	} catch (error) {
+		console.error('Error fetching match history:', error);
+		return null;
+	}
 }
 
 async function displayMatchHistory(page: HTMLDivElement)
@@ -407,4 +430,80 @@ async function displayMatchHistory(page: HTMLDivElement)
 	}
 	html += `</tbody></table>`;
 	histDiv.innerHTML = html;
+}
+
+async function getFriendsList() {
+	try {
+		const user = await getUserInfo();
+		if (!user) return null;
+
+		const token = sessionStorage.getItem('authToken');
+		if (!token) {
+			throw new Error('No auth token found');
+		}
+
+		const response = await fetch(`/api/profile/friends?username=${encodeURIComponent(user.username)}`, {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+				"Authorization": `Bearer ${token}`
+			},
+		});
+
+		if (response.ok) {
+			const friends = await response.json();
+			console.log('Friends list retrieved!', friends);
+			return friends;
+		} else {
+			console.error('Failed to retrieve friends list');
+			return null;
+		}
+	} catch (error) {
+		console.error('Error fetching friends list:', error);
+		return null;
+	}
+}
+
+
+async function displayFriendsList(page: HTMLDivElement)
+{
+	console.log("ENTER IN FRIENDS LIST");
+	const username = sessionStorage.getItem("username");
+	console.log("USERNAME RETRIEVED : ", username);
+	const friendsList = await getFriendsList();
+	if (!friendsList) return ;
+	console.log("FRIENDS LIST RETRIEVED : ", friendsList);
+	const friendsDiv = page.querySelector("#friends-block");
+	if (!friendsDiv) return;
+
+	let html = `
+		<table class="data-table">
+			<thead>
+				<tr>
+					<th>${i18n.t('id')}</th>
+					<th>${i18n.t('avatar')}</th>
+					<th>${i18n.t('name')}</th>
+					<th>${i18n.t('Games_played')}</th>
+				</tr>
+			</thead>
+			<tbody>
+	`;
+
+	for (const friend of friendsList){
+		const avatar = friend.getItem("avatarUrl")
+		const id = friend.getItem("id");
+		const name = friend.getItem("username");
+		const played = friend.getItem("gamesPlayed");
+
+	html += `
+			<tr>
+				<td>${id}</td>
+				<td>${avatar}</td>
+				<td>${name}</td>
+				<td>${played}</td>
+			</tr>
+		`;
+	}
+	html += `</tbody></table>`;
+	friendsDiv.innerHTML = html;
 }
