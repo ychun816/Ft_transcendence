@@ -64,6 +64,7 @@ export async function registerProfileRoute(
 	// HANDLE AVATAR REQUEST
 	app.post("/api/profile/avatar", async (request: FastifyRequest, reply) => {
 		const auth = extractTokenFromRequest(request);
+		console.log("auth: ", auth);
 		if (!auth) {
 			return reply.status(401).send({ error: 'Unauthorized' });
 		}
@@ -315,14 +316,16 @@ async function updateAvatar(
 		`${fileName}`
 	);
 	console.log("uploadPath: ", uploadPath);
-
-	await pipeline(file, fs.createWriteStream(uploadPath));
+	if (!file.file) {
+		throw new Error("No file stream found");
+	}
+	await pipeline(file.file, fs.createWriteStream(uploadPath));
 	if (fs.existsSync(uploadPath)) {
 		console.log("✅ Fichier sauvegardé avec succès");
 		const stats = fs.statSync(uploadPath);
 		console.log("📁 Taille du fichier:", stats.size, "bytes");
 	}
-	const avatarPath = `/public/avatars/${fileName}`;
+	const avatarPath = `/avatars/${fileName}`;
 	console.log("avatarPath: ", avatarPath);
 
 	await prisma.user.update({
