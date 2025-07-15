@@ -85,12 +85,12 @@ const start = async () => {
         await registerNotificationRoutes(app, prisma);
         console.log("🎧 Starting to listen...");
         await app.listen({
-            port: 3002,
+            port: 3000,
             host: '0.0.0.0'
         });
 
-        console.log(`🎉 Server is listening on port: 3002`);
-        console.log(`🌐 Access your app at: http://localhost:3002`);
+        console.log(`🎉 Server is listening on port: 3000`);
+        console.log(`🌐 Access your app at: http://localhost:3000`);
 
     } catch (err) {
         console.error("❌ Server startup failed:", err);
