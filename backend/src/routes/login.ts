@@ -33,18 +33,18 @@ export async function handleLogIn(app: FastifyInstance, prisma: PrismaClient){
 				// JWT generation
 				console.log("🔑 Generating JWT for user:", user.username);
 				console.log("🔑 Secret key:", secretKey || 'fallback-secret-key');
-				
+
 				const token = jwt.sign({
 					id: user.id,
 					username: user.username
-				}, secretKey || 'fallback-secret-key', { 
-					expiresIn: '24h' 
+				}, secretKey || 'fallback-secret-key', {
+					expiresIn: '24h'
 				});
-				
+
 				console.log("🔑 Generated token:", token);
 
 				// Plus besoin de activeSessions Map ni de cookies
-				
+
 				return reply.send({
 					success: true,
 					token: token, // Envoyer le JWT au frontend
@@ -72,21 +72,28 @@ export async function handleLogIn(app: FastifyInstance, prisma: PrismaClient){
 		}
 
 		const token = authHeader.substring(7); // Remove "Bearer "
-		
+
 		try {
 			// Verify and decode the JWT
 			const decoded = jwt.verify(token, secretKey || 'fallback-secret-key') as any;
-			
+
 			// Get the user from the DB
 			const user = await prisma.user.findUnique({
 				where: { id: decoded.id },
-				select: { id: true, username: true, avatarUrl: true }
+				select: {
+					id: true,
+					username: true,
+					avatarUrl: true,
+					gamesPlayed:true,
+					wins: true,
+					losses: true,
+				}
 			});
 
 			if (!user) {
 				return reply.status(401).send({ error: "User not found" });
 			}
-			
+
 			reply.send(user);
 		} catch (error) {
 			console.error('JWT verification error:', error);
@@ -103,13 +110,13 @@ export async function handleLogIn(app: FastifyInstance, prisma: PrismaClient){
 export function requireAuth() {
 	return async (request: any, reply: any) => {
 		const authHeader = request.headers.authorization;
-		
+
 		if (!authHeader || !authHeader.startsWith('Bearer ')) {
 			return reply.status(401).send({ error: "Authentication required" });
 		}
 
 		const token = authHeader.substring(7);
-		
+
 		try {
 			const decoded = jwt.verify(token, secretKey || 'fallback-secret-key') as any;
 			request.user = { userId: decoded.id, username: decoded.username };
@@ -135,7 +142,7 @@ export async function secureRoutes(app: FastifyInstance, prisma: PrismaClient) {
             '/api/chat'
         ];
 
-        const isProtected = protectedPaths.some(path => 
+        const isProtected = protectedPaths.some(path =>
             request.url.startsWith(path)
         );
 
