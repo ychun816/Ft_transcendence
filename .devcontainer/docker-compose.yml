@@ -25,17 +25,9 @@ services:
       - app-network
 
 
-
-
-
-
 # A FAIRE NEXT
 
-# continuer archivage des logs
 # prometheus et grafana
-
-
-
 
 
   # prod:
