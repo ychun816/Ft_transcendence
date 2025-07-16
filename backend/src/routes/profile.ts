@@ -242,6 +242,39 @@ export async function registerProfileRoute(
 			}
 		}
 	);
+
+	// ROUTE POUR AJOUTER UN AMI
+	app.post("/api/profile/friends/add", async (request, reply) => {
+		const auth = extractTokenFromRequest(request);
+		if (!auth) return reply.status(401).send({ error: "Unauthorized" });
+
+		const { friendUsername } = request.body as { friendUsername: string };
+		if (!friendUsername) return reply.status(400).send({ error: "No username provided" });
+
+		const user = await prisma.user.findUnique({ where: { username: auth.username } });
+		if (!user) return reply.status(404).send({ error: "User not found" });
+		const friend = await prisma.user.findUnique({ where: { username: friendUsername } });
+
+		if (!friend) return reply.status(404).send({ error: "user not found" });
+		if (user.id === friend.id) return reply.status(400).send({ error: "Cannot add yourself" });
+
+		// Vérifie si déjà ami
+		const alreadyFriend = await prisma.user.findFirst({
+			where: {
+				id: user.id,
+				friends: { some: { id: friend.id } }
+			}
+		});
+		if (alreadyFriend) return reply.status(400).send({ error: "Already friends" });
+
+		await prisma.user.update({
+			where: { id: user.id },
+			data: {
+				friends: { connect: { id: friend.id } }
+			}
+		});
+		reply.send({ success: true });
+	});
 }
 
 async function getUserInfo(username: string, prisma: PrismaClient) {
