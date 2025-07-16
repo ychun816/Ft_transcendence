@@ -3,36 +3,112 @@ import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
 
 export function createChatPage(): HTMLElement {
 	const page = document.createElement("div");
-	page.className =
-		"min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-100 to-pink-100";
+	page.className = "min-h-screen bg-gray-900 text-white font-mono overflow-hidden";
 
 	const renderContent = () => {
 		page.innerHTML = `
+		<style>
+			/* Styles personnalisés pour les effets néon */
+			.neon-text {
+				text-shadow: 
+					0 0 5px currentColor,
+					0 0 10px currentColor,
+					0 0 15px currentColor,
+					0 0 20px currentColor;
+			}
+			
+			.neon-border {
+				box-shadow: 
+					0 0 10px currentColor,
+					inset 0 0 10px currentColor;
+			}
+			
+			.particles {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				pointer-events: none;
+				z-index: -1;
+			}
+			
+			.particle {
+				position: absolute;
+				width: 2px;
+				height: 2px;
+				background: #00ff41;
+				border-radius: 50%;
+				animation: float 6s ease-in-out infinite;
+			}
+			
+			@keyframes float {
+				0%, 100% { transform: translateY(0px) rotate(0deg); }
+				50% { transform: translateY(-20px) rotate(180deg); }
+			}
+			
+			.scan-lines::before {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				background: linear-gradient(
+					transparent 0%,
+					rgba(0, 255, 65, 0.03) 50%,
+					transparent 100%
+				);
+				background-size: 100% 4px;
+				animation: scan 0.1s linear infinite;
+				pointer-events: none;
+			}
+			
+			@keyframes scan {
+				0% { background-position: 0 0; }
+				100% { background-position: 0 4px; }
+			}
+		</style>
+		
+		<!-- Particules d'arrière-plan -->
+		<div class="particles">
+			<div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+			<div class="particle" style="left: 20%; animation-delay: 1s;"></div>
+			<div class="particle" style="left: 30%; animation-delay: 2s;"></div>
+			<div class="particle" style="left: 40%; animation-delay: 3s;"></div>
+			<div class="particle" style="left: 50%; animation-delay: 4s;"></div>
+			<div class="particle" style="left: 60%; animation-delay: 5s;"></div>
+			<div class="particle" style="left: 70%; animation-delay: 2s;"></div>
+			<div class="particle" style="left: 80%; animation-delay: 1s;"></div>
+			<div class="particle" style="left: 90%; animation-delay: 3s;"></div>
+		</div>
+		
 		<div class="absolute top-4 right-4" id="language-switcher-container"></div>
-		<div class="card max-w-6xl w-full bg-white flex flex-col items-center">
+		<div class="min-h-screen flex items-center justify-center p-4 scan-lines relative">
+			<div class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-8 border border-cyan-400 border-opacity-30 neon-border max-w-6xl w-full flex flex-col items-center"
 		  <header class="w-full flex items-center gap-4 mb-6">
-			<button class="btn" data-route="/home">${i18n.t('chat.back')}</button>
-			<h2 class="text-2xl font-bold text-gray-900">${i18n.t('chat.title')}</h2>
+			<button class="bg-gradient-to-r from-gray-500 from-opacity-30 to-gray-600 to-opacity-30 hover:from-gray-500 hover:from-opacity-50 hover:to-gray-600 hover:to-opacity-50 text-white font-bold py-2 px-4 rounded-lg border border-gray-500 border-opacity-50 transition-all duration-300 transform hover:scale-105" data-route="/home">${i18n.t('chat.back')}</button>
+			<h2 class="text-3xl font-bold text-cyan-400 neon-text">${i18n.t('chat.title')}</h2>
 		  </header>
       <main class="w-full flex flex-col items-center">
         <div class="flex w-full h-96">
           <!-- Online Users -->
-          <div class="w-1/4 border-r border-gray-200 flex flex-col">
-            <div class="p-4 border-b border-gray-200">
-              <h3 class="font-semibold text-gray-700">${i18n.t('chat.online_users')}</h3>
+          <div class="w-1/4 border-r border-cyan-400 border-opacity-30 flex flex-col bg-gray-800 bg-opacity-30 rounded-l-xl">
+            <div class="p-4 border-b border-cyan-400 border-opacity-30">
+              <h3 class="font-semibold text-cyan-400 neon-text">${i18n.t('chat.online_users')}</h3>
             </div>
             <div class="flex-1 overflow-y-auto" id="online-users-list">
-              <div class="p-4 text-gray-500 text-center">
-                <div class="animate-spin inline-block w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full mb-2"></div>
+              <div class="p-4 text-cyan-400 text-center">
+                <div class="animate-spin inline-block w-4 h-4 border-2 border-cyan-400 border-t-green-400 rounded-full mb-2"></div>
                 <div>${i18n.t('chat.connecting')}</div>
               </div>
             </div>
           </div>
           
           <!-- Conversations List -->
-          <div class="w-1/3 border-r border-gray-200 flex flex-col">
-            <div class="p-4 border-b border-gray-200">
-              <h3 class="font-semibold text-gray-700">${i18n.t('chat.conversations')}</h3>
+          <div class="w-1/3 border-r border-cyan-400 border-opacity-30 flex flex-col bg-gray-800 bg-opacity-30">
+            <div class="p-4 border-b border-cyan-400 border-opacity-30">
+              <h3 class="font-semibold text-cyan-400 neon-text">${i18n.t('chat.conversations')}</h3>
             </div>
             <div class="flex-1 overflow-y-auto" id="conversations-list">
               <!-- Conversations will appear here -->
@@ -40,21 +116,22 @@ export function createChatPage(): HTMLElement {
           </div>
           
           <!-- Chat Area -->
-          <div class="flex-1 flex flex-col">
-            <div class="p-4 border-b border-gray-200" id="chat-header">
-              <h3 class="font-semibold text-gray-700">${i18n.t('chat.select_conversation')}</h3>
+          <div class="flex-1 flex flex-col bg-gray-800 bg-opacity-30 rounded-r-xl">
+            <div class="p-4 border-b border-cyan-400 border-opacity-30" id="chat-header">
+              <h3 class="font-semibold text-cyan-400 neon-text">${i18n.t('chat.select_conversation')}</h3>
             </div>
             <div class="flex-1 p-4 overflow-y-auto" id="chat-messages">
               <!-- Messages will appear here -->
             </div>
-            <div class="bg-white border-t p-4 flex gap-2">
-              <input type="text" placeholder="${i18n.t('chat.type_message')}" id="message-input" class="input flex-1">
-              <button id="send-message" class="btn">${i18n.t('chat.send')}</button>
+            <div class="bg-gray-700 bg-opacity-50 border-t border-cyan-400 border-opacity-30 p-4 flex gap-2">
+              <input type="text" placeholder="${i18n.t('chat.type_message')}" id="message-input" class="flex-1 bg-gray-600 bg-opacity-50 text-white border border-cyan-400 border-opacity-30 rounded-lg px-4 py-2 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400 focus:ring-opacity-50">
+              <button id="send-message" class="bg-gradient-to-r from-cyan-400 from-opacity-30 to-blue-400 to-opacity-30 hover:from-cyan-400 hover:from-opacity-50 hover:to-blue-400 hover:to-opacity-50 text-white font-bold py-2 px-4 rounded-lg border border-cyan-400 border-opacity-50 transition-all duration-300 transform hover:scale-105">${i18n.t('chat.send')}</button>
             </div>
           </div>
         </div>
       </main>
     </div>
+		</div>
 		`;
 		
 		// Add language switcher
@@ -84,10 +161,12 @@ export function createChatPage(): HTMLElement {
 
 	if (!username) {
 		page.innerHTML = `
-			<div class="card max-w-md w-full bg-white text-center p-8">
-				<h2 class="text-xl font-bold text-red-600 mb-4">Erreur</h2>
-				<p class="text-gray-600">Vous devez être connecté pour accéder au chat.</p>
-				<button class="btn mt-4" data-route="/login">Se connecter</button>
+			<div class="min-h-screen flex items-center justify-center p-4 scan-lines relative">
+				<div class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-8 border border-red-400 border-opacity-30 neon-border max-w-md w-full text-center">
+					<h2 class="text-xl font-bold text-red-400 neon-text mb-4">Erreur</h2>
+					<p class="text-gray-300">Vous devez être connecté pour accéder au chat.</p>
+					<button class="bg-gradient-to-r from-red-400 from-opacity-30 to-orange-400 to-opacity-30 hover:from-red-400 hover:from-opacity-50 hover:to-orange-400 hover:to-opacity-50 text-white font-bold py-2 px-4 rounded-lg border border-red-400 border-opacity-50 transition-all duration-300 transform hover:scale-105 mt-4" data-route="/login">Se connecter</button>
+				</div>
 			</div>
 		`;
 
@@ -135,10 +214,12 @@ export function createChatPage(): HTMLElement {
 			.catch((error) => {
 				console.error("❌ Failed to get user info:", error);
 				page.innerHTML = `
-					<div class="card max-w-md w-full bg-white text-center p-8">
-						<h2 class="text-xl font-bold text-red-600 mb-4">Erreur</h2>
-						<p class="text-gray-600">Impossible de récupérer les informations utilisateur.</p>
-						<button class="btn mt-4" data-route="/login">Se reconnecter</button>
+					<div class="min-h-screen flex items-center justify-center p-4 scan-lines relative">
+						<div class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-8 border border-red-400 border-opacity-30 neon-border max-w-md w-full text-center">
+							<h2 class="text-xl font-bold text-red-400 neon-text mb-4">Erreur</h2>
+							<p class="text-gray-300">Impossible de récupérer les informations utilisateur.</p>
+							<button class="bg-gradient-to-r from-red-400 from-opacity-30 to-orange-400 to-opacity-30 hover:from-red-400 hover:from-opacity-50 hover:to-orange-400 hover:to-opacity-50 text-white font-bold py-2 px-4 rounded-lg border border-red-400 border-opacity-50 transition-all duration-300 transform hover:scale-105 mt-4" data-route="/login">Se reconnecter</button>
+						</div>
 					</div>
 				`;
 			});
@@ -380,7 +461,7 @@ function initializeChat(page: HTMLElement, userData: any) {
 
 		if (users.length === 0) {
 			onlineUsersList.innerHTML = `
-				<div class="p-4 text-gray-500 text-center">
+				<div class="p-4 text-cyan-400 text-center">
 					Aucun utilisateur en ligne
 				</div>
 			`;
@@ -398,18 +479,18 @@ function initializeChat(page: HTMLElement, userData: any) {
 
 			const userDiv = document.createElement("div");
 			userDiv.className =
-				"p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer";
+				"p-3 border-b border-cyan-400 border-opacity-20 hover:bg-gray-700 hover:bg-opacity-30 cursor-pointer transition-all duration-300";
 			userDiv.setAttribute("data-username", user.username);
 			userDiv.innerHTML = `
 				<div class="flex items-center gap-3">
 					<img src="${user.avatarUrl || "/public/default-avatar.png"}" 
 						 alt="${user.username}" 
-						 class="w-8 h-8 rounded-full">
+						 class="w-8 h-8 rounded-full border border-cyan-400 border-opacity-30">
 					<div class="flex-1">
-						<h4 class="font-medium text-gray-900 text-sm">${user.username}</h4>
+						<h4 class="font-medium text-cyan-400 text-sm">${user.username}</h4>
 						<div class="flex items-center gap-1">
-							<div class="w-2 h-2 bg-green-500 rounded-full"></div>
-							<span class="text-xs text-green-600">En ligne</span>
+							<div class="w-2 h-2 bg-green-400 rounded-full shadow-sm" style="box-shadow: 0 0 10px #00ff41;"></div>
+							<span class="text-xs text-green-400">En ligne</span>
 						</div>
 					</div>
 				</div>
