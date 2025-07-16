@@ -256,8 +256,8 @@ async function editUsername(page: HTMLDivElement){
 				inputType: "string",
 				onValidate: async (newValue) => {
 					const UserInfo = {
-							username: usernameElem.textContent,
-							newUsername: newValue,
+						username: usernameElem.textContent,
+						newUsername: newValue,
 					};
 					const response = await fetch('/api/profile/username', {
 						method: "POST",
@@ -269,14 +269,17 @@ async function editUsername(page: HTMLDivElement){
 					});
 					const data = await response.json();
 					if (data.ok || data.success){
-						console.log("Username succesfully edited!");
+						if (data.token) {
+							sessionStorage.setItem('authToken', data.token);
+						}
 						sessionStorage.removeItem('username');
 						sessionStorage.setItem('username', newValue);
 						usernameElem.textContent = newValue;
 					} else {
 						alert(i18n.t('profile.username_error'));
 					}
-				}
+				},
+				page
 			});
 		});
 	}
@@ -297,8 +300,8 @@ async function editPassword(page: HTMLDivElement){
 				inputType: "password",
 				onValidate: async (newValue) => {
 					const UserInfo = {
-							username: sessionStorage.getItem('username'),
-							newPassword: newValue,
+						username: sessionStorage.getItem('username'),
+						newPassword: newValue,
 					};
 					const response = await fetch('/api/profile/password', {
 						method: "POST",
@@ -315,18 +318,20 @@ async function editPassword(page: HTMLDivElement){
 						alert(i18n.t('profile.password_error'));
 					}
 					passwordElem.textContent = i18n.t('profile.password_display');
-				}
+				},
+				page
 			});
 		});
 	}
 }
 
-function enableInlineEdit({element, initialValue, onValidate, inputType = "text"} :
+function enableInlineEdit({element, initialValue, onValidate, inputType = "text", page} :
 	{
 		element: HTMLElement,
 		initialValue: string,
 		onValidate: (newValue: string) => Promise<void> | void,
 		inputType?: string,
+		page: HTMLDivElement,
 	}) {
 		const input = document.createElement("input");
 		input.type = inputType;
@@ -355,9 +360,11 @@ function enableInlineEdit({element, initialValue, onValidate, inputType = "text"
 		parent?.appendChild(cancelBtn);
 
 		const cleanup = () => {
-			parent?.replaceChild(oldContent, input);
-			validateBtn.remove();
-			cancelBtn.remove();
+			const app = document.getElementById('app');
+			if (app) {
+				app.innerHTML = '';
+				app.appendChild(createProfilePage());
+			}
 		};
 
 		validateBtn.onclick = async () => {
