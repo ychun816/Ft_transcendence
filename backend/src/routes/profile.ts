@@ -10,6 +10,15 @@ import { createHash } from "crypto";
 import jwt from "jsonwebtoken";
 import { request } from "http";
 
+/*
+TO DO:
+- Ajuster la regle de mot de passe
+- Ajuster la redirection (home page)
+- Friends online status
+- Friends click on name profil
+- Avatar upload
+*/
+
 const secretKey = process.env.COOKIE_SECRET;
 
 function getFieldValue(field: any): string | undefined {
@@ -115,7 +124,18 @@ export async function registerProfileRoute(
 			}
 			try {
 				await updateUsername(prisma, currentUsername, newUsername);
-				reply.status(200).send({ success: true });
+				// Générer un nouveau JWT avec le nouveau username
+				const updatedUser = await prisma.user.findUnique({ where: { username: newUsername } });
+				if (!updatedUser) {
+					reply.status(400).send({ error: "User not found after update" });
+					return;
+				}
+				const newToken = jwt.sign(
+					{ id: updatedUser.id, username: updatedUser.username },
+					secretKey || 'fallback-secret-key',
+					{ expiresIn: '24h' }
+				);
+				reply.status(200).send({ success: true, token: newToken });
 			} catch (err) {
 				reply
 					.status(400)
@@ -217,6 +237,7 @@ export async function registerProfileRoute(
 								username: true,
 								avatarUrl: true,
 								gamesPlayed: true,
+								connected: true,
 							}
 						}
 					}
@@ -231,6 +252,39 @@ export async function registerProfileRoute(
 			}
 		}
 	);
+
+	// ROUTE POUR AJOUTER UN AMI
+	app.post("/api/profile/friends/add", async (request, reply) => {
+		const auth = extractTokenFromRequest(request);
+		if (!auth) return reply.status(401).send({ error: "Unauthorized" });
+
+		const { friendUsername } = request.body as { friendUsername: string };
+		if (!friendUsername) return reply.status(400).send({ error: "No username provided" });
+
+		const user = await prisma.user.findUnique({ where: { username: auth.username } });
+		if (!user) return reply.status(404).send({ error: "User not found" });
+		const friend = await prisma.user.findUnique({ where: { username: friendUsername } });
+
+		if (!friend) return reply.status(404).send({ error: "user not found" });
+		if (user.id === friend.id) return reply.status(400).send({ error: "Cannot add yourself" });
+
+		// Vérifie si déjà ami
+		const alreadyFriend = await prisma.user.findFirst({
+			where: {
+				id: user.id,
+				friends: { some: { id: friend.id } }
+			}
+		});
+		if (alreadyFriend) return reply.status(400).send({ error: "Already friends" });
+
+		await prisma.user.update({
+			where: { id: user.id },
+			data: {
+				friends: { connect: { id: friend.id } }
+			}
+		});
+		reply.send({ success: true });
+	});
 }
 
 async function getUserInfo(username: string, prisma: PrismaClient) {
@@ -325,7 +379,7 @@ async function updateAvatar(
 		const stats = fs.statSync(uploadPath);
 		console.log("📁 Taille du fichier:", stats.size, "bytes");
 	}
-	const avatarPath = `/avatars/${fileName}`;
+	const avatarPath = `/${fileName}`;
 	console.log("avatarPath: ", avatarPath);
 
 	await prisma.user.update({
