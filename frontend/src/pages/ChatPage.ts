@@ -10,19 +10,19 @@ export function createChatPage(): HTMLElement {
 		<style>
 			/* Styles personnalisés pour les effets néon */
 			.neon-text {
-				text-shadow: 
+				text-shadow:
 					0 0 5px currentColor,
 					0 0 10px currentColor,
 					0 0 15px currentColor,
 					0 0 20px currentColor;
 			}
-			
+
 			.neon-border {
-				box-shadow: 
+				box-shadow:
 					0 0 10px currentColor,
 					inset 0 0 10px currentColor;
 			}
-			
+
 			.particles {
 				position: fixed;
 				top: 0;
@@ -32,7 +32,7 @@ export function createChatPage(): HTMLElement {
 				pointer-events: none;
 				z-index: -1;
 			}
-			
+
 			.particle {
 				position: absolute;
 				width: 2px;
@@ -41,12 +41,12 @@ export function createChatPage(): HTMLElement {
 				border-radius: 50%;
 				animation: float 6s ease-in-out infinite;
 			}
-			
+
 			@keyframes float {
 				0%, 100% { transform: translateY(0px) rotate(0deg); }
 				50% { transform: translateY(-20px) rotate(180deg); }
 			}
-			
+
 			.scan-lines::before {
 				content: '';
 				position: absolute;
@@ -63,13 +63,13 @@ export function createChatPage(): HTMLElement {
 				animation: scan 0.1s linear infinite;
 				pointer-events: none;
 			}
-			
+
 			@keyframes scan {
 				0% { background-position: 0 0; }
 				100% { background-position: 0 4px; }
 			}
 		</style>
-		
+
 		<!-- Particules d'arrière-plan -->
 		<div class="particles">
 			<div class="particle" style="left: 10%; animation-delay: 0s;"></div>
@@ -82,7 +82,7 @@ export function createChatPage(): HTMLElement {
 			<div class="particle" style="left: 80%; animation-delay: 1s;"></div>
 			<div class="particle" style="left: 90%; animation-delay: 3s;"></div>
 		</div>
-		
+
 		<div class="absolute top-4 right-4" id="language-switcher-container"></div>
 		<div class="min-h-screen flex items-center justify-center p-4 scan-lines relative">
 			<div class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-8 border border-cyan-400 border-opacity-30 neon-border max-w-6xl w-full flex flex-col items-center"
@@ -104,7 +104,7 @@ export function createChatPage(): HTMLElement {
               </div>
             </div>
           </div>
-          
+
           <!-- Conversations List -->
           <div class="w-1/3 border-r border-cyan-400 border-opacity-30 flex flex-col bg-gray-800 bg-opacity-30">
             <div class="p-4 border-b border-cyan-400 border-opacity-30">
@@ -114,7 +114,7 @@ export function createChatPage(): HTMLElement {
               <!-- Conversations will appear here -->
             </div>
           </div>
-          
+
           <!-- Chat Area -->
           <div class="flex-1 flex flex-col bg-gray-800 bg-opacity-30 rounded-r-xl">
             <div class="p-4 border-b border-cyan-400 border-opacity-30" id="chat-header">
@@ -133,23 +133,23 @@ export function createChatPage(): HTMLElement {
     </div>
 		</div>
 		`;
-		
+
 		// Add language switcher
 		const languageSwitcherContainer = page.querySelector('#language-switcher-container');
 		if (languageSwitcherContainer) {
 			languageSwitcherContainer.appendChild(createLanguageSwitcher());
 		}
 	};
-	
+
 	renderContent();
-	
+
 	// Re-render when language changes
 	window.addEventListener('languageChanged', renderContent);
 
 	// Get current user info
 	const currentUser = sessionStorage.getItem("currentUser");
 	let username = null;
-	
+
 	if (currentUser) {
 		try {
 			const user = JSON.parse(currentUser);
@@ -305,7 +305,7 @@ function initializeChat(page: HTMLElement, userData: any) {
 	function connectWebSocket() {
 		// Utiliser l'URL complète du serveur backend
 		ws = new WebSocket(
-			`ws://localhost:3002/ws/chat?username=${encodeURIComponent(userData.username)}&userId=${userData.id}`
+			`ws://localhost:3000/ws/chat?username=${encodeURIComponent(userData.username)}&userId=${userData.id}`
 		);
 
 		ws.onopen = () => {
@@ -483,8 +483,8 @@ function initializeChat(page: HTMLElement, userData: any) {
 			userDiv.setAttribute("data-username", user.username);
 			userDiv.innerHTML = `
 				<div class="flex items-center gap-3">
-					<img src="${user.avatarUrl || "/public/default-avatar.png"}" 
-						 alt="${user.username}" 
+					<img src="${user.avatarUrl || "/public/default-avatar.png"}"
+						 alt="${user.username}"
 						 class="w-8 h-8 rounded-full border border-cyan-400 border-opacity-30">
 					<div class="flex-1">
 						<h4 class="font-medium text-cyan-400 text-sm">${user.username}</h4>
@@ -528,8 +528,8 @@ function initializeChat(page: HTMLElement, userData: any) {
 		userDiv.setAttribute("data-username", user.username);
 		userDiv.innerHTML = `
 			<div class="flex items-center gap-3">
-				<img src="${user.avatarUrl || "/public/default-avatar.png"}" 
-					 alt="${user.username}" 
+				<img src="${user.avatarUrl || "/public/default-avatar.png"}"
+					 alt="${user.username}"
 					 class="w-8 h-8 rounded-full">
 				<div class="flex-1">
 					<h4 class="font-medium text-gray-900 text-sm">${user.username}</h4>
@@ -552,7 +552,7 @@ function initializeChat(page: HTMLElement, userData: any) {
 		userDiv.addEventListener("click", (e) => {
 			const target = e.target as HTMLElement;
 			const action = target.getAttribute('data-action');
-			
+
 			if (action === 'chat') {
 				e.stopPropagation();
 				startConversationWithUser(user.username);
@@ -625,8 +625,8 @@ function initializeChat(page: HTMLElement, userData: any) {
 			convDiv.setAttribute('data-username', conv.partner.username);
 			convDiv.innerHTML = `
 				<div class="flex items-center gap-3">
-					<img src="${conv.partner.avatarUrl || "/public/default-avatar.png"}" 
-						 alt="${conv.partner.username}" 
+					<img src="${conv.partner.avatarUrl || "/public/default-avatar.png"}"
+						 alt="${conv.partner.username}"
 						 class="w-10 h-10 rounded-full">
 					<div class="flex-1">
 						<div class="flex justify-between items-center">
@@ -903,7 +903,7 @@ function initializeChat(page: HTMLElement, userData: any) {
 	function displayUserProfile(profile: any) {
 		// For now, just log the profile. In the future, this could open a modal or navigate to profile page
 		console.log("📄 User profile received:", profile);
-		
+
 		// You could display this in a modal or navigate to the profile page
 		alert(`Profil de ${profile.username}:\nPartites jouées: ${profile.gamesPlayed}\nVictoires: ${profile.wins}\nDéfaites: ${profile.losses}`);
 	}

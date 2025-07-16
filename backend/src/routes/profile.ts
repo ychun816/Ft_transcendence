@@ -10,6 +10,15 @@ import { createHash } from "crypto";
 import jwt from "jsonwebtoken";
 import { request } from "http";
 
+/*
+TO DO:
+- Ajuster la regle de mot de passe
+- Ajuster la redirection (home page)
+- Friends online status
+- Friends click on name profil
+- Avatar upload
+*/
+
 const secretKey = process.env.COOKIE_SECRET;
 
 function getFieldValue(field: any): string | undefined {
@@ -228,6 +237,7 @@ export async function registerProfileRoute(
 								username: true,
 								avatarUrl: true,
 								gamesPlayed: true,
+								connected: true,
 							}
 						}
 					}
@@ -369,7 +379,7 @@ async function updateAvatar(
 		const stats = fs.statSync(uploadPath);
 		console.log("📁 Taille du fichier:", stats.size, "bytes");
 	}
-	const avatarPath = `/avatars/${fileName}`;
+	const avatarPath = `/${fileName}`;
 	console.log("avatarPath: ", avatarPath);
 
 	await prisma.user.update({

@@ -29,18 +29,29 @@ export function createHomePage(): HTMLElement {
 			</div>
 			<div class="absolute top-4 right-4" id="language-switcher-container"></div>
 		`;
-		
+
 		page.innerHTML = createNeonContainer(content);
-		
+
 		// Add language switcher
 		const languageSwitcherContainer = page.querySelector('#language-switcher-container');
 		if (languageSwitcherContainer) {
 			languageSwitcherContainer.appendChild(createLanguageSwitcher());
+			const logoutBtn = document.createElement('button');
+			logoutBtn.className = "neon-btn neon-btn-secondary";
+			logoutBtn.textContent = "Logout";
+			logoutBtn.onclick = async () => {
+				await fetch("/api/logout", { method: "POST" });
+				sessionStorage.clear();
+				import('../router/router.js').then(({ router }) => {
+					router.navigate('/login');
+					});
+			};
+			languageSwitcherContainer.appendChild(logoutBtn);
 		}
 	};
-	
+
 	renderContent();
-	
+
 	// Re-render when language changes
 	window.addEventListener('languageChanged', renderContent);
 
