@@ -17,7 +17,11 @@ export async function handleLogIn(app: FastifyInstance, prisma: PrismaClient){
 	// console.log("DEBUG LOGIN MANAGEMENT 2");
 
 	app.post("/api/login", async (request: FastifyRequest, reply: FastifyReply) => {
-			const { username, password } = request.body as { username: string; password: string };
+			const { username, password, twoFactorToken } = request.body as { 
+				username: string; 
+				password: string; 
+				twoFactorToken?: string;
+			};
 
 			console.log(username);
 			console.log(password);
@@ -30,6 +34,30 @@ export async function handleLogIn(app: FastifyInstance, prisma: PrismaClient){
 				const passwordCheck = await bcrypt.compare(password, user.passwordHash);
 				if (!passwordCheck)
 					return reply.status(401).send({success: false, message: "Wrong password"});
+				
+				// Check if 2FA is enabled
+				if (user.twoFactorEnabled && user.twoFactorSecret) {
+					if (!twoFactorToken) {
+						return reply.status(200).send({
+							success: false,
+							requires2FA: true,
+							message: "2FA verification required"
+						});
+					}
+
+					// Verify 2FA token
+					const { TwoFactorService } = await import('../services/twoFactorService.js');
+					const is2FAValid = TwoFactorService.verifyToken(twoFactorToken, user.twoFactorSecret);
+					
+					if (!is2FAValid) {
+						return reply.status(401).send({
+							success: false,
+							requires2FA: true,
+							message: "Invalid 2FA token"
+						});
+					}
+				}
+
 				// JWT generation
 				console.log("🔑 Generating JWT for user:", user.username);
 				console.log("🔑 Secret key:", secretKey || 'fallback-secret-key');
@@ -43,15 +71,14 @@ export async function handleLogIn(app: FastifyInstance, prisma: PrismaClient){
 
 				console.log("🔑 Generated token:", token);
 
-				// Plus besoin de activeSessions Map ni de cookies
-
 				return reply.send({
 					success: true,
 					token: token, // Envoyer le JWT au frontend
 					user: {
 						id: user.id,
 						username: user.username,
-						avatarUrl: user.avatarUrl
+						avatarUrl: user.avatarUrl,
+						twoFactorEnabled: user.twoFactorEnabled
 					}
 				});
 

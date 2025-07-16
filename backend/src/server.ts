@@ -2,6 +2,7 @@ import fastify from "fastify";
 import { registerNewUser } from "./routes/signup.js";
 import { handleLogIn } from "./routes/login.js";
 import { registerProfileRoute } from "./routes/profile.js";
+import { register2FARoutes } from "./routes/twoFactor.js";
 import fastifyStatic from "@fastify/static";
 import fastifyWebsocket from "@fastify/websocket"; // ✅ Import corrigé
 import fastifyMultipart from "@fastify/multipart";
@@ -78,6 +79,9 @@ const start = async () => {
 
 		console.log("GET USER INFO FOR FRONTEND");
 		registerProfileRoute(app, prisma);
+
+		console.log("🔐 Registering 2FA routes...");
+		register2FARoutes(app, prisma);
 
 		console.log("🔌 Registering WebSocket routes...");
 		await chatWebSocketRoutes(app, prisma);
