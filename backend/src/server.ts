@@ -59,6 +59,12 @@ const start = async () => {
 			prefix: "/public/",
 			decorateReply: false,
 		});
+		
+		await app.register(fastifyStatic, {
+			root: path.join(PROJECT_ROOT, "public/avatars"),
+			prefix: "/avatars/",
+			decorateReply: false,
+		  });
 
 		app.setNotFoundHandler((_req, reply) => {
 			reply.sendFile("index.html");

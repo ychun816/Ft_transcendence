@@ -128,8 +128,9 @@ export function createProfilePage(): HTMLElement {
 
 					<!-- Bloc Friends List - occupe le reste de l'espace -->
 					<div id="friends-block" class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-6 border border-green-400 border-opacity-30 neon-border w-full flex flex-col flex-1">
-						<header class="w-full flex-shrink-0 mb-4">
+						<header class="w-full flex-shrink-0 mb-4 flex items-center justify-between">
 							<h2 class="text-2xl font-bold text-green-400 neon-text">${i18n.t('profile.friends_list')}</h2>
+							<!-- Le bouton (+) sera ajouté ici par JS -->
 						</header>
 						<main class="w-full flex-1 overflow-y-auto">
 							<!-- Le contenu de la liste d'amis sera ajouté ici -->
@@ -563,33 +564,105 @@ async function displayFriendsList(page: HTMLDivElement)
 	if (!friendsDiv) return;
 
 	let html = `
-		<table class="data-table">
-			<thead>
-				<tr>
-					<th>${i18n.t('id')}</th>
-					<th>${i18n.t('avatar')}</th>
-					<th>${i18n.t('name')}</th>
-					<th>${i18n.t('Games_played')}</th>
-				</tr>
-			</thead>
-			<tbody>
+		<header class="w-full flex-shrink-0 mb-4 flex items-center justify-between" style="overflow:hidden;">
+			<h2 class="text-2xl font-bold text-green-400 neon-text">${i18n.t('profile.friends_list')}</h2>
+			<!-- Le bouton (+) sera ajouté ici par JS -->
+		</header>
+		<div class="friends-table-scroll">
+			<table class="data-table">
+				<thead>
+					<tr>
+						<th>${i18n.t('avatar')}</th>
+						<th>${i18n.t('name')}</th>
+						<th>${i18n.t('Games_played')}</th>
+					</tr>
+				</thead>
+				<tbody>
 	`;
 
 	for (const friend of friendsList){
-		const avatar = friend.getItem("avatarUrl")
-		const id = friend.getItem("id");
-		const name = friend.getItem("username");
-		const played = friend.getItem("gamesPlayed");
+		const avatar = friend.avatarUrl;
+		const name = friend.username;
+		const played = friend.gamesPlayed;
 
 	html += `
 			<tr>
-				<td>${id}</td>
-				<td>${avatar}</td>
+				<td>
+					<div style="width:40px; height:40px; border-radius:50%; overflow:hidden; background:#222; display:flex; align-items:center; justify-content:center;">
+						<img src="${avatar || '/default-avatar.png'}" alt="avatar" style="width:100%; height:100%; object-fit:cover;">
+					</div>
+				</td>
 				<td>${name}</td>
 				<td>${played}</td>
 			</tr>
 		`;
 	}
-	html += `</tbody></table>`;
+	html += `</tbody></table></div>`;
 	friendsDiv.innerHTML = html;
+	setupAddFriendFeature(page);
+}
+
+function setupAddFriendFeature(page: HTMLDivElement) {
+	const friendsBlock = page.querySelector("#friends-block");
+	if (!friendsBlock) return;
+	
+	const header = friendsBlock.querySelector("header");
+	if (!header) return;
+	let addBtn = header.querySelector("#add-friend-btn") as HTMLButtonElement;
+	if (!addBtn) {
+		addBtn = document.createElement("button");
+		addBtn.id = "add-friend-btn";
+		addBtn.title = "Add friend";
+		addBtn.className = "bg-green-400 hover:bg-green-500 text-white font-bold rounded-full w-8 h-8 flex items-center justify-center text-xl transition-all duration-200 ml-2";
+		addBtn.textContent = "+";
+		header.appendChild(addBtn);
+	}
+
+	let formContainer = friendsBlock.querySelector("#add-friend-form-container") as HTMLDivElement;
+	if (!formContainer) {
+		formContainer = document.createElement("div");
+		formContainer.id = "add-friend-form-container";
+		formContainer.className = "mt-2";
+		header.insertAdjacentElement('afterend', formContainer);
+	}
+
+	addBtn.onclick = () => {
+		formContainer.innerHTML = `
+			<form id="add-friend-form" class="flex gap-2 mt-2">
+				<input type="text" id="friend-username" placeholder="Username..." class="input bg-gray-700 text-white border border-green-400 rounded px-2 py-1" required>
+				<button type="submit" class="bg-green-400 hover:bg-green-500 text-white rounded px-3 py-1 font-bold">Ajouter</button>
+				<span id="add-friend-error" class="text-red-400 ml-2"></span>
+			</form>
+		`;
+		const form = formContainer.querySelector("#add-friend-form") as HTMLFormElement;
+		form?.addEventListener("submit", async (e) => {
+			e.preventDefault();
+			const usernameInput = formContainer.querySelector("#friend-username") as HTMLInputElement;
+			const username = usernameInput.value.trim();
+			const errorSpan = formContainer.querySelector("#add-friend-error") as HTMLSpanElement;
+			errorSpan.textContent = "";
+			if (!username) return;
+
+			const token = sessionStorage.getItem('authToken');
+			try {
+				const response = await fetch('/api/profile/friends/add', {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						"Authorization": `Bearer ${token}`
+					},
+					body: JSON.stringify({ friendUsername: username })
+				});
+				const data = await response.json();
+				if (response.ok && data.success) {
+					displayFriendsList(page);
+					formContainer.innerHTML = "";
+				} else {
+					errorSpan.textContent = data.error || "user not found";
+				}
+			} catch (err) {
+				errorSpan.textContent = "Erreur réseau";
+			}
+		});
+	};
 }
