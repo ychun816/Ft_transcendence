@@ -115,7 +115,18 @@ export async function registerProfileRoute(
 			}
 			try {
 				await updateUsername(prisma, currentUsername, newUsername);
-				reply.status(200).send({ success: true });
+				// Générer un nouveau JWT avec le nouveau username
+				const updatedUser = await prisma.user.findUnique({ where: { username: newUsername } });
+				if (!updatedUser) {
+					reply.status(400).send({ error: "User not found after update" });
+					return;
+				}
+				const newToken = jwt.sign(
+					{ id: updatedUser.id, username: updatedUser.username },
+					secretKey || 'fallback-secret-key',
+					{ expiresIn: '24h' }
+				);
+				reply.status(200).send({ success: true, token: newToken });
 			} catch (err) {
 				reply
 					.status(400)
