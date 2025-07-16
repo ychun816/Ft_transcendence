@@ -60,6 +60,12 @@ const start = async () => {
 			decorateReply: false,
 		});
 
+		await app.register(fastifyStatic, {
+			root: path.join(PROJECT_ROOT, "public/avatars"),
+			prefix: "/avatars/",
+			decorateReply: false,
+		  });
+
 		app.setNotFoundHandler((_req, reply) => {
 			reply.sendFile("index.html");
 		});
@@ -85,7 +91,7 @@ const start = async () => {
 		await registerNotificationRoutes(app, prisma);
 		console.log("🎧 Starting to listen...");
 		await app.listen({
-			port: 3002,
+			port: 3000,
 			host: '0.0.0.0'
 		});
 

@@ -31,6 +31,13 @@ export async function handleLogIn(app: FastifyInstance, prisma: PrismaClient){
 				if (!passwordCheck)
 					return reply.status(401).send({success: false, message: "Wrong password"});
 				// JWT generation
+				await prisma.user.update({
+					where: { id:user.id },
+					data: {
+						connected: true
+					}
+				});
+				console.log("✅ User status :", user.connected);
 				console.log("🔑 Generating JWT for user:", user.username);
 				console.log("🔑 Secret key:", secretKey || 'fallback-secret-key');
 
@@ -51,7 +58,7 @@ export async function handleLogIn(app: FastifyInstance, prisma: PrismaClient){
 					user: {
 						id: user.id,
 						username: user.username,
-						avatarUrl: user.avatarUrl
+						avatarUrl: user.avatarUrl,
 					}
 				});
 
@@ -84,6 +91,7 @@ export async function handleLogIn(app: FastifyInstance, prisma: PrismaClient){
 					id: true,
 					username: true,
 					avatarUrl: true,
+					connected: true,
 					gamesPlayed:true,
 					wins: true,
 					losses: true,
@@ -102,8 +110,21 @@ export async function handleLogIn(app: FastifyInstance, prisma: PrismaClient){
 	});
 
 	app.post("/api/logout", async (request: FastifyRequest, reply: FastifyReply) => {
-		// JWT = Logout on client side
-		reply.send({ success: true });
+		const authHeader = request.headers.authorization;
+		if (!authHeader || !authHeader.startsWith('Bearer ')) {
+			return reply.status(401).send({ success: false, message: "Not authenticated" });
+		}
+		const token = authHeader.substring(7);
+		try {
+			const decoded = jwt.verify(token, secretKey || 'fallback-secret-key') as any;
+			await prisma.user.update({
+				where: { id: decoded.id },
+				data: { connected: false }
+			});
+			reply.send({ success: true });
+		} catch (error) {
+			reply.status(401).send({ success: false, message: "Invalid token" });
+		}
 	});
 }
 
@@ -138,6 +159,8 @@ export async function secureRoutes(app: FastifyInstance, prisma: PrismaClient) {
             '/api/profile/username',
             '/api/profile/password',
             '/api/profile/matches',
+			'/api/profile/friends',
+			'/api/profile/friends/add',
             '/api/game',
             '/api/chat'
         ];
