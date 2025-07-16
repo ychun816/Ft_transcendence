@@ -1,5 +1,6 @@
 import { i18n } from "../services/i18n.js";
 import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
+// import { TwoFactorSettings } from "../components/TwoFactorSettings.js";
 
 export function createProfilePage(): HTMLElement {
 	const page = document.createElement("div");
@@ -62,6 +63,16 @@ export function createProfilePage(): HTMLElement {
 									</div>
 								</div>
 							</div>
+							
+							<!-- Security Section -->
+							<div class="w-full mb-4">
+								<h4 class="text-lg font-semibold mb-3">${i18n.t('profile.security') || 'Security'}</h4>
+								<div class="space-y-2">
+									<button id="manage-2fa" class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 text-sm">
+										🔐 ${i18n.t('profile.manage_2fa') || 'Manage Two-Factor Authentication'}
+									</button>
+								</div>
+							</div>
 						</main>
 					</div>
 
@@ -105,6 +116,7 @@ export function createProfilePage(): HTMLElement {
   	editAvatar(page);
 	editUsername(page);
 	editPassword(page);
+	manage2FA(page);
 
 	getUserInfo().then(data =>{
 		if (data){
@@ -523,4 +535,43 @@ async function displayFriendsList(page: HTMLDivElement)
 	}
 	html += `</tbody></table>`;
 	friendsDiv.innerHTML = html;
+}
+
+function manage2FA(page: HTMLDivElement): void {
+	const manage2FABtn = page.querySelector('#manage-2fa') as HTMLButtonElement;
+	
+	manage2FABtn?.addEventListener('click', () => {
+		// Create modal overlay
+		const modalOverlay = document.createElement('div');
+		modalOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+		modalOverlay.innerHTML = `
+			<div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+				<div class="flex justify-between items-center p-4 border-b">
+					<h3 class="text-xl font-semibold">Security Settings</h3>
+					<button id="close-2fa-modal" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+				</div>
+				<div id="2fa-settings-container" class="p-4"></div>
+			</div>
+		`;
+
+		document.body.appendChild(modalOverlay);
+
+		// Initialize 2FA settings
+		const settingsContainer = modalOverlay.querySelector('#2fa-settings-container') as HTMLElement;
+		const twoFactorSettings = new TwoFactorSettings(settingsContainer);
+		twoFactorSettings.init();
+
+		// Close modal handlers
+		const closeBtn = modalOverlay.querySelector('#close-2fa-modal') as HTMLButtonElement;
+		const closeModal = () => {
+			document.body.removeChild(modalOverlay);
+		};
+
+		closeBtn.addEventListener('click', closeModal);
+		modalOverlay.addEventListener('click', (e) => {
+			if (e.target === modalOverlay) {
+				closeModal();
+			}
+		});
+	});
 }
