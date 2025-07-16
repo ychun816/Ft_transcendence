@@ -10,19 +10,19 @@ export function createProfilePage(): HTMLElement {
 			<style>
 				/* Styles personnalisés pour les effets néon */
 				.neon-text {
-					text-shadow: 
+					text-shadow:
 						0 0 5px currentColor,
 						0 0 10px currentColor,
 						0 0 15px currentColor,
 						0 0 20px currentColor;
 				}
-				
+
 				.neon-border {
-					box-shadow: 
+					box-shadow:
 						0 0 10px currentColor,
 						inset 0 0 10px currentColor;
 				}
-				
+
 				.particles {
 					position: fixed;
 					top: 0;
@@ -32,7 +32,7 @@ export function createProfilePage(): HTMLElement {
 					pointer-events: none;
 					z-index: -1;
 				}
-				
+
 				.particle {
 					position: absolute;
 					width: 2px;
@@ -41,12 +41,12 @@ export function createProfilePage(): HTMLElement {
 					border-radius: 50%;
 					animation: float 6s ease-in-out infinite;
 				}
-				
+
 				@keyframes float {
 					0%, 100% { transform: translateY(0px) rotate(0deg); }
 					50% { transform: translateY(-20px) rotate(180deg); }
 				}
-				
+
 				.scan-lines::before {
 					content: '';
 					position: absolute;
@@ -63,13 +63,13 @@ export function createProfilePage(): HTMLElement {
 					animation: scan 0.1s linear infinite;
 					pointer-events: none;
 				}
-				
+
 				@keyframes scan {
 					0% { background-position: 0 0; }
 					100% { background-position: 0 4px; }
 				}
 			</style>
-			
+
 			<!-- Particules d'arrière-plan -->
 			<div class="particles">
 				<div class="particle" style="left: 10%; animation-delay: 0s;"></div>
@@ -82,7 +82,7 @@ export function createProfilePage(): HTMLElement {
 				<div class="particle" style="left: 80%; animation-delay: 1s;"></div>
 				<div class="particle" style="left: 90%; animation-delay: 3s;"></div>
 			</div>
-			
+
 			<div class="absolute top-4 right-4" id="language-switcher-container"></div>
 			<div class="min-h-screen flex items-center justify-center p-4 scan-lines relative">
 
@@ -159,9 +159,20 @@ export function createProfilePage(): HTMLElement {
 
 	// Insérer le commutateur de langue
 	const languageSwitcherContainer = page.querySelector('#language-switcher-container');
-	if (languageSwitcherContainer) {
-		languageSwitcherContainer.appendChild(createLanguageSwitcher());
-	}
+		if (languageSwitcherContainer) {
+			languageSwitcherContainer.appendChild(createLanguageSwitcher());
+			const logoutBtn = document.createElement('button');
+			logoutBtn.className = "neon-btn neon-btn-secondary";
+			logoutBtn.textContent = "Logout";
+			logoutBtn.onclick = async () => {
+				await fetch("/api/logout", { method: "POST" });
+				sessionStorage.clear();
+			import('../router/router.js').then(({ router }) => {
+				router.navigate('/login');
+				});
+			};
+			languageSwitcherContainer.appendChild(logoutBtn);
+		}
 
 	// Re-render when language changes
 	window.addEventListener('languageChanged', renderContent);
@@ -572,6 +583,7 @@ async function displayFriendsList(page: HTMLDivElement)
 			<table class="data-table">
 				<thead>
 					<tr>
+						<th>${i18n.t('status')}</th>
 						<th>${i18n.t('avatar')}</th>
 						<th>${i18n.t('name')}</th>
 						<th>${i18n.t('Games_played')}</th>
@@ -581,12 +593,17 @@ async function displayFriendsList(page: HTMLDivElement)
 	`;
 
 	for (const friend of friendsList){
+		const status = friend.connected;
 		const avatar = friend.avatarUrl;
 		const name = friend.username;
 		const played = friend.gamesPlayed;
 
 	html += `
 			<tr>
+				<td>
+					<div style="width:10px; height:10px; border-radius:50%; overflow:hidden; background:${status ? 'green' : 'gray'}; display:flex; align-items:center; justify-content:center;">
+					</div>
+				</td>
 				<td>
 					<div style="width:40px; height:40px; border-radius:50%; overflow:hidden; background:#222; display:flex; align-items:center; justify-content:center;">
 						<img src="${avatar || '/default-avatar.png'}" alt="avatar" style="width:100%; height:100%; object-fit:cover;">
@@ -605,7 +622,7 @@ async function displayFriendsList(page: HTMLDivElement)
 function setupAddFriendFeature(page: HTMLDivElement) {
 	const friendsBlock = page.querySelector("#friends-block");
 	if (!friendsBlock) return;
-	
+
 	const header = friendsBlock.querySelector("header");
 	if (!header) return;
 	let addBtn = header.querySelector("#add-friend-btn") as HTMLButtonElement;
@@ -630,10 +647,16 @@ function setupAddFriendFeature(page: HTMLDivElement) {
 		formContainer.innerHTML = `
 			<form id="add-friend-form" class="flex gap-2 mt-2">
 				<input type="text" id="friend-username" placeholder="Username..." class="input bg-gray-700 text-white border border-green-400 rounded px-2 py-1" required>
-				<button type="submit" class="bg-green-400 hover:bg-green-500 text-white rounded px-3 py-1 font-bold">Ajouter</button>
+				<button type="button" id="cancel-add-friend" class="bg-gray-400 hover:bg-gray-500 text-white rounded px-3 py-1 font-bold">Cancel</button>
+				<button type="submit" class="bg-green-400 hover:bg-green-500 text-white rounded px-3 py-1 font-bold">Add</button>
 				<span id="add-friend-error" class="text-red-400 ml-2"></span>
 			</form>
 		`;
+
+		const cancelBtn = formContainer.querySelector("#cancel-add-friend") as HTMLButtonElement;
+		cancelBtn?.addEventListener("click", () => {
+				formContainer.innerHTML = "";
+			});
 		const form = formContainer.querySelector("#add-friend-form") as HTMLFormElement;
 		form?.addEventListener("submit", async (e) => {
 			e.preventDefault();
