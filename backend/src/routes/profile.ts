@@ -13,21 +13,20 @@ import { request } from "http";
 /*
 TO DO:
 - Ajuster la regle de mot de passe
-- Ajuster la redirection (home page)
-- Friends online status
+- Friends online status update on user profile
 - Friends click on name profil
 - Avatar upload
 */
 
 const secretKey = process.env.COOKIE_SECRET;
 
-function getFieldValue(field: any): string | undefined {
-	if (!field) return undefined;
-	if (Array.isArray(field)) field = field[0];
-	if (typeof field.value === "string") return field.value;
-	if (Buffer.isBuffer(field.value)) return field.value.toString();
-	return undefined;
-}
+// function getFieldValue(field: any): string | undefined {
+// 	if (!field) return undefined;
+// 	if (Array.isArray(field)) field = field[0];
+// 	if (typeof field.value === "string") return field.value;
+// 	if (Buffer.isBuffer(field.value)) return field.value.toString();
+// 	return undefined;
+// }
 
 function extractTokenFromRequest(request: FastifyRequest): { userId: number; username: string } | null {
 	const authHeader = request.headers.authorization;
@@ -46,7 +45,7 @@ function extractTokenFromRequest(request: FastifyRequest): { userId: number; use
 }
 
 export async function registerProfileRoute(
-	app: FastifyInstance,
+	app: FastifyInstance<any, any, any, any>,
 	prisma: PrismaClient
 ) {
 	app.get(

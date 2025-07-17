@@ -8,7 +8,7 @@ import { PrismaClient } from "@prisma/client";
  * @param prisma - Prisma client instance
  */
 export async function registerNotificationRoutes(
-	app: FastifyInstance,
+	app: FastifyInstance<any, any, any, any>,
 	prisma: PrismaClient
 ) {
 	/**
