@@ -7,14 +7,16 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { PrismaClient } from '@prisma/client';
 import { logger } from './utils/logger.js';
+import { metricsPlugin } from './utils/metricsPlugin.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 export const PROJECT_ROOT = path.resolve(__dirname, "../../");
 const prisma = new PrismaClient();
 const app = fastify({ logger: false, disableRequestLogging: false });
+logger.info("Enregistrement du plugin de métriques Prometheus");
+app.register(metricsPlugin);
 app.addHook('onRequest', async (request, reply) => {
     request.startTime = Date.now();
-    // Log chaque requête du frontend
     logger.info({
         type: 'http_request',
         method: request.method,
@@ -25,7 +27,6 @@ app.addHook('onRequest', async (request, reply) => {
 });
 app.addHook('onResponse', async (request, reply) => {
     const responseTime = Date.now() - (request.startTime || 0);
-    // Log chaque réponse vers le frontend
     logger.info({
         type: 'http_response',
         method: request.method,

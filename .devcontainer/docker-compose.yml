@@ -28,9 +28,6 @@ services:
       - app-network
 
 
-# A FAIRE NEXT
-
-# prometheus et grafana
 
 
   # prod:
@@ -170,6 +167,7 @@ services:
     ports:
       - "${PROMETHEUS_PORT}:9090"
     volumes:
+      - ./../monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -186,7 +184,7 @@ services:
     image: prom/node-exporter:latest
     container_name: trans-node-exporter
     ports:
-      - "${NODE_EXP_PORT}:9101"
+      - "${NODE_EXP_PORT}:9100"
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -205,10 +203,18 @@ services:
     container_name: trans-grafana
     ports:
       - "${GRAFANA_PORT}:3000"
+    volumes:
+      - ./../monitoring/grafana/grafana.ini:/etc/grafana/grafana.ini:ro
+      - ./../monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
       - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+      - GF_PROVISIONING_ENABLED=true
+      - GF_LOG_LEVEL=info
+      - GF_METRICS_ENABLED=true
     depends_on:
       - prometheus
     networks:
@@ -221,6 +227,7 @@ volumes:
   prometheus_data:
   shared_data:
   log_cleanup_data:
+  grafana_data:
 
 
 networks:

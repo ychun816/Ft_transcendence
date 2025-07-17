@@ -59,8 +59,6 @@ if [ -z "$ELASTIC_PASSWORD" ]; then
 	exit 1
 fi
 
-export TZ="Europe/Paris"
-
 # === FONCTIONS UTILITAIRES ===
 log_message() {
 	local level="${2:-INFO}"
