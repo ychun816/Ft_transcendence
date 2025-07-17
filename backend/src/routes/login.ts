@@ -8,7 +8,7 @@ export const activeSessions = new Map<string, { userId: number; username: string
 
 const secretKey = process.env.COOKIE_SECRET;
 
-export async function handleLogIn(app: FastifyInstance, prisma: PrismaClient){
+export async function handleLogIn(app: FastifyInstance<any, any, any, any>, prisma: PrismaClient){
 	console.log("DEBUG LOGIN MANAGEMENT");
 	// app.register(cookie, {
 	// 	secret: secretKey,

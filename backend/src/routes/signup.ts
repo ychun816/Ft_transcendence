@@ -99,7 +99,7 @@ async function createUser(
 }
 
 export async function registerNewUser(
-	app: FastifyInstance,
+	app: FastifyInstance<any, any, any, any>,
 	prisma: PrismaClient
 ) {
 	app.post("/api/signup", async (request, reply) => {
