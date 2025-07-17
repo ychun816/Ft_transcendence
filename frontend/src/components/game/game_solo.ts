@@ -442,6 +442,113 @@ class Pong
         //APPEL DE L'API et lui envoyer l'interface data !
     }
 
+
+    cleanup(): void
+    {
+        console.log("🧹 Nettoyage des ressources du jeu...");
+        
+        // Nettoyer tous les timers et animations
+        this.clear_all_timers();
+        
+        // Arrêter le jeu
+        this.state.game_running = false;
+        this.state.is_paused = true;
+        this.state.count_down_active = false;
+        
+        // Réinitialiser les positions des éléments de jeu
+        this.ball.ball_x = this.config.canvas_width / 2;
+        this.ball.ball_y = this.config.canvas_height / 2;
+        this.ball.ball_dir_x = 0;
+        this.ball.ball_dir_y = 0;
+        
+        this.paddle.left_paddle_y = (this.config.canvas_height - this.config.paddle_height) / 2;
+        this.paddle.right_paddle_y = (this.config.canvas_height - this.config.paddle_height) / 2;
+        
+        // Réinitialiser les scores
+        this.update_score(0);
+        
+        // Nettoyer l'affichage
+        if (this.count_down) {
+            this.count_down.innerText = "";
+        }
+        
+        if (this.end_message) {
+            this.end_message.style.display = 'none';
+            this.end_message.textContent = '';
+        }
+        
+        // Nettoyer le canvas
+        this.ctx.clearRect(0, 0, this.config.canvas_width, this.config.canvas_height);
+        
+        console.log("✅ Nettoyage terminé");
+    }
+
+    back_to_menu(): void
+    {
+        console.log("🏠 Retour au menu principal...");
+        
+        // D'abord nettoyer les ressources
+        this.cleanup();
+        
+        // Réinitialiser les paramètres spécifiques au menu
+        this.state.restart_active = false;
+        this.state.ia_mode = false;
+        
+        // Réinitialiser les statistiques IA
+        this.ia.service = true;
+        this.ia.continue_flag = true;
+        this.ia.counter = 0;
+        this.ia.rebond = 0;
+        this.ia.random_move_1 = false;
+        this.ia.random_move_2 = false;
+        this.ia.move_flag = false;
+        this.ia.super_flag = true;
+        this.ia.random_paddle_move = false;
+        
+        // Réinitialiser les données de jeu
+        this.data.ia_mode = false;
+        this.data.winner = false;
+        this.data.score = 0;
+        this.data.score_adv = 0;
+        this.data.point_marque_moitie_up = 0;
+        this.data.point_marque_moitie_down = 0;
+        this.data.point_perdu_moitie_up = 0;
+        this.data.point_perdu_moitie_down = 0;
+        
+        // Réinitialiser les vitesses par défaut
+        this.config.ball_speed = 4.5 * (3/2);
+        this.config.paddle_speed = 7.5 * (3/2);
+        
+        console.log("✅ Retour au menu préparé");
+    }
+
+    destroy(): void
+    {
+        console.log("💥 Destruction de l'instance de jeu...");
+        
+        // D'abord effectuer le nettoyage standard
+        this.cleanup();
+        
+        // Supprimer tous les event listeners pour éviter les fuites mémoire
+        document.removeEventListener("keydown", this.handle_keydown);
+        document.removeEventListener("keyup", this.handle_keyup);
+        
+        // Nettoyer le canvas une dernière fois
+        this.ctx.clearRect(0, 0, this.config.canvas_width, this.config.canvas_height);
+        
+        // Réinitialiser les références aux éléments DOM
+        this.count_down = null as any;
+        this.end_message = null;
+        
+        // Vider l'objet keys_pressed
+        this.keys_pressed = {};
+        
+        // Marquer l'instance comme détruite (utile pour le debugging)
+        this.state.game_running = false;
+        
+        console.log("✅ Instance détruite");
+    }
+
     restart(): void
     {
         console.log("🔄 RESTART demandé");
@@ -1643,17 +1750,21 @@ class GamePong
 export class Game_solo
 {
     private current_game: Pong | null = null;
-    private restart_btn: HTMLButtonElement;
+    //private restart_btn: HTMLButtonElement;
     private canvas: HTMLCanvasElement; 
     private mode: 'solo' | 'versus';
+    //private back_to_menu_btn: HTMLButtonElement;
+
 
     constructor(mode : 'solo' | 'versus')
     {
         this.mode = mode;
         this.canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
-        this.restart_btn = document.getElementById("restartBtn") as HTMLButtonElement;
-        this.restart_btn.addEventListener('click', () => this.restart());
+        //this.restart_btn = document.getElementById("restartBtn") as HTMLButtonElement;
+        //this.restart_btn.addEventListener('click', () => this.restart());
         this.current_game = GamePong.create_game(this.canvas, this.mode);
+        //this.back_to_menu_btn = document.getElementById("#backToMenuBtn") as HTMLButtonElement;
+        //this.back_to_menu_btn.addEventListener('click', () => this.back_to_menu());
     }
 
     start_game_loop(): void
@@ -1667,6 +1778,30 @@ export class Game_solo
         if (this.current_game)
         {
             this.current_game.restart();
+        }
+    }
+
+    cleanup()
+    {
+        if (this.current_game)
+        {
+            this.current_game.cleanup();
+        }
+    }    
+    
+    back_to_menu()
+    {
+        if (this.current_game)
+        {
+            this.current_game.back_to_menu();
+        }
+    }    
+    
+    destroy()
+    {
+        if (this.current_game)
+        {
+            this.current_game.destroy();
         }
     }
 }

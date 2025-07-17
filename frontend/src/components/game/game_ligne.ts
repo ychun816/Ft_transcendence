@@ -329,6 +329,93 @@ class Pong
         this.state.game_running = false;
     }
 
+
+    cleanup(): void
+    {
+        console.log("🧹 Nettoyage des ressources du jeu...");
+        
+        // Nettoyer tous les timers et animations
+        this.clear_all_timers();
+        
+        // Arrêter le jeu
+        this.state.game_running = false;
+        this.state.is_paused = true;
+        this.state.count_down_active = false;
+        
+        // Réinitialiser les positions des éléments de jeu
+        this.ball.ball_x = this.config.canvas_width / 2;
+        this.ball.ball_y = this.config.canvas_height / 2;
+        this.ball.ball_dir_x = 0;
+        this.ball.ball_dir_y = 0;
+
+        this.paddle.paddles.p1_y = (this.config.canvas_height - this.config.paddle_height) / 4,
+        this.paddle.paddles.p2_y = 3 * (this.config.canvas_height - this.config.paddle_height) / 4,
+        this.paddle.paddles.p3_y = (this.config.canvas_height - this.config.paddle_height) / 4,
+        this.paddle.paddles.p4_y = 3 * (this.config.canvas_height - this.config.paddle_height) / 4,
+        
+        // Réinitialiser les scores
+        this.update_score(0);
+        
+        // Nettoyer l'affichage
+        if (this.count_down) {
+            this.count_down.innerText = "";
+        }
+        
+        if (this.end_message) {
+            this.end_message.style.display = 'none';
+            this.end_message.textContent = '';
+        }
+        
+        // Nettoyer le canvas
+        this.ctx.clearRect(0, 0, this.config.canvas_width, this.config.canvas_height);
+        
+        console.log("✅ Nettoyage terminé");
+    }
+
+    back_to_menu(): void
+    {
+        console.log("🏠 Retour au menu principal...");
+        
+        // D'abord nettoyer les ressources
+        this.cleanup();
+        
+        // Réinitialiser les paramètres spécifiques au menu
+        this.state.restart_active = false;        
+        
+        // Réinitialiser les vitesses par défaut
+        this.config.ball_speed = 4.5 * (3/2);
+        this.config.paddle_speed = 7.5 * (3/2);
+        
+        console.log("✅ Retour au menu préparé");
+    }
+
+    destroy(): void
+    {
+        console.log("💥 Destruction de l'instance de jeu...");
+        
+        // D'abord effectuer le nettoyage standard
+        this.cleanup();
+        
+        // Supprimer tous les event listeners pour éviter les fuites mémoire
+        document.removeEventListener("keydown", this.handle_keydown);
+        document.removeEventListener("keyup", this.handle_keyup);
+        
+        // Nettoyer le canvas une dernière fois
+        this.ctx.clearRect(0, 0, this.config.canvas_width, this.config.canvas_height);
+        
+        // Réinitialiser les références aux éléments DOM
+        this.count_down = null as any;
+        this.end_message = null;
+        
+        // Vider l'objet keys_pressed
+        this.keys_pressed = {};
+        
+        // Marquer l'instance comme détruite (utile pour le debugging)
+        this.state.game_running = false;
+        
+        console.log("✅ Instance détruite");
+    }
+
     restart(): void
     {
         console.log("🔄 RESTART demandé");
@@ -1000,6 +1087,30 @@ export class Game_ligne
         if (this.current_game)
         {
             this.current_game.restart();
+        }
+    }
+
+    cleanup()
+    {
+        if (this.current_game)
+        {
+            this.current_game.cleanup();
+        }
+    }
+
+    back_to_menu()
+    {
+        if (this.current_game)
+        {
+            this.current_game.back_to_menu();
+        }
+    }    
+    
+    destroy()
+    {
+        if (this.current_game)
+        {
+            this.current_game.destroy();
         }
     }
 }
