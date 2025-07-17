@@ -158,7 +158,7 @@ export function createGamePage(): HTMLElement {
 					</div>`).join("")}
 				</div>
 				<div class="mt-6 text-center">
-					<button id="startTournoiMatchmaking" class="bg-gradient-to-r from-green-400 from-opacity-20 to-blue-500 to-opacity-20 hover:from-green-400 hover:from-opacity-40 hover:to-blue-500 hover:to-opacity-40 text-white font-bold py-4 px-8 rounded-xl border border-green-400 border-opacity-50 transition-all duration-300 transform hover:scale-105">
+					<button id="startTournoiMatchmaking" class="hidden bg-gradient-to-r from-green-400 from-opacity-20 to-blue-500 to-opacity-20 hover:from-green-400 hover:from-opacity-40 hover:to-blue-500 hover:to-opacity-40 text-white font-bold py-4 px-8 rounded-xl border border-green-400 border-opacity-50 transition-all duration-300 transform hover:scale-105">
 						🎯 Lancer Matchmaking (1 vs 3, 2 vs 4)
 					</button>
 				</div>
@@ -317,7 +317,7 @@ export function createGamePage(): HTMLElement {
 		const menu = page.querySelector("#menu") as HTMLElement;
 		const menuLocal = page.querySelector("#menu_local") as HTMLElement;
 		const menuLigne = page.querySelector("#menu_ligne") as HTMLElement;
-		const menuTournoi = page.querySelector("#menu_tournoi") as HTMLElement;
+		//const menuTournoi = page.querySelector("#menu_tournoi") as HTMLElement;
 		const game = page.querySelector("#game") as HTMLElement;
 		const restart = page.querySelector("#restartBtn") as HTMLButtonElement;
 		const control1 = page.querySelector("#control_1") as HTMLElement;
@@ -329,7 +329,7 @@ export function createGamePage(): HTMLElement {
 		menuLocal.style.display = "none";
 		menuLigne.style.display = "none";
 		game.style.display = "none";
-        menuTournoi.style.display = "none";
+        //menuTournoi.style.display = "none";
 		menu.style.display = "block";
 		
 		// Cacher les contrôles et le bouton restart
@@ -370,9 +370,11 @@ export function createGamePage(): HTMLElement {
 		const controlPlayer2 = page.querySelector("#control_player_2") as HTMLElement;
 		const controlPlayer2Command = page.querySelector("#control_player_2_command") as HTMLElement;
 
-		const menuTournoi = page.querySelector("#menu_tournoi") as HTMLElement;
-        const backToMainBtn3 = page.querySelector('#backToMainBtn3') as HTMLButtonElement;
-        const startTournoiBtn = page.querySelector('#startTournoiMatchmaking') as HTMLButtonElement;
+		// const menuTournoi = page.querySelector("#menu_tournoi") as HTMLElement;
+        // const backToMainBtn3 = page.querySelector('#backToMainBtn3') as HTMLButtonElement;
+        // const startTournoiBtn = page.querySelector('#startTournoiMatchmaking') as HTMLButtonElement;
+		// const tournoiInputs = page.querySelectorAll('#menu_tournoi input') as NodeListOf<HTMLInputElement>;
+
 
 
 		
@@ -403,38 +405,36 @@ export function createGamePage(): HTMLElement {
 			resetUIState();
 		}
 
-        function startTournoi()
-        {
-            cleanupCurrentGame();
+        // function startTournoi()
+        // {
+        //     cleanupCurrentGame();
 
-            menuLocal.style.display = "none";
-			menuLigne.style.display = "none";
-            menuTournoi.style.display = "block";
+        //     menuLocal.style.display = "none";
+		// 	menuLigne.style.display = "none";
+        //     menuTournoi.style.display = "block";
 
-            startTournoiBtn.addEventListener('click', () => {
-            // Récupère les noms entrés
-            const inputs = page.querySelectorAll('#menu_tournoi input');
-            const playerNames: string[] = [];
+		// 	tournoiInputs.forEach(input => {
+		// 		input.addEventListener('input', checkAllNamesFilled);
+		// 	});
 
-            inputs.forEach((input) => {
-                const name = (input as HTMLInputElement).value.trim();
-                playerNames.push(name || "Joueur inconnu");
-            });
+        //     startTournoiBtn.addEventListener('click', () =>
+		// 	{
+		// 		// Récupère les noms entrés
+		// 		const playerNames: string[] = [];
 
-            playerNames.forEach(() => {
-                if (playerNames[] == "Joueur inconnu")
-                    
-            })
+		// 		tournoiInputs.forEach((input) =>
+		// 		{
+		// 			const name = input.value.trim();
+		// 			playerNames.push(name || "Joueur inconnu");
+        //     	});
+		// 	});
+		// }
 
-            // // Affiche les matchs prévus
-            // console.log("Match 1 :", playerNames[0], "vs", playerNames[2]);
-            // console.log("Match 2 :", playerNames[1], "vs", playerNames[3]);
-
-            // TODO : ici, tu peux démarrer le match 1 dans une nouvelle fonction ou page.
-            // Exemple : startMatch(playerNames[0], playerNames[2]);
-            
-            });
-        }
+		// function checkAllNamesFilled()
+		// {
+		// 	const allFilled = Array.from(tournoiInputs).every(input => input.value.trim() !== '');
+		// 	startTournoiBtn.style.display = allFilled ? 'inline-block' : 'none';
+		// }
 		
 		/**
 		 * Fonction pour démarrer un jeu solo ou versus
@@ -539,7 +539,7 @@ export function createGamePage(): HTMLElement {
 		
 		backToMainBtn.addEventListener('click', () => backToMainMenu());
 		backToMainBtn2.addEventListener('click', () => backToMainMenu());
-        backToMainBtn3.addEventListener('click', () => backToMainMenu());
+        //backToMainBtn3.addEventListener('click', () => backToMainMenu());
 		
 		// Event listener pour le bouton "Retour au menu" pendant le jeu
 		backToMenuBtn.addEventListener('click', () => backToMainMenu());
@@ -551,7 +551,7 @@ export function createGamePage(): HTMLElement {
 		soloLigneBtn.addEventListener('click', () => startGameLigneSolo());
 		multiBtn.addEventListener('click', () => startGameMulti());
 
-        tournoiBtn.addEventListener('click', () => startTournoi());
+        //tournoiBtn.addEventListener('click', () => startTournoi());
         // startTournoiBtn.addEventListener('click', () => {
         // // Récupère les noms entrés
         // const inputs = page.querySelectorAll('#menu_tournoi input');
