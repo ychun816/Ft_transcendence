@@ -7,6 +7,8 @@ export function createGamePage(): HTMLElement {
 	const page = document.createElement("div");
 	page.className = "min-h-screen bg-gray-900 text-white font-mono overflow-hidden";
 
+	let currentGame: Game_solo | Game_ligne | null = null;
+
 	const renderContent = () => {
 		page.innerHTML = `
 		<style>
@@ -100,10 +102,10 @@ export function createGamePage(): HTMLElement {
 				</button>
 				<h2 class="text-3xl font-bold text-blue-400 mb-8 text-center">Mode de Jeu</h2>
 				<div class="flex flex-col gap-4">
-					<button id="localBtn" class="group relative bg-gradient-to-r from-green-400 from-opacity-20 to-blue-400 to-opacity-20 hover:from-green-400 hover:from-opacity-40 hover:to-blue-400 hover:to-opacity-40 text-white font-bold py-4 px-8 rounded-xl border border-green-400 border-opacity-50 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl">
+					<button id="localBtn" class="group relative bg-gradient-to-r from-green-400 from-opacity-20 to-blue-700 to-opacity-20 hover:from-green-400 hover:from-opacity-40 hover:to-blue-400 hover:to-opacity-40 text-white font-bold py-4 px-8 rounded-xl border border-green-400 border-opacity-50 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl">
 						<span class="relative z-10">🎮 Jouer en local</span>
 					</button>
-					<button id="ligneBtn" class="group relative bg-gradient-to-r from-purple-400 from-opacity-20 to-pink-400 to-opacity-20 hover:from-purple-400 hover:from-opacity-40 hover:to-pink-400 hover:to-opacity-40 text-white font-bold py-4 px-8 rounded-xl border border-purple-400 border-opacity-50 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl">
+					<button id="ligneBtn" class="group relative bg-gradient-to-r from-purple-400 from-opacity-20 to-pink-700 to-opacity-20 hover:from-purple-400 hover:from-opacity-40 hover:to-pink-400 hover:to-opacity-40 text-white font-bold py-4 px-8 rounded-xl border border-purple-400 border-opacity-50 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl">
 						<span class="relative z-10">🌐 Jouer en ligne</span>
 					</button>
 				</div>
@@ -116,15 +118,17 @@ export function createGamePage(): HTMLElement {
 				</button>
 				<h2 class="text-3xl font-bold text-green-400 mb-8 text-center">En Local</h2>
 				<div class="flex flex-col gap-4">
-					<button id="soloBtn" class="bg-gradient-to-r from-orange-500 from-opacity-20 to-red-500 to-opacity-20 hover:from-orange-500 hover:from-opacity-40 hover:to-red-500 hover:to-opacity-40 text-white font-bold py-4 px-8 rounded-xl border border-orange-500 border-opacity-50 transition-all duration-300 transform hover:scale-105">
+					<button id="soloBtn" class="bg-gradient-to-r from-orange-300 from-opacity-20 to-red-500 to-opacity-20 hover:from-orange-500 hover:from-opacity-40 hover:to-red-500 hover:to-opacity-40 text-white font-bold py-4 px-8 rounded-xl border border-orange-500 border-opacity-50 transition-all duration-300 transform hover:scale-105">
 						🤖 Solo (vs IA)
 					</button>
-					<button id="versusBtn" class="bg-gradient-to-r from-green-500 from-opacity-20 to-teal-500 to-opacity-20 hover:from-green-500 hover:from-opacity-40 hover:to-teal-500 hover:to-opacity-40 text-white font-bold py-4 px-8 rounded-xl border border-green-500 border-opacity-50 transition-all duration-300 transform hover:scale-105">
+					<button id="versusBtn" class="bg-gradient-to-r from-green-400 from-opacity-20 to-teal-500 to-opacity-20 hover:from-green-500 hover:from-opacity-40 hover:to-teal-500 hover:to-opacity-40 text-white font-bold py-4 px-8 rounded-xl border border-green-500 border-opacity-50 transition-all duration-300 transform hover:scale-105">
 						👥 Versus (2 joueurs)
+					</button>
+					<button id="tournoiBtn" class="bg-gradient-to-r from-yellow-300 from-opacity-20 to-orange-500 to-opacity-20 hover:from-yellow-500 hover:from-opacity-40 hover:to-orange-500 hover:to-opacity-40 text-white font-bold py-4 px-8 rounded-xl border border-yellow-500 border-opacity-50 transition-all duration-300 transform hover:scale-105">
+						🏆 Tournoi
 					</button>
 				</div>
 			</div>
-			
 			<!-- Menu en ligne -->
 			<div id="menu_ligne" class="hidden bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-8 border border-purple-400 border-opacity-30">
 				<button id="backToMainBtn2" class="mb-4 bg-gradient-to-r from-gray-500 from-opacity-30 to-gray-600 to-opacity-30 hover:from-gray-500 hover:from-opacity-50 hover:to-gray-600 hover:to-opacity-50 text-white font-bold py-2 px-4 rounded-lg border border-gray-500 border-opacity-50 transition-all duration-300 transform hover:scale-105">
@@ -138,12 +142,27 @@ export function createGamePage(): HTMLElement {
 					<button id="multiBtn" class="bg-gradient-to-r from-purple-500 from-opacity-20 to-pink-500 to-opacity-20 hover:from-purple-500 hover:from-opacity-40 hover:to-pink-500 hover:to-opacity-40 text-white font-bold py-4 px-8 rounded-xl border border-purple-500 border-opacity-50 transition-all duration-300 transform hover:scale-105">
 						🎯 Multijoueur
 					</button>
-					<button id="tournoiBtn" class="bg-gradient-to-r from-yellow-500 from-opacity-20 to-orange-500 to-opacity-20 hover:from-yellow-500 hover:from-opacity-40 hover:to-orange-500 hover:to-opacity-40 text-white font-bold py-4 px-8 rounded-xl border border-yellow-500 border-opacity-50 transition-all duration-300 transform hover:scale-105">
-						🏆 Tournoi
+				</div>
+			</div>
+            <!-- Interface Tournoi -->
+			<div id="menu_tournoi" class="hidden bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-8 border border-purple-400 border-opacity-30">
+				<button id="backToMainBtn3" class="mb-4 bg-gradient-to-r from-gray-500 from-opacity-30 to-gray-600 to-opacity-30 hover:from-gray-500 hover:from-opacity-50 hover:to-gray-600 hover:to-opacity-50 text-white font-bold py-2 px-4 rounded-lg border border-gray-500 border-opacity-50 transition-all duration-300 transform hover:scale-105">
+					← Retour au menu principal
+				</button>
+				<h2 class="text-3xl font-bold text-yellow-400 mb-8 text-center">🏆 Tournoi - Entrée des joueurs</h2>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+					${[1,2,3,4].map(i => `
+					<div class="flex flex-col items-center bg-gray-700 bg-opacity-30 rounded-xl p-4 border border-yellow-400 border-opacity-30">
+						<img src="/assets/avatar${i}.png" alt="Joueur ${i}" class="w-24 h-24  mb-4">
+						<input type="text" placeholder="Nom Joueur ${i}" class="px-4 py-2 text-black rounded-lg w-full text-center focus:outline-none">
+					</div>`).join("")}
+				</div>
+				<div class="mt-6 text-center">
+					<button id="startTournoiMatchmaking" class="bg-gradient-to-r from-green-400 from-opacity-20 to-blue-500 to-opacity-20 hover:from-green-400 hover:from-opacity-40 hover:to-blue-500 hover:to-opacity-40 text-white font-bold py-4 px-8 rounded-xl border border-green-400 border-opacity-50 transition-all duration-300 transform hover:scale-105">
+						🎯 Lancer Matchmaking (1 vs 3, 2 vs 4)
 					</button>
 				</div>
 			</div>
-			
 			<!-- Zone de jeu -->
 			<div id="game" class="hidden w-full max-w-6xl">
 				<!-- Bouton retour -->
@@ -160,10 +179,10 @@ export function createGamePage(): HTMLElement {
 				<div id="scoreboard" class="bg-gray-800 bg-opacity-70 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-blue-400 border-opacity-20">
 					<div class="grid grid-cols-2 gap-8 text-center">
 						<div class="bg-gradient-to-r from-blue-500 from-opacity-20 to-cyan-500 to-opacity-20 rounded-xl p-4 border border-blue-500 border-opacity-30">
-							<p id="scoreP1" class="text-2xl font-bold text-blue-400">Joueur 1 : 0</p>
+							<p id="scoreP1" class="text-2xl font-bold text-blue-100">Joueur 1 : 0</p>
 						</div>
-						<div class="bg-gradient-to-r from-red-500 from-opacity-20 to-orange-500 to-opacity-20 rounded-xl p-4 border border-red-500 border-opacity-30">
-							<p id="scoreP2" class="text-2xl font-bold text-pink-400">Joueur 2 : 0</p>
+						<div class="bg-gradient-to-r from-pink-500 from-opacity-20 to-pink-500 to-opacity-20 rounded-xl p-4 border border-red-500 border-opacity-30">
+							<p id="scoreP2" class="text-2xl font-bold text-pink-100">Joueur 2 : 0</p>
 						</div>
 					</div>
 				</div>
@@ -245,17 +264,87 @@ export function createGamePage(): HTMLElement {
 
 	page.addEventListener("click", (e) => {
 		/*
-    This function is called when the user clicks on a button.
-    It finds the targeted route and navigates to it.
-    */
+		Cette fonction est appelée quand l'utilisateur clique sur un bouton.
+		Elle trouve la route ciblée et navigue vers elle.
+		*/
 		const target = e.target as HTMLElement;
 		const route = target.getAttribute("data-route");
 		if (route) {
+			// Nettoyer le jeu en cours avant de naviguer
+			cleanupCurrentGame();
+			
 			import("../router/router.js").then(({ router }) => {
 				router.navigate(route);
 			});
 		}
 	});
+
+	/**
+	 * Fonction pour nettoyer proprement le jeu en cours
+	 * Cette fonction s'assure que toutes les ressources sont libérées
+	 */
+	function cleanupCurrentGame(): void
+    {
+		if (currentGame)
+        {
+			console.log('Nettoyage du jeu en cours...');
+			
+			//Vérifier si la méthode cleanup existe et l'appeler
+			if (typeof currentGame.cleanup === 'function') {
+				currentGame.cleanup();
+			}
+			
+			//Vérifier si la méthode back_to_menu existe et l'appeler
+			if (typeof currentGame.back_to_menu === 'function') {
+				currentGame.back_to_menu();
+			}
+			
+			//Vérifier si la méthode destroy existe et l'appeler
+			if (typeof currentGame.destroy === 'function') {
+				currentGame.destroy();
+			}
+			
+			//Réinitialiser la référence
+			currentGame = null;
+		}
+	}
+
+	/**
+	 * Fonction pour réinitialiser l'interface utilisateur
+	 * Cette fonction remet tous les éléments dans leur état initial
+	 */
+	function resetUIState(): void {
+		const menu = page.querySelector("#menu") as HTMLElement;
+		const menuLocal = page.querySelector("#menu_local") as HTMLElement;
+		const menuLigne = page.querySelector("#menu_ligne") as HTMLElement;
+		const menuTournoi = page.querySelector("#menu_tournoi") as HTMLElement;
+		const game = page.querySelector("#game") as HTMLElement;
+		const restart = page.querySelector("#restartBtn") as HTMLButtonElement;
+		const control1 = page.querySelector("#control_1") as HTMLElement;
+		const control2 = page.querySelector("#control_2") as HTMLElement;
+		const controlPlayer2 = page.querySelector("#control_player_2") as HTMLElement;
+		const controlPlayer2Command = page.querySelector("#control_player_2_command") as HTMLElement;
+		
+		// Cacher tous les menus sauf le menu principal
+		menuLocal.style.display = "none";
+		menuLigne.style.display = "none";
+		game.style.display = "none";
+        menuTournoi.style.display = "none";
+		menu.style.display = "block";
+		
+		// Cacher les contrôles et le bouton restart
+		restart.style.display = "none";
+		control1.style.display = "none";
+		control2.style.display = "none";
+		
+		// Remettre les textes par défaut
+		if (controlPlayer2) {
+			controlPlayer2.textContent = 'Joueur 2';
+		}
+		if (controlPlayer2Command) {
+			controlPlayer2Command.textContent = 'ARROW UP / ARROW DOWN';
+		}
+	}
 
 	function initializeGameLogic() {
 		const menu = page.querySelector("#menu") as HTMLElement;
@@ -280,8 +369,20 @@ export function createGamePage(): HTMLElement {
 		const control2 = page.querySelector("#control_2") as HTMLElement;
 		const controlPlayer2 = page.querySelector("#control_player_2") as HTMLElement;
 		const controlPlayer2Command = page.querySelector("#control_player_2_command") as HTMLElement;
+
+		const menuTournoi = page.querySelector("#menu_tournoi") as HTMLElement;
+        const backToMainBtn3 = page.querySelector('#backToMainBtn3') as HTMLButtonElement;
+        const startTournoiBtn = page.querySelector('#startTournoiMatchmaking') as HTMLButtonElement;
+
+
 		
+		/**
+		 * Fonction pour choisir le mode de jeu (local ou ligne)
+		 */
 		function chooseMode(mode: 'local' | 'ligne'): void {
+			// Nettoyer le jeu en cours avant de changer de mode
+			cleanupCurrentGame();
+			
 			menu.style.display = "none";
 			if (mode === 'local') {
 				menuLocal.style.display = "block";
@@ -290,64 +391,192 @@ export function createGamePage(): HTMLElement {
 			}
 		}
 		
+		/**
+		 * Fonction pour retourner au menu principal
+		 * Cette fonction nettoie le jeu et remet l'interface dans son état initial
+		 */
 		function backToMainMenu(): void {
-			menuLocal.style.display = "none";
-			menuLigne.style.display = "none";
-			game.style.display = "none";
-			menu.style.display = "block";
-		}
-		
-		function startGameSolo(mode: 'solo' | 'versus'): void {
-			const gameSolo = new Game_solo(mode);
+			// Nettoyer le jeu en cours
+			cleanupCurrentGame();
 			
+			// Réinitialiser l'interface utilisateur
+			resetUIState();
+		}
+
+        function startTournoi()
+        {
+            cleanupCurrentGame();
+
+            menuLocal.style.display = "none";
+			menuLigne.style.display = "none";
+            menuTournoi.style.display = "block";
+
+            startTournoiBtn.addEventListener('click', () => {
+            // Récupère les noms entrés
+            const inputs = page.querySelectorAll('#menu_tournoi input');
+            const playerNames: string[] = [];
+
+            inputs.forEach((input) => {
+                const name = (input as HTMLInputElement).value.trim();
+                playerNames.push(name || "Joueur inconnu");
+            });
+
+            playerNames.forEach(() => {
+                if (playerNames[] == "Joueur inconnu")
+                    
+            })
+
+            // // Affiche les matchs prévus
+            // console.log("Match 1 :", playerNames[0], "vs", playerNames[2]);
+            // console.log("Match 2 :", playerNames[1], "vs", playerNames[3]);
+
+            // TODO : ici, tu peux démarrer le match 1 dans une nouvelle fonction ou page.
+            // Exemple : startMatch(playerNames[0], playerNames[2]);
+            
+            });
+        }
+		
+		/**
+		 * Fonction pour démarrer un jeu solo ou versus
+		 */
+		function startGameSolo(mode: 'solo' | 'versus'): void {
+			// Nettoyer le jeu précédent s'il existe
+			cleanupCurrentGame();
+			
+			// Créer une nouvelle instance du jeu
+			currentGame = new Game_solo(mode);
+			
+			// Changer l'affichage
 			menuLocal.style.display = "none";
 			menuLigne.style.display = "none";
 			game.style.display = "block";
 			restart.style.display = "block";
 			
+			// Configurer l'interface selon le mode
 			if (mode === "solo") {
 				controlPlayer2.textContent = 'IA';
 				controlPlayer2Command.textContent = "";
+			} else {
+				controlPlayer2.textContent = 'Joueur 2';
+				controlPlayer2Command.textContent = 'ARROW UP / ARROW DOWN';
 			}
+			
 			control1.style.display = 'block';
 			
-			gameSolo.start_game_loop();
+			//Configurer le bouton restart
+			restart.onclick = () =>
+            {
+				if (currentGame)
+                {
+					// Nettoyer le jeu actuel
+					cleanupCurrentGame();
+					
+					// Créer une nouvelle instance
+					currentGame = new Game_solo(mode);
+					currentGame.start_game_loop();
+                }
+			};
+			
+			// Démarrer le jeu
+			currentGame.start_game_loop();
 		}
 		
+		/**
+		 * Fonction pour démarrer un jeu multijoueur
+		 */
 		function startGameMulti(): void {
-			const gameLigne = new Game_ligne();
+			// Nettoyer le jeu précédent s'il existe
+			cleanupCurrentGame();
 			
+			// Créer une nouvelle instance du jeu
+			currentGame = new Game_ligne();
+			
+			// Changer l'affichage
 			menuLigne.style.display = "none";
 			game.style.display = "block";
 			
 			control2.style.display = 'block';
-			gameLigne.start_game_loop();
+			
+			// Démarrer le jeu
+			currentGame.start_game_loop();
 		}
 		
+		/**
+		 * Fonction pour démarrer un jeu solo en ligne
+		 */
 		function startGameLigneSolo(): void {
-			const gameSolo = new Game_solo('solo');
+			// Nettoyer le jeu précédent s'il existe
+			cleanupCurrentGame();
 			
+			// Créer une nouvelle instance du jeu
+			currentGame = new Game_solo('solo');
+			
+			// Changer l'affichage
 			menuLocal.style.display = "none";
 			menuLigne.style.display = "none";
 			game.style.display = "block";
 			restart.style.display = "block";
 			
-			gameSolo.start_game_loop();
+			// Configurer le bouton restart
+			restart.onclick = () => {
+				if (currentGame) {
+					// Nettoyer le jeu actuel
+					cleanupCurrentGame();
+					
+					// Créer une nouvelle instance
+					currentGame = new Game_solo('solo');
+					currentGame.start_game_loop();
+				}
+			};
+			
+			// Démarrer le jeu
+			currentGame.start_game_loop();
 		}
 		
+		// Event listeners pour la navigation
 		localBtn.addEventListener('click', () => chooseMode('local'));
 		ligneBtn.addEventListener('click', () => chooseMode('ligne'));
 		
 		backToMainBtn.addEventListener('click', () => backToMainMenu());
 		backToMainBtn2.addEventListener('click', () => backToMainMenu());
+        backToMainBtn3.addEventListener('click', () => backToMainMenu());
+		
+		// Event listener pour le bouton "Retour au menu" pendant le jeu
 		backToMenuBtn.addEventListener('click', () => backToMainMenu());
 		
+		// Event listeners pour démarrer les jeux
 		soloBtn.addEventListener('click', () => startGameSolo('solo'));
 		versusBtn.addEventListener('click', () => startGameSolo('versus'));
 		
 		soloLigneBtn.addEventListener('click', () => startGameLigneSolo());
 		multiBtn.addEventListener('click', () => startGameMulti());
+
+        tournoiBtn.addEventListener('click', () => startTournoi());
+        // startTournoiBtn.addEventListener('click', () => {
+        // // Récupère les noms entrés
+        // const inputs = page.querySelectorAll('#menu_tournoi input');
+        // const playerNames: string[] = [];
+
+        // inputs.forEach((input) => {
+        //     const name = (input as HTMLInputElement).value.trim();
+        //     playerNames.push(name || "Joueur inconnu");
+        // });
+
+        // // Affiche les matchs prévus
+        // console.log("Match 1 :", playerNames[0], "vs", playerNames[2]);
+        // console.log("Match 2 :", playerNames[1], "vs", playerNames[3]);
+
+        // // TODO : ici, tu peux démarrer le match 1 dans une nouvelle fonction ou page.
+        // // Exemple : startMatch(playerNames[0], playerNames[2]);
+
+        // });
+
 	}
+
+	// Nettoyer le jeu quand la page est détruite
+	window.addEventListener('beforeunload', () => {
+		cleanupCurrentGame();
+	});
 
 	return page;
 }
