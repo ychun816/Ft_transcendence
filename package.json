@@ -24,7 +24,10 @@
 		"@fastify/websocket": "^11.1.0",
 		"@prisma/client": "^6.10.0",
 		"@tailwindcss/postcss": "^4.1.11",
+		"@types/qrcode": "^1.5.5",
+		"@types/speakeasy": "^2.0.10",
 		"bcrypt": "^6.0.0",
+		"qrcode": "^1.5.4",
 		"env-schema": "^6.0.1",
 		"esbuild": "^0.25.5",
 		"fastify": "^5.4.0",
@@ -38,6 +41,7 @@
 		"prisma": "^6.10.0",
 		"rollup": "^4.43.0",
 		"source-map-js": "^1.2.1",
+		"speakeasy": "^2.0.0",
 		"tinyglobby": "^0.2.14",
 		"vite": "^7.0.0"
 	},
