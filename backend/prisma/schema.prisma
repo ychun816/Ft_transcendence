@@ -18,7 +18,6 @@ model User {
   avatarUrl				String?
   isTwoFactorEnabled	Boolean		@default(false)
   twoFactorSecret		String?
-  twoFactorEnabled		Boolean		@default(false)
   twoFactorEnabledAt	DateTime?
   gamesPlayed				Int			@default(0)
   losses				Int			@default(0)
