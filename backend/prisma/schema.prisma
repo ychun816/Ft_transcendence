@@ -17,8 +17,11 @@ model User {
   passwordHash			String
   avatarUrl				String?
   isTwoFactorEnabled	Boolean		@default(false)
+  twoFactorCode      String?
   twoFactorSecret		String?
   twoFactorEnabledAt	DateTime?
+  twoFactorCodeExpires DateTime?
+// The twoFactorCodeExpires field is used to store the expiration time of the two-factor
   gamesPlayed				Int			@default(0)
   losses				Int			@default(0)
   wins					Int			@default(0)

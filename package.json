@@ -27,7 +27,6 @@
 		"@types/qrcode": "^1.5.5",
 		"@types/speakeasy": "^2.0.10",
 		"bcrypt": "^6.0.0",
-		"qrcode": "^1.5.4",
 		"env-schema": "^6.0.1",
 		"esbuild": "^0.25.5",
 		"fastify": "^5.4.0",
