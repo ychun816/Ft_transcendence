@@ -21,7 +21,7 @@ model User {
   twoFactorSecret		String?
   twoFactorEnabledAt	DateTime?
   twoFactorCodeExpires DateTime?
-// The twoFactorCodeExpires field is used to store the expiration time of the two-factor
+  twoFactorType String? // 'email' or 'totp'
   gamesPlayed				Int			@default(0)
   losses				Int			@default(0)
   wins					Int			@default(0)
