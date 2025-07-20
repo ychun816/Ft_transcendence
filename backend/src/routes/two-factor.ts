@@ -7,73 +7,129 @@ import { FastifyInstance } from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { sendEmail } from '../sendEmail';
+import speakeasy from 'speakeasy'; // for TOTP
 
 const prisma = new PrismaClient();
 
-export async function twoFactorRoutes(fastify: FastifyInstance) {
-  // Disable 2FA
-  fastify.post('/api/2fa/disable', async (request, reply) => {
-    try {
-      const { userId, password } = request.body as { userId: number; password: string };
-      const user = await prisma.user.findUnique({ where: { id: userId } });
-      if (!user) {
-        return reply.status(404).send({ error: 'User not found' });
+export async function twoFactorRoutes(fastify: FastifyInstance) 
+{
+  // ===============================
+  // Disable 2FA for a user
+  // ===============================
+  fastify.post('/api/2fa/disable', async (request, reply) => 
+  {
+      try 
+      {
+        const { userId, password } = request.body as { userId: number; password: string };
+
+        // look up for user by ID
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (!user) 
+          return reply.status(404).send({ error: 'User not found' });
+
+        // validate user password
+        const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+        if (!isValidPassword) 
+          return reply.status(400).send({ error: 'Invalid password' });
+
+        // disable 2FA
+        // clear any existing 2FA code info
+        await prisma.user.update(
+        {
+          where: { id: userId },
+          data: {
+            isTwoFactorEnabled: false,
+            twoFactorCode: null,
+            twoFactorCodeExpires: null,
+            twoFactorSecret: null,
+            twoFactorEnabledAt: null,
+            twoFactorType: null}
+        });
+        return reply.send({ message: '2FA successfully disabled' });
+      } catch (error) 
+      {
+        console.error('2FA disable error:', error);
+        return reply.status(500).send({ error: 'Internal server error' });
       }
-      const isValidPassword = await bcrypt.compare(password, user.passwordHash);
-      if (!isValidPassword) {
-        return reply.status(400).send({ error: 'Invalid password' });
-      }
-      await prisma.user.update({
-        where: { id: userId },
-        data: {
-          isTwoFactorEnabled: false,
-          twoFactorCode: null,
-          twoFactorCodeExpires: null,
-          twoFactorEnabledAt: null
-        }
-      });
-      return reply.send({ message: '2FA disabled successfully' });
-    } catch (error) {
-      console.error('2FA disable error:', error);
-      return reply.status(500).send({ error: 'Internal server error' });
-    }
   });
 
-  // Login with 2FA (email code only)
-  fastify.post('/api/2fa/login', async (request, reply) => {
-    try {
+  // ===============================
+  // Login endpoint (with 2FA check)
+  // ===============================
+  fastify.post('/api/2fa/login', async (request, reply) => 
+  {
+    try 
+    {
       const { username, password, twoFactorCode } = request.body as {
         username: string;
         password: string;
         twoFactorCode: string;
       };
+
+      // Find user by username
       const user = await prisma.user.findUnique({ where: { username } });
-      if (!user) {
+      if (!user) 
         return reply.status(400).send({ error: 'Invalid credentials' });
-      }
+
+      // Validate password
       const isValidPassword = await bcrypt.compare(password, user.passwordHash);
-      if (!isValidPassword) {
+      if (!isValidPassword) 
         return reply.status(400).send({ error: 'Invalid credentials' });
-      }
-      if (user.isTwoFactorEnabled) {
-        if (!user.twoFactorCode || !user.twoFactorCodeExpires) {
-          return reply.status(400).send({ error: '2FA code not requested' });
+
+      // If 2FA is enabled -> validate the code
+      if (user.isTwoFactorEnabled) 
+      {
+        if (user.twoFactorType === 'email') 
+        {
+          if (!user.twoFactorCode || !user.twoFactorCodeExpires) 
+          {
+            return reply.status(400).send({ error: '2FA code not requested' });
+          }
+          
+          //store the current time -> check if expire
+          const now = new Date();
+
+          // check if code match
+          // check if code not expired
+          if (user.twoFactorCode !== twoFactorCode || user.twoFactorCodeExpires < now) 
+          {
+            return reply.status(400).send({ error: 'Invalid or expired 2FA code' });
+          }
+
+          // Clear code after successful login
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { twoFactorCode: null, twoFactorCodeExpires: null }
+          });
+        } 
+        else if (user.twoFactorType === 'totp') 
+        {
+          if (!user.twoFactorSecret) 
+            return reply.status(400).send({ error: '2FA secret missing' });
+
+          const verified = speakeasy.totp.verify({
+            secret: user.twoFactorSecret,
+            encoding: 'base32',
+            token: twoFactorCode,
+            window: 1
+          });
+
+          if (!verified)
+            return reply.status(400).send({ error: 'Invalid TOTP code' });
+          // else
+          //   return reply.status(400).send({ error: '2FA type not set' });
         }
-        const now = new Date();
-        if (user.twoFactorCode !== twoFactorCode || user.twoFactorCodeExpires < now) {
-          return reply.status(400).send({ error: 'Invalid or expired 2FA code' });
-        }
-        // Clear code after successful login
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { twoFactorCode: null, twoFactorCodeExpires: null }
-        });
       }
+
+      // Generate JWT token for session
       const token = jwt.sign(
         { userId: user.id, username: user.username },
-        process.env.JWT_SECRET || 'your-secret-key',
+        process.env.JWT_SECRET || 'secret-key',
         { expiresIn: '24h' }
       );
+
+      // Respond with token and user info
       return reply.send({
         token,
         user: {
@@ -81,58 +137,180 @@ export async function twoFactorRoutes(fastify: FastifyInstance) {
           username: user.username,
           email: user.email,
           avatarUrl: user.avatarUrl,
-          isTwoFactorEnabled: user.isTwoFactorEnabled
+          isTwoFactorEnabled: user.isTwoFactorEnabled,
+          twoFactorType: user.twoFactorType
         }
       });
-    } catch (error) {
+    } catch (error) 
+    {
       console.error('2FA login error:', error);
       return reply.status(500).send({ error: 'Internal server error' });
     }
   });
 
-  // Send 2FA code by email
-  fastify.post('/api/2fa/email/send', async (request, reply) => {
-    try {
+  // ===============================
+  // Send 2FA code (email or TOTP)
+  // ===============================
+  fastify.post('/api/2fa/send', async (request, reply) => 
+  {
+    try 
+    {
       const { userId } = request.body as { userId: number };
+
+      // Fetch user by ID
       const user = await prisma.user.findUnique({ where: { id: userId } });
-      if (!user) {
-        return reply.status(404).send({ error: 'User not found' });
+      if (!user) return reply.status(404).send({ error: 'User not found' });
+
+      if (user.twoFactorType === 'email') 
+      {
+        // Generate a random 6-digit code
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        // Set code expiration (5 minutes from now)
+        const expires = new Date(Date.now() + 5 * 60 * 1000);
+        // Store code & expiration in database
+        await prisma.user.update({
+          where: { id: userId },
+          data: { twoFactorCode: code, twoFactorCodeExpires: expires }
+        });
+
+        // Send the 2FA code via email
+        await sendEmail(user.email, 'Your 2FA code', `<b>Your code is: ${code}</b>`);
+      } else if (user.twoFactorType === 'totp') {
+          if (!user.twoFactorSecret) 
+            return reply.status(400).send({ error: '2FA secret missing' });
+          const code = speakeasy.totp({ secret: user.twoFactorSecret, encoding: 'base32' });
+          await sendEmail(user.email, 'Your TOTP 2FA code', `<b>Your code is: ${code}</b>`);
+      } else 
+      {
+        return reply.status(400).send({ error: '2FA type not set' });
       }
-      const code = Math.floor(100000 + Math.random() * 900000).toString();
-      const expires = new Date(Date.now() + 5 * 60 * 1000);
-      await prisma.user.update({
-        where: { id: userId },
-        data: { twoFactorCode: code, twoFactorCodeExpires: expires }
-      });
-      // TODO: Send code by email (use nodemailer or your email util)
-      // Example: await sendEmail(user.email, 'Your 2FA code', `Your code is: ${code}`);
       return reply.send({ message: '2FA code sent to your email.' });
-    } catch (error) {
-      console.error('2FA email send error:', error);
+    } catch (error) 
+    {
+      console.error('2FA send error:', error);
       return reply.status(500).send({ error: 'Internal server error' });
     }
   });
 
-  // Verify 2FA code from email
-  fastify.post('/api/2fa/email/verify', async (request, reply) => {
-    try {
+  // ===============================
+  // Verify email 2FA code (for enabling email 2FA)
+  // ===============================
+  fastify.post('/api/2fa/email/verify', async (request, reply) => 
+  {
+    try 
+    {
       const { userId, code } = request.body as { userId: number; code: string };
+      
+      // Fetch user and ensure a code exists
       const user = await prisma.user.findUnique({ where: { id: userId } });
-      if (!user || !user.twoFactorCode || !user.twoFactorCodeExpires) {
+
+      if (!user || !user.twoFactorCode || !user.twoFactorCodeExpires)
         return reply.status(400).send({ error: '2FA not requested or expired' });
-      }
+      
+      //store current time stamp
       const now = new Date();
-      if (user.twoFactorCode !== code || user.twoFactorCodeExpires < now) {
+      
+      // Check if the code matches and is within the expiration window
+      if (user.twoFactorCode !== code || user.twoFactorCodeExpires < now)
         return reply.status(400).send({ error: 'Invalid or expired code' });
-      }
+
+      // Enable 2FA and clear stored code
       await prisma.user.update({
         where: { id: userId },
-        data: { isTwoFactorEnabled: true, twoFactorCode: null, twoFactorCodeExpires: null, twoFactorEnabledAt: new Date() }
+        data: {
+          isTwoFactorEnabled: true,
+          twoFactorCode: null,
+          twoFactorCodeExpires: null,
+          twoFactorEnabledAt: new Date(),
+          twoFactorType: 'email'}
       });
-      return reply.send({ message: '2FA enabled successfully' });
-    } catch (error) {
+      return reply.send({ message: '2FA enabled successfully (email)' });
+    } catch (error) 
+    {
       console.error('2FA email verify error:', error);
       return reply.status(500).send({ error: 'Internal server error' });
     }
   });
+
+  // ===============================
+  // Setup TOTP (authenticator app) for a user
+  // ===============================
+  fastify.post('/api/2fa/totp/setup', async (request, reply) => 
+  {
+    try {
+      const { userId } = request.body as { userId: number };
+
+      // Fetch user by ID
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+      if (!user) return reply.status(404).send({ error: 'User not found' });
+
+      // Generate a new secret for TOTP
+      const secret = speakeasy.generateSecret({ name: `YourApp (${user.username})` });
+
+      // Store the secret in the user's record
+      await prisma.user.update({
+        where: { id: userId },
+        data: { twoFactorSecret: secret.base32 }
+      });
+
+      // Respond with the otpauth URL and secret
+      return reply.send({ otpauth_url: secret.otpauth_url, secret: secret.base32 });
+    } catch (error) 
+    {
+      console.error('TOTP setup error:', error);
+      return reply.status(500).send({ error: 'Internal server error' });
+    }
+  });
+
+  // ===============================
+  // Verify TOTP code and enable TOTP 2FA
+  // ===============================
+  fastify.post('/api/2fa/totp/verify', async (request, reply) => 
+  {
+    try {
+      const { userId, code } = request.body as { userId: number; code: string };
+
+      // Fetch user by ID
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+      if (!user || !user.twoFactorSecret)
+        return reply.status(400).send({ error: 'TOTP not set up' });
+
+      // Verify the TOTP code
+      const verified = speakeasy.totp.verify({
+        secret: user.twoFactorSecret,
+        encoding: 'base32',
+        token: code,
+        window: 1
+      });
+
+      if (!verified)
+        return reply.status(400).send({ error: 'Invalid TOTP code' });
+
+      // Enable 2FA and set the type to TOTP
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          isTwoFactorEnabled: true,
+          twoFactorEnabledAt: new Date(),
+          twoFactorType: 'totp'}
+      });
+      return reply.send({ message: '2FA enabled successfully (TOTP)' });
+    } catch (error) 
+    {
+      console.error('TOTP verify error:', error);
+      return reply.status(500).send({ error: 'Internal server error' });
+    }
+  });
 }
+
+/*
+
+| Endpoint                     | Purpose                          |
+| ---------------------------- | -------------------------------- |
+| `POST /api/2fa/disable`      | Disable 2FA after password check |
+| `POST /api/2fa/login`        | Login and validate 2FA code      |
+| `POST /api/2fa/send`         | Send a 2FA code (email or TOTP)  |
+| `POST /api/2fa/email/verify` | Verify email code and enable 2FA |
+| `POST /api/2fa/totp/setup`   | Setup TOTP for 2FA               |
+| `POST /api/2fa/totp/verify`  | Verify TOTP code and enable 2FA  |
+*/
