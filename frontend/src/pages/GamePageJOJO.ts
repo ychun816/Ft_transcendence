@@ -7,7 +7,7 @@ export function createGamePage(): HTMLElement {
 	const page = document.createElement("div");
 	page.className = "min-h-screen bg-gray-900 text-white font-mono overflow-hidden";
 
-	let currentGame: Game_solo | Game_ligne | null = null;
+	//let currentGame: Game_solo | Game_ligne | null = null;
 
 	const renderContent = () => {
 		page.innerHTML = `
@@ -254,7 +254,7 @@ export function createGamePage(): HTMLElement {
 		const route = target.getAttribute("data-route");
 		if (route)
 		{
-			cleanupCurrentGame();
+			//cleanupCurrentGame();
 			import("../router/router.js").then(({ router }) => {
 				router.navigate(route);
 			});
@@ -321,10 +321,10 @@ export function createGamePage(): HTMLElement {
 			gameSolo.start_game_loop();
 		}
 
-		function clean_game(game: Game_solo)
-		{
+		// function clean_game(game: Game_solo)
+		// {
 
-		}
+		// }
 		
 		function startGameMulti(): void {
 			const gameLigne = new Game_ligne();

@@ -2,21 +2,12 @@ import { i18n } from "../services/i18n.js";
 import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
 import { Game_solo } from "../components/game/game_solo.js";
 import { Game_ligne } from "../components/game/game_ligne.js";
-import { Game_tournoi } from "../components/game/game_tournoi.js";
-import { clear } from "console";
 
 export function createGamePage(): HTMLElement {
 	const page = document.createElement("div");
 	page.className = "min-h-screen bg-gray-900 text-white font-mono overflow-hidden";
 
-	let currentGame: Game_solo | Game_ligne | Game_tournoi | null = null;
-	// let tournoiState = {
-	// 	isActive: false,
-	// 	currentMatch: 1, // 1 pour demi-finale 1, 2 pour demi-finale 2, 3 pour finale
-	// 	players: [] as string[],
-	// 	winners: [] as string[],
-	// 	currentPlayers: [] as string[]
-	// };
+	let currentGame: Game_solo | Game_ligne | null = null;
 
 	const renderContent = () => {
 		page.innerHTML = `
@@ -221,12 +212,6 @@ export function createGamePage(): HTMLElement {
 				<!-- Message de fin de partie -->
 				<div id="endMessage" class="text-2xl font-bold text-green-400 neon-text mt-6 text-center">
 				</div>
-				<button id="nextMatchBtn" class="hidden m-6 mx-auto bg-gradient-to-r from-green-400 from-opacity-30 to-blue-400 to-opacity-30 hover:from-green-400 hover:from-opacity-50 hover:to-blue-400 hover:to-opacity-50 text-white font-bold py-2 px-4 rounded-lg border border-green-400 border-opacity-50 transition-all duration-300 transform hover:scale-105">
-					Next Game
-				</button>
-				<button id="finalMatchBtn" class="hidden m-6 mx-auto bg-gradient-to-r from-green-400 from-opacity-30 to-blue-400 to-opacity-30 hover:from-green-400 hover:from-opacity-50 hover:to-blue-400 hover:to-opacity-50 text-white font-bold py-2 px-4 rounded-lg border border-green-400 border-opacity-50 transition-all duration-300 transform hover:scale-105">
-					GO TO THE FINAL !
-				</button>
 				
 				<!-- Contrôles avec design moderne -->
 				<div id="control_1" class="hidden bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-6 mt-6 border border-blue-400 border-opacity-20">
@@ -391,8 +376,6 @@ export function createGamePage(): HTMLElement {
 		const restart = page.querySelector("#restartBtn") as HTMLButtonElement;
 		const backToMenuBtn = page.querySelector("#backToMenuBtn") as HTMLButtonElement;
 		const control1 = page.querySelector("#control_1") as HTMLElement;
-		const scorep1 = page.querySelector("#scoreP1") as HTMLElement;
-		const scorep2 = page.querySelector("#scoreP2") as HTMLElement;
 		const control2 = page.querySelector("#control_2") as HTMLElement;
 		const controlPlayer2 = page.querySelector("#control_player_2") as HTMLElement;
 		const controlPlayer2Command = page.querySelector("#control_player_2_command") as HTMLElement;
@@ -402,10 +385,8 @@ export function createGamePage(): HTMLElement {
 		const menuTournoi = page.querySelector("#menu_tournoi") as HTMLElement;
         const backToMainBtn3 = page.querySelector('#backToMainBtn3') as HTMLButtonElement;
         const startTournoiMatchmakingBtn = page.querySelector('#startTournoiMatchmaking') as HTMLButtonElement;
-		let nextMatchBtn = page.querySelector('#nextMatchBtn') as HTMLButtonElement | HTMLElement;
-		let finalMatchBtn = page.querySelector('#nextMatchBtn') as HTMLButtonElement | HTMLElement;
 		const tournoiInputs = page.querySelectorAll('#menu_tournoi input') as NodeListOf<HTMLInputElement>;
-		let startTournoiBtn = page.querySelector('#startTournoi') as HTMLButtonElement | HTMLElement;
+		const startTournoiBtn = page.querySelector('#startTournoi') as HTMLButtonElement;
 
 		
 		/**
@@ -505,308 +486,45 @@ export function createGamePage(): HTMLElement {
 			});
 		}
 
-		// function launchTournoi(player_a: string, player_b: string, player_c: string , player_d: string)
-		// {
-		// 	let finaliste_1: string;
-		// 	let finaliste_2: string;
-		// 	const tournoiMess = page.querySelector('#tournoimess') as HTMLElement;
-
-		// 	tournoiMess.innerText = `Le premier match entre ${player_a} et ${player_b} va commencer !`
-		// 	tournoiMess.classList.remove("hidden");
-
-		// 	startTournoiBtn.classList.remove("hidden");
-
-		// 	startTournoiBtn.addEventListener('click', () =>
-		// 	{
-		// 		cleanupCurrentGame();
-
-		// 		// Créer une nouvelle instance du jeu
-		// 		currentGame = new Game_tournoi(player_a, player_b, 0);
-
-		// 		// Changer l'affichage
-		// 		menuLocal.style.display = "none";
-		// 		menuLigne.style.display = "none";
-		// 		menuTournoi.style.display = "none";
-		// 		game.style.display = "block";
-		// 		backToMenuBtn.style.display = "none";
-				
-		// 		//changement affichage selon nom du joueur
-		// 		controlPlayer1.textContent = player_a;
-		// 		scorep1.textContent = `${player_a} : 0`;
-		// 		controlPlayer1Command.textContent = 'W / S';
-
-		// 		controlPlayer2.textContent = player_b;
-		// 		scorep2.textContent = `${player_b} : 0`;
-		// 		controlPlayer2Command.textContent = 'ARROW UP / ARROW DOWN';
-
-				
-		// 		control1.style.display = 'block';
-
-		// 		currentGame.start_game_loop();
-
-		// 		let interval = setInterval(() =>
-		// 		{
-		// 			if (currentGame.check_end_game() === 1)
-		// 			{
-		// 				//console.log(`${player_a} GAGNE !`);
-		// 				finaliste_1 = player_a;
-		// 				nextMatchBtn.style.display = 'block';
-		// 				nextMatchBtn.addEventListener('click', () => match_2(interval));
-		// 			}					
-		// 			else if (currentGame.check_end_game() === 2)
-		// 			{
-		// 				//console.log(`${player_b} GAGNE !`);
-		// 				finaliste_1 = player_b;
-		// 				nextMatchBtn.style.display = 'block';
-		// 				nextMatchBtn.addEventListener('click', () => match_2(interval));
-		// 			}
-		// 		}, 3000);
-
-		// 		function match_2(interval: NodeJS.Timeout)
-		// 		{
-		// 			clearInterval(interval);
-		// 			cleanupCurrentGame();
-
-		// 			// Créer une nouvelle instance du jeu
-		// 			currentGame = new Game_tournoi(player_c, player_d, 0);
-
-		// 			// Changer l'affichage
-		// 			nextMatchBtn.style.display = 'none';
-		// 			menuLocal.style.display = "none";
-		// 			menuLigne.style.display = "none";
-		// 			menuTournoi.style.display = "none";
-		// 			game.style.display = "block";
-		// 			backToMenuBtn.style.display = "none";
-					
-		// 			//changement affichage selon nom du joueur
-		// 			controlPlayer1.textContent = player_c;
-		// 			scorep1.textContent = `${player_c} : 0`;
-		// 			controlPlayer1Command.textContent = 'W / S';
-
-		// 			controlPlayer2.textContent = player_d;
-		// 			scorep2.textContent = `${player_d} : 0`;
-		// 			controlPlayer2Command.textContent = 'ARROW UP / ARROW DOWN';
-
-					
-		// 			control1.style.display = 'block';
-
-		// 			currentGame.start_game_loop();
-		// 			let interval_2 = setInterval(() =>
-		// 			{
-		// 				if (currentGame.check_end_game() === 1)
-		// 				{
-		// 					//console.log(`${player_a} GAGNE !`);
-		// 					finaliste_2 = player_c;
-		// 					finalMatchBtn.style.display = 'block';
-		// 					finalMatchBtn.addEventListener('click', () => finale(interval_2));
-		// 				}					
-		// 				else if (currentGame.check_end_game() === 2)
-		// 				{
-		// 					//console.log(`${player_b} GAGNE !`);
-		// 					finaliste_2 = player_d;
-		// 					finalMatchBtn.style.display = 'block';
-		// 					finalMatchBtn.addEventListener('click', () => finale(interval_2));
-		// 				}
-		// 			}, 3000);
-		// 		}
-
-		// 		function finale(interval_2: NodeJS.Timeout)
-		// 		{
-		// 			clearInterval(interval_2);
-		// 			cleanupCurrentGame();
-		// 			// Créer une nouvelle instance du jeu
-		// 			currentGame = new Game_tournoi(finaliste_1, finaliste_2, 1);
-
-		// 			// Changer l'affichage
-		// 			nextMatchBtn.style.display = 'none';
-		// 			finalMatchBtn.style.display = 'none';
-		// 			menuLocal.style.display = "none";
-		// 			menuLigne.style.display = "none";
-		// 			menuTournoi.style.display = "none";
-		// 			game.style.display = "block";
-		// 			backToMenuBtn.style.display = "none";
-					
-		// 			//changement affichage selon nom du joueur
-		// 			controlPlayer1.textContent = finaliste_1;
-		// 			scorep1.textContent = `${finaliste_1} : 0`;
-		// 			controlPlayer1Command.textContent = 'W / S';
-
-		// 			controlPlayer2.textContent = finaliste_2;
-		// 			scorep2.textContent = `${finaliste_2} : 0`;
-		// 			controlPlayer2Command.textContent = 'ARROW UP / ARROW DOWN';
-
-					
-		// 			control1.style.display = 'block';
-
-		// 			currentGame.start_game_loop();
-		// 			let interval_3 = setInterval(() =>
-		// 			{
-		// 				if (currentGame.check_end_game() === 1)
-		// 				{
-		// 					//console.log(`${player_a} GAGNE !`);
-		// 					//finaliste_2 = player_c;
-		// 					//nextMatchBtn.textContent = " GO TO THE FINAL !"
-		// 					backToMenuBtn.style.display = "block";
-		// 					//nextMatchBtn.addEventListener('click', () => finale(interval));
-		// 				}					
-		// 				else if (currentGame.check_end_game() === 2)
-		// 				{
-		// 					//console.log(`${player_b} GAGNE !`);
-		// 					//finaliste_2 = player_d;
-		// 					//nextMatchBtn.textContent = " GO TO THE FINAL !"
-		// 					backToMenuBtn.style.display = "block";
-		// 					//nextMatchBtn.addEventListener('click', () => finale(interval));
-		// 				}
-		// 			}, 3000);
-		// 		}
-		// 	});
-		// }
-
-
-		function launchTournoi(player_a: string, player_b: string, player_c: string, player_d: string)
+		function launchTournoi(player_a: string, player_b: string, player_c: string , player_d: string)
 		{
-			let finaliste_1: string;
-			let finaliste_2: string;
 			const tournoiMess = page.querySelector('#tournoimess') as HTMLElement;
 
-			tournoiMess.innerText = `Le premier match entre ${player_a} et ${player_b} va commencer !`;
+			tournoiMess.innerText = `Le premier match entre ${player_a} et ${player_b} va commencer !`
 			tournoiMess.classList.remove("hidden");
 
 			startTournoiBtn.classList.remove("hidden");
-
-			// Supprimer tous les event listeners précédents
-			const newStartBtn = startTournoiBtn.cloneNode(true) as HTMLElement;
-			startTournoiBtn.parentNode?.replaceChild(newStartBtn, startTournoiBtn);
-			startTournoiBtn = newStartBtn;
-
-			startTournoiBtn.addEventListener('click', () => {
-				startMatch1();
-			});
-
-			function startMatch1() {
+			startTournoiBtn.addEventListener('click', () =>
+			{
 				cleanupCurrentGame();
 
 				// Créer une nouvelle instance du jeu
-				currentGame = new Game_tournoi(player_a, player_b, 0);
+				currentGame = new Game_solo("versus");
 
 				// Changer l'affichage
-				hideMenus();
-				showGameInterface(player_a, player_b);
-
-				currentGame.start_game_loop();
-
-				// Attendre la fin du match 1
-				waitForMatchEnd((winner) => {
-					finaliste_1 = winner;
-					showNextMatchButton(() => startMatch2());
-				});
-			}
-
-			function startMatch2() {
-				hideButton(nextMatchBtn);
-				cleanupCurrentGame();
-
-				// Créer une nouvelle instance du jeu
-				currentGame = new Game_tournoi(player_c, player_d, 0);
-
-				// Changer l'affichage
-				hideMenus();
-				showGameInterface(player_c, player_d);
-
-				currentGame.start_game_loop();
-
-				// Attendre la fin du match 2
-				waitForMatchEnd((winner) => {
-					finaliste_2 = winner;
-					showFinalMatchButton(() => startFinal());
-				});
-			}
-
-			function startFinal() {
-				hideButton(finalMatchBtn);
-				cleanupCurrentGame();
-
-				// Créer une nouvelle instance du jeu
-				currentGame = new Game_tournoi(finaliste_1, finaliste_2, 1);
-
-				// Changer l'affichage
-				hideMenus();
-				showGameInterface(finaliste_1, finaliste_2);
-
-				currentGame.start_game_loop();
-
-				// Attendre la fin de la finale
-				waitForMatchEnd((winner) => {
-					// Le tournoi est terminé, afficher le bouton retour menu
-					backToMenuBtn.style.display = "block";
-				});
-			}
-
-			// Fonction utilitaire pour attendre la fin d'un match
-			function waitForMatchEnd(callback: (winner: string) => void) {
-				const interval = setInterval(() => {
-					const result = currentGame.check_end_game();
-					if (result === 1) {
-						clearInterval(interval);
-						const winner = currentGame.getPlayer1Name(); // Supposé que cette méthode existe
-						callback(winner);
-					} else if (result === 2) {
-						clearInterval(interval);
-						const winner = currentGame.getPlayer2Name(); // Supposé que cette méthode existe
-						callback(winner);
-					}
-				}, 1000); // Réduit à 1 seconde pour plus de réactivité
-			}
-
-			// Fonction utilitaire pour cacher les menus
-			function hideMenus() {
 				menuLocal.style.display = "none";
 				menuLigne.style.display = "none";
 				menuTournoi.style.display = "none";
 				game.style.display = "block";
 				backToMenuBtn.style.display = "none";
-			}
-
-			// Fonction utilitaire pour afficher l'interface de jeu
-			function showGameInterface(player1: string, player2: string) {
-				controlPlayer1.textContent = player1;
-				scorep1.textContent = `${player1} : 0`;
+				
+				//changement affichage selon nom du joueur
+				controlPlayer1.textContent = player_a;
 				controlPlayer1Command.textContent = 'W / S';
-
-				controlPlayer2.textContent = player2;
-				scorep2.textContent = `${player2} : 0`;
+				controlPlayer2.textContent = player_b;
 				controlPlayer2Command.textContent = 'ARROW UP / ARROW DOWN';
 
+				
 				control1.style.display = 'block';
-			}
 
-			// Fonction utilitaire pour afficher le bouton "Next Match"
-			function showNextMatchButton(callback: () => void) {
-				// Nettoyer l'ancien event listener
-				const newNextBtn = nextMatchBtn.cloneNode(true) as HTMLElement;
-				nextMatchBtn.parentNode?.replaceChild(newNextBtn, nextMatchBtn);
-				nextMatchBtn = newNextBtn;
+				currentGame.start_game_loop();
+			});
+		
 
-				nextMatchBtn.style.display = 'block';
-				nextMatchBtn.addEventListener('click', callback);
-			}
-
-			// Fonction utilitaire pour afficher le bouton "Final Match"
-			function showFinalMatchButton(callback: () => void) {
-				// Nettoyer l'ancien event listener
-				const newFinalBtn = finalMatchBtn.cloneNode(true) as HTMLElement;
-				finalMatchBtn.parentNode?.replaceChild(newFinalBtn, finalMatchBtn);
-				finalMatchBtn = newFinalBtn;
-
-				finalMatchBtn.style.display = 'block';
-				finalMatchBtn.addEventListener('click', callback);
-			}
-
-			// Fonction utilitaire pour cacher un bouton
-			function hideButton(button: HTMLElement) {
-				button.style.display = 'none';
-			}
 		}
+
+
+
 		
 		/**
 		 * Fonction pour démarrer un jeu solo ou versus
@@ -825,10 +543,6 @@ export function createGamePage(): HTMLElement {
 			restart.style.display = "block";
 			
 			// Configurer l'interface selon le mode
-			// if (joueurp1 connecte)
-			// {
-			// 	scorep1.textContent = //son nom;
-			// }
 			if (mode === "solo") {
 				controlPlayer2.textContent = 'IA';
 				controlPlayer2Command.textContent = "";

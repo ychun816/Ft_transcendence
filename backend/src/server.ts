@@ -91,7 +91,7 @@ const start = async () => {
 		await registerNotificationRoutes(app, prisma);
 		console.log("🎧 Starting to listen...");
 		await app.listen({
-			port: 3000,
+			port: 3001,
 			host: '0.0.0.0'
 		});
 
