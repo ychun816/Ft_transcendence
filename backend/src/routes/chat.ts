@@ -19,7 +19,7 @@ const activeConnections = new Map<
  * @param prisma - Prisma client instance
  */
 export default async function chatWebSocketRoutes(
-	fastify: FastifyInstance,
+	fastify: FastifyInstance<any, any, any, any>,
 	prisma: PrismaClient
 ) {
 	console.log("🔧 Registering WebSocket route: /ws/chat");

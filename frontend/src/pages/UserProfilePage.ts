@@ -84,6 +84,7 @@ export function createUserProfilePage(): HTMLElement {
 					</button>
 				</div>
 			</main>
+			</div>
 		</div>
 		`;
 		
@@ -158,9 +159,9 @@ async function loadUserProfile(page: HTMLElement, username: string) {
 		if (main) {
 			main.innerHTML = `
 				<div class="text-center p-8">
-					<h3 class="section-title text-accent mb-2">${i18n.t('user_profile.error_title')}</h3>
-					<p class="text-muted">${i18n.t('user_profile.profile_load_error')} ${username}</p>
-					<button class="btn-primary mt-4" data-route="/chat">${i18n.t('user_profile.back_to_chat')}</button>
+					<h3 class="text-xl font-bold text-red-400 neon-text mb-2">${i18n.t('user_profile.error_title')}</h3>
+					<p class="text-gray-300">${i18n.t('user_profile.profile_load_error')} ${username}</p>
+					<button class="bg-gradient-to-r from-red-400 from-opacity-30 to-orange-400 to-opacity-30 hover:from-red-400 hover:from-opacity-50 hover:to-orange-400 hover:to-opacity-50 text-white font-bold py-2 px-4 rounded-lg border border-red-400 border-opacity-50 transition-all duration-300 transform hover:scale-105 mt-4" data-route="/chat">${i18n.t('user_profile.back_to_chat')}</button>
 				</div>
 			`;
 		}
@@ -192,27 +193,27 @@ async function loadMatchHistory(page: HTMLElement, username: string) {
 		if (matchesHistory) {
 			if (matches.length === 0) {
 				matchesHistory.innerHTML = `
-					<div class="text-center text-muted py-4">
+					<div class="text-center text-cyan-400 py-4">
 						${i18n.t('user_profile.no_matches')}
 					</div>
 				`;
 			} else {
 				matchesHistory.innerHTML = matches.map((match: any) => {
 					const isWinner = match.winnerId === match.player1.id;
-					const resultClass = isWinner ? 'status-victory' : 'status-defeat';
+					const resultClass = isWinner ? 'text-green-400' : 'text-red-400';
 					return `
-						<div class="bg-surface p-4 rounded-modern border">
+						<div class="bg-gray-700 bg-opacity-50 p-4 rounded-xl border border-purple-400 border-opacity-30">
 							<div class="flex justify-between items-center">
 								<div>
-									<span class="font-medium">${match.player1.username}</span>
-									<span class="text-muted mx-2">${i18n.t('user_profile.vs')}</span>
-									<span class="font-medium">${match.player2.username}</span>
+									<span class="font-medium text-cyan-400">${match.player1.username}</span>
+									<span class="text-gray-400 mx-2">${i18n.t('user_profile.vs')}</span>
+									<span class="font-medium text-cyan-400">${match.player2.username}</span>
 								</div>
 								<div class="text-right">
 									<div class="font-bold ${resultClass}">
 										${match.score1} - ${match.score2}
 									</div>
-									<div class="text-xs text-muted">
+									<div class="text-xs text-gray-400">
 										${new Date(match.playedAt).toLocaleDateString('fr-FR')}
 									</div>
 								</div>
@@ -227,7 +228,7 @@ async function loadMatchHistory(page: HTMLElement, username: string) {
 		const matchesHistory = page.querySelector('#matches-history');
 		if (matchesHistory) {
 			matchesHistory.innerHTML = `
-				<div class="text-center text-accent py-4">
+				<div class="text-center text-red-400 py-4">
 					${i18n.t('user_profile.history_load_error')}
 				</div>
 			`;

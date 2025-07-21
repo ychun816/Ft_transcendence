@@ -1,27 +1,50 @@
 import { AuthService } from "../middleware/auth.js";
 import { i18n } from "../services/i18n.js";
 import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
+import { createNeonContainer } from "../styles/neonTheme.js";
 
 // Créer une instance locale (pas de singleton)
 const authService = new AuthService();
 
 export function createLoginPage(): HTMLElement {
 	const page = document.createElement("div");
-	page.className = "page-centered fade-in";
+	page.className = "fade-in";
 
 	const renderContent = () => {
-		page.innerHTML = `
-			<div class="absolute top-4 right-4" id="language-switcher-container"></div>
-			<div class="card max-w-md w-full slide-up">
-				<h1 class="page-title text-4xl text-center mb-8">${i18n.t('auth.login_title')}</h1>
-				<form class="space-y-4">
-					<input type="text" placeholder="${i18n.t('auth.username')}" id="username" required class="input">
-					<input type="password" placeholder="${i18n.t('auth.password')}" id="password" required class="input">
-					<button type="submit" id="login-btn" class="btn-primary w-full">${i18n.t('common.login')}</button>
+		const content = `
+			<div class="neon-card max-w-md w-full p-8 slide-up">
+				<h1 class="neon-title text-center mb-8"> ${i18n.t('auth.login_title')}</h1>
+				<form class="space-y-6">
+					<div>
+						<input 
+							type="text" 
+							placeholder="${i18n.t('auth.username')}" 
+							id="username" 
+							required 
+							class="neon-input"
+						>
+					</div>
+					<div>
+						<input 
+							type="password" 
+							placeholder="${i18n.t('auth.password')}" 
+							id="password" 
+							required 
+							class="neon-input"
+						>
+					</div>
+					<button type="submit" id="login-btn" class="neon-btn neon-btn-primary w-full">
+						✨ ${i18n.t('common.login')}
+					</button>
 				</form>
-				<button type="button" id="register-btn" class="btn-secondary w-full mt-4">${i18n.t('common.register')}</button>
+				<button type="button" id="register-btn" class="neon-btn neon-btn-secondary w-full mt-4">
+					📝 ${i18n.t('common.register')}
+				</button>
 			</div>
+			<div class="absolute top-4 right-4" id="language-switcher-container"></div>
 		`;
+		
+		page.innerHTML = createNeonContainer(content);
 		
 		// Add language switcher
 		const languageSwitcherContainer = page.querySelector('#language-switcher-container');
@@ -34,7 +57,7 @@ export function createLoginPage(): HTMLElement {
 	};
 	
 	const attachEventListeners = () => {
-		const form = page.querySelector('.space-y-4') as HTMLFormElement;
+		const form = page.querySelector('form') as HTMLFormElement;
 		const signupBtn = page.querySelector('#register-btn') as HTMLButtonElement;
 		
 		if (form) {
@@ -130,7 +153,6 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
         alert(i18n.t('auth.login_error') + ": " + (error || "Please try again."));
     }
 }
-
 function show2FAInput(page: HTMLDivElement): void {
     const form = page.querySelector('.space-y-4') as HTMLFormElement;
     

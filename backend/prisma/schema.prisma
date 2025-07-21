@@ -18,6 +18,7 @@ model User {
   avatarUrl				String?
   isTwoFactorEnabled	Boolean		@default(false)
   twoFactorCode      String?
+  connected				Boolean		@default(false)
   twoFactorSecret		String?
   twoFactorEnabledAt	DateTime?
   twoFactorCodeExpires DateTime?
