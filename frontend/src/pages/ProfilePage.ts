@@ -1,6 +1,7 @@
 import { i18n } from "../services/i18n.js";
 import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
 // import { TwoFactorSettings } from "../components/TwoFactorSettings.js";
+import TwoFactorSetup from '../components/twoFactor_setup';
 
 export function createProfilePage(): HTMLElement {
 	const page = document.createElement("div");
@@ -558,8 +559,21 @@ function manage2FA(page: HTMLDivElement): void {
 
 		// Initialize 2FA settings
 		const settingsContainer = modalOverlay.querySelector('#2fa-settings-container') as HTMLElement;
-		const twoFactorSettings = new TwoFactorSettings(settingsContainer);
-		twoFactorSettings.init();
+		// Remove old TwoFactorSettings logic
+		// Render React 2FA setup component into modal
+		//react-dom is required for rendering React components in the browser.
+		//It works together with the main react package.
+		const userId = sessionStorage.getItem('userId') || sessionStorage.getItem('id');
+		if (settingsContainer && userId) {
+			import('react').then(React => {
+				import('react-dom').then(ReactDOM => {
+					ReactDOM.render(
+						React.createElement(TwoFactorSetup, { userId: Number(userId) }),
+						settingsContainer
+					);
+				});
+			});
+		}
 
 		// Close modal handlers
 		const closeBtn = modalOverlay.querySelector('#close-2fa-modal') as HTMLButtonElement;

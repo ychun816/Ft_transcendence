@@ -7,8 +7,15 @@ import { FastifyInstance } from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { sendEmail } from '../sendEmail';
-import speakeasy from 'speakeasy'; // for TOTP
+import {
+  generateEmailCode,
+  verifyEmailCode,
+  generateTOTPSecret,
+  verifyTOTPCode,
+  send2FACodeEmail 
+} from '../services/twoFactorService';
+// import { sendEmail } from '../sendEmail';
+// import speakeasy from 'speakeasy'; // for TOTP
 
 const prisma = new PrismaClient();
 
@@ -163,23 +170,20 @@ export async function twoFactorRoutes(fastify: FastifyInstance)
 
       if (user.twoFactorType === 'email') 
       {
-        // Generate a random 6-digit code
-        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        // Use service to generate code
+        const code = await generateEmailCode();
         // Set code expiration (5 minutes from now)
         const expires = new Date(Date.now() + 5 * 60 * 1000);
-        // Store code & expiration in database
         await prisma.user.update({
           where: { id: userId },
           data: { twoFactorCode: code, twoFactorCodeExpires: expires }
         });
-
-        // Send the 2FA code via email
-        await sendEmail(user.email, 'Your 2FA code', `<b>Your code is: ${code}</b>`);
+        await send2FACodeEmail(user.email, code);
       } else if (user.twoFactorType === 'totp') {
           if (!user.twoFactorSecret) 
             return reply.status(400).send({ error: '2FA secret missing' });
-          const code = speakeasy.totp({ secret: user.twoFactorSecret, encoding: 'base32' });
-          await sendEmail(user.email, 'Your TOTP 2FA code', `<b>Your code is: ${code}</b>`);
+          // For TOTP, do not send code via email; just confirm secret exists
+          return reply.send({ message: 'TOTP is enabled. Use your authenticator app.' });
       } else 
       {
         return reply.status(400).send({ error: '2FA type not set' });
@@ -244,17 +248,16 @@ export async function twoFactorRoutes(fastify: FastifyInstance)
       const user = await prisma.user.findUnique({ where: { id: userId } });
       if (!user) return reply.status(404).send({ error: 'User not found' });
 
-      // Generate a new secret for TOTP
-      const secret = speakeasy.generateSecret({ name: `YourApp (${user.username})` });
-
+      // Generate a new secret for TOTP using service
+      const secretObj = await generateTOTPSecret(user.username);
+      
       // Store the secret in the user's record
       await prisma.user.update({
         where: { id: userId },
-        data: { twoFactorSecret: secret.base32 }
+        data: { twoFactorSecret: secretObj.base32 }
       });
-
       // Respond with the otpauth URL and secret
-      return reply.send({ otpauth_url: secret.otpauth_url, secret: secret.base32 });
+      return reply.send({ otpauth_url: secretObj.otpauth_url, secret: secretObj.base32 });
     } catch (error) 
     {
       console.error('TOTP setup error:', error);
@@ -275,14 +278,8 @@ export async function twoFactorRoutes(fastify: FastifyInstance)
       if (!user || !user.twoFactorSecret)
         return reply.status(400).send({ error: 'TOTP not set up' });
 
-      // Verify the TOTP code
-      const verified = speakeasy.totp.verify({
-        secret: user.twoFactorSecret,
-        encoding: 'base32',
-        token: code,
-        window: 1
-      });
-
+      // Verify the TOTP code using service
+      const verified = await verifyTOTPCode(user.twoFactorSecret, code);
       if (!verified)
         return reply.status(400).send({ error: 'Invalid TOTP code' });
 

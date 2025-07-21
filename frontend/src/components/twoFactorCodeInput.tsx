@@ -42,4 +42,4 @@ const TwoFactorCodeInput: React.FC<TwoFactorCodeInputProps> = ({ onSubmit, loadi
   );
 };
 
-export default twoFactorCode_input;
+export default TwoFactorCodeInput;
