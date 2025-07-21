@@ -1,7 +1,7 @@
 import { i18n } from "../services/i18n.js";
 import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
 // import { TwoFactorSettings } from "../components/TwoFactorSettings.js";
-import TwoFactorSetup from '../components/twoFactor_setup';
+import TwoFactorSetup from '../components/twoFactorSetup.js';
 
 export function createProfilePage(): HTMLElement {
 	const page = document.createElement("div");
