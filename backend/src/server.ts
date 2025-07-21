@@ -1,5 +1,6 @@
 import fastify from "fastify";
 import { registerNewUser } from "./routes/signup.js";
+import { FastifyRequest } from "fastify";
 import { handleLogIn } from "./routes/login.js";
 import { registerProfileRoute } from "./routes/profile.js";
 import fastifyStatic from "@fastify/static";
@@ -75,25 +76,22 @@ const setupHttpsApp = async () => {
 		}
 	});
 
-	await httpsApp.register(fastifyStatic, {
-		root: path.join(__dirname, "../../frontend/src"),
-		prefix: "/",
+	console.log("📁 Registering avatars static files...");
+	await httpsApp.register(async function (fastify) {
+		await fastify.register(fastifyStatic, {
+			root: path.join(PROJECT_ROOT, "public", "avatars"),
+			prefix: "/avatars/",
+			decorateReply: false,
+		});
 	});
 
-	await httpsApp.register(fastifyStatic, {
-		root: path.join(PROJECT_ROOT, "public"),
-		prefix: "/public/",
-		decorateReply: false,
-	});
-
-	await httpsApp.register(fastifyStatic, {
-		root: path.join(PROJECT_ROOT, "public/avatars"),
-		prefix: "/avatars/",
-		decorateReply: false,
-	});
-
-	httpsApp.setNotFoundHandler((_req, reply) => {
-		reply.sendFile("index.html");
+	// Register frontend static SECOND  
+	console.log("📁 Registering frontend static files...");
+	await httpsApp.register(async function (fastify) {
+		await fastify.register(fastifyStatic, {
+			root: path.join(__dirname, "../../frontend/src"),
+			prefix: "/",
+		});
 	});
 
 	console.log("🛣️ Enregistrement des routes HTTPS...");
@@ -103,6 +101,11 @@ const setupHttpsApp = async () => {
 
 	await chatWebSocketRoutes(httpsApp, prisma);
 	await registerNotificationRoutes(httpsApp, prisma);
+	
+	// Make sure the setNotFoundHandler comes AFTER all static registrations
+	httpsApp.setNotFoundHandler((_req, reply) => {
+		reply.sendFile("index.html");
+	});
 };
 
 const setupHttpApp = async () => {

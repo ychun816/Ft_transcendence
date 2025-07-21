@@ -100,15 +100,71 @@ export function createProfilePage(): HTMLElement {
 		editAvatar(page);
 		editUsername(page);
 		editPassword(page);
-
+		
 		getUserInfo().then(data => {
 			if (data) {
+				console.log("🔍 User data received:", data);
 				const usernameElem = page.querySelector('#username') as HTMLElement;
 				if (usernameElem) usernameElem.textContent = data.username;
-
 				const avatarElem = page.querySelector('#user-avatar') as HTMLImageElement;
-				if (avatarElem && data.avatarUrl) avatarElem.setAttribute('src', data.avatarUrl);
-
+				if (avatarElem && data.avatarUrl) {
+					console.log("🖼️ Setting avatar URL:", data.avatarUrl);
+					
+					const isDevMode = window.location.port === '5173'; // Vite dev server
+					const serverUrl = isDevMode 
+						? `https://${window.location.hostname}:3444`
+						: window.location.origin;
+					
+					const fullAvatarUrl = data.avatarUrl.startsWith('http') 
+						? data.avatarUrl // External URL, use as-is
+						: `${serverUrl}${data.avatarUrl}`; // Local URL, add server prefix
+					
+					const avatarUrl = fullAvatarUrl.includes('?') 
+						? `${fullAvatarUrl}&cb=${Date.now()}`
+						: `${fullAvatarUrl}?cb=${Date.now()}`;
+					
+					console.log("🌐 Full avatar URL:", avatarUrl);
+					
+					// Try to load image normally first
+					const testImage = new Image();
+					
+					testImage.onload = function() {
+						console.log("✅ Normal image loaded successfully!");
+						avatarElem.src = avatarUrl;
+					};
+					
+					testImage.onerror = async function(e) {
+						console.error("❌ Normal image failed, trying base64 fallback...");
+						
+						try {
+							// Fetch as base64 from our API
+							const response = await fetch(avatarUrl, {
+								headers: {
+									'Accept': 'application/json'
+								}
+							});
+							
+							if (response.ok) {
+								const data = await response.json();
+								if (data.data && data.data.startsWith('data:image')) {
+									console.log("✅ Base64 fallback successful!");
+									avatarElem.src = data.data;
+								} else {
+									throw new Error('Invalid base64 response');
+								}
+							} else {
+								throw new Error('Base64 fetch failed');
+							}
+						} catch (error) {
+							console.error("❌ Base64 fallback also failed:", error);
+							avatarElem.src = '/default-avatar.png';
+						}
+					};
+					
+					testImage.src = avatarUrl;
+					console.log("🔄 Testing normal image load first");
+				}
+		
 				const statElem = page.querySelector("#user-stats") as HTMLElement;
 				if (statElem && data.gamesPlayed != null && data.wins != null && data.losses != null) {
 					statElem.textContent = i18n.t('profile.games_played_stats', {
@@ -127,13 +183,13 @@ export function createProfilePage(): HTMLElement {
 	render();
 	
 	function handleLanguageChange() {
-        window.removeEventListener('languageChanged', handleLanguageChange);
-        const app = document.getElementById('app');
-        if (app) {
-            app.innerHTML = '';
-            app.appendChild(createProfilePage());
-        }
-    }
+		window.removeEventListener('languageChanged', handleLanguageChange);
+		const app = document.getElementById('app');
+		if (app) {
+			app.innerHTML = '';
+			app.appendChild(createProfilePage());
+		}
+	}
 
 	window.addEventListener('languageChanged', handleLanguageChange);
 
@@ -379,15 +435,15 @@ async function updateDbAvatar(file: File){
 		const data = await response.json();
 		console.log('Avatar updated!', data);
 		if (data.avatarPath && typeof data.avatarPath === 'string') {
-/* 			// 🔍 Ajout d'un timestamp pour éviter le cache
-			const timestampedUrl = `${data.avatarPath}?t=${Date.now()}`;
-			console.log('URL avec timestamp:', timestampedUrl); */
-			return data.avatarPath;
+			const timestampedUrl = `${data.avatarPath}?cb=${Date.now()}`;
+			console.log('URL with cache busting:', timestampedUrl);
+			return timestampedUrl;
 		} else {
 			console.error('Failed to update avatar');
 			return null;
 		}
 	}
+	console.error('Failed to update avatar - server error');
 	return null;
 }
 
@@ -503,6 +559,24 @@ async function displayFriendsList(page: HTMLDivElement){
 
 	const friendsMain = page.querySelector("#friends-block main");
 	if (!friendsMain) return;
+	
+	function fixAvatarUrl(avatarUrl: string | null): string {
+		if (!avatarUrl) return '/default-avatar.png';
+		
+		// Si c'est une URL externe, l'utiliser telle quelle
+		if (avatarUrl.startsWith('http')) {
+			return avatarUrl;
+		}
+		
+		// Déterminer l'URL du serveur correct
+		const isDevMode = window.location.port === '5173';
+		const serverUrl = isDevMode 
+			? `https://${window.location.hostname}:3444`
+			: window.location.origin;
+		
+		// Construire l'URL complète
+		return `${serverUrl}${avatarUrl}`;
+	}
 
 	let html = `
 		<div class="friends-table-scroll">
@@ -520,7 +594,7 @@ async function displayFriendsList(page: HTMLDivElement){
 
 	for (const friend of friendsList) {
 		const status = friend.connected;
-		const avatar = friend.avatarUrl;
+		const avatar = fixAvatarUrl(friend.avatarUrl);
 		const name = friend.username;
 		const played = friend.gamesPlayed;
 
