@@ -1,89 +1,15 @@
 import { i18n } from "../services/i18n.js";
 import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
+import { createLogoutSwitcher } from "../components/logoutSwitcher.js";
+import { createNeonContainer } from "../styles/neonTheme.js";
 
 export function createProfilePage(): HTMLElement {
 	const page = document.createElement("div");
 	page.className = "min-h-screen bg-gray-900 text-white font-mono overflow-hidden";
 
-	const renderContent = () => {
-		page.innerHTML = `
-			<style>
-				/* Styles personnalisés pour les effets néon */
-				.neon-text {
-					text-shadow:
-						0 0 5px currentColor,
-						0 0 10px currentColor,
-						0 0 15px currentColor,
-						0 0 20px currentColor;
-				}
 
-				.neon-border {
-					box-shadow:
-						0 0 10px currentColor,
-						inset 0 0 10px currentColor;
-				}
-
-				.particles {
-					position: fixed;
-					top: 0;
-					left: 0;
-					width: 100%;
-					height: 100%;
-					pointer-events: none;
-					z-index: -1;
-				}
-
-				.particle {
-					position: absolute;
-					width: 2px;
-					height: 2px;
-					background: #00ff41;
-					border-radius: 50%;
-					animation: float 6s ease-in-out infinite;
-				}
-
-				@keyframes float {
-					0%, 100% { transform: translateY(0px) rotate(0deg); }
-					50% { transform: translateY(-20px) rotate(180deg); }
-				}
-
-				.scan-lines::before {
-					content: '';
-					position: absolute;
-					top: 0;
-					left: 0;
-					right: 0;
-					bottom: 0;
-					background: linear-gradient(
-						transparent 0%,
-						rgba(0, 255, 65, 0.03) 50%,
-						transparent 100%
-					);
-					background-size: 100% 4px;
-					animation: scan 0.1s linear infinite;
-					pointer-events: none;
-				}
-
-				@keyframes scan {
-					0% { background-position: 0 0; }
-					100% { background-position: 0 4px; }
-				}
-			</style>
-
-			<!-- Particules d'arrière-plan -->
-			<div class="particles">
-				<div class="particle" style="left: 10%; animation-delay: 0s;"></div>
-				<div class="particle" style="left: 20%; animation-delay: 1s;"></div>
-				<div class="particle" style="left: 30%; animation-delay: 2s;"></div>
-				<div class="particle" style="left: 40%; animation-delay: 3s;"></div>
-				<div class="particle" style="left: 50%; animation-delay: 4s;"></div>
-				<div class="particle" style="left: 60%; animation-delay: 5s;"></div>
-				<div class="particle" style="left: 70%; animation-delay: 2s;"></div>
-				<div class="particle" style="left: 80%; animation-delay: 1s;"></div>
-				<div class="particle" style="left: 90%; animation-delay: 3s;"></div>
-			</div>
-
-			<div class="absolute top-4 right-4" id="language-switcher-container"></div>
+	const render = () => {
+		const content = `
 			<div class="min-h-screen flex items-center justify-center p-4 scan-lines relative">
 
 			<!-- Conteneur principal avec disposition côte à côte - centré -->
@@ -152,84 +78,76 @@ export function createProfilePage(): HTMLElement {
 				</div>
 			</div>
 		</div>
+			<div class="absolute top-4 right-4" id="language-switcher-container"></div>
+			<div class="absolute top-4 left-4" id="logout-container"></div>
 		`;
-	};
+		
+		page.innerHTML = createNeonContainer(content);
 
-	renderContent();
-
-	// Insérer le commutateur de langue
-	const languageSwitcherContainer = page.querySelector('#language-switcher-container');
+		// Insérer le commutateur de langue
+		const languageSwitcherContainer = page.querySelector('#language-switcher-container');
 		if (languageSwitcherContainer) {
+			languageSwitcherContainer.innerHTML = '';
 			languageSwitcherContainer.appendChild(createLanguageSwitcher());
-			const logoutBtn = document.createElement('button');
-			logoutBtn.className = "neon-btn neon-btn-secondary";
-			logoutBtn.textContent = "Logout";
-			logoutBtn.onclick = async () => {
-				try
-				{
-					const response = await fetch("/api/logout", {
-						method: "POST",
-						headers: {
-							'Authorization': `Bearer ${sessionStorage.getItem('authToken')}`
-						}
-					});
-			
-					if (response.ok) {
-						console.log("Logout successful on backend.");
-					} else {
-						console.error("Backend logout failed.");
-					}
-				} catch (error) {
-					console.error("Error during logout fetch:", error);
-				} finally {
-					sessionStorage.clear();
-					import('../router/router.js').then(({ router }) => {
-						router.navigate('/login');
+		}
+
+		const logoutContainer = page.querySelector('#logout-container');
+		if (logoutContainer) {
+			logoutContainer.innerHTML = '';
+			logoutContainer.appendChild(createLogoutSwitcher());
+		}
+
+		editAvatar(page);
+		editUsername(page);
+		editPassword(page);
+
+		getUserInfo().then(data => {
+			if (data) {
+				const usernameElem = page.querySelector('#username') as HTMLElement;
+				if (usernameElem) usernameElem.textContent = data.username;
+
+				const avatarElem = page.querySelector('#user-avatar') as HTMLImageElement;
+				if (avatarElem && data.avatarUrl) avatarElem.setAttribute('src', data.avatarUrl);
+
+				const statElem = page.querySelector("#user-stats") as HTMLElement;
+				if (statElem && data.gamesPlayed != null && data.wins != null && data.losses != null) {
+					statElem.textContent = i18n.t('profile.games_played_stats', {
+						games: data.gamesPlayed.toString(),
+						wins: data.wins.toString(),
+						losses: data.losses.toString()
 					});
 				}
-			};
-			languageSwitcherContainer.appendChild(logoutBtn);
-		}
-
-	// Re-render when language changes
-	window.addEventListener('languageChanged', renderContent);
-  	editAvatar(page);
-	editUsername(page);
-	editPassword(page);
-
-	getUserInfo().then(data =>{
-		if (data){
-			const usernameElem = page.querySelector('#username') as HTMLElement;
-			if (usernameElem) usernameElem.textContent = data.username;
-
-			const avatarElem = page.querySelector('#user-avatar') as HTMLImageElement;
-			console.log("Avatar URL reçue :", data.avatarUrl);
-			if (avatarElem && data.avatarUrl) avatarElem.setAttribute('src', data.avatarUrl);
-
-			const statElem = page.querySelector("#user-stats") as HTMLElement;
-			console.log("gamesPlayed reçue :", data.gamesPlayed);
-			console.log("wins reçue :", data.wins);
-			console.log("losses reçue :", data.losses);
-			if (statElem && data.gamesPlayed && data.wins &&  data.losses){
-				statElem.textContent = i18n.t('profile.games_played_stats', {
-					games: data.gamesPlayed.toString(),
-					wins: data.wins.toString(),
-					losses: data.losses.toString()
-				});
 			}
-		}
-	});
+		});
 
-	displayMatchHistory(page);
-	displayFriendsList(page);
+		displayMatchHistory(page);
+		displayFriendsList(page);
+	};
+
+	render();
+	
+	function handleLanguageChange() {
+        window.removeEventListener('languageChanged', handleLanguageChange);
+        const app = document.getElementById('app');
+        if (app) {
+            app.innerHTML = '';
+            app.appendChild(createProfilePage());
+        }
+    }
+
+	window.addEventListener('languageChanged', handleLanguageChange);
 
 	page.addEventListener('click', (e) => {
 		const target = e.target as HTMLElement;
-		const route = target.getAttribute('data-route');
-		if (route) {
-			import('../router/router.js').then(({ router }) => {
-				router.navigate(route);
-		});
+		if (target.hasAttribute('data-route') || target.closest('[data-route]')) {
+			const routeElement = target.hasAttribute('data-route') ? target : target.closest('[data-route]');
+			const route = routeElement?.getAttribute('data-route');
+			if (route) {
+				window.removeEventListener('languageChanged', handleLanguageChange);
+				import('../router/router.js').then(({ router }) => {
+					router.navigate(route);
+				});
+			}
 		}
 	});
 
@@ -506,14 +424,12 @@ async function getMatchHistory() {
 	}
 }
 
-async function displayMatchHistory(page: HTMLDivElement)
-{
-	console.log("ENTER IN MATCH HISTORY");
+async function displayMatchHistory(page: HTMLDivElement) {
 	const username = sessionStorage.getItem("username");
-	console.log("USERNAME RETRIEVED : ", username);
 	const history = await getMatchHistory();
-	console.log("HISTORY RETRIEVED : ", history);
-	const histDiv = page.querySelector("#match-block");
+	if (!history) return;
+
+	const histDiv = page.querySelector("#match-block main");
 	if (!histDiv) return;
 
 	let html = `
@@ -528,14 +444,14 @@ async function displayMatchHistory(page: HTMLDivElement)
 			<tbody>
 	`;
 
-	for (const match of history){
+	for (const match of history) {
 		const isPlayer1 = match.player1.username === username;
 		const opponent = isPlayer1 ? match.player2.username : match.player1.username;
 		const result = match.winnerId === (isPlayer1 ? match.player1Id : match.player2Id) ? i18n.t('profile.victory') : i18n.t('profile.defeat');
 		const date = new Date(match.playedAt).toLocaleDateString();
 		const statusClass = result === i18n.t('profile.victory') ? "status-victory" : "status-defeat";
 
-	html += `
+		html += `
 			<tr>
 				<td>${date}</td>
 				<td>${opponent}</td>
@@ -580,42 +496,35 @@ async function getFriendsList() {
 }
 
 
-async function displayFriendsList(page: HTMLDivElement)
-{
-	console.log("ENTER IN FRIENDS LIST");
+async function displayFriendsList(page: HTMLDivElement){
 	const username = sessionStorage.getItem("username");
-	console.log("USERNAME RETRIEVED : ", username);
 	const friendsList = await getFriendsList();
-	if (!friendsList) return ;
-	console.log("FRIENDS LIST RETRIEVED : ", friendsList);
-	const friendsDiv = page.querySelector("#friends-block");
-	if (!friendsDiv) return;
+	if (!friendsList) return;
+
+	const friendsMain = page.querySelector("#friends-block main");
+	if (!friendsMain) return;
 
 	let html = `
-		<header class="w-full flex-shrink-0 mb-4 flex items-center justify-between" style="overflow:hidden;">
-			<h2 class="text-2xl font-bold text-green-400 neon-text">${i18n.t('profile.friends_list')}</h2>
-			<!-- Le bouton (+) sera ajouté ici par JS -->
-		</header>
 		<div class="friends-table-scroll">
 			<table class="data-table">
 				<thead>
 					<tr>
-						<th>${i18n.t('status')}</th>
-						<th>${i18n.t('avatar')}</th>
-						<th>${i18n.t('name')}</th>
-						<th>${i18n.t('Games_played')}</th>
+						<th>${i18n.t('profile.status')}</th>
+						<th>${i18n.t('profile.avatar')}</th>
+						<th>${i18n.t('profile.name')}</th>
+						<th>${i18n.t('profile.Games_played')}</th>
 					</tr>
 				</thead>
 				<tbody>
 	`;
 
-	for (const friend of friendsList){
+	for (const friend of friendsList) {
 		const status = friend.connected;
 		const avatar = friend.avatarUrl;
 		const name = friend.username;
 		const played = friend.gamesPlayed;
 
-	html += `
+		html += `
 			<tr>
 				<td>
 					<div style="width:10px; height:10px; border-radius:50%; overflow:hidden; background:${status ? 'green' : 'gray'}; display:flex; align-items:center; justify-content:center;">
@@ -632,7 +541,7 @@ async function displayFriendsList(page: HTMLDivElement)
 		`;
 	}
 	html += `</tbody></table></div>`;
-	friendsDiv.innerHTML = html;
+	friendsMain.innerHTML = html;
 	setupAddFriendFeature(page);
 }
 
