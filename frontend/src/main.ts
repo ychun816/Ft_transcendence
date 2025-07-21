@@ -14,21 +14,31 @@ import { i18n } from "./services/i18n";
 async function initApp() {
   // Initialize i18n before starting router
   await i18n.init();
-  
+
   router
-      .addRoute('/', createLoginPage)
-      .addRoute('/login', createLoginPage)
-      .addRoute('/signup', createSignUpPage)
-      .addRoute('/home', createHomePage)
-      .addRoute('/game', createGamePage)
-      .addRoute('/profile', createProfilePage)
-      .addRoute('/chat', createChatPage)
-      .addRoute('/404', createNotFoundPage);
+	  .addRoute('/', createLoginPage)
+	  .addRoute('/login', createLoginPage)
+	  .addRoute('/signup', createSignUpPage)
+	  .addRoute('/home', createHomePage)
+	  .addRoute('/game', createGamePage)
+	  .addRoute('/profile', createProfilePage)
+	  .addRoute('/chat', createChatPage)
+	  .addRoute('/404', createNotFoundPage);
 
   // Route dynamique pour les profils utilisateur
   router.addDynamicRoute('/profile/:username', createUserProfilePage);
+  const token = sessionStorage.getItem('authToken');
+  const currentPath = window.location.pathname;
 
-  router.start();
+  if (currentPath === '/') {
+	if (token) {
+	  router.navigate('/home');
+	} else {
+	  router.navigate('/login');
+	}
+  } else {
+	router.start();
+  }
 }
 
 initApp().catch(console.error);

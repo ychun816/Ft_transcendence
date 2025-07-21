@@ -25,15 +25,15 @@ class Router {
         if (this.protectedRoutes.has(route)) {
             return true;
         }
-        
+
         // Check pattern matches for dynamic routes like /profile/:username
         if (route.startsWith('/profile/') && route.length > '/profile/'.length) {
             return true;
         }
-        
+
         return false;
     }
-    
+
     addRoute(path: string, component: () => HTMLElement) {
       /*
       This function is called when the user adds a new route to the router.
@@ -47,7 +47,7 @@ class Router {
         this.dynamicRoutes.push({ pattern, handler });
         return this;
     }
-    
+
     private handleRoute() {
       /*
       This function is called when the user navigates to a new page.
@@ -56,7 +56,7 @@ class Router {
       */
       const path = window.location.pathname;
       const component = this.routes.get(path) || this.routes.get('/404');
-    
+
       if (component) {
         const app = document.querySelector('#app');
         if (app) {
@@ -65,7 +65,7 @@ class Router {
         }
       }
     }
-    
+
     start() {
       /*
       This function is called when the app starts.
@@ -88,15 +88,15 @@ class Router {
 
     async navigate(route: string): Promise<void> {
         this.currentRoute = route;
-        this.renderRoute(route);
         history.pushState({}, '', route);
+        await this.renderRoute(route);
     }
 
     private async renderRoute(route: string): Promise<void> {
         // Check exact routes first
         let routeHandler = this.routes.get(route);
         let routeParams: any = {};
-        
+
         // If no exact match, check dynamic routes
         if (!routeHandler) {
             for (const dynamicRoute of this.dynamicRoutes) {
@@ -108,7 +108,7 @@ class Router {
                 }
             }
         }
-        
+
         if (!routeHandler) {
             this.navigate('/404');
             return;
@@ -134,16 +134,16 @@ class Router {
         // Extract parameters from route using pattern
         const patternParts = pattern.split('/');
         const routeParts = route.split('/');
-        
+
         if (patternParts.length !== routeParts.length) {
             return null;
         }
-        
+
         const params: any = {};
         for (let i = 0; i < patternParts.length; i++) {
             const patternPart = patternParts[i];
             const routePart = routeParts[i];
-            
+
             if (patternPart.startsWith(':')) {
                 const paramName = patternPart.substring(1);
                 params[paramName] = routePart;
@@ -151,15 +151,20 @@ class Router {
                 return null;
             }
         }
-        
+
         return params;
     }
 
-    private handlePopState(): void {
-        window.addEventListener('popstate', async () => {
-            await this.navigate(window.location.pathname);
-        });
-    }
+	private async navigateFromHistory(route: string): Promise<void> {
+    	this.currentRoute = route;
+    	await this.renderRoute(route);
+	}
+
+	private handlePopState(): void {
+		window.addEventListener('popstate', async () => {
+			await this.navigateFromHistory(window.location.pathname);
+		});
+	}
 }
 
 export const router = new Router();

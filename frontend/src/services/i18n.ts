@@ -64,7 +64,12 @@ const translations: Record<Language, Translations> = {
       "opponent": "Adversaire",
       "result": "Résultat",
       "victory": "Victoire",
-      "defeat": "Défaite"
+      "defeat": "Défaite",
+	    "friends_list": "Liste d'amis",
+	    "status": "Status",
+	    "avatar": "Avatar",
+	    "name": "Nom",
+	    "Games_played": "Parties Jouées"
     },
     "chat": {
       "title": "Chat",
@@ -193,7 +198,12 @@ const translations: Record<Language, Translations> = {
       "opponent": "Opponent",
       "result": "Result",
       "victory": "Victory",
-      "defeat": "Defeat"
+      "defeat": "Defeat",
+	    "friends_list": "Friends List",
+	    "status": "Status",
+	    "avatar": "Avatar",
+	    "name": "Username",
+	    "Games_played": "Games Played"
     },
     "chat": {
       "title": "Chat",
@@ -272,12 +282,12 @@ class I18nService {
 
   async init(): Promise<void> {
     if (this.isLoaded) return;
-    
+
     const savedLang = localStorage.getItem('language') as Language;
     if (savedLang && (savedLang === 'fr' || savedLang === 'en')) {
       this.currentLanguage = savedLang;
     }
-    
+
     this.isLoaded = true;
   }
 
@@ -288,7 +298,7 @@ class I18nService {
   async setLanguage(language: Language): Promise<void> {
     this.currentLanguage = language;
     localStorage.setItem('language', language);
-    
+
     // Trigger re-render of current page
     window.dispatchEvent(new CustomEvent('languageChanged', { detail: language }));
   }
@@ -296,7 +306,7 @@ class I18nService {
   t(key: string, params?: Record<string, string>): string {
     const keys = key.split('.');
     let value: any = this.translations[this.currentLanguage];
-    
+
     for (const k of keys) {
       if (value && typeof value === 'object' && k in value) {
         value = value[k];
@@ -305,12 +315,12 @@ class I18nService {
         return key;
       }
     }
-    
+
     if (typeof value !== 'string') {
       console.warn(`Translation value is not a string: ${key}`);
       return key;
     }
-    
+
     // Simple parameter replacement
     if (params) {
       return Object.entries(params).reduce(
@@ -318,7 +328,7 @@ class I18nService {
         value
       );
     }
-    
+
     return value;
   }
 
