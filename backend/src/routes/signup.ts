@@ -58,7 +58,7 @@ async function saveAvatar(avatarFile: any, username: string): Promise<string> {
 	const fileName = `${safeUsername}_${hash}.${ext}`;
 	const uploadPath = path.join(avatarsDir, fileName);
 	await pipeline(avatarFile.file, fs.createWriteStream(uploadPath));
-	return `./public/avatars/${fileName}`;
+	return `/avatars/${fileName}`;
 }
 
 async function createUser(
