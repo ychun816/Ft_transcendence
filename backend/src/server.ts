@@ -22,10 +22,10 @@ export const PROJECT_ROOT = path.resolve(__dirname, "../../");
 
 const prisma = new PrismaClient();
 
-const HTTP_PORT = process.env.HTTP_PORT ? parseInt(process.env.HTTP_PORT) : 3002;
-const HTTPS_PORT = process.env.HTTPS_PORT ? parseInt(process.env.HTTPS_PORT) : 3444;
+const HTTP_PORT = process.env.HTTP_PORT ? parseInt(process.env.HTTP_PORT) : 3003;
+const HTTPS_PORT = process.env.HTTPS_PORT ? parseInt(process.env.HTTPS_PORT) : 3445;
 
-const PUBLIC_IP = '192.168.1.196';
+const PUBLIC_IP = '10.16.12.6';
 
 let httpsOptions;
 try{
@@ -85,7 +85,7 @@ const setupHttpsApp = async () => {
 		});
 	});
 
-	// Register frontend static SECOND  
+	// Register frontend static SECOND
 	console.log("📁 Registering frontend static files...");
 	await httpsApp.register(async function (fastify) {
 		await fastify.register(fastifyStatic, {
@@ -101,7 +101,7 @@ const setupHttpsApp = async () => {
 
 	await chatWebSocketRoutes(httpsApp, prisma);
 	await registerNotificationRoutes(httpsApp, prisma);
-	
+
 	// Make sure the setNotFoundHandler comes AFTER all static registrations
 	httpsApp.setNotFoundHandler((_req, reply) => {
 		reply.sendFile("index.html");
