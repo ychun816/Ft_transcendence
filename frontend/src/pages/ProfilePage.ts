@@ -15,7 +15,7 @@ export function createProfilePage(): HTMLElement {
 			<!-- Conteneur principal avec disposition côte à côte - centré -->
 			<div class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-8 border border-blue-400 border-opacity-30 neon-border flex gap-10 items-start" style="height: 80vh; max-width: 1300px; width: 95%;">
 				<!-- Colonne de gauche : Profile + Friends - largeur fixe (moitié du match history) -->
-				<div class="flex flex-col gap-6 h-full" style="width: 600px;">
+				<div class="flex flex-col gap-6 h-full" style="width: 800px;">
 					<!-- Bloc Profile Principal -->
 					<div class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-6 border border-cyan-400 border-opacity-30 neon-border w-full flex flex-col items-center flex-shrink-0">
 						<header class="w-full mb-6">
@@ -66,10 +66,18 @@ export function createProfilePage(): HTMLElement {
 				</div>
 
 				<!-- Colonne de droite : Match History - largeur fixe -->
-				<div class="h-full" style="width: 800px;">
+				<div class="flex flex-col gap-6 h-full" style="width: 800px;">
 					<div id="match-block" class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-6 border border-purple-400 border-opacity-30 neon-border w-full flex flex-col h-full">
 						<header class="w-full mb-4">
 							<h2 class="text-2xl font-bold text-purple-400 neon-text">${i18n.t('profile.match_history')}</h2>
+						</header>
+						<main class="w-full flex-1 overflow-y-auto">
+							<!-- Le contenu de l'historique des matchs sera ajouté ici -->
+						</main>
+					</div>
+					<div id="dashboard" class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-6 border border-purple-400 border-opacity-30 neon-border w-full flex flex-col h-full">
+						<header class="w-full mb-4">
+							<h2 class="text-2xl font-bold text-purple-400 neon-text">${i18n.t('profile.dashboard')}</h2>
 						</header>
 						<main class="w-full flex-1 overflow-y-auto">
 							<!-- Le contenu de l'historique des matchs sera ajouté ici -->
@@ -81,7 +89,7 @@ export function createProfilePage(): HTMLElement {
 			<div class="absolute top-4 right-4" id="language-switcher-container"></div>
 			<div class="absolute top-4 left-4" id="logout-container"></div>
 		`;
-		
+
 		page.innerHTML = createNeonContainer(content);
 
 		// Insérer le commutateur de langue
@@ -100,7 +108,7 @@ export function createProfilePage(): HTMLElement {
 		editAvatar(page);
 		editUsername(page);
 		editPassword(page);
-		
+
 		getUserInfo().then(data => {
 			if (data) {
 				console.log("🔍 User data received:", data);
@@ -109,33 +117,33 @@ export function createProfilePage(): HTMLElement {
 				const avatarElem = page.querySelector('#user-avatar') as HTMLImageElement;
 				if (avatarElem && data.avatarUrl) {
 					console.log("🖼️ Setting avatar URL:", data.avatarUrl);
-					
+
 					const isDevMode = window.location.port === '5173'; // Vite dev server
-					const serverUrl = isDevMode 
+					const serverUrl = isDevMode
 						? `https://${window.location.hostname}:3444`
 						: window.location.origin;
-					
-					const fullAvatarUrl = data.avatarUrl.startsWith('http') 
+
+					const fullAvatarUrl = data.avatarUrl.startsWith('http')
 						? data.avatarUrl // External URL, use as-is
 						: `${serverUrl}${data.avatarUrl}`; // Local URL, add server prefix
-					
-					const avatarUrl = fullAvatarUrl.includes('?') 
+
+					const avatarUrl = fullAvatarUrl.includes('?')
 						? `${fullAvatarUrl}&cb=${Date.now()}`
 						: `${fullAvatarUrl}?cb=${Date.now()}`;
-					
+
 					console.log("🌐 Full avatar URL:", avatarUrl);
-					
+
 					// Try to load image normally first
 					const testImage = new Image();
-					
+
 					testImage.onload = function() {
 						console.log("✅ Normal image loaded successfully!");
 						avatarElem.src = avatarUrl;
 					};
-					
+
 					testImage.onerror = async function(e) {
 						console.error("❌ Normal image failed, trying base64 fallback...");
-						
+
 						try {
 							// Fetch as base64 from our API
 							const response = await fetch(avatarUrl, {
@@ -143,7 +151,7 @@ export function createProfilePage(): HTMLElement {
 									'Accept': 'application/json'
 								}
 							});
-							
+
 							if (response.ok) {
 								const data = await response.json();
 								if (data.data && data.data.startsWith('data:image')) {
@@ -160,11 +168,11 @@ export function createProfilePage(): HTMLElement {
 							avatarElem.src = '/default-avatar.png';
 						}
 					};
-					
+
 					testImage.src = avatarUrl;
 					console.log("🔄 Testing normal image load first");
 				}
-		
+
 				const statElem = page.querySelector("#user-stats") as HTMLElement;
 				if (statElem && data.gamesPlayed != null && data.wins != null && data.losses != null) {
 					statElem.textContent = i18n.t('profile.games_played_stats', {
@@ -181,7 +189,7 @@ export function createProfilePage(): HTMLElement {
 	};
 
 	render();
-	
+
 	function handleLanguageChange() {
 		window.removeEventListener('languageChanged', handleLanguageChange);
 		const app = document.getElementById('app');
@@ -559,21 +567,21 @@ async function displayFriendsList(page: HTMLDivElement){
 
 	const friendsMain = page.querySelector("#friends-block main");
 	if (!friendsMain) return;
-	
+
 	function fixAvatarUrl(avatarUrl: string | null): string {
 		if (!avatarUrl) return '/default-avatar.png';
-		
+
 		// Si c'est une URL externe, l'utiliser telle quelle
 		if (avatarUrl.startsWith('http')) {
 			return avatarUrl;
 		}
-		
+
 		// Déterminer l'URL du serveur correct
 		const isDevMode = window.location.port === '5173';
-		const serverUrl = isDevMode 
+		const serverUrl = isDevMode
 			? `https://${window.location.hostname}:3444`
 			: window.location.origin;
-		
+
 		// Construire l'URL complète
 		return `${serverUrl}${avatarUrl}`;
 	}
@@ -688,4 +696,94 @@ function setupAddFriendFeature(page: HTMLDivElement) {
 			}
 		});
 	};
+}
+
+class GlobalStat {
+	score1: number = 0;
+}
+
+async function regroupUserStat()
+{
+	const user = await getUserInfo();
+	if (!user) return null;
+
+	const token = sessionStorage.getItem('authToken');
+	if (!token) {
+		throw new Error('No auth token found');
+	}
+
+	const globalStats = new GlobalStat();
+	const globalStats1 = Object.assign(new GlobalStat(), globalStats);
+	const globalStats2 = Object.assign(new GlobalStat(), globalStats);
+
+	for (let game = 1; game <= user.gamesPlayed; game++)
+	{
+		const history = await getMatchHistory();
+		const globalStats1.score1 += history.score1,
+
+		}
+
+	}
+
+	const response = await fetch(`/api/game/friends?username=${encodeURIComponent(user.username)}`, {
+		method: "GET",
+		headers: {
+			"Content-Type": "application/json",
+			"Authorization": `Bearer ${token}`
+		},
+	});
+}
+
+async function generateStatDashboard() {
+	const history = await getMatchHistory();
+	if (!history) return;
+
+	const gamesPlayed = 0;
+	const
+
+	const userStat = {
+		games = ;
+
+	}
+
+
+}
+
+async function displayDashboard(page: HTMLDivElement) {
+	const username = sessionStorage.getItem("username");
+	const history = await generateStatDashboard();
+	if (!history) return;
+
+	const histDiv = page.querySelector("#match-block main");
+	if (!histDiv) return;
+
+	let html = `
+		<table class="data-table">
+			<thead>
+				<tr>
+					<th>${i18n.t('profile.date')}</th>
+					<th>${i18n.t('profile.opponent')}</th>
+					<th>${i18n.t('profile.result')}</th>
+				</tr>
+			</thead>
+			<tbody>
+	`;
+
+	for (const match of history) {
+		const isPlayer1 = match.player1.username === username;
+		const opponent = isPlayer1 ? match.player2.username : match.player1.username;
+		const result = match.winnerId === (isPlayer1 ? match.player1Id : match.player2Id) ? i18n.t('profile.victory') : i18n.t('profile.defeat');
+		const date = new Date(match.playedAt).toLocaleDateString();
+		const statusClass = result === i18n.t('profile.victory') ? "status-victory" : "status-defeat";
+
+		html += `
+			<tr>
+				<td>${date}</td>
+				<td>${opponent}</td>
+				<td><span class="${statusClass}">${result}</span></td>
+			</tr>
+		`;
+	}
+	html += `</tbody></table>`;
+	histDiv.innerHTML = html;
 }
