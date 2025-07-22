@@ -48,6 +48,9 @@ model Match {
   score2				Int
   winnerId				Int      // FK vers User.id (le gagnant)
   playedAt				DateTime	@default(now())
+  lasted				Int
+  pointsUp				Int
+  pointsDown			Int
 }
 
 model Message {
