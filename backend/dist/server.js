@@ -15,10 +15,18 @@ const prisma = new PrismaClient();
 const app = fastify({ logger: false, disableRequestLogging: false });
 logger.info("Enregistrement du plugin de métriques Prometheus");
 app.register(metricsPlugin);
+function scrappingMessage(method, url, userAgent) {
+    if (url === '/metrics' && userAgent && userAgent.includes('Prometheus')) {
+        return 'Scrapping';
+    }
+}
 app.addHook('onRequest', async (request, reply) => {
     request.startTime = Date.now();
+    const baseMessage = request.body;
+    const scrapping = scrappingMessage(request.method, request.url, request.headers['user-agent']);
     logger.info({
         type: 'http_request',
+        message: scrapping || baseMessage,
         method: request.method,
         url: request.url,
         ip: request.ip,
@@ -27,8 +35,11 @@ app.addHook('onRequest', async (request, reply) => {
 });
 app.addHook('onResponse', async (request, reply) => {
     const responseTime = Date.now() - (request.startTime || 0);
+    const baseMessage = request.body;
+    const scrapping = scrappingMessage(request.method, request.url, request.headers['user-agent']);
     logger.info({
         type: 'http_response',
+        message: scrapping || baseMessage,
         method: request.method,
         url: request.url,
         statusCode: reply.statusCode,
