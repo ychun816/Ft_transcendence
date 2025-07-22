@@ -6,3 +6,9 @@ datasources:
     access: proxy
     url: http://prometheus:9090
     isDefault: true
+    editable: true #ici
+    jsonData:
+      queryTimeout: 60s
+      defaultStepWidth: 15s
+      httpMethod: POST
+    version: 1

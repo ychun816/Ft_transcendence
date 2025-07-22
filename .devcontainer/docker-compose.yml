@@ -27,6 +27,18 @@ services:
     networks:
       - app-network
 
+#  Dashboard persistent + configure
+#  Securite
+#  Log Rentention
+#  Test alerte prometheus
+
+
+# ogger=provisioning.dashboard type=file name=default t=2025-07-22T15:06:31.98202236Z level=error msg="failed to load dashboard from " file=/etc/grafana/provisioning/dashboards/system-overview.json error="Dashboard title cannot be empty"
+# logger=provisioning.dashboard type=file name=default t=2025-07-22T15:06:41.981702767Z level=error msg="failed to load dashboard from " file=/etc/grafana/provisioning/dashboards/system-overview.json error="Dashboard title cannot be empty"
+# logger=provisioning.dashboard type=file name=default t=2025-07-22T15:06:51.982377369Z level=error msg="failed to load dashboard from " file=/etc/grafana/provisioning/dashboards/system-overview.json error="Dashboard title cannot be empty"
+# ~ %
+# curl sur node-exporter:9101 fonctionne, par contre pas via le docker de prod directement, que par lexterieur, poruquoi ?
+
 
 
 
@@ -204,9 +216,9 @@ services:
     ports:
       - "${GRAFANA_PORT}:3000"
     volumes:
-      - ./../monitoring/grafana/grafana.ini:/etc/grafana/grafana.ini:ro
-      - ./../monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
-      - grafana_data:/var/lib/grafana
+    - ./../monitoring/grafana/grafana.ini:/etc/grafana/grafana.ini:ro
+    - ./../monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    - grafana_data:/var/lib/grafana
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}

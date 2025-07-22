@@ -1,0 +1,47 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Test Simple",
+    "tags": ["test"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Test Panel",
+        "type": "text",
+        "gridPos": {"h": 3, "w": 24, "x": 0, "y": 0},
+        "options": {
+          "content": "Si vous voyez ce panneau, le provisioning fonctionne !"
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "schemaVersion": 27,
+    "version": 1
+  },
+  "meta": {
+    "type": "db",
+    "canSave": true,
+    "canEdit": true,
+    "canAdmin": true,
+    "canStar": true,
+    "slug": "test-simple",
+    "url": "/d/test-simple/test-simple",
+    "expires": "0001-01-01T00:00:00Z",
+    "created": "0001-01-01T00:00:00Z",
+    "updated": "0001-01-01T00:00:00Z",
+    "updatedBy": "",
+    "createdBy": "",
+    "version": 1,
+    "hasAcl": false,
+    "isFolder": false,
+    "folderId": 1,
+    "folderTitle": "System Monitoring",
+    "folderUrl": "",
+    "provisioned": true,
+    "provisionedExternalId": "test-simple.json"
+  }
+}
