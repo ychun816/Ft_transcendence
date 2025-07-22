@@ -25,7 +25,7 @@ const secretKey = process.env.COOKIE_SECRET;
 // 	return undefined;
 // }
 
-function extractTokenFromRequest(request: FastifyRequest): { userId: number; username: string } | null {
+export function extractTokenFromRequest(request: FastifyRequest): { userId: number; username: string } | null {
 	const authHeader = request.headers.authorization;
 	if (!authHeader || !authHeader.startsWith('Bearer ')) {
 		return null;
@@ -49,27 +49,27 @@ export async function registerProfileRoute(
 		try {
 			const filename = request.params.filename;
 			console.log("🔍 Server-level avatar route called for:", filename);
-			
+
 			if (!/\.(jpg|jpeg|png|gif|webp)$/i.test(filename)) {
 				return reply.status(400).send({ error: "Invalid file type" });
 			}
-			
+
 			const safeFilename = path.basename(filename);
 			const filePath = path.join(PROJECT_ROOT, "public", "avatars", safeFilename);
-			
+
 			console.log("🔍 Serving avatar from server level:", filePath);
-			
+
 			if (!fs.existsSync(filePath)) {
 				console.log("❌ Avatar file not found:", filePath);
 				return reply.status(404).send({ error: "Avatar not found" });
 			}
-			
+
 			const stats = fs.statSync(filePath);
 			console.log("📁 File size:", stats.size, "bytes");
-			
+
 			// Check if client wants base64 (for CSP bypass)
 			const acceptsBase64 = request.headers.accept?.includes('application/json');
-			
+
 			if (acceptsBase64) {
 				// Return as base64 JSON for CSP bypass
 				const fileBuffer = fs.readFileSync(filePath);
@@ -79,37 +79,37 @@ export async function registerProfileRoute(
 				if (ext === '.png') mimeType = 'image/png';
 				else if (ext === '.gif') mimeType = 'image/gif';
 				else if (ext === '.webp') mimeType = 'image/webp';
-				
+
 				return reply.send({
 					data: `data:${mimeType};base64,${base64}`,
 					size: stats.size,
 					filename: filename
 				});
 			}
-			
+
 			// Normal image serving
 			const ext = path.extname(filename).toLowerCase();
 			let mimeType = 'image/jpeg';
 			if (ext === '.png') mimeType = 'image/png';
 			else if (ext === '.gif') mimeType = 'image/gif';
 			else if (ext === '.webp') mimeType = 'image/webp';
-			
+
 			reply.header('Content-Type', mimeType);
 			reply.header('Content-Length', stats.size);
 			reply.header('Cache-Control', 'public, max-age=86400');
 			reply.header('Access-Control-Allow-Origin', '*');
 			reply.header('Access-Control-Allow-Methods', 'GET');
 			reply.header('Access-Control-Allow-Headers', 'Content-Type');
-			
+
 			const fileStream = fs.createReadStream(filePath);
 			return reply.send(fileStream);
-			
+
 		} catch (error) {
 			console.error("❌ Error serving avatar:", error);
 			return reply.status(500).send({ error: "Internal server error" });
 		}
 	});
-	
+
 	app.get(
 		"/api/profile",
 		async (
