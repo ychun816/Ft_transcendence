@@ -1,7 +1,7 @@
 import { i18n } from "../services/i18n.js";
 import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
 // import { TwoFactorSettings } from "../components/TwoFactorSettings.js";
-import TwoFactorSetup from '../components/twoFactorSetup.js';
+import TwoFactorSetup from '../components/TwoFactorSetup.js';
 import { createLogoutSwitcher } from "../components/logoutSwitcher.js";
 import { createNeonContainer } from "../styles/neonTheme.js";
 

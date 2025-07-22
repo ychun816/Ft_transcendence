@@ -142,9 +142,15 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
                 router.navigate('/home');
             });
         } else if (data.requires2FA) {
-            // Show 2FA input
-            show2FAInput(page);
-            alert(data.message || i18n.t('auth.2fa_required'));
+            // Save username for 2FA verification step
+            sessionStorage.setItem('pending2FAUser', UserInfo.username);
+            // Redirect to 2FA verification page
+            import("../router/router.js").then(({ router }) => {
+                router.navigate('/2fa-verify');
+            // // Show 2FA input
+            // show2FAInput(page);
+            // alert(data.message || i18n.t('auth.2fa_required'));
+            });
         } else {
             alert(i18n.t('auth.login_error') + ": " + (data.message || i18n.t('auth.invalid_credentials')));
         }
@@ -155,20 +161,59 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
 }
 function show2FAInput(page: HTMLDivElement): void {
     const form = page.querySelector('.space-y-4') as HTMLFormElement;
-    
-    // Check if 2FA input already exists
-    if (form.querySelector('#two-factor-token')) {
-        return;
-    }
+
+    function show2FAInput(page: HTMLDivElement): void {
+    // Find the login form
+    const form = page.querySelector('form.space-y-6') as HTMLFormElement;
+    if (!form) return;
+
+    // Prevent duplicate 2FA input
+    if (form.querySelector('#two-factor-token')) return;
 
     // Create 2FA input field
+    const twoFactorDiv = document.createElement('div');
+    twoFactorDiv.className = "mt-2";
     const twoFactorInput = document.createElement('input');
     twoFactorInput.type = 'text';
     twoFactorInput.id = 'two-factor-token';
     twoFactorInput.placeholder = i18n.t('auth.2fa_code') || '6-digit code';
     twoFactorInput.maxLength = 6;
-    twoFactorInput.className = 'input text-center font-mono';
+    twoFactorInput.className = 'neon-input text-center font-mono';
     twoFactorInput.required = true;
+
+    // Only allow digits
+    twoFactorInput.addEventListener('input', (e) => {
+        const target = e.target as HTMLInputElement;
+        target.value = target.value.replace(/\D/g, '').slice(0, 6);
+    });
+
+    twoFactorDiv.appendChild(twoFactorInput);
+
+    // Insert 2FA input before the submit button
+    const submitButton = form.querySelector('#login-btn');
+    if (submitButton) {
+        form.insertBefore(twoFactorDiv, submitButton);
+
+        // Change button text for clarity
+        submitButton.textContent = i18n.t('auth.verify_and_login') || 'Verify & Login';
+    }
+
+    // Focus on the 2FA input
+    twoFactorInput.focus();
+}
+    // Check if 2FA input already exists
+    // if (form.querySelector('#two-factor-token')) {
+    //     return;
+    // }
+
+    // // Create 2FA input field
+    // const twoFactorInput = document.createElement('input');
+    // twoFactorInput.type = 'text';
+    // twoFactorInput.id = 'two-factor-token';
+    // twoFactorInput.placeholder = i18n.t('auth.2fa_code') || '6-digit code';
+    // twoFactorInput.maxLength = 6;
+    // twoFactorInput.className = 'input text-center font-mono';
+    // twoFactorInput.required = true;
 
     // Format input (digits only)
     twoFactorInput.addEventListener('input', (e) => {

@@ -3,7 +3,7 @@ import { registerNewUser } from "./routes/signup.js";
 import { FastifyRequest } from "fastify";
 import { handleLogIn } from "./routes/login.js";
 import { registerProfileRoute } from "./routes/profile.js";
-import { register2FARoutes } from "./routes/twoFactor.js";
+import { twoFactorRoutes } from "./routes/two-factor.js"; // import { register2FARoutes } from "./routes/twoFactor.js";
 import fastifyStatic from "@fastify/static";
 import fastifyWebsocket from "@fastify/websocket"; // ✅ Import corrigé
 import fastifyMultipart from "@fastify/multipart";
@@ -23,8 +23,8 @@ export const PROJECT_ROOT = path.resolve(__dirname, "../../");
 
 const prisma = new PrismaClient();
 
-const HTTP_PORT = process.env.HTTP_PORT ? parseInt(process.env.HTTP_PORT) : 3002;
-const HTTPS_PORT = process.env.HTTPS_PORT ? parseInt(process.env.HTTPS_PORT) : 3444;
+const HTTP_PORT = process.env.HTTP_PORT ? parseInt(process.env.HTTP_PORT) : 3003;
+const HTTPS_PORT = process.env.HTTPS_PORT ? parseInt(process.env.HTTPS_PORT) : 3445;
 
 const PUBLIC_IP = '192.168.1.196';
 
@@ -102,6 +102,7 @@ const setupHttpsApp = async () => {
 
 	await chatWebSocketRoutes(httpsApp, prisma);
 	await registerNotificationRoutes(httpsApp, prisma);
+	await twoFactorRoutes(httpsApp, prisma); ///Register 2FA routes
 	
 	// Make sure the setNotFoundHandler comes AFTER all static registrations
 	httpsApp.setNotFoundHandler((_req, reply) => {
