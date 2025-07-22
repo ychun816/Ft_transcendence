@@ -1,5 +1,3 @@
-//TRYING TO START
-//TO UNDERSTAND TSX SYNTAXXXXXXXX!!!!!
 
 import React, { useState } from 'react';
 

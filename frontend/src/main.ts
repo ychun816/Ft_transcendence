@@ -8,6 +8,7 @@ import { createChatPage } from "./pages/ChatPage";
 import { createNotFoundPage } from "./pages/NotFoundPage";
 import { createSignUpPage } from "./pages/SignUpPage";
 import { createUserProfilePage } from "./pages/UserProfilePage";
+import { TwoFactorVerifyPage } from "./pages/TwoFactorVerifyPage";
 import { i18n } from "./services/i18n";
 
 // Initialize app

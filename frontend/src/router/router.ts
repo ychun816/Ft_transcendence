@@ -174,11 +174,11 @@ class Router {
 }
 
 // Add this helper function after your Router class (before export):
-function renderReactPage(ReactComponent: React.FC): HTMLElement {
-    const container = document.createElement("div");
-    ReactDOM.createRoot(container).render(<ReactComponent />);
-    return container;
-}
+// function renderReactPage(ReactComponent: React.FC): HTMLElement {
+//     const container = document.createElement("div");
+//     ReactDOM.createRoot(container).render(ReactComponent);
+//     return container;
+// }
 
 export const router = new Router();
 
