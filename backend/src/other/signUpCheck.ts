@@ -39,8 +39,5 @@ export function UserSignUpCheck(user : IUserInfo): true | string {
     if (!isPasswordLong(user)) {
         return "Password must be at least 5 characters long";
     }
-    // if (!isAvatarDefined(user)) {
-    //     return "Avatar must be a File ou undefined";
-    // }
     return true;
 }
