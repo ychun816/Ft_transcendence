@@ -73,7 +73,7 @@ const start = async () => {
         await registerNotificationRoutes(app, prisma);
         console.log("🎧 Starting to listen...");
         await app.listen({
-            port: 3001,
+            port: 3000,
             host: '0.0.0.0'
         });
         console.log(`🎉 Server is listening on port: 3000`);
