@@ -698,24 +698,6 @@ function setupAddFriendFeature(page: HTMLDivElement) {
 	};
 }
 
-// class GlobalStat {
-// 	score1: number = 0;
-// }
-
-// async function generateStatDashboard() {
-// 	const history = await getMatchHistory();
-// 	if (!history) return;
-
-// 	const gamesPlayed = 0;
-// 	const
-
-// 	const userStat = {
-// 		games = ;
-
-// 	}
-
-
-// }
 
 // async function displayDashboard(page: HTMLDivElement) {
 // 	const username = sessionStorage.getItem("username");

@@ -2,7 +2,7 @@
 
 # IP de votre machine sur le réseau local.
 # Changez cette valeur si votre IP change.
-PUBLIC_IP="10.16.12.6"
+PUBLIC_IP="10.16.13.4"
 DOMAIN_NAME="localhost"
 
 echo "🔐 Génération des certificats SSL"
