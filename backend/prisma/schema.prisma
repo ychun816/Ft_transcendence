@@ -52,6 +52,9 @@ model Match {
   lasted				Int			@default(0)
   pointsUp				Int			@default(0)
   pointsDown			Int			@default(0)
+  tournamentMode		Boolean		@default(false)
+  iaMode		Boolean		@default(false)
+  multiMode		Boolean		@default(false)
 }
 
 model Message {

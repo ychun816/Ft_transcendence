@@ -699,13 +699,37 @@ function setupAddFriendFeature(page: HTMLDivElement) {
 }
 
 
-// async function displayDashboard(page: HTMLDivElement) {
-// 	const username = sessionStorage.getItem("username");
-// 	const history = await generateStatDashboard();
-// 	if (!history) return;
+async function getDashboard(page: HTMLDivElement) {
+	try{
+		const user = await getUserInfo();
+		if (!user) return null;
+		const token = sessionStorage.getItem('authToken');
+		const response = await fetch(`/api/game/stats?username=${encodeURIComponent(user.username)}`, {
+			method: "GET",
+			headers:{
+				"Content-Type": "application/json",
+				"Authorization": `Bearer ${token}`
+			},
+		});
+		if (response.ok) {
+			const stats = await response.json();
+			console.log('Game stats retrieved!', stats);
+			return stats;
+		} else {
+			console.error('Failed to retrieve game stats');
+			return null;
+		}
+	} catch (error) {
+		console.error('Error fetching game stats:', error);
+		return null;
+	}
+}
 
-// 	const histDiv = page.querySelector("#match-block main");
-// 	if (!histDiv) return;
+// async function displayDashboard(page: HTMLDivElement)
+// {
+// 	const stats = getDashboard(page);
+// 	const statDiv = page.querySelector("#dashboard");
+// 	if (!statDiv) return;
 
 // 	let html = `
 // 		<table class="data-table">

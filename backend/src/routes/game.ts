@@ -1,6 +1,8 @@
-import { FastifyInstance } from "fastify";
-import { Prisma, PrismaClient, User } from "@prisma/client";
+import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import { Prisma, PrismaClient, User, Match } from "@prisma/client";
 import { extractTokenFromRequest } from "./profile.js"
+import { match } from "assert";
+import { request } from "http";
 
 interface GameDataRequest {
 	players: number;
@@ -99,34 +101,100 @@ export async function registerGameRoute(
 			gameId: game.id,
 		});
 	});
+
+	app.get("/api/game/stats", async(
+		request: FastifyRequest<{ Querystring: { username: string }}>,
+		reply:  FastifyReply
+	) => {
+		const auth = extractTokenFromRequest(request);
+		if (!auth) {
+			return reply.status(401).send({ error: 'Unauthorized' });
+		}
+
+		const username = request.query.username as string;
+		const {iaStats, tournamentStats, multiStats} = await generateStats(prisma, username)
+		if (!iaStats || !tournamentStats || !multiStats)
+			reply.status(400).send({ error: "No game stats" });
+		reply.status(200).send({sucess:true, iaStats, tournamentStats, multiStats});
+	});
 }
 
-// class GlobalStat {
-// 	winnerId: number = 0;
-// 	lasted: number = 0;
-// 	pointsUp: number = 0;
-// 	pointsDown: number = 0;
-// 	score1: number = 0;
-// 	score2: number = 0;
-// }
+class GlobalStat {
+	winner: number = 0;
+	loser: number = 0;
+	lasted: number = 0;
+	pointsUp: number = 0;
+	pointsDown: number = 0;
+	score: number = 0;
+}
 
-// async function generateStatDashboard(prisma: PrismaClient, username: string)
-// {
-// 	try
-// 	{
-// 		const user = await prisma.user.findUnique({ where: { username } });
+async function generateStats(prisma: PrismaClient, username: string)
+{
+	const matches = await prisma.user.findUnique({
+		where: { username },
+		select:{
+			matchesAsPlayer1: true,
+			matchesAsPlayer2: true,
+			gamesPlayed: true,
+		}
+	});
+	let iaStats = new GlobalStat;
+	let tournamentStats = new GlobalStat;
+	let multiStats = new GlobalStat;
+	if (matches){
+		await handleMatches(matches.matchesAsPlayer1, prisma, username, iaStats, tournamentStats, multiStats)
+		await handleMatches(matches.matchesAsPlayer2, prisma, username, iaStats, tournamentStats, multiStats)
+	}
+	return {iaStats, tournamentStats, multiStats};
+}
 
+async function getWinnerStatus(prisma: PrismaClient, username: string, matche: Match): Promise <number>
+{
+	const user = await prisma.user.findUnique({
+		where: { username },
+		select:{ id: true }
+	});
+	if (!user) return 0;
+	return matche.winnerId === user.id ? 1 : -1;
+}
 
-// 	} catch(error){
-// 		console.error("Generate Dashboard: ", error);
-// 	}
+function addUpGameStats(matche: Match, tab: GlobalStat, winCount: number, gamesPlayed: number)
+{
+	winCount < 0 ? tab.loser += gamesPlayed - tab.winner : tab.winner += winCount;
+	tab.lasted += matche.lasted;
+	tab.pointsUp += matche.pointsUp;
+	tab.pointsDown += matche.pointsDown;
+	tab.score += matche.score1;
+}
 
-// }
-
-
-// async function generateIAStats(prisma: PrismaClient, user: any)
-// {
-// 	const matchesPlayer1 = await prisma.user.findMany({
-// 		where: {user.id: id}
-// 	})
-// }
+async function handleMatches(
+	matches: Match[],
+	prisma: PrismaClient,
+	username: string,
+	iaStats: GlobalStat,
+	tournamentStats: GlobalStat,
+	multiStats: GlobalStat)
+{
+	let iaGames = 0, tounamentGames = 0, multiGames = 0;
+	for (let matche of matches)
+	{
+		if (matche.iaMode == true)
+		{
+			iaGames++;
+			let winCount = await getWinnerStatus(prisma, username, matche);
+			addUpGameStats(matche, iaStats, winCount, iaGames);
+		}
+		else if (matche.tournamentMode == true)
+		{
+			tounamentGames++;
+			let winCount = await getWinnerStatus(prisma, username, matche);
+			addUpGameStats(matche, tournamentStats, winCount, tounamentGames);
+		}
+		else (matche.multiMode == true)
+		{
+			multiGames++;
+			let winCount = await getWinnerStatus(prisma, username, matche);
+			addUpGameStats(matche, multiStats, winCount, multiGames);
+		}
+	}
+}
