@@ -183,4 +183,4 @@ class Router {
 export const router = new Router();
 
 // Register the /2fa-verify route (do this in your main entry file or here if you prefer)
-router.addRoute("/2fa-verify", () => renderReactPage(TwoFactorVerifyPage));
+// router.addRoute("/2fa-verify", () => renderReactPage(TwoFactorVerifyPage));
