@@ -80,14 +80,20 @@ interface ia_interface
 
 interface data_score
 {
+    id: number;
+    player1Id: string | null;
     ia_mode: boolean;
-    winner: boolean;
-    score: number;
-    score_adv: number;
-    point_marque_moitie_up: number;
-    point_marque_moitie_down: number;
-    point_perdu_moitie_up: number;
-    point_perdu_moitie_down: number;
+    winnerId: string | null;
+    score1: number;
+    score2: number;
+    tournoi_mode: boolean;
+    multi_mode: boolean;
+    played_at: Date;
+    game_time: number;
+    win_point_up: number;
+    win_point_down: number;
+    lose_point_up: number;
+    lose_point_down: number;
 }
 
 
@@ -119,6 +125,12 @@ function get_random_playable_angle(): number
         return angle;
     }
 }
+
+function create_ID(): number
+{
+    return Math.floor(Math.random() * 1_000_001);
+}
+
 
 function random_number(min: number, max: number): number
 {
@@ -271,14 +283,20 @@ class Pong
 
         this.data = 
         {
+            id: 0,
+            player1Id: "default",
             ia_mode: false,
-            winner: false,
-            score: 0,
-            score_adv: 0,
-            point_marque_moitie_up: 0,
-            point_marque_moitie_down: 0,
-            point_perdu_moitie_up: 0,
-            point_perdu_moitie_down: 0,
+            tournoi_mode: false,
+            multi_mode: false,
+            winnerId: "default",
+            score1: 0,
+            score2: 0,
+            played_at: new Date(),
+            game_time: performance.now(),
+            win_point_up: 0,
+            win_point_down: 0,
+            lose_point_up: 0,
+            lose_point_down: 0,
         }
 
         this.setup_event();
@@ -429,14 +447,45 @@ class Pong
 
     handle_data()
     {
+        const token = sessionStorage.getItem("authToken");
+        if (!token)
+            return;
+        const userId = sessionStorage.getItem("userId");
+        this.data.player1Id = userId;
+
+        this.data.id = create_ID();
+
         if (this.state.ia_mode == true)
             this.data.ia_mode = true;
-        this.data.score = this.state.left_score;
-        this.data.score_adv = this.state.right_score;
-        if (this.data.score > this.data.score_adv)
-            this.data.winner = true;
 
-        //APPEL DE L'API et lui envoyer l'interface data !
+
+
+        this.data.score1 = this.state.left_score;
+        this.data.score2 = this.state.right_score;
+        if (this.data.score1 > this.data.score2)
+            this.data.winnerId = this.data.player1Id;
+
+
+        this.data.tournoi_mode = false;
+        this.data.multi_mode = false;
+        this.data.played_at = new Date();
+
+        // mesure de la duree
+        let t0 = this.data.game_time;
+        let t1 = performance.now();
+        this.data.game_time = t1 - t0;
+
+        //console.log("DATA ENVOYE AU BACKEND !")
+    
+        // const response = await fetch("/api/game/add", {
+        //     method: "POST",
+        //     ContentType: {
+        //         "application/json",
+        //     }
+        //     body?: this.data,
+        // }
+
+        // )
     }
 
 
@@ -490,14 +539,20 @@ class Pong
         this.ia.super_flag = true;
         this.ia.random_paddle_move = false;
         
+        this.data.id = 0;
+        this.data.player1Id = "default";
         this.data.ia_mode = false;
-        this.data.winner = false;
-        this.data.score = 0;
-        this.data.score_adv = 0;
-        this.data.point_marque_moitie_up = 0;
-        this.data.point_marque_moitie_down = 0;
-        this.data.point_perdu_moitie_up = 0;
-        this.data.point_perdu_moitie_down = 0;
+        this.data.tournoi_mode = false;
+        this.data.multi_mode = false;
+        this.data.winnerId = "default";
+        this.data.score1 = 0;
+        this.data.score2 = 0;
+        this.data.played_at = new Date();
+        this.data.game_time = 0;
+        this.data.win_point_down = 0;
+        this.data.win_point_up = 0;
+        this.data.lose_point_down = 0;
+        this.data.lose_point_up = 0;
         
         this.config.ball_speed = 4.5 * (3/2);
         this.config.paddle_speed = 7.5 * (3/2);
@@ -899,16 +954,16 @@ class Pong
         if (this.ball.ball_x < 0)
         {
             if (this.ball.ball_y <= this.config.canvas_height)
-                this.data.point_perdu_moitie_up++;
+                this.data.lose_point_up++;
             else
-                this.data.point_perdu_moitie_down++;
+                this.data.lose_point_down++;
         }
         else
         {
             if (this.ball.ball_y <= this.config.canvas_height)
-                this.data.point_marque_moitie_up++;
+                this.data.win_point_up++;
             else
-                this.data.point_marque_moitie_down++;
+                this.data.win_point_down++;
         }
 
 
