@@ -1,120 +1,109 @@
-import { setupTOTP, send2FACode, verifyEmail2FA, verifyTOTP } from '../services/twoFactorService.js';
+import { setupTOTP, send2FACode, verifyEmail2FA, verifyTOTP, get2FAStatus, disable2FA } from '../services/TwoFactorService.js';
+// import { setupTOTP, send2FACode, verifyEmail2FA, verifyTOTP } from '../services/TwoFactorService.js';
+// import { createTwoFactorCodeInput } from './TwoFactorCodeInput.js';
 
 export function createTwoFactorSetup(userId: number): HTMLElement {
     const container = document.createElement('div');
     container.className = 'flex flex-col gap-4';
 
-    let method: 'email' | 'totp' | null = null;
-    let step: 'choose' | 'code' | 'totp-setup' | 'done' = 'choose';
-    let totpInfo: { otpauth_url: string; secret: string } | null = null;
+    let status: { enabled: boolean, type?: 'email' | 'totp' } | null = null;
     let error: string | null = null;
+
+    async function fetchStatus() {
+        try {
+            status = await get2FAStatus(userId);
+        } catch {
+            status = null;
+        }
+        render();
+    }
+
+    async function handleEnableEmail() {
+        // You may want to send a code to the user's email and ask for input here
+        try {
+            await send2FACode(userId);
+            alert('A verification code has been sent to your email. Please check your inbox.');
+            // You should show an input for the code and call verifyEmail2FA(userId, code)
+        } catch (e) {
+            error = "Failed to send email code.";
+            render();
+        }
+    }
+
+    async function handleEnableTOTP() {
+        try {
+            const info = await setupTOTP(userId);
+            // Show QR code and secret to user, then ask for code input and call verifyTOTP(userId, code)
+            alert('Scan the QR code in your authenticator app and enter the code to verify.');
+            // You should show a QR code and input for the code
+        } catch (e) {
+            error = "Failed to setup TOTP.";
+            render();
+        }
+    }
+
+    async function handleDisable() {
+        const password = prompt("Enter your password to disable 2FA:");
+        if (!password) return;
+        const res = await disable2FA(userId, password);
+        if (res.error) {
+            error = res.error;
+        } else {
+            error = null;
+            await fetchStatus();
+        }
+        render();
+    }
 
     function render() {
         container.innerHTML = '';
 
-        if (step === 'choose') {
-            const title = document.createElement('h2');
-            title.textContent = 'Enable Two-Factor Authentication';
-            container.appendChild(title);
-
-            const emailBtn = document.createElement('button');
-            emailBtn.className = 'btn';
-            emailBtn.textContent = 'Email 2FA';
-            emailBtn.onclick = () => {
-                method = 'email';
-                step = 'code';
-                render();
-            };
-            container.appendChild(emailBtn);
-
-            const totpBtn = document.createElement('button');
-            totpBtn.className = 'btn';
-            totpBtn.textContent = 'Authenticator App (TOTP)';
-            totpBtn.onclick = async () => {
-                totpBtn.disabled = true;
-                try {
-                    totpInfo = await setupTOTP(userId);
-                    method = 'totp';
-                    step = 'totp-setup';
-                } catch {
-                    error = 'Failed to setup TOTP';
-                }
-                totpBtn.disabled = false;
-                render();
-            };
-            container.appendChild(totpBtn);
-
-            if (error) {
-                const errDiv = document.createElement('div');
-                errDiv.className = 'text-red-500';
-                errDiv.textContent = error;
-                container.appendChild(errDiv);
-            }
+        if (!status) {
+            container.textContent = "Loading...";
+            return;
         }
 
-        if (step === 'code' && method === 'email') {
-            const sendBtn = document.createElement('button');
-            sendBtn.className = 'btn';
-            sendBtn.textContent = 'Send Code';
-            sendBtn.onclick = async () => {
-                sendBtn.disabled = true;
-                try {
-                    await send2FACode(userId);
-                } catch {
-                    error = 'Failed to send code';
-                }
-                sendBtn.disabled = false;
-                render();
-            };
-            container.appendChild(sendBtn);
+        if (status.enabled) {
+            // 2FA is enabled
+            const info = document.createElement('div');
+            info.textContent = `2FA is enabled (${status.type === 'totp' ? 'Authenticator App' : 'Email'})`;
+            container.appendChild(info);
 
-            container.appendChild(createTwoFactorCodeInput(async (code) => {
-                const res = await verifyEmail2FA(userId, code);
-                if (res.error) {
-                    error = res.error;
-                } else {
-                    step = 'done';
-                }
-                render();
-            }, error || undefined));
+            const disableBtn = document.createElement('button');
+            disableBtn.textContent = "Disable 2FA";
+            disableBtn.className = "bg-red-500 text-white px-4 py-2 rounded";
+            disableBtn.onclick = handleDisable;
+            container.appendChild(disableBtn);
+        } else {
+            // 2FA is disabled
+            const info = document.createElement('div');
+            info.textContent = "2FA is currently disabled.";
+            container.appendChild(info);
+
+            const enableEmailBtn = document.createElement('button');
+            enableEmailBtn.textContent = "Enable 2FA by Email";
+            enableEmailBtn.className = "bg-blue-500 text-white px-4 py-2 rounded";
+            enableEmailBtn.onclick = handleEnableEmail;
+            container.appendChild(enableEmailBtn);
+
+            const enableTotpBtn = document.createElement('button');
+            enableTotpBtn.textContent = "Enable 2FA by Authenticator App";
+            enableTotpBtn.className = "bg-green-500 text-white px-4 py-2 rounded";
+            enableTotpBtn.onclick = handleEnableTOTP;
+            container.appendChild(enableTotpBtn);
         }
 
-        if (step === 'totp-setup' && totpInfo) {
-            const qrTitle = document.createElement('h3');
-            qrTitle.textContent = 'Scan this QR code with your authenticator app:';
-            container.appendChild(qrTitle);
-
-            const qrImg = document.createElement('img');
-            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(totpInfo.otpauth_url)}&size=200x200`;
-            qrImg.alt = 'TOTP QR';
-            container.appendChild(qrImg);
-
-            const secretDiv = document.createElement('div');
-            secretDiv.innerHTML = `Or enter this secret: <b>${totpInfo.secret}</b>`;
-            container.appendChild(secretDiv);
-
-            container.appendChild(createTwoFactorCodeInput(async (code) => {
-                const res = await verifyTOTP(userId, code);
-                if (res.error) {
-                    error = res.error;
-                } else {
-                    step = 'done';
-                }
-                render();
-            }, error || undefined));
-        }
-
-        if (step === 'done') {
-            const doneDiv = document.createElement('div');
-            doneDiv.className = 'text-green-600';
-            doneDiv.textContent = 'Two-Factor Authentication enabled!';
-            container.appendChild(doneDiv);
+        if (error) {
+            const errDiv = document.createElement('div');
+            errDiv.textContent = error;
+            errDiv.className = "text-red-500";
+            container.appendChild(errDiv);
         }
     }
 
-    render();
+    fetchStatus();
     return container;
 }
 
-// Helper: import this from the next file or place below
-import { createTwoFactorCodeInput } from './TwoFactorCodeInput.js';
+// // Helper: import this from the next file or place below
+// import { createTwoFactorCodeInput } from './TwoFactorCodeInput.js';
