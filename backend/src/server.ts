@@ -15,6 +15,7 @@ import chatWebSocketRoutes from "./routes/chat.js";
 import cookie from '@fastify/cookie'
 import type { FastifyCookieOptions } from '@fastify/cookie'
 import { registerNotificationRoutes } from "./routes/notifications.js";
+import { registerGameRoute } from "./routes/game.js";
 import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -23,10 +24,10 @@ export const PROJECT_ROOT = path.resolve(__dirname, "../../");
 
 const prisma = new PrismaClient();
 
-const HTTP_PORT = process.env.HTTP_PORT ? parseInt(process.env.HTTP_PORT) : 3002;
-const HTTPS_PORT = process.env.HTTPS_PORT ? parseInt(process.env.HTTPS_PORT) : 3444;
+const HTTP_PORT = process.env.HTTP_PORT ? parseInt(process.env.HTTP_PORT) : 3001;
+const HTTPS_PORT = process.env.HTTPS_PORT ? parseInt(process.env.HTTPS_PORT) : 3443;
 
-const PUBLIC_IP = '192.168.1.196';
+const PUBLIC_IP = '10.16.13.4';
 
 let httpsOptions;
 try{
@@ -86,7 +87,7 @@ const setupHttpsApp = async () => {
 		});
 	});
 
-	// Register frontend static SECOND  
+	// Register frontend static SECOND
 	console.log("📁 Registering frontend static files...");
 	await httpsApp.register(async function (fastify) {
 		await fastify.register(fastifyStatic, {
@@ -96,9 +97,10 @@ const setupHttpsApp = async () => {
 	});
 
 	console.log("🛣️ Enregistrement des routes HTTPS...");
-	registerNewUser(httpsApp, prisma);
-	handleLogIn(httpsApp, prisma);
-	registerProfileRoute(httpsApp, prisma);
+	await registerNewUser(httpsApp, prisma);
+	await handleLogIn(httpsApp, prisma);
+	await registerProfileRoute(httpsApp, prisma);
+	await registerGameRoute(httpsApp, prisma);
 
 	await chatWebSocketRoutes(httpsApp, prisma);
 	await registerNotificationRoutes(httpsApp, prisma);

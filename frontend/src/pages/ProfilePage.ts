@@ -16,7 +16,7 @@ export function createProfilePage(): HTMLElement {
 			<!-- Conteneur principal avec disposition côte à côte - centré -->
 			<div class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-8 border border-blue-400 border-opacity-30 neon-border flex gap-10 items-start" style="height: 80vh; max-width: 1300px; width: 95%;">
 				<!-- Colonne de gauche : Profile + Friends - largeur fixe (moitié du match history) -->
-				<div class="flex flex-col gap-6 h-full" style="width: 600px;">
+				<div class="flex flex-col gap-6 h-full" style="width: 800px;">
 					<!-- Bloc Profile Principal -->
 					<div class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-6 border border-cyan-400 border-opacity-30 neon-border w-full flex flex-col items-center flex-shrink-0">
 						<header class="w-full mb-6">
@@ -77,10 +77,18 @@ export function createProfilePage(): HTMLElement {
 				</div>
 
 				<!-- Colonne de droite : Match History - largeur fixe -->
-				<div class="h-full" style="width: 800px;">
+				<div class="flex flex-col gap-6 h-full" style="width: 800px;">
 					<div id="match-block" class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-6 border border-purple-400 border-opacity-30 neon-border w-full flex flex-col h-full">
 						<header class="w-full mb-4">
 							<h2 class="text-2xl font-bold text-purple-400 neon-text">${i18n.t('profile.match_history')}</h2>
+						</header>
+						<main class="w-full flex-1 overflow-y-auto">
+							<!-- Le contenu de l'historique des matchs sera ajouté ici -->
+						</main>
+					</div>
+					<div id="dashboard" class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-6 border border-purple-400 border-opacity-30 neon-border w-full flex flex-col h-full">
+						<header class="w-full mb-4">
+							<h2 class="text-2xl font-bold text-purple-400 neon-text">${i18n.t('profile.dashboard')}</h2>
 						</header>
 						<main class="w-full flex-1 overflow-y-auto">
 							<!-- Le contenu de l'historique des matchs sera ajouté ici -->
@@ -92,7 +100,7 @@ export function createProfilePage(): HTMLElement {
 			<div class="absolute top-4 right-4" id="language-switcher-container"></div>
 			<div class="absolute top-4 left-4" id="logout-container"></div>
 		`;
-		
+
 		page.innerHTML = createNeonContainer(content);
 
 		// Insérer le commutateur de langue
@@ -122,33 +130,33 @@ export function createProfilePage(): HTMLElement {
 				const avatarElem = page.querySelector('#user-avatar') as HTMLImageElement;
 				if (avatarElem && data.avatarUrl) {
 					console.log("🖼️ Setting avatar URL:", data.avatarUrl);
-					
+
 					const isDevMode = window.location.port === '5173'; // Vite dev server
-					const serverUrl = isDevMode 
+					const serverUrl = isDevMode
 						? `https://${window.location.hostname}:3444`
 						: window.location.origin;
-					
-					const fullAvatarUrl = data.avatarUrl.startsWith('http') 
+
+					const fullAvatarUrl = data.avatarUrl.startsWith('http')
 						? data.avatarUrl // External URL, use as-is
 						: `${serverUrl}${data.avatarUrl}`; // Local URL, add server prefix
-					
-					const avatarUrl = fullAvatarUrl.includes('?') 
+
+					const avatarUrl = fullAvatarUrl.includes('?')
 						? `${fullAvatarUrl}&cb=${Date.now()}`
 						: `${fullAvatarUrl}?cb=${Date.now()}`;
-					
+
 					console.log("🌐 Full avatar URL:", avatarUrl);
-					
+
 					// Try to load image normally first
 					const testImage = new Image();
-					
+
 					testImage.onload = function() {
 						console.log("✅ Normal image loaded successfully!");
 						avatarElem.src = avatarUrl;
 					};
-					
+
 					testImage.onerror = async function(e) {
 						console.error("❌ Normal image failed, trying base64 fallback...");
-						
+
 						try {
 							// Fetch as base64 from our API
 							const response = await fetch(avatarUrl, {
@@ -156,7 +164,7 @@ export function createProfilePage(): HTMLElement {
 									'Accept': 'application/json'
 								}
 							});
-							
+
 							if (response.ok) {
 								const data = await response.json();
 								if (data.data && data.data.startsWith('data:image')) {
@@ -173,11 +181,11 @@ export function createProfilePage(): HTMLElement {
 							avatarElem.src = '/default-avatar.png';
 						}
 					};
-					
+
 					testImage.src = avatarUrl;
 					console.log("🔄 Testing normal image load first");
 				}
-		
+
 				const statElem = page.querySelector("#user-stats") as HTMLElement;
 				if (statElem && data.gamesPlayed != null && data.wins != null && data.losses != null) {
 					statElem.textContent = i18n.t('profile.games_played_stats', {
@@ -194,7 +202,7 @@ export function createProfilePage(): HTMLElement {
 	};
 
 	render();
-	
+
 	function handleLanguageChange() {
 		window.removeEventListener('languageChanged', handleLanguageChange);
 		const app = document.getElementById('app');
@@ -572,21 +580,21 @@ async function displayFriendsList(page: HTMLDivElement){
 
 	const friendsMain = page.querySelector("#friends-block main");
 	if (!friendsMain) return;
-	
+
 	function fixAvatarUrl(avatarUrl: string | null): string {
 		if (!avatarUrl) return '/default-avatar.png';
-		
+
 		// Si c'est une URL externe, l'utiliser telle quelle
 		if (avatarUrl.startsWith('http')) {
 			return avatarUrl;
 		}
-		
+
 		// Déterminer l'URL du serveur correct
 		const isDevMode = window.location.port === '5173';
-		const serverUrl = isDevMode 
+		const serverUrl = isDevMode
 			? `https://${window.location.hostname}:3444`
 			: window.location.origin;
-		
+
 		// Construire l'URL complète
 		return `${serverUrl}${avatarUrl}`;
 	}
@@ -701,44 +709,4 @@ function setupAddFriendFeature(page: HTMLDivElement) {
 			}
 		});
 	};
-}
-
-function manage2FA(page: HTMLDivElement): void {
-    const manage2FABtn = page.querySelector('#manage-2fa') as HTMLButtonElement;
-    manage2FABtn?.addEventListener('click', () => {
-        // Create modal overlay
-        const modalOverlay = document.createElement('div');
-        modalOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-        modalOverlay.innerHTML = `
-            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-                <div class="flex justify-between items-center p-4 border-b">
-                    <h3 class="text-xl font-semibold">Security Settings</h3>
-                    <button id="close-2fa-modal" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
-                </div>
-                <div id="2fa-settings-container" class="p-4"></div>
-            </div>
-        `;
-
-        document.body.appendChild(modalOverlay);
-
-        // Initialize 2FA settings using the DOM function
-        const settingsContainer = modalOverlay.querySelector('#2fa-settings-container') as HTMLElement;
-        const userId = sessionStorage.getItem('userId') || sessionStorage.getItem('id');
-        if (settingsContainer && userId) {
-            settingsContainer.appendChild(createTwoFactorSetup(Number(userId)));
-        }
-
-        // Close modal handlers
-        const closeBtn = modalOverlay.querySelector('#close-2fa-modal') as HTMLButtonElement;
-        const closeModal = () => {
-            document.body.removeChild(modalOverlay);
-        };
-
-        closeBtn.addEventListener('click', closeModal);
-        modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay) {
-                closeModal();
-            }
-        });
-    });
 }
