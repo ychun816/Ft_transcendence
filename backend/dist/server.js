@@ -57,6 +57,12 @@ const start = async () => {
         app.setNotFoundHandler((_req, reply) => {
             reply.sendFile("index.html");
         });
+        // app.register(async function (app) {
+        // 	app.get('/ws', { websocket: true }, (connection, req) => {
+        // 		connection.socket.on('message', message => {
+        // 		});
+        // 	});
+        // });
         console.log("🗄️ Testing database connection...");
         await prisma.$connect();
         console.log("✅ Database connected successfully");
@@ -73,7 +79,7 @@ const start = async () => {
         await registerNotificationRoutes(app, prisma);
         console.log("🎧 Starting to listen...");
         await app.listen({
-            port: 3000,
+            port: 3001,
             host: '0.0.0.0'
         });
         console.log(`🎉 Server is listening on port: 3000`);

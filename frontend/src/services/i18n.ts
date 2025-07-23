@@ -65,7 +65,11 @@ const translations: Record<Language, Translations> = {
       "result": "Résultat",
       "victory": "Victoire",
       "defeat": "Défaite",
-	  "friends_list": "Liste d'amis"
+	    "friends_list": "Liste d'amis",
+	    "status": "Status",
+	    "avatar": "Avatar",
+	    "name": "Nom",
+	    "Games_played": "Parties Jouées"
     },
     "chat": {
       "title": "Chat",
@@ -195,7 +199,11 @@ const translations: Record<Language, Translations> = {
       "result": "Result",
       "victory": "Victory",
       "defeat": "Defeat",
-	  "friends_list": "Friends List"
+	    "friends_list": "Friends List",
+	    "status": "Status",
+	    "avatar": "Avatar",
+	    "name": "Username",
+	    "Games_played": "Games Played"
     },
     "chat": {
       "title": "Chat",
