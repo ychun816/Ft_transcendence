@@ -137,7 +137,7 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
             
             await authService.getCurrentUser();
             import("../router/router.js").then(({ router }) => {
-                router.navigate('/home');
+                router.navigate('/game');
             });
         } else {
             alert(i18n.t('auth.login_error') + ": " + (data.message || i18n.t('auth.invalid_credentials')));
