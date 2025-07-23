@@ -1,5 +1,4 @@
-import { FastifyInstance } from "fastify";
-import { FastifyRequest } from "fastify";
+import { FastifyInstance, FastifyRequest } from "fastify";
 import { PrismaClient } from "@prisma/client";
 import fs from "fs";
 import path from "path";
@@ -13,21 +12,18 @@ import { request } from "http";
 /*
 TO DO:
 - Ajuster la regle de mot de passe
-- Ajuster la redirection (home page)
-- Friends online status
 - Friends click on name profil
-- Avatar upload
 */
 
 const secretKey = process.env.COOKIE_SECRET;
 
-function getFieldValue(field: any): string | undefined {
-	if (!field) return undefined;
-	if (Array.isArray(field)) field = field[0];
-	if (typeof field.value === "string") return field.value;
-	if (Buffer.isBuffer(field.value)) return field.value.toString();
-	return undefined;
-}
+// function getFieldValue(field: any): string | undefined {
+// 	if (!field) return undefined;
+// 	if (Array.isArray(field)) field = field[0];
+// 	if (typeof field.value === "string") return field.value;
+// 	if (Buffer.isBuffer(field.value)) return field.value.toString();
+// 	return undefined;
+// }
 
 function extractTokenFromRequest(request: FastifyRequest): { userId: number; username: string } | null {
 	const authHeader = request.headers.authorization;
@@ -46,9 +42,74 @@ function extractTokenFromRequest(request: FastifyRequest): { userId: number; use
 }
 
 export async function registerProfileRoute(
-	app: FastifyInstance,
+	app: FastifyInstance<any, any, any, any>,
 	prisma: PrismaClient
 ) {
+	app.get("/avatars/:filename", async (request: FastifyRequest<{Params: {filename: string}}>, reply) => {
+		try {
+			const filename = request.params.filename;
+			console.log("🔍 Server-level avatar route called for:", filename);
+			
+			if (!/\.(jpg|jpeg|png|gif|webp)$/i.test(filename)) {
+				return reply.status(400).send({ error: "Invalid file type" });
+			}
+			
+			const safeFilename = path.basename(filename);
+			const filePath = path.join(PROJECT_ROOT, "public", "avatars", safeFilename);
+			
+			console.log("🔍 Serving avatar from server level:", filePath);
+			
+			if (!fs.existsSync(filePath)) {
+				console.log("❌ Avatar file not found:", filePath);
+				return reply.status(404).send({ error: "Avatar not found" });
+			}
+			
+			const stats = fs.statSync(filePath);
+			console.log("📁 File size:", stats.size, "bytes");
+			
+			// Check if client wants base64 (for CSP bypass)
+			const acceptsBase64 = request.headers.accept?.includes('application/json');
+			
+			if (acceptsBase64) {
+				// Return as base64 JSON for CSP bypass
+				const fileBuffer = fs.readFileSync(filePath);
+				const base64 = fileBuffer.toString('base64');
+				const ext = path.extname(filename).toLowerCase();
+				let mimeType = 'image/jpeg';
+				if (ext === '.png') mimeType = 'image/png';
+				else if (ext === '.gif') mimeType = 'image/gif';
+				else if (ext === '.webp') mimeType = 'image/webp';
+				
+				return reply.send({
+					data: `data:${mimeType};base64,${base64}`,
+					size: stats.size,
+					filename: filename
+				});
+			}
+			
+			// Normal image serving
+			const ext = path.extname(filename).toLowerCase();
+			let mimeType = 'image/jpeg';
+			if (ext === '.png') mimeType = 'image/png';
+			else if (ext === '.gif') mimeType = 'image/gif';
+			else if (ext === '.webp') mimeType = 'image/webp';
+			
+			reply.header('Content-Type', mimeType);
+			reply.header('Content-Length', stats.size);
+			reply.header('Cache-Control', 'public, max-age=86400');
+			reply.header('Access-Control-Allow-Origin', '*');
+			reply.header('Access-Control-Allow-Methods', 'GET');
+			reply.header('Access-Control-Allow-Headers', 'Content-Type');
+			
+			const fileStream = fs.createReadStream(filePath);
+			return reply.send(fileStream);
+			
+		} catch (error) {
+			console.error("❌ Error serving avatar:", error);
+			return reply.status(500).send({ error: "Internal server error" });
+		}
+	});
+	
 	app.get(
 		"/api/profile",
 		async (
@@ -379,7 +440,7 @@ async function updateAvatar(
 		const stats = fs.statSync(uploadPath);
 		console.log("📁 Taille du fichier:", stats.size, "bytes");
 	}
-	const avatarPath = `/${fileName}`;
+	const avatarPath = `/avatars/${fileName}`;
 	console.log("avatarPath: ", avatarPath);
 
 	await prisma.user.update({

@@ -58,7 +58,7 @@ async function saveAvatar(avatarFile: any, username: string): Promise<string> {
 	const fileName = `${safeUsername}_${hash}.${ext}`;
 	const uploadPath = path.join(avatarsDir, fileName);
 	await pipeline(avatarFile.file, fs.createWriteStream(uploadPath));
-	return `./public/avatars/${fileName}`;
+	return `/avatars/${fileName}`;
 }
 
 async function createUser(
@@ -99,7 +99,7 @@ async function createUser(
 }
 
 export async function registerNewUser(
-	app: FastifyInstance,
+	app: FastifyInstance<any, any, any, any>,
 	prisma: PrismaClient
 ) {
 	app.post("/api/signup", async (request, reply) => {
