@@ -8,7 +8,7 @@ import { createChatPage } from "./pages/ChatPage";
 import { createNotFoundPage } from "./pages/NotFoundPage";
 import { createSignUpPage } from "./pages/SignUpPage";
 import { createUserProfilePage } from "./pages/UserProfilePage";
-import { TwoFactorVerifyPage } from "./pages/TwoFactorVerifyPage";
+import { createTwoFactorVerifyPage } from "./pages/TwoFactorVerifyPage";
 import { i18n } from "./services/i18n";
 
 // Initialize app
@@ -24,7 +24,9 @@ async function initApp() {
 	  .addRoute('/game', createGamePage)
 	  .addRoute('/profile', createProfilePage)
 	  .addRoute('/chat', createChatPage)
-	  .addRoute('/404', createNotFoundPage);
+	  .addRoute('/404', createNotFoundPage)
+	  .addRoute('/2fa-verify', createTwoFactorVerifyPage); // register the 2FA page
+
 
   // Route dynamique pour les profils utilisateur
   router.addDynamicRoute('/profile/:username', createUserProfilePage);
