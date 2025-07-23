@@ -22,10 +22,10 @@ export const PROJECT_ROOT = path.resolve(__dirname, "../../");
 
 const prisma = new PrismaClient();
 
-const HTTP_PORT = process.env.HTTP_PORT ? parseInt(process.env.HTTP_PORT) : 3002;
-const HTTPS_PORT = process.env.HTTPS_PORT ? parseInt(process.env.HTTPS_PORT) : 3444;
+const HTTP_PORT = process.env.HTTP_PORT ? parseInt(process.env.HTTP_PORT) : 3001;
+const HTTPS_PORT = process.env.HTTPS_PORT ? parseInt(process.env.HTTPS_PORT) : 3446;
 
-const PUBLIC_IP = '192.168.1.196';
+//const PUBLIC_IP = '192.168.1.196';
 
 let httpsOptions;
 try{
@@ -134,7 +134,7 @@ const start = async () => {
 		console.log("✅ Base de données connectée avec succès");
 
 		await setupHttpsApp();
-		await setupHttpApp();
+		//await setupHttpApp();
 
 		console.log(`🔒 Démarrage du serveur HTTPS sur le port ${HTTPS_PORT}...`);
 		await httpsApp.listen({
@@ -142,11 +142,11 @@ const start = async () => {
 			host: '0.0.0.0'
 		});
 
-		console.log(`🌐 Démarrage du serveur HTTP sur le port ${HTTP_PORT}...`);
-		await httpApp.listen({
-			port: HTTP_PORT,
-			host: '0.0.0.0'
-		});
+		// console.log(`🌐 Démarrage du serveur HTTP sur le port ${HTTP_PORT}...`);
+		// await httpApp.listen({
+		// 	port: HTTP_PORT,
+		// 	host: '0.0.0.0'
+		// });
 
 	} catch (err) {
 		console.error("❌ Server startup failed:", err);
