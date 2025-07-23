@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { PrismaClient, User } from "@prisma/client";
+import { Prisma, PrismaClient, User } from "@prisma/client";
 import { extractTokenFromRequest } from "./profile.js"
 
 interface GameDataRequest {
@@ -100,3 +100,33 @@ export async function registerGameRoute(
 		});
 	});
 }
+
+// class GlobalStat {
+// 	winnerId: number = 0;
+// 	lasted: number = 0;
+// 	pointsUp: number = 0;
+// 	pointsDown: number = 0;
+// 	score1: number = 0;
+// 	score2: number = 0;
+// }
+
+// async function generateStatDashboard(prisma: PrismaClient, username: string)
+// {
+// 	try
+// 	{
+// 		const user = await prisma.user.findUnique({ where: { username } });
+
+
+// 	} catch(error){
+// 		console.error("Generate Dashboard: ", error);
+// 	}
+
+// }
+
+
+// async function generateIAStats(prisma: PrismaClient, user: any)
+// {
+// 	const matchesPlayer1 = await prisma.user.findMany({
+// 		where: {user.id: id}
+// 	})
+// }
