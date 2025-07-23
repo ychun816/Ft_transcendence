@@ -1,4 +1,5 @@
 import { defineConfig } from "vite";
+import fs from "fs";
 
 export default defineConfig({
 	root: "./src",
@@ -11,23 +12,27 @@ export default defineConfig({
 		},
 	},
 	server: {
-		host: true,
-		port: 5173,
+		host: '0.0.0.0',
+		port: 5174,
+		https: {
+			key: fs.readFileSync('/app/backend/src/../ssl/key.pem'),
+			cert: fs.readFileSync('/app/backend/src/../ssl/cert.pem'),
+		},
 		watch: {
 			usePolling: true,
 			interval: 100,
 		},
 		hmr: {
-			port: 5173,
+			port: 5174,
 		},
 		proxy: {
 			"/api": {
-				target: "https://localhost:3445",
+				target: "https://10.16.13.4:3443",
 				changeOrigin: true,
 				secure: false,
 			},
 			"/ws": {
-				target: "ws://localhost:3445",
+				target: "ws://10.16.13.4:3443",
 				ws: true,
 				changeOrigin: true,
 			},
