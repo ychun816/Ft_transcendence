@@ -37,6 +37,7 @@
 		"jsonwebtoken": "^9.0.2",
 		"nanoid": "^3.3.11",
 		"nodejs": "^0.0.0",
+		"nodemailer": "^7.0.5",
 		"path": "^0.12.7",
 		"picocolors": "^1.1.1",
 		"picomatch": "^4.0.2",

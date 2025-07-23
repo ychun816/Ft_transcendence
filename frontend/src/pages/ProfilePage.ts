@@ -1,7 +1,7 @@
 import { i18n } from "../services/i18n.js";
 import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
 // import { TwoFactorSettings } from "../components/TwoFactorSettings.js";
-import { TwoFactorSetup } from "../components/TwoFactorSetup.tsx"; //JS
+import { createTwoFactorSetup } from "../components/TwoFactorSetup.ts"; //JS
 import { createLogoutSwitcher } from "../components/logoutSwitcher.js";
 import { createNeonContainer } from "../styles/neonTheme.js";
 
@@ -703,53 +703,97 @@ function setupAddFriendFeature(page: HTMLDivElement) {
 }
 
 function manage2FA(page: HTMLDivElement): void {
-	const manage2FABtn = page.querySelector('#manage-2fa') as HTMLButtonElement;
-	
-	manage2FABtn?.addEventListener('click', () => {
-		// Create modal overlay
-		const modalOverlay = document.createElement('div');
-		modalOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-		modalOverlay.innerHTML = `
-			<div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-				<div class="flex justify-between items-center p-4 border-b">
-					<h3 class="text-xl font-semibold">Security Settings</h3>
-					<button id="close-2fa-modal" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
-				</div>
-				<div id="2fa-settings-container" class="p-4"></div>
-			</div>
-		`;
+    const manage2FABtn = page.querySelector('#manage-2fa') as HTMLButtonElement;
+    
+    manage2FABtn?.addEventListener('click', () => {
+        // Create modal overlay
+        const modalOverlay = document.createElement('div');
+        modalOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        modalOverlay.innerHTML = `
+            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center p-4 border-b">
+                    <h3 class="text-xl font-semibold">Security Settings</h3>
+                    <button id="close-2fa-modal" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+                </div>
+                <div id="2fa-settings-container" class="p-4"></div>
+            </div>
+        `;
 
-		document.body.appendChild(modalOverlay);
+        document.body.appendChild(modalOverlay);
 
-		// Initialize 2FA settings
-		const settingsContainer = modalOverlay.querySelector('#2fa-settings-container') as HTMLElement;
-		// Remove old TwoFactorSettings logic
-		// Render React 2FA setup component into modal
-		//react-dom is required for rendering React components in the browser.
-		//It works together with the main react package.
-		const userId = sessionStorage.getItem('userId') || sessionStorage.getItem('id');
-		if (settingsContainer && userId) {
-			import('react').then(React => {
-				import('react-dom').then(ReactDOM => {
-					ReactDOM.render(
-						React.createElement(TwoFactorSetup, { userId: Number(userId) }),
-						settingsContainer
-					);
-				});
-			});
-		}
+        // Initialize 2FA settings using the DOM function
+        const settingsContainer = modalOverlay.querySelector('#2fa-settings-container') as HTMLElement;
+        const userId = sessionStorage.getItem('userId') || sessionStorage.getItem('id');
+        if (settingsContainer && userId) {
+            settingsContainer.appendChild(createTwoFactorSetup(Number(userId)));
+        }
 
-		// Close modal handlers
-		const closeBtn = modalOverlay.querySelector('#close-2fa-modal') as HTMLButtonElement;
-		const closeModal = () => {
-			document.body.removeChild(modalOverlay);
-		};
+        // Close modal handlers
+        const closeBtn = modalOverlay.querySelector('#close-2fa-modal') as HTMLButtonElement;
+        const closeModal = () => {
+            document.body.removeChild(modalOverlay);
+        };
 
-		closeBtn.addEventListener('click', closeModal);
-		modalOverlay.addEventListener('click', (e) => {
-			if (e.target === modalOverlay) {
-				closeModal();
-			}
-		});
-	});
+        closeBtn.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                closeModal();
+            }
+        });
+    });
 }
+// function manage2FA(page: HTMLDivElement): void {
+// 	const manage2FABtn = page.querySelector('#manage-2fa') as HTMLButtonElement;
+	
+// 	manage2FABtn?.addEventListener('click', () => {
+// 		// Create modal overlay
+// 		const modalOverlay = document.createElement('div');
+// 		modalOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+// 		modalOverlay.innerHTML = `
+// 			<div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+// 				<div class="flex justify-between items-center p-4 border-b">
+// 					<h3 class="text-xl font-semibold">Security Settings</h3>
+// 					<button id="close-2fa-modal" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+// 				</div>
+// 				<div id="2fa-settings-container" class="p-4"></div>
+// 			</div>
+// 		`;
+
+// 		document.body.appendChild(modalOverlay);
+
+// 		// Initialize 2FA settings
+// 		const settingsContainer = modalOverlay.querySelector('#2fa-settings-container') as HTMLElement;
+// 		// Remove old TwoFactorSettings logic
+// 		// Render React 2FA setup component into modal
+// 		//react-dom is required for rendering React components in the browser.
+// 		//It works together with the main react package.
+// 		const userId = sessionStorage.getItem('userId') || sessionStorage.getItem('id');
+// 		if (settingsContainer && userId) {
+// 			settingsContainer.appendChild(createTwoFactorSetup(Number(userId)));
+// 		}
+// 		// const userId = sessionStorage.getItem('userId') || sessionStorage.getItem('id');
+// 		// if (settingsContainer && userId) {
+// 		// 	import('react').then(React => {
+// 		// 		import('react-dom').then(ReactDOM => {
+// 		// 			ReactDOM.render(
+// 		// 				React.createElement(TwoFactorSetup, { userId: Number(userId) }),
+// 		// 				settingsContainer
+// 		// 			);
+// 		// 		});
+// 		// 	});
+// 		// }
+
+// 		// Close modal handlers
+// 		const closeBtn = modalOverlay.querySelector('#close-2fa-modal') as HTMLButtonElement;
+// 		const closeModal = () => {
+// 			document.body.removeChild(modalOverlay);
+// 		};
+
+// 		closeBtn.addEventListener('click', closeModal);
+// 		modalOverlay.addEventListener('click', (e) => {
+// 			if (e.target === modalOverlay) {
+// 				closeModal();
+// 			}
+// 		});
+// 	});
+// }
