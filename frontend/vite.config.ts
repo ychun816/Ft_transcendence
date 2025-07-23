@@ -27,12 +27,12 @@ export default defineConfig({
 		},
 		proxy: {
 			"/api": {
-				target: "https://10.16.13.4:3443",
+				target: "https://10.16.13.4:3445",
 				changeOrigin: true,
 				secure: false,
 			},
 			"/ws": {
-				target: "ws://10.16.13.4:3443",
+				target: "ws://10.16.13.4:3445",
 				ws: true,
 				changeOrigin: true,
 			},
