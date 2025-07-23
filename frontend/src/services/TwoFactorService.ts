@@ -3,6 +3,11 @@
 
 const API_BASE = '/api/2fa';
 
+export async function get2FAStatus(userId: number) {
+  const res = await fetch(`/api/profile/${userId}/2fa-status`);
+  return await res.json();
+}
+
 export async function send2FACode(userId: number) {
   return fetch(`${API_BASE}/send`, {
     method: 'POST',

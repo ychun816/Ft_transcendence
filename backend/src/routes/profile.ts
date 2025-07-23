@@ -131,6 +131,18 @@ export async function registerProfileRoute(
 		}
 	);
 
+	// ✅ Add this new route here, as a sibling, not inside the above handler: -> 2FA
+	app.get('/api/profile/:userId/2fa-status', async (request, reply) => {
+		const userId = Number(request.params.userId);
+		const user = await prisma.user.findUnique({ where: { id: userId } });
+		if (!user) return reply.status(404).send({ enabled: false });
+		return reply.send({
+			enabled: !!user.isTwoFactorEnabled,
+			type: user.twoFactorType || null
+		});
+	});
+
+
 	// HANDLE AVATAR REQUEST
 	app.post("/api/profile/avatar", async (request: FastifyRequest, reply) => {
 		const auth = extractTokenFromRequest(request);
