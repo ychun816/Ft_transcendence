@@ -698,92 +698,60 @@ function setupAddFriendFeature(page: HTMLDivElement) {
 	};
 }
 
-class GlobalStat {
-	score1: number = 0;
-}
+// class GlobalStat {
+// 	score1: number = 0;
+// }
 
-async function regroupUserStat()
-{
-	const user = await getUserInfo();
-	if (!user) return null;
+// async function generateStatDashboard() {
+// 	const history = await getMatchHistory();
+// 	if (!history) return;
 
-	const token = sessionStorage.getItem('authToken');
-	if (!token) {
-		throw new Error('No auth token found');
-	}
+// 	const gamesPlayed = 0;
+// 	const
 
-	const globalStats = new GlobalStat();
-	const globalStats1 = Object.assign(new GlobalStat(), globalStats);
-	const globalStats2 = Object.assign(new GlobalStat(), globalStats);
+// 	const userStat = {
+// 		games = ;
 
-	for (let game = 1; game <= user.gamesPlayed; game++)
-	{
-		const history = await getMatchHistory();
-		const globalStats1.score1 += history.score1,
-
-		}
-
-	}
-
-	const response = await fetch(`/api/game/friends?username=${encodeURIComponent(user.username)}`, {
-		method: "GET",
-		headers: {
-			"Content-Type": "application/json",
-			"Authorization": `Bearer ${token}`
-		},
-	});
-}
-
-async function generateStatDashboard() {
-	const history = await getMatchHistory();
-	if (!history) return;
-
-	const gamesPlayed = 0;
-	const
-
-	const userStat = {
-		games = ;
-
-	}
+// 	}
 
 
-}
+// }
 
-async function displayDashboard(page: HTMLDivElement) {
-	const username = sessionStorage.getItem("username");
-	const history = await generateStatDashboard();
-	if (!history) return;
+// async function displayDashboard(page: HTMLDivElement) {
+// 	const username = sessionStorage.getItem("username");
+// 	const history = await generateStatDashboard();
+// 	if (!history) return;
 
-	const histDiv = page.querySelector("#match-block main");
-	if (!histDiv) return;
+// 	const histDiv = page.querySelector("#match-block main");
+// 	if (!histDiv) return;
 
-	let html = `
-		<table class="data-table">
-			<thead>
-				<tr>
-					<th>${i18n.t('profile.date')}</th>
-					<th>${i18n.t('profile.opponent')}</th>
-					<th>${i18n.t('profile.result')}</th>
-				</tr>
-			</thead>
-			<tbody>
-	`;
+// 	let html = `
+// 		<table class="data-table">
+// 			<thead>
+// 				<tr>
+// 					<th>${i18n.t('profile.date')}</th>
+// 					<th>${i18n.t('profile.opponent')}</th>
+// 					<th>${i18n.t('profile.result')}</th>
+// 				</tr>
+// 			</thead>
+// 			<tbody>
+// 	`;
 
-	for (const match of history) {
-		const isPlayer1 = match.player1.username === username;
-		const opponent = isPlayer1 ? match.player2.username : match.player1.username;
-		const result = match.winnerId === (isPlayer1 ? match.player1Id : match.player2Id) ? i18n.t('profile.victory') : i18n.t('profile.defeat');
-		const date = new Date(match.playedAt).toLocaleDateString();
-		const statusClass = result === i18n.t('profile.victory') ? "status-victory" : "status-defeat";
+// 	for (const match of history) {
+// 		const isPlayer1 = match.player1.username === username;
+// 		const opponent = isPlayer1 ? match.player2.username : match.player1.username;
+// 		const result = match.winnerId === (isPlayer1 ? match.player1Id : match.player2Id) ? i18n.t('profile.victory') : i18n.t('profile.defeat');
+// 		const date = new Date(match.playedAt).toLocaleDateString();
+// 		const statusClass = result === i18n.t('profile.victory') ? "status-victory" : "status-defeat";
 
-		html += `
-			<tr>
-				<td>${date}</td>
-				<td>${opponent}</td>
-				<td><span class="${statusClass}">${result}</span></td>
-			</tr>
-		`;
-	}
-	html += `</tbody></table>`;
-	histDiv.innerHTML = html;
-}
+// 		html += `
+// 			<tr>
+// 				<td>${date}</td>
+// 				<td>${opponent}</td>
+// 				<td><span class="${statusClass}">${result}</span></td>
+// 			</tr>
+// 		`;
+// 	}
+// 	html += `</tbody></table>`;
+// 	histDiv.innerHTML = html;
+// }
