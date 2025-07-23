@@ -17,6 +17,7 @@ export async function handleLogIn(app: FastifyInstance<any, any, any, any>, pris
 	// console.log("DEBUG LOGIN MANAGEMENT 2");
 
 	app.post("/api/login", async (request: FastifyRequest, reply: FastifyReply) => {
+			console.log("in /api/login")
 			const { username, password, twoFactorToken } = request.body as { 
 				username: string; 
 				password: string; 
@@ -26,6 +27,7 @@ export async function handleLogIn(app: FastifyInstance<any, any, any, any>, pris
 			console.log(username);
 			console.log(password);
 			try{
+				console.log("before prisma")
 				const user = await prisma.user.findUnique({
 					where: { username }
 				});
@@ -36,6 +38,7 @@ export async function handleLogIn(app: FastifyInstance<any, any, any, any>, pris
 					return reply.status(401).send({success: false, message: "Wrong password"});
 				
 				// Check if 2FA is enabled
+				console.log("before 2fa")
 				if (user.twoFactorEnabled && user.twoFactorSecret) {
 					if (!twoFactorToken) {
 						return reply.status(200).send({
@@ -44,6 +47,7 @@ export async function handleLogIn(app: FastifyInstance<any, any, any, any>, pris
 							message: "2FA verification required"
 						});
 					}
+				console.log("after 2fa")
 
 					// Verify 2FA token
 					const { TwoFactorService } = await import('../services/twoFactorService.js');
@@ -58,6 +62,7 @@ export async function handleLogIn(app: FastifyInstance<any, any, any, any>, pris
 					}
 				}
 
+				console.log("before JWT")
 				// JWT generation
 				await prisma.user.update({
 					where: { id:user.id },

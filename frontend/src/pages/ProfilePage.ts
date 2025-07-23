@@ -133,7 +133,7 @@ export function createProfilePage(): HTMLElement {
 
 					const isDevMode = window.location.port === '5173'; // Vite dev server
 					const serverUrl = isDevMode
-						? `https://${window.location.hostname}:3444`
+						? `https://${window.location.hostname}:3445`
 						: window.location.origin;
 
 					const fullAvatarUrl = data.avatarUrl.startsWith('http')
@@ -592,7 +592,7 @@ async function displayFriendsList(page: HTMLDivElement){
 		// Déterminer l'URL du serveur correct
 		const isDevMode = window.location.port === '5173';
 		const serverUrl = isDevMode
-			? `https://${window.location.hostname}:3444`
+			? `https://${window.location.hostname}:3445`
 			: window.location.origin;
 
 		// Construire l'URL complète
