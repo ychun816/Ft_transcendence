@@ -112,6 +112,8 @@ export function createProfilePage(): HTMLElement {
 		editAvatar(page);
 		editUsername(page);
 		editPassword(page);
+		manage2FA(page); // <-- ADD to enable the 2FA button
+
 		
 		getUserInfo().then(data => {
 			if (data) {
