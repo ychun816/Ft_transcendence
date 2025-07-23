@@ -22,9 +22,7 @@ interface game_state
     right_score: number;
     is_paused: boolean;
     game_running: boolean;
-    game_mode: 'solo' | 'versus';
     count_down_active: boolean;
-    ia_mode: boolean;
     restart_active: boolean;
 }
 
@@ -37,10 +35,6 @@ interface ball_interface
     ball_dir_x: number;
     ball_dir_y: number;
     angle: number;
-    ia_x: number;
-    ia_y: number;
-    time_ia_in_frame: number;
-    distance_ia: number;
     current_rebond: number;
 }
 
@@ -49,33 +43,7 @@ interface paddle_interface
     left_paddle_y: number;
     right_paddle_y: number;
     marge: number;
-    time_ia_in_frame: number;
     current_shot: number;
-}
-
-interface ia_interface
-{
-    depart: number;
-    move_1: number;
-    move_2: number;
-    counter: number;
-    rebond: number;
-    random_move_1: boolean;
-    random_move_2: boolean;
-    move_flag: boolean;
-    continue_flag: boolean;
-    distance_with_marge: number;
-    super_flag: boolean;
-    random_paddle_move: boolean;
-    ia_debug: boolean;
-    ia_debug_2: boolean;
-    close_rebond: boolean;
-    far_rebond: boolean;
-    far_far_rebond: boolean;
-    service: boolean;
-    delta_paddle: number;
-    delta_error: number;
-    error_percent: number;
 }
 
 interface data_score
@@ -97,7 +65,6 @@ interface data_score
 }
 
 
-
 // ------------------------ FONCTIONS UTILES -----------------------
 
 
@@ -109,14 +76,14 @@ function get_random_playable_angle(): number
         angle = Math.random() * 2 * Math.PI;
 
         const is_too_vertical = (
-        (angle >= 1 && angle <= 2.1) ||   
-        (angle >= 4.4 && angle <= 5.1)   
+        (angle >= 1 && angle <= 2.1) || 
+        (angle >= 4.4 && angle <= 5.1)      
         );
 
         const is_too_horizontal = (
-        (angle >= 0 && angle <= 0.4) ||                
-        (angle >= 2 * Math.PI - 0.4 && angle <= 2 * Math.PI) || 
-        (angle >= Math.PI - 0.4 && angle <= Math.PI + 0.4) 
+        (angle >= 0 && angle <= 0.4) ||                  
+        (angle >= 2 * Math.PI - 0.4 && angle <= 2 * Math.PI) ||  
+        (angle >= Math.PI - 0.4 && angle <= Math.PI + 0.4)       
         );
 
         if (is_too_vertical || is_too_horizontal) 
@@ -130,7 +97,6 @@ function create_ID(): number
 {
     return Math.floor(Math.random() * 1_000_001);
 }
-
 
 function random_number(min: number, max: number): number
 {
@@ -173,6 +139,10 @@ function random_bool(): boolean
 
 class Pong
 {
+    private player_a: string;
+    private player_b: string;
+    private vainqueur: number;
+    private final: number;
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
     private start_time: DOMHighResTimeStamp;
@@ -182,7 +152,6 @@ class Pong
     private ball: ball_interface;
     private keys_pressed: Record<string, boolean> = {};
     private count_down: HTMLDivElement;
-    private ia: ia_interface;
     private animation_id: number;
     private countdown_interval: number | null = null;
     private restart_timeout: number | null = null;
@@ -195,8 +164,12 @@ class Pong
     private data: data_score;
 
 
-    constructor(canvas : HTMLCanvasElement, mode: 'solo' | 'versus')
+    constructor(canvas : HTMLCanvasElement, player_a: string, player_b: string, final: number)
     {
+        this.player_a = player_a;
+        this.player_b = player_b;
+        this.vainqueur = 0;
+        this.final = final;
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d")!;
         this.start_time = performance.now();
@@ -214,7 +187,7 @@ class Pong
             ball_speed: 4.5 * (3/2),
             ball_max_speed: 12 * (3/2),
             paddle_speed: 7.5 * (3/2),
-            score_to_win: 5,
+            score_to_win: 1,
             increase_vitesse: 175, //250,
             time_before_new_ball: 3000
         }
@@ -225,9 +198,7 @@ class Pong
             right_score: 0,
             is_paused: false,
             game_running: true,
-            game_mode: mode,
             count_down_active: false,
-            ia_mode: false,
             restart_active: false
         }
 
@@ -240,10 +211,6 @@ class Pong
             ball_dir_x: 0,
             ball_dir_y: 0,
             angle: 0,
-            ia_x: 0,
-            ia_y: 0,
-            time_ia_in_frame: 0,
-            distance_ia: 0,
             current_rebond: 0
         }
 
@@ -252,33 +219,7 @@ class Pong
             left_paddle_y:  (this.config.canvas_height - this.config.paddle_height) / 2,
             right_paddle_y:  (this.config.canvas_height - this.config.paddle_height) / 2,
             marge: 5,
-            time_ia_in_frame: 0,
             current_shot: 0
-        }
-
-        this.ia =
-        {
-            depart: 0,
-            move_1: 0,
-            move_2:0,
-            counter: 0,
-            rebond: 0,
-            random_move_1: false,
-            random_move_2: false,
-            move_flag: false,
-            continue_flag: true,
-            distance_with_marge: 0,
-            super_flag: true,
-            random_paddle_move: false,
-            ia_debug: true,
-            ia_debug_2: true,
-            close_rebond: false,
-            far_rebond: false,
-            far_far_rebond: false,
-            service: true,
-            delta_paddle: 0,
-            delta_error: 0,
-            error_percent: 0.2
         }
 
         this.data = 
@@ -302,6 +243,9 @@ class Pong
         this.setup_event();
         this.init_ball_direction();
     }
+
+    public get gameState() { return this.state; }
+    public get gameConfig() { return this.config; }
 
     setup_event(): void
     {
@@ -388,27 +332,9 @@ class Pong
         {
             if (!this.state.is_paused)
             {
-                if (this.state.game_mode == "solo" && this.state.ia_mode == false && this.ball.ball_dir_x > 0)
-                {
-                    if (this.ia.service == true)
-                    {
-                        this.ia_detection();
-                        this.ia.continue_flag = true;
-                        this.ia.service = false;
-                        //console.log("DETECTION servica IA");
-                    }
-                    //console.log("service IA");
-                    this.ia_ajustement(15, false);
-                }
-                if (this.state.game_mode == "solo" && this.state.ia_mode == true)
-                {
-                    this.ia.counter++;
-                    this.handle_paddle_move();
-                }
                 this.update_paddle();
                 this.update_ball();
                 //this.draw();
-                
             }
             this.accumulator -= this.fixed_timestep;
             //frame_fois++;
@@ -432,9 +358,21 @@ class Pong
         setTimeout(() =>
         {
             if (this.state.left_score == this.config.score_to_win)
-                message = '🏆 Joueur 1 gagne la partie !';
+            {
+                if (this.final == 0)
+                    message = `🏆 ${this.player_a} gagne la partie !`;
+                else
+                    message = `🏆 ${this.player_a} gagne le tournoi !`;
+                this.vainqueur = 1;
+            }
             else
-                message = '🏆 Joueur 2 gagne la partie !';
+            {
+                if (this.final == 0)
+                    message = `🏆 ${this.player_b} gagne la partie !`;
+                else
+                    message = `🏆 ${this.player_b} gagne le tournoi !`;
+                this.vainqueur = 2;
+            }
 
             if (this.end_message)
             {
@@ -444,6 +382,11 @@ class Pong
         }, 1000);
         this.state.game_running = false;
     }   
+
+    is_it_finish(): number
+    {
+        return this.vainqueur;
+    }
 
     handle_data()
     {
@@ -455,18 +398,13 @@ class Pong
 
         this.data.id = create_ID();
 
-        if (this.state.ia_mode == true)
-            this.data.ia_mode = true;
-
-
-
         this.data.score1 = this.state.left_score;
         this.data.score2 = this.state.right_score;
         if (this.data.score1 > this.data.score2)
             this.data.winnerId = this.data.player1Id;
 
 
-        this.data.tournoi_mode = false;
+        this.data.tournoi_mode = true;
         this.data.multi_mode = false;
         this.data.played_at = new Date();
 
@@ -474,8 +412,6 @@ class Pong
         let t0 = this.data.game_time;
         let t1 = performance.now();
         this.data.game_time = t1 - t0;
-
-        //console.log("DATA ENVOYE AU BACKEND !")
     
         // const response = await fetch("/api/game/add", {
         //     method: "POST",
@@ -492,8 +428,8 @@ class Pong
     cleanup(): void
     {
         console.log("🧹 Nettoyage des ressources du jeu...");
-        
         this.clear_all_timers();
+        
         this.state.game_running = false;
         this.state.is_paused = true;
         this.state.count_down_active = false;
@@ -505,7 +441,6 @@ class Pong
         
         this.paddle.left_paddle_y = (this.config.canvas_height - this.config.paddle_height) / 2;
         this.paddle.right_paddle_y = (this.config.canvas_height - this.config.paddle_height) / 2;
-        
         this.update_score(0);
         
         if (this.count_down) {
@@ -516,28 +451,16 @@ class Pong
             this.end_message.style.display = 'none';
             this.end_message.textContent = '';
         }
-        
         this.ctx.clearRect(0, 0, this.config.canvas_width, this.config.canvas_height);
+        
         console.log("✅ Nettoyage terminé");
     }
 
     back_to_menu(): void
     {
         console.log("🏠 Retour au menu principal...");
-        
         this.cleanup();
         this.state.restart_active = false;
-        this.state.ia_mode = false;
-        
-        this.ia.service = true;
-        this.ia.continue_flag = true;
-        this.ia.counter = 0;
-        this.ia.rebond = 0;
-        this.ia.random_move_1 = false;
-        this.ia.random_move_2 = false;
-        this.ia.move_flag = false;
-        this.ia.super_flag = true;
-        this.ia.random_paddle_move = false;
         
         this.data.id = 0;
         this.data.player1Id = "default";
@@ -563,17 +486,14 @@ class Pong
     destroy(): void
     {
         console.log("💥 Destruction de l'instance de jeu...");
-        
         this.cleanup();
         document.removeEventListener("keydown", this.handle_keydown);
         document.removeEventListener("keyup", this.handle_keyup);
-        
         this.ctx.clearRect(0, 0, this.config.canvas_width, this.config.canvas_height);
         this.count_down = null as any;
         this.end_message = null;
         this.keys_pressed = {};
         this.state.game_running = false;
-        
         console.log("✅ Instance détruite");
     }
 
@@ -588,7 +508,7 @@ class Pong
             this.end_message.style.display = 'none';
         this.state.is_paused = true;
         this.state.count_down_active = false;
-        this.state.game_running = true; 
+        this.state.game_running = true;
         this.last_frame_time = performance.now();
         
         this.ball.ball_dir_x = 0;
@@ -603,7 +523,6 @@ class Pong
         this.restart_timeout = setTimeout(() =>
         {
             console.log("🚀 Nouvelle partie");
-            
             this.last_frame_time = performance.now();
             this.ball.ball_x = this.config.canvas_width / 2;
             this.ball.ball_y = this.config.canvas_height / 2;
@@ -646,7 +565,6 @@ class Pong
             //console.log("✅ Start timeout nettoyé");
         }
         
-        // Annule aussi l'animation frame si nécessaire
         if (this.animation_id)
         {
             cancelAnimationFrame(this.animation_id);
@@ -664,6 +582,7 @@ class Pong
         this.countdown_interval = setInterval(() => {
             countdown--;
             
+            // Vérifier si le restart est toujours valide
             if (this.state.restart_active)
             {
                 //console.log("⚠️ Restart annulé pendant le countdown");
@@ -706,13 +625,10 @@ class Pong
         if (this.keys_pressed["s"] && this.paddle.left_paddle_y < this.config.canvas_height - this.config.paddle_height - 0)
             this.paddle.left_paddle_y += this.config.paddle_speed;
 
-        if (this.state.game_mode != "solo")
-        {
-            if (this.keys_pressed["ArrowUp"] && this.paddle.right_paddle_y > 0)
-                this.paddle.right_paddle_y -= this.config.paddle_speed;
-            if (this.keys_pressed["ArrowDown"] && this.paddle.right_paddle_y < this.config.canvas_height - this.config.paddle_height - 0)
-                this.paddle.right_paddle_y += this.config.paddle_speed;
-        }
+        if (this.keys_pressed["ArrowUp"] && this.paddle.right_paddle_y > 0)
+            this.paddle.right_paddle_y -= this.config.paddle_speed;
+        if (this.keys_pressed["ArrowDown"] && this.paddle.right_paddle_y < this.config.canvas_height - this.config.paddle_height - 0)
+            this.paddle.right_paddle_y += this.config.paddle_speed;
     }
 
     // detection collision
@@ -722,7 +638,6 @@ class Pong
         rect: { x: number; y: number; width: number; height: number }
     ): { collision: boolean; intersectionPoint?: { x: number; y: number } } {
         
-
         if (lineEnd.x >= rect.x && lineEnd.x <= rect.x + rect.width &&
             lineEnd.y >= rect.y && lineEnd.y <= rect.y + rect.height) {
             return { collision: true, intersectionPoint: lineEnd };
@@ -749,20 +664,24 @@ class Pong
     private getLineIntersection(
         p1: { x: number; y: number }, p2: { x: number; y: number },
         p3: { x: number; y: number }, p4: { x: number; y: number }
-    ): { x: number; y: number } | null {
+    ): { x: number; y: number } | null
+    {
         
         const x1 = p1.x, y1 = p1.y;
         const x2 = p2.x, y2 = p2.y;
         const x3 = p3.x, y3 = p3.y;
         const x4 = p4.x, y4 = p4.y;
         
+        // eviter la division par zero
         const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
         if (Math.abs(denom) < 1e-10) return null;
         
+        // Calculer les paramètres t et u
         const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / denom;
         const u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / denom;
         
-        if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+        if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
+        {
             return {
                 x: x1 + t * (x2 - x1),
                 y: y1 + t * (y2 - y1)
@@ -834,16 +753,6 @@ class Pong
                 this.update_ball_dir(0);
                 this.normalize_ball_speed();
                 
-                if (this.state.game_mode == "solo")
-                {
-                    this.state.ia_mode = true;
-                    this.ia_init();
-                    this.ia_detection();
-                    this.ia_init_difficulty();
-                    this.ia.counter = 0;
-                    this.ball.current_rebond = 0;
-                    this.paddle.current_shot++;
-                }
                 return;
             }
         }
@@ -855,7 +764,7 @@ class Pong
             {
                 x: this.config.canvas_width - 40,
                 y: this.paddle.right_paddle_y - this.paddle.marge,
-                width: 15,
+                width: 15, 
                 height: this.config.paddle_height + (this.paddle.marge * 2)
             };
             
@@ -883,12 +792,6 @@ class Pong
                 }
                 this.update_ball_dir(1);
                 this.normalize_ball_speed();
-                
-                if (this.state.game_mode == "solo")
-                {
-                    this.state.ia_mode = false;
-                    this.ball.current_rebond = 0;
-                }
                 return;
             }
         }
@@ -901,16 +804,8 @@ class Pong
         if (this.ball.ball_x < 0 || this.ball.ball_x > this.config.canvas_width)
         {
             this.state.is_paused = true;
-            console.log(`🎯 BUT ! ball_x = ${this.ball.ball_x} et ballspeed = ${this.config.ball_speed} et rebond = ${this.ball.current_rebond} et delta error = ${this.ia.delta_error} et delta_paddle = ${this.ia.delta_paddle}`);
+            console.log(`🎯 BUT ! ball_x = ${this.ball.ball_x} et ballspeed = ${this.config.ball_speed} et rebond = ${this.ball.current_rebond}`);
             this.handle_goal();
-            if (this.state.game_mode == "solo")
-            {
-                this.state.ia_mode = false;
-                this.ia.service = true;
-                this.paddle.current_shot = 0;
-                this.ia.delta_error = 0;
-                this.ia.delta_paddle = 0;
-            }
             return;
         }
 
@@ -1023,9 +918,9 @@ class Pong
         }
 
         if (score_P1)
-            score_P1.textContent = `Joueur 1 : ${this.state.left_score}`;
+            score_P1.textContent = `${this.player_a} : ${this.state.left_score}`;
         if (score_P2)
-            score_P2.textContent = `Joueur 2 : ${this.state.right_score}`;
+            score_P2.textContent = `${this.player_b} : ${this.state.right_score}`;
     }
 
     // Fonction start_count_down corrigée (après un but)
@@ -1082,7 +977,6 @@ class Pong
     init_ball_direction(): void
     {
         this.ball.angle = get_random_playable_angle();
-        //this.ball.angle = 0;
         this.ball.ball_dir_x = this.config.ball_speed * Math.cos(this.ball.angle);
         this.ball.ball_dir_y = this.config.ball_speed * Math.sin(this.ball.angle);
     }
@@ -1146,23 +1040,15 @@ class Pong
         this.ctx.fillRect(this.config.canvas_width - 30 - this.config.paddle_width, this.paddle.right_paddle_y, this.config.paddle_width, this.config.paddle_height);
 
         // balle
-        const pulse = 10 + Math.sin(Date.now() / 100) * 2;
         const blink = Math.floor(Date.now() / 200) % 2 === 0;
         this.ctx.shadowColor = blink ? "#ffff00" : "#ff00ff";
         this.ctx.shadowBlur = 25;
         this.ctx.fillStyle = blink ? "#ffff00" : "#ff00ff";
         this.ctx.beginPath();
-        //this.ctx.arc(this.ball.ball_x, this.ball.ball_y, pulse, 0, Math.PI * 2);
         this.ctx.arc(interpolated_x, interpolated_y, 10, 0, Math.PI * 2);
         this.ctx.fill();
 
-        // balle fantome
-        // this.ctx.beginPath();
-        // this.ctx.fillStyle = "gray";
-        // this.ctx.arc(this.ball.ia_x, this.ball.ia_y, 10, 0,  Math.PI * 2)
-        // this.ctx.fill();
-
-        // === 5. HUD (score, vitesse) AVEC POLICE PIXEL ===
+        // messsages debug
         // this.ctx.shadowBlur = 0;
         // this.ctx.fillStyle = "#00ffcc";
         // this.ctx.font = "bold 18px 'Courier New', monospace";
@@ -1173,519 +1059,54 @@ class Pong
         // this.ctx.font = "14px 'Courier New', monospace";
         // this.ctx.fillText(`⏱️ Temps: ${get_time(this.start_time).toFixed(0)} ms`, 20, 55);
     }
-
-
-    ia_init()
-    {
-        this.ia.random_move_1 = random_bool();
-        this.ia.random_move_2 = random_bool();
-        this.ia.random_paddle_move = random_bool();
-        this.ia.continue_flag = true;
-        this.ia.move_flag = false;
-        this.ia.super_flag = true;
-        this.ia.rebond = 0;
-        this.ball.distance_ia = 0;
-        this.ia.ia_debug = true;
-        this.ia.close_rebond = false;
-        this.ia.far_rebond = false;
-        this.ia.far_far_rebond = false;
-        this.ia.delta_paddle = this.ia_delta_paddle();
-        if (this.paddle.current_shot >= 4)
-            this.handle_ia_error();
-    }
-
-    ia_detection(): void
-    {
-        let x = this.ball.ball_x;
-        let y = this.ball.ball_y;
-        let dir_x = this.ball.ball_dir_x;
-        let dir_y = this.ball.ball_dir_y;
-        let prev_x = x;
-        let prev_y = y;
-        
-        while (x < this.config.canvas_width - 40)
-        {
-            if (y <= 0 || y >= this.config.canvas_height)
-            {
-                let distance = Math.sqrt(Math.pow(x - prev_x, 2) + Math.pow(y - prev_y, 2));
-                this.ball.distance_ia += distance;
-                dir_y *= -1;
-                this.ia.rebond++;
-                prev_x = x;
-                prev_y = y;
-                if (x <= this.config.canvas_width / 2)
-                    this.ia.close_rebond = true;
-                else if (x > this.config.canvas_width / 2)
-                    this.ia.far_rebond = true;
-                else if (x > (3 * this.config.canvas_width / 4))
-                    this.ia.far_far_rebond = true;
-            }
-            x += dir_x;
-            y += dir_y;
-        }
-
-        this.ball.ia_x = x;
-        this.ball.ia_y = y;
-
-        if (this.ia.rebond == 0)
-           this.ball.distance_ia = Math.sqrt(Math.pow(this.ball.ball_x - x, 2) + Math.pow(this.ball.ball_y - y, 2));
-        else
-        {
-            let final_distance = Math.sqrt(Math.pow(x - prev_x, 2) + Math.pow(y - prev_y, 2));
-            this.ball.distance_ia += final_distance;
-        }
-        
-        this.ball.time_ia_in_frame = this.ball.distance_ia / this.config.ball_speed;
-        //this.paddle.time_ia_in_frame = Math.abs(this.ball.ia_y - this.paddle.right_paddle_y + 5) / this.config.paddle_speed;
-    }
-
-    ia_init_difficulty()
-    {
-        let random_depart = random_number(0.1, 0.2);
-        this.ia.depart = random_depart * this.ball.time_ia_in_frame;
-
-        let random_move_2 = random_number(0.1, 0.25);
-        this.ia.move_2 = random_move_2 * this.ball.time_ia_in_frame;
-
-        let random_move_1 = 1 - random_move_2 - random_depart;
-        this.ia.move_1 = random_move_1 * this.ball.time_ia_in_frame;
-
-        console.log(`TIME IN FRAME = ${this.ball.time_ia_in_frame}`);
-        console.log(`random_depart = ${random_depart}`);
-        console.log(`random_move_1 = ${random_move_1}`);
-        console.log(`random_move_2 = ${random_move_2}`);
-
-
-        // supression de l'erreur si paddle deja sur la trajectoire
-        if (this.ball.ia_y >= this.paddle.right_paddle_y && this.ball.ia_y <= this.paddle.right_paddle_y + this.config.paddle_height)
-            this.ia.delta_error = 0;
-    }
-
-    handle_paddle_move()
-    {
-        if (this.ia.rebond == 0)
-        {
-            if (this.ia.delta_error != 0)
-                this.ia.random_move_1 = false;
-            this.update_paddle_ia_with_time();
-        }
-        else if (this.ia.rebond == 1 && this.ia.close_rebond == true)
-            this.update_paddle_ia_with_1_close_rebond();
-        else if (this.ia.rebond == 1 && this.ia.far_rebond == true)
-            this.update_paddle_ia_with_1_far_rebond();
-        else if (this.ia.rebond == 2)
-            this.update_paddle_ia_with_2_rebonds();
-
-    }
-
-    update_paddle_ia_with_time()
-    {
-        if (this.ia.depart >= this.ia.counter) 
-            return ;
-
-        if (this.ia.move_1 >= this.ia.counter - this.ia.depart)
-        {
-            if (this.ia.ia_debug == true)
-            {
-                console.log("****** TIME move 1 *********");
-                this.ia.ia_debug = false;
-            }
-            this.ia_ajustement(80, this.ia.random_move_1);
-            return ;
-        }
-        if (this.ia.super_flag == true)
-        {
-            //console.log("---------------- SUPER FLAG ---------------");
-            this.ia.continue_flag = true;
-            this.ia.move_flag = false;
-            this.ia.super_flag = false;
-            this.ia.ia_debug = true;
-            //this.ia.ia_debug_2 = true;
-        }
-        if (this.ia.move_2 >= (this.ia.counter - this.ia.move_1 - this.ia.depart))
-        {       
-            if (this.ia.ia_debug == true)
-            {
-                let center_paddle = this.ia.delta_error + this.ia.delta_paddle + this.paddle.right_paddle_y + this.config.paddle_height / 2;
-                let target_y = this.ball.ia_y;
-                let distance = target_y - center_paddle;
-                console.log("****** TIME move 2 *********");
-                console.log(`distance = ${Math.abs(distance)} et delta_paddle = ${this.ia.delta_paddle} et random = ${this.ia.random_move_2}`);
-                this.ia.ia_debug = false;
-                if (Math.abs(distance) < 30)
-                    this.ia.random_move_2 = false;
-            }
-            if (this.config.ball_speed > 13)
-                this.ia_ajustement(12, this.ia.random_move_2);
-            else
-                this.ia_ajustement(8, this.ia.random_move_2);
-            //console.log("FIN DE MOOOOVE");
-            return ;
-        }
-    }
-
-    update_paddle_ia_with_1_close_rebond()
-    {
-        if (this.ball.current_rebond < 1 && this.ia.depart >= this.ia.counter)
-            return ;
-        if (this.ia.move_1 >= this.ia.counter)
-        {
-            if (this.ia.ia_debug == true)
-            {
-                console.log("****** 1 CLOSE move 1 *********");
-                this.ia.ia_debug = false;
-            }            
-            this.ia_ajustement(200, this.ia.random_move_1);
-            return ;
-        }
-        if (this.ia.super_flag == true)
-        {
-            //console.log("---------------- SUPER FLAG ---------------");
-            this.ia.continue_flag = true;
-            this.ia.move_flag = false;
-            this.ia.super_flag = false;
-            this.ia.ia_debug = true;
-            //this.ia.ia_debug_2 = true;
-        }
-        if (this.ia.move_2 >= (this.ia.counter - this.ia.move_1 - this.ia.depart))
-        {
-            if (this.ia.ia_debug == true)
-            {
-                let center_paddle = this.ia.delta_error + this.ia.delta_paddle + this.paddle.right_paddle_y + this.config.paddle_height / 2;
-                let target_y = this.ball.ia_y;
-                let distance = target_y - center_paddle;
-                console.log("****** 1 CLOSE move 2 *********");
-                console.log(`distance = ${Math.abs(distance)} et delta_paddle = ${this.ia.delta_paddle} et random = ${this.ia.random_move_2}`);
-                this.ia.ia_debug = false;
-                if (Math.abs(distance) < 30)
-                    this.ia.random_move_2 = false;
-            }
-            if (this.config.ball_speed > 13)
-                this.ia_ajustement(12, this.ia.random_move_2);
-            else
-                this.ia_ajustement(10, this.ia.random_move_2);
-            //console.log("FIN DE MOOOOVE");
-            return ;
-        }
-    }
-
-    update_paddle_ia_with_1_far_rebond()
-    {
-        if (this.ia.depart >= this.ia.counter)
-            return ;
-        if (this.ball.current_rebond < 1)
-        {
-            if (this.ia.ia_debug == true)
-            {
-                console.log("****** 1 FAR move 1 *********");
-                this.ia.ia_debug = false;
-            }    
-            this.ia_ajustement_rebond(200);
-            return ;
-        }
-        if (this.ia.super_flag == true)
-        {
-            //console.log("---------------- SUPER FLAG ---------------");
-            this.ia.continue_flag = true;
-            this.ia.move_flag = false;
-            this.ia.super_flag = false;
-            this.ia.ia_debug = true;
-            //this.ia.ia_debug_2 = true;
-        }
-        if (this.ball.current_rebond >= 1)
-        {
-            if (this.ia.ia_debug == true)
-            {
-                let center_paddle = this.ia.delta_error + this.ia.delta_paddle + this.paddle.right_paddle_y + this.config.paddle_height / 2;
-                let target_y = this.ball.ia_y;
-                let distance = target_y - center_paddle;
-                console.log("****** 1 FAR move 2 *********");
-                console.log(`distance = ${Math.abs(distance)} et delta_paddle = ${this.ia.delta_paddle} et random = ${this.ia.random_move_2}`);
-                this.ia.ia_debug = false;
-                if (Math.abs(distance) < 30)
-                    this.ia.random_move_2 = false;
-            }            
-            if (this.config.ball_speed > 13)
-                this.ia_ajustement(12, false);
-            else
-                this.ia_ajustement(10, false);
-            //console.log("FIN DE MOOOOVE");
-            return ;
-        }
-    }
-
-    update_paddle_ia_with_2_rebonds()
-    {
-        if (this.ball.current_rebond < 1 && this.ia.depart >= this.ia.counter)
-            return ;
-        if (this.ball.current_rebond < 2)
-        {
-            if (this.ia.ia_debug == true)
-            {
-                console.log("****** 2 REBONDS move 1 *********");
-                this.ia.ia_debug = false;
-            }           
-            this.ia_ajustement_rebond(200);
-            return ;
-        }
-        if (this.ia.super_flag == true)
-        {
-            //console.log("---------------- SUPER FLAG ---------------");
-            this.ia.continue_flag = true;
-            this.ia.move_flag = false;
-            this.ia.super_flag = false;
-            this.ia.ia_debug = true;
-            //this.ia.ia_debug_2 = true;
-        }
-        if (this.ball.current_rebond >= 2)
-        {
-            if (this.ia.ia_debug == true)
-            {
-                let center_paddle = this.ia.delta_error + this.ia.delta_paddle + this.paddle.right_paddle_y + this.config.paddle_height / 2;
-                let target_y = this.ball.ia_y;
-                let distance = target_y - center_paddle;
-                console.log("****** 2 REBONDS move 2 *********");
-                console.log(`distance = ${Math.abs(distance)} et delta_paddle = ${this.ia.delta_paddle} et random = ${this.ia.random_move_2}`);
-                this.ia.ia_debug = false;
-                if (Math.abs(distance) < 30)
-                    this.ia.random_move_2 = false;
-            }      
-            if (this.config.ball_speed > 13)
-                this.ia_ajustement(12, false);
-            else
-                this.ia_ajustement(10, false);
-            //console.log("FIN DE MOOOOVE");
-            return ;
-        }
-    }
-
-
-    ia_ajustement(marge: number, random: boolean)
-    {
-        let center_paddle = this.paddle.right_paddle_y + this.ia.delta_error + this.ia.delta_paddle + this.config.paddle_height / 2;
-        let target_y = this.ball.ia_y;
-        let distance = target_y - center_paddle;
-
-        //console.log(`distance = ${Math.abs(distance)} et marge = ${marge} et continue = ${this.ia.continue_flag}`);
-
-        if (Math.abs(distance) <= marge && random == false)
-        {
-            console.log("FIN DE MOVE avec random = false");
-            return ;
-        }
-        
-        if (Math.abs(distance) <= marge && random == true && this.ia.move_flag == true)
-        {
-            if (this.ia.continue_flag == true)
-            {
-                //console.log(" ----- CONTINUE FLAG ----- ");
-                this.ia.distance_with_marge = center_paddle - this.ball.ia_y;
-                this.ia.continue_flag = false;
-            }
-            this.continue_movement();  
-            console.log("FIN DE MOVE continue");
-            return ;
-        }
-
-        if (Math.abs(distance) <= marge)
-        {
-            console.log("FIN DE MOVE");
-            return ;
-        }
-
-        if (distance > 0 && this.ia.continue_flag == true)
-        {
-            console.log(`ajust 1 et marge = ${marge}`);
-            this.paddle.right_paddle_y += this.config.paddle_speed;
-            this.ia.move_flag = true;
-        }
-        else if (distance < 0 && this.ia.continue_flag == true)
-        {
-            console.log(`ajust 2 et marge = ${marge}`);
-            this.paddle.right_paddle_y -= this.config.paddle_speed;
-            this.ia.move_flag = true;
-        }
-
-        this.paddle.right_paddle_y = Math.max(5, Math.min(this.config.canvas_height - this.config.paddle_height - 5, this.paddle.right_paddle_y));
-    }
-
-    ia_ajustement_rebond(marge: number)
-    {
-        let center_paddle = this.paddle.right_paddle_y + this.ia.delta_error + this.ia.delta_paddle + this.config.paddle_height / 2;
-        let target_y = this.ball.ia_y;
-        let distance = target_y - center_paddle;
-
-        if (Math.abs(distance) <= marge)
-        {
-            if (this.ia.continue_flag == true)
-            {
-                this.ia.distance_with_marge = center_paddle - this.ball.ia_y;
-                this.ia.continue_flag = false;
-            }
-            this.continue_movement_rebond();
-            console.log("FIN DE MOVE continue");
-            return ;
-        }
-
-        if (distance > 0 && this.ia.continue_flag == true)
-        {
-            console.log(`ajust 1 et marge = ${marge}`);
-            this.paddle.right_paddle_y += this.config.paddle_speed;
-        }
-        else if (distance < 0 && this.ia.continue_flag == true)
-        {
-            console.log(`ajust 2 et marge = ${marge}`);
-            this.paddle.right_paddle_y -= this.config.paddle_speed;
-        }
-
-        this.paddle.right_paddle_y = Math.max(5, Math.min(this.config.canvas_height - this.config.paddle_height - 5, this.paddle.right_paddle_y));
-    }
-
-    continue_movement()
-    {   
-        let center_paddle = this.paddle.right_paddle_y + this.ia.delta_error + this.ia.delta_paddle + this.config.paddle_height / 2;
-        let target_y = this.ball.ia_y;
-
-        if (this.ia.distance_with_marge < 0 && (this.config.canvas_height - target_y) >= (this.config.paddle_height / 2))
-        {
-            if (center_paddle - target_y <= (this.ia.distance_with_marge * -1 * 0.8))
-            {
-                this.paddle.right_paddle_y += this.config.paddle_speed;
-                console.log("continue 1");
-            }
-            this.paddle.right_paddle_y = Math.max(0, Math.min(this.config.canvas_height - this.config.paddle_height, this.paddle.right_paddle_y));
-            return ;
-        }
-        else if (this.ia.distance_with_marge >= 0 && target_y >= (this.config.paddle_height / 2))
-        {
-            if (center_paddle - target_y >= (this.ia.distance_with_marge * -1 * 0.8))
-            {
-                this.paddle.right_paddle_y -= this.config.paddle_speed;
-                console.log("continue 2");
-            }
-            this.paddle.right_paddle_y = Math.max(0, Math.min(this.config.canvas_height - this.config.paddle_height, this.paddle.right_paddle_y));
-            return ;
-        }
-        return ;
-    }
-
-    continue_movement_rebond()
-    {   
-        let center_paddle = this.paddle.right_paddle_y + this.ia.delta_error + this.ia.delta_paddle + this.config.paddle_height / 2;
-        let target_y = this.ball.ia_y;
-
-        if (this.ia.distance_with_marge < 0)
-        {
-            if (center_paddle - target_y <= (this.ia.distance_with_marge * -1 * 0.8))
-            {
-                this.paddle.right_paddle_y += this.config.paddle_speed;
-                console.log("continue 1");
-            }
-            this.paddle.right_paddle_y = Math.max(5, Math.min(this.config.canvas_height - this.config.paddle_height - 5, this.paddle.right_paddle_y));
-            return ;
-        }
-        else if (this.ia.distance_with_marge >= 0)
-        {
-            if (center_paddle - target_y >= (this.ia.distance_with_marge * -1 * 0.8))
-            {
-                this.paddle.right_paddle_y -= this.config.paddle_speed;
-                console.log("continue 2");
-            }
-            this.paddle.right_paddle_y = Math.max(5, Math.min(this.config.canvas_height - this.config.paddle_height - 5, this.paddle.right_paddle_y));
-            return ;
-        }
-        return ;
-    }
-
-    ia_delta_paddle(): number
-    {
-        let random = random_number(0, 0.38);
-        let random_sign = random_bool();
-
-        if (random_sign == true)
-            random *= -1;
-
-        return (random * 100);
-    }
-
-    handle_ia_error()
-    {
-        let random = random_number(0, 1);
-        let ajust_percent_lose = 0;
-
-        if (this.state.right_score - this.state.left_score >= 2)
-            ajust_percent_lose = 0.15;
-
-        if (this.state.right_score - this.state.left_score >= 3)
-            ajust_percent_lose = 0.20;
-
-        if (this.state.right_score - this.state.left_score >= 4)
-            ajust_percent_lose = 0.25;
-
-        if (this.paddle.current_shot < 9)
-        {
-            if (random < 0.15 + ajust_percent_lose)
-            {
-                if (this.ia.delta_paddle > 0)
-                    this.ia.delta_error = 70 - this.ia.delta_paddle;
-                else
-                    this.ia.delta_error = (70 + this.ia.delta_paddle) * -1;
-            }
-        }        
-        else if (this.paddle.current_shot < 12)
-        {
-            if (random < 0.20 + ajust_percent_lose)
-            {
-                if (this.ia.delta_paddle > 0)
-                    this.ia.delta_error = 70 - this.ia.delta_paddle;
-                else
-                    this.ia.delta_error = (70 + this.ia.delta_paddle) * -1;
-            }
-        }        
-        else
-        {
-            if (random < 0.30 + ajust_percent_lose)
-            {
-                if (this.ia.delta_paddle > 0)
-                    this.ia.delta_error = 70 - this.ia.delta_paddle;
-                else
-                    this.ia.delta_error = (70 + this.ia.delta_paddle) * -1;
-            }
-        }
-
-        if (this.ia.delta_error != 0)
-            console.log(`! ERROR ! avec cou = ${this.paddle.current_shot} avec delta = ${this.ia.delta_error}`);
-    }
-
 }
 
 class GamePong
 {
-    static create_game(canvas : HTMLCanvasElement, mode: 'solo' | 'versus'): Pong
+    static create_game(canvas : HTMLCanvasElement, player_a: string, player_b: string, final: number): Pong
     {
-        return new Pong(canvas, mode);
+        return new Pong(canvas, player_a, player_b, final);
     }
 }
 
 
-export class Game_solo
+export class Game_tournoi
 {
     private current_game: Pong | null = null;
+    private player_a: string;
+    private player_b: string;
     private canvas: HTMLCanvasElement; 
-    private mode: 'solo' | 'versus';
 
-
-    constructor(mode : 'solo' | 'versus')
+    constructor(player_a: string, player_b: string, final: number)
     {
-        this.mode = mode;
         this.canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
-        this.current_game = GamePong.create_game(this.canvas, this.mode);
+        this.player_a = player_a;
+        this.player_b = player_b;
+        this.current_game = GamePong.create_game(this.canvas, player_a, player_b, final);
+    }
+
+    getPlayer1Name(): string {
+        return this.player_a;
+    }
+
+    getPlayer2Name(): string {
+        return this.player_b;
     }
 
     start_game_loop(): void
     {
         if (this.current_game)
+        {
             this.current_game.start();
+        }
+    }
+
+    check_end_game(): number | undefined
+    {
+        if (this.current_game)
+        {
+            return this.current_game.is_it_finish();
+        }
     }
 
     restart()
