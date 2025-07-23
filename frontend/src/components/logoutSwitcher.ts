@@ -25,7 +25,7 @@ export function createLogoutSwitcher(): HTMLElement {
 		} finally {
 			sessionStorage.clear();
 			import('../router/router.js').then(({ router }) => {
-				router.navigate('/login');
+				router.navigate('/game');
 			});
 		}
 	};
