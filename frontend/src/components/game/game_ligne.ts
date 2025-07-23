@@ -50,6 +50,24 @@ interface paddle_interface
     current_shot: number;
 }
 
+interface data_score
+{
+    id: number;
+    player1Id: string | null;
+    ia_mode: boolean;
+    winnerId: string | null;
+    score1: number;
+    score2: number;
+    tournoi_mode: boolean;
+    multi_mode: boolean;
+    played_at: Date;
+    game_time: number;
+    win_point_up: number;
+    win_point_down: number;
+    lose_point_up: number;
+    lose_point_down: number;
+}
+
 
 // ------------------------ FONCTIONS UTILES -----------------------
 
@@ -77,6 +95,11 @@ function get_random_playable_angle(): number
     
         return angle;
     }
+}
+
+function create_ID(): number
+{
+    return Math.floor(Math.random() * 1_000_001);
 }
 
 function random_number(min: number, max: number): number
@@ -138,6 +161,7 @@ class Pong
     private accumulator: number = 0;
     private fixed_timestep: number = 16.67;
     private last_frame_time: number = 0;
+    private data: data_score;
 
     constructor(canvas : HTMLCanvasElement)
     {
@@ -201,6 +225,24 @@ class Pong
             },
             marge: 5,
             current_shot: 0
+        }
+
+        this.data = 
+        {
+            id: 0,
+            player1Id: "default",
+            ia_mode: false,
+            tournoi_mode: false,
+            multi_mode: false,
+            winnerId: "default",
+            score1: 0,
+            score2: 0,
+            played_at: new Date(),
+            game_time: performance.now(),
+            win_point_up: 0,
+            win_point_down: 0,
+            lose_point_up: 0,
+            lose_point_down: 0,
         }
 
         this.setup_event();
@@ -310,6 +352,7 @@ class Pong
     end_game(): void
     {
         let message = '';
+        this.handle_data();
         setTimeout(() =>
         {
             if (this.state.left_score == this.config.score_to_win)
@@ -325,6 +368,42 @@ class Pong
             }
         }, 1000);
         this.state.game_running = false;
+    }
+
+    handle_data()
+    {
+        const token = sessionStorage.getItem("authToken");
+        if (!token)
+            return;
+        const userId = sessionStorage.getItem("userId");
+        this.data.player1Id = userId;
+
+        this.data.id = create_ID();
+
+        this.data.score1 = this.state.left_score;
+        this.data.score2 = this.state.right_score;
+        if (this.data.score1 > this.data.score2)
+            this.data.winnerId = this.data.player1Id;
+
+
+        this.data.tournoi_mode = false;
+        this.data.multi_mode = true;
+        this.data.played_at = new Date();
+
+        // mesure de la duree
+        let t0 = this.data.game_time;
+        let t1 = performance.now();
+        this.data.game_time = t1 - t0;
+    
+        // const response = await fetch("/api/game/add", {
+        //     method: "POST",
+        //     ContentType: {
+        //         "application/json",
+        //     }
+        //     body?: this.data,
+        // }
+
+        // )
     }
 
 
@@ -374,6 +453,21 @@ class Pong
         
         this.config.ball_speed = 4.5 * (3/2);
         this.config.paddle_speed = 7.5 * (3/2);
+
+        this.data.id = 0;
+        this.data.player1Id = "default";
+        this.data.ia_mode = false;
+        this.data.tournoi_mode = false;
+        this.data.multi_mode = false;
+        this.data.winnerId = "default";
+        this.data.score1 = 0;
+        this.data.score2 = 0;
+        this.data.played_at = new Date();
+        this.data.game_time = 0;
+        this.data.win_point_down = 0;
+        this.data.win_point_up = 0;
+        this.data.lose_point_down = 0;
+        this.data.lose_point_up = 0;
         
         console.log("✅ Retour au menu préparé");
     }
@@ -789,6 +883,21 @@ class Pong
 
     handle_goal(): void
     {
+        // mettre a jour data
+        if (this.ball.ball_x < 0)
+        {
+            if (this.ball.ball_y <= this.config.canvas_height)
+                this.data.lose_point_up++;
+            else
+                this.data.lose_point_down++;
+        }
+        else
+        {
+            if (this.ball.ball_y <= this.config.canvas_height)
+                this.data.win_point_up++;
+            else
+                this.data.win_point_down++;
+        }
         this.ball.ball_dir_x = 0;
         this.ball.ball_dir_y = 0;
         this.update_score(1);
