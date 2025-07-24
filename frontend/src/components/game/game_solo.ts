@@ -211,7 +211,7 @@ class Pong
             this.player_name =  userId;
         }
         else
-            this.player_name = "Joueur 1";
+            this.player_name = "JOUEUR 1";
         
 
         this.config =
@@ -339,6 +339,8 @@ class Pong
         this.draw(1);
         //console.log("ca demarre");
         let countdown = 3;
+
+        // METTRE EN ANGLAIS ICIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
         this.count_down.innerText = `Debut de partie dans`;
         setTimeout(() => 
         {
@@ -442,10 +444,15 @@ class Pong
         setTimeout(() =>
         {
             if (this.state.left_score == this.config.score_to_win)
+            {
+                // METTRE EN ANGLAIS ICIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
                 message = '🏆 Joueur 1 gagne la partie !';
+            }
             else
+            {
+                // METTRE EN ANGLAIS ICIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
                 message = '🏆 Joueur 2 gagne la partie !';
-
+            }
             if (this.end_message)
             {
                 this.end_message.textContent = message;
@@ -608,6 +615,7 @@ class Pong
         this.config.ball_speed = 4.5 * (3/2);
         this.config.paddle_speed = 8.5 * (3/2);
         
+        // METTRE EN ANGLAIS ICIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
         this.count_down.innerText = "Nouvelle partie...";
         
         this.restart_timeout = setTimeout(() =>
@@ -668,6 +676,7 @@ class Pong
     start_count_down_for_restart(): void
     {
         let countdown = 3;
+        // METTRE EN ANGLAIS ICIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
         this.count_down.innerText = `Reprise dans : ${countdown}`;
         this.state.count_down_active = true;
         
@@ -682,6 +691,7 @@ class Pong
             
             if (countdown > 0)
             {
+                // METTRE EN ANGLAIS ICIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
                 this.count_down.innerText = `Reprise dans : ${countdown}`;
                 //console.log(`⏰ Countdown : ${countdown}`);
             }
@@ -1035,7 +1045,10 @@ class Pong
         if (score_P1)
             score_P1.textContent = `${this.player_name} : ${this.state.left_score}`;
         if (score_P2)
-            score_P2.textContent = `Joueur 2 : ${this.state.right_score}`;
+        {
+            // METTRE EN ANGLAIS ICIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+            score_P2.textContent = `JOUEUR 2 : ${this.state.right_score}`;
+        }
     }
 
     // Fonction start_count_down corrigée (après un but)
@@ -1060,6 +1073,7 @@ class Pong
             }
             
             this.state.count_down_active = true;
+            // METTRE EN ANGLAIS ICIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
             this.count_down.innerText = `Reprise dans : ${countdown}`;
             
             // Utiliser this.countdown_interval
@@ -1074,6 +1088,7 @@ class Pong
                 
                 if (countdown > 0)
                 {
+                    // METTRE EN ANGLAIS ICIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
                     this.count_down.innerText = `Reprise dans : ${countdown}`;
                 } else
                 {

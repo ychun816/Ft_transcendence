@@ -28,7 +28,7 @@ const translations: Record<Language, Translations> = {
     "auth": {
       "username": "Nom d'utilisateur",
       "password": "Mot de passe",
-      "login_title": "Transcendence",
+      "login_title": "Connexion",
       "create_account": "Créer un compte",
       "login_error": "Erreur lors de la connexion",
       "invalid_credentials": "Identifiants incorrects"
@@ -113,7 +113,31 @@ const translations: Record<Language, Translations> = {
       "back": "← Retour",
       "score": "Score",
       "start": "Démarrer",
-      "pause": "Pause"
+      "pause": "Pause",
+      "game_mode": "Mode de jeu",
+      "local_mode": "🎮 JOUER EN LOCAL",
+      "line_mode": "🌐 JOUER EN LIGNE",
+      "mess_line_err": "Tu dois être connecté pour jouer en ligne",
+      "multi": "🎯 MULTIJOUEUR (2v2)",
+      "tournament": "🏆 TOURNOI",
+      "mode_local": "MODE LOCAL",
+      "mode_line": "MODE EN LIGNE",
+      "valid_name": "VALIDER LES NOMS",
+      "mess_valid_err": "⚠️ TOUS LES NOMS DOIVENT ÊTRE REMPLIS ET UNIQUES !",
+      "start_tournament": "🎯 COMMENCER TOURNOI",
+      "new_game": "NOUVELLE PARTIE",
+      "player_1": "JOUEUR 1 : 0",
+      "player_2": "JOUEUR 2 : 0",
+      "next_game": "MATCH SUIVANT",
+      "final": "FINAL",
+      "control": "🎮 CONTRÔLES",
+      "p1": "JOUEUR 1",
+      "p2": "JOUEUR 2",
+      "p3": "JOUEUR 3",
+      "p4": "JOUEUR 4",
+      "up_down": "ARROW UP / ARROW DOWN"
+
+
     },
     "not_found": {
       "title": "404",
@@ -162,7 +186,7 @@ const translations: Record<Language, Translations> = {
     "auth": {
       "username": "Username",
       "password": "Password",
-      "login_title": "Transcendence",
+      "login_title": "Connexion",
       "create_account": "Create Account",
       "login_error": "Login error",
       "invalid_credentials": "Invalid credentials"
@@ -247,7 +271,36 @@ const translations: Record<Language, Translations> = {
       "back": "← Back",
       "score": "Score",
       "start": "Start",
-      "pause": "Pause"
+      "pause": "Pause",
+      "game_mode": "Game mode",
+      "local_mode": "🎮 PLAY LOCALLY",
+      "line_mode": "🌐 PLAY ONLINE",
+      "mess_line_err": "You must been connected to play online",
+      "multi": "🎯 MULTIPLAYER (2v2)",
+      "tournament": "🏆 TOURNAMENT",
+      "mode_local": "LOCAL MODE",
+      "mode_line": "ONLINE MODE",
+      "valid_name": "VALIDATE THE NAMES",
+      "mess_valid_err": "⚠️ ALL NAMES MUST BE FILLED IN AND UNIQUE !",
+      "start_tournament": "🎯 START TOURNAMENT",
+      "new_game": "NEW GAME",
+      "player_1": "PLAYER 1 : 0",
+      "player_2": "PLAYER 2 : 0",
+      "next_game": "NEXT GAME",
+      "final": "FINAL",
+      "control": "🎮 CONTROLS",
+      "p1": "PLAYER 1",
+      "p2": "PLAYER 2",
+      "p3": "PLAYER 3",
+      "p4": "PLAYER 4",
+      "up_down": "ARROW UP / ARROW DOWN"
+
+
+
+
+
+
+
     },
     "not_found": {
       "title": "404",
