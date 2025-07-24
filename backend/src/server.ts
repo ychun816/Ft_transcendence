@@ -138,7 +138,7 @@ const start = async () => {
 		console.log("✅ Base de données connectée avec succès");
 
 		await setupHttpsApp();
-		await setupHttpApp();
+		//await setupHttpApp();
 
 		console.log(`🔒 Démarrage du serveur HTTPS sur le port ${HTTPS_PORT}...`);
 		await httpsApp.listen({
@@ -146,11 +146,11 @@ const start = async () => {
 			host: '0.0.0.0'
 		});
 
-		console.log(`🌐 Démarrage du serveur HTTP sur le port ${HTTP_PORT}...`);
-		await httpApp.listen({
-			port: HTTP_PORT,
-			host: '0.0.0.0'
-		});
+		// console.log(`🌐 Démarrage du serveur HTTP sur le port ${HTTP_PORT}...`);
+		// await httpApp.listen({
+		// 	port: HTTP_PORT,
+		// 	host: '0.0.0.0'
+		// });
 
 	} catch (err) {
 		console.error("❌ Server startup failed:", err);
