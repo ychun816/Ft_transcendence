@@ -139,7 +139,7 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
             
             await authService.getCurrentUser();
             import("../router/router.js").then(({ router }) => {
-                router.navigate('/home');
+                router.navigate('/game');
             });
         } else if (data.requires2FA) {
             // Save username for 2FA verification step

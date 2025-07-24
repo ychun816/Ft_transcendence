@@ -8,7 +8,6 @@ import { createChatPage } from "./pages/ChatPage";
 import { createNotFoundPage } from "./pages/NotFoundPage";
 import { createSignUpPage } from "./pages/SignUpPage";
 import { createUserProfilePage } from "./pages/UserProfilePage";
-import { createTwoFactorVerifyPage } from "./pages/TwoFactorVerifyPage";
 import { i18n } from "./services/i18n";
 
 // Initialize app
@@ -16,9 +15,7 @@ async function initApp() {
   // Initialize i18n before starting router
   await i18n.init();
 
-  // Configuration des routes - CHANGEMENT MINIMAL : GamePage sur la route racine
   router
-<<<<<<< HEAD
 	  .addRoute('/', createLoginPage)
 	  .addRoute('/login', createLoginPage)
 	  .addRoute('/signup', createSignUpPage)
@@ -26,34 +23,21 @@ async function initApp() {
 	  .addRoute('/game', createGamePage)
 	  .addRoute('/profile', createProfilePage)
 	  .addRoute('/chat', createChatPage)
-	  .addRoute('/404', createNotFoundPage)
-	  .addRoute('/2fa-verify', createTwoFactorVerifyPage); // register the 2FA page
-
-=======
-    .addRoute('/', createGamePage)           // SEUL CHANGEMENT : GamePage au lieu de createLoginPage
-    .addRoute('/login', createLoginPage)
-    .addRoute('/signup', createSignUpPage)
-    .addRoute('/home', createHomePage)
-    .addRoute('/game', createGamePage)       // Garde l'alias /game pour cohérence
-    .addRoute('/profile', createProfilePage)
-    .addRoute('/chat', createChatPage)
-    .addRoute('/404', createNotFoundPage);
->>>>>>> main
+	  .addRoute('/404', createNotFoundPage);
 
   // Route dynamique pour les profils utilisateur
   router.addDynamicRoute('/profile/:username', createUserProfilePage);
-  
-  // Récupération du token (logique existante conservée)
   const token = sessionStorage.getItem('authToken');
   const currentPath = window.location.pathname;
 
-  // LOGIQUE SIMPLIFIEE : laissons le router faire son travail normal
   if (currentPath === '/') {
-    // Pour la route racine, utiliser directement le router sans logique spéciale
-    router.start();
+	if (token) {
+	  router.navigate('/home');
+	} else {
+	  router.navigate('/login');
+	}
   } else {
-    // Pour toutes les autres routes, comportement normal
-    router.start();
+	router.start();
   }
 }
 

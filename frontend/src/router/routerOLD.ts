@@ -1,7 +1,3 @@
-// Add these imports at the very top of the file:
-import React from "react";
-import ReactDOM from "react-dom/client";
-import TwoFactorVerifyPage from "../pages/TwoFactorVerifyPage";
 
 class Router {
     private routes: Map<string, () => HTMLElement> = new Map();
@@ -19,7 +15,7 @@ class Router {
         // Définir les routes qui nécessitent une authentification
         this.protectedRoutes.add('/home');
         this.protectedRoutes.add('/profile');
-        //this.protectedRoutes.add('/game');
+        this.protectedRoutes.add('/game');
         this.protectedRoutes.add('/chat');
         this.protectedRoutes.add('/leaderboard');
     }
@@ -169,18 +165,6 @@ class Router {
 			await this.navigateFromHistory(window.location.pathname);
 		});
 	}
-
-    
 }
 
-// Add this helper function after your Router class (before export):
-// function renderReactPage(ReactComponent: React.FC): HTMLElement {
-//     const container = document.createElement("div");
-//     ReactDOM.createRoot(container).render(ReactComponent);
-//     return container;
-// }
-
 export const router = new Router();
-
-// Register the /2fa-verify route (do this in your main entry file or here if you prefer)
-// router.addRoute("/2fa-verify", () => renderReactPage(TwoFactorVerifyPage));
