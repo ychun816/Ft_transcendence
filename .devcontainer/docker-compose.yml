@@ -1,6 +1,10 @@
 services:
 
 
+#  Test alerte prometheus
+
+# MAJ pour connected user
+
   dev:
     container_name: trans-dev
     build:
@@ -27,21 +31,6 @@ services:
     networks:
       - app-network
 
-
-
-
-
-#  Dashboard persistent + configure
-#  Securite
-#  Log Rentention
-#  Test alerte prometheus
-
-# MAJ pour connected user
-
-
-
-
-
   # prod:
   #   container_name: trans-prod
   #   build:
@@ -62,6 +51,7 @@ services:
   #     - logstash
   #   networks:
   #     - app-network
+  #   restart: unless-stopped
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
@@ -83,6 +73,8 @@ services:
       - ./../monitoring/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
     networks:
       - app-network
+    restart: unless-stopped
+
 
 
   log-cleanup:
@@ -106,6 +98,7 @@ services:
       - app-network
 
 
+
   logstash:
     image: docker.elastic.co/logstash/logstash:8.11.0
     container_name: trans-logstash
@@ -124,6 +117,8 @@ services:
       - LOGSTASH_PORT=${LOGSTASH_PORT}
     networks:
       - app-network
+    restart: unless-stopped
+
 
 
   kibana:
@@ -151,6 +146,8 @@ services:
       - elasticsearch
     networks:
       - app-network
+    restart: unless-stopped
+
 
 
   kibana-init:
@@ -173,6 +170,7 @@ services:
       - app-network
 
 
+
   prometheus:
     image: prom/prometheus:latest
     container_name: trans-prometheus
@@ -180,6 +178,7 @@ services:
       - "${PROMETHEUS_PORT}:9090"
     volumes:
       - ./../monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./../monitoring/prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
       - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -187,9 +186,13 @@ services:
       - '--web.console.libraries=/etc/prometheus/console_libraries'
       - '--web.console.templates=/etc/prometheus/consoles'
       - '--storage.tsdb.retention.time=30d'
+      - '--storage.tsdb.retention.size=10GB'
       - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
     networks:
       - app-network
+    restart: unless-stopped
+
 
 
   node-exporter:
@@ -206,8 +209,13 @@ services:
       - '--path.rootfs=/rootfs'
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+      - '--collector.systemd'
+      - '--collector.processes'
     networks:
       - app-network
+    pid: host
+    restart: unless-stopped
+
 
 
   grafana:
@@ -228,11 +236,16 @@ services:
       - GF_LOG_LEVEL=info
       - GF_METRICS_ENABLED=true
       - GF_USERS_HOME_PAGE=${GRAFANA_DASHBOARD}
-
+      - GF_SECURITY_COOKIE_SECURE=false  # a passer en 'true' en production apres implementation de HTTPS
+      - GF_SECURITY_COOKIE_SAMESITE=strict
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_DASHBOARDS_VERSIONS_TO_KEEP=10
     depends_on:
       - prometheus
     networks:
       - app-network
+    restart: unless-stopped
+
 
 
 volumes:
@@ -242,6 +255,7 @@ volumes:
   shared_data:
   log_cleanup_data:
   grafana_data:
+
 
 
 networks:

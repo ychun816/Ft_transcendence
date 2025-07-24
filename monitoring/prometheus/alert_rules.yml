@@ -3,7 +3,7 @@ groups:
     rules:
       # Alerte si le taux d'erreur HTTP dépasse 5% sur 5 minutes
       - alert: HighHttpErrorRate
-        expr: rate(transcendence_http_requests_total{status_code=~"5.."}[5m]) / rate(transcendence_http_requests_total[5m]) > 0.05
+        expr: rate(transcendence_http_requests_total{status_code=~"5.."}[30s]) / rate(transcendence_http_requests_total[30s]) > 0.05
         for: 2m
         labels:
           severity: warning
@@ -14,7 +14,7 @@ groups:
 
       # Alerte si le temps de réponse moyen dépasse 1 seconde
       - alert: HighResponseTime
-        expr: histogram_quantile(0.95, rate(transcendence_http_request_duration_seconds_bucket[5m])) > 1
+        expr: histogram_quantile(0.95, rate(transcendence_http_request_duration_seconds_bucket[30s])) > 1
         for: 3m
         labels:
           severity: warning

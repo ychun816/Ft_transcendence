@@ -135,7 +135,6 @@ cleanup_by_retention() {
 			-d "$query" -o /tmp/delete_response.json)
 
 		if [ "$delete_response" = "200" ]; then
-			# Extraire les métriques du résultat
 			local deleted=$(grep -o '"deleted":[0-9]*' /tmp/delete_response.json | cut -d':' -f2)
 			local took=$(grep -o '"took":[0-9]*' /tmp/delete_response.json | cut -d':' -f2)
 
@@ -152,7 +151,6 @@ cleanup_by_retention() {
 	fi
 }
 
-# Fonction pour nettoyer les index vides
 cleanup_empty_indices() {
 	log_message "Recherche des index vides à supprimer"
 
@@ -179,7 +177,6 @@ cleanup_empty_indices() {
 	done
 }
 
-# Fonction pour calculer l'espace libéré
 calculate_space_freed() {
 	local space_response=$(curl -s -w "%{http_code}" -u "$ELASTIC_USER:$ELASTIC_PASSWORD" \
 		"$ELASTIC_URL/_cat/indices/$INDEX_PATTERN?h=store.size&bytes=b" -o /tmp/space_response.txt)
