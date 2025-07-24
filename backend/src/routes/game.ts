@@ -9,14 +9,17 @@ interface GameDataRequest {
 	player1: User;
 	player1Id: number;
 	player2: User;
-	player2Id: number;
+	player2Id?: number | null;
 	score1: number;
 	score2: number;
-	winnerId: number;
+	winnerId: number | null;
 	playedAt: Date;
 	lasted: number;
 	pointsUp: number;
 	pointsDown: number;
+    iaMode?: boolean;
+    tournamentMode?: boolean;
+    multiMode?: boolean;
 }
 
 async function findUser(prisma: PrismaClient, playerId: number)
@@ -32,74 +35,104 @@ export async function registerGameRoute(
 	prisma: PrismaClient
 )	{
 	app.post("/api/game/add", async(request, reply) =>{
-		const auth = extractTokenFromRequest(request);
-		if (!auth) {
-			return reply.status(401).send({ error: 'Unauthorized' });
-		}
-
-		const gameData = request.body as GameDataRequest;
-		if (!gameData) {
-			reply.status(400).send({ error: "Game data not available" });
-			return;
-		}
-
-		if (!gameData.player1Id || !gameData.player2Id) {
-			reply.status(400).send({ error: "Player IDs are required" });
-			return;
-		}
-
-		const [user1, user2] = await Promise.all([
-			findUser(prisma, gameData.player1Id),
-			findUser(prisma, gameData.player2Id)
-		]);
-
-		if (!user1) {
-			reply.status(400).send({ error: `Player 1 (ID: ${gameData.player1Id}) doesn't exist` });
-			return;
-		}
-
-		if (!user2) {
-			reply.status(400).send({ error: `Player 2 (ID: ${gameData.player2Id}) doesn't exist` });
-			return;
-		}
-
-		const game = await prisma.match.create({
-			data:{
-				players: gameData.players,
-				player1Id: gameData.player1Id,
-				player1: { connect: { id: gameData.player1Id } },
-				player2Id: gameData.player2Id,
-				player2: { connect: { id: gameData.player1Id } },
-				score1: gameData.score1,
-				score2: gameData.score2,
-				winnerId: gameData.winnerId,
-				playedAt: gameData.playedAt,
-				lasted: gameData.lasted,
-				pointsUp: gameData.pointsUp,
-				pointsDown: gameData.pointsDown,
+		try{
+			const auth = extractTokenFromRequest(request);
+			if (!auth) {
+				return reply.status(401).send({ error: 'Unauthorized' });
 			}
-		});
 
-		await Promise.all([
-			prisma.user.update({
-				where: { id: gameData.player1Id },
-				data: {
-					gamesPlayed: { increment: 1 },
-					matchesAsPlayer1: { connect: { id: game.id } }
+			console.log("AUTH GAME : ", auth);
+			const gameData = request.body as GameDataRequest;
+			if (!gameData) {
+				reply.status(400).send({ error: "Game data not available" });
+				return;
+			}
+
+			console.log("GAME DATA : ", gameData);
+			if (!gameData.player1Id || !gameData.player2Id) {
+				reply.status(400).send({ error: "Player IDs are required" });
+				return;
+			}
+
+			if (!gameData.player1Id) {
+				return reply.status(400).send({ error: "Player1 ID is required" });
+			}
+
+			// Vérification du player1
+			const user1 = await findUser(prisma, gameData.player1Id);
+			if (!user1) {
+				return reply.status(400).send({
+					error: `Player 1 (ID: ${gameData.player1Id}) doesn't exist`
+				});
+			}
+
+			// Vérification conditionnelle du player2
+			let user2 = null;
+			if (gameData.player2Id) {
+				user2 = await findUser(prisma, gameData.player2Id);
+				if (!user2) {
+					return reply.status(400).send({
+						error: `Player 2 (ID: ${gameData.player2Id}) doesn't exist`
+					});
 				}
-			}),
-			prisma.user.update({
-				where: { id: gameData.player2Id },
+			}
+
+			console.log("USER1 : ", user1);
+			console.log("USER2 : ", user2);
+
+			// Création du match avec les corrections ci-dessus
+			const game = await prisma.match.create({
 				data: {
-					gamesPlayed: { increment: 1 },
-					matchesAsPlayer2: { connect: { id: game.id } }
+					players: gameData.players,
+					player1Id: gameData.player1Id,
+					player1: { connect: { id: gameData.player1Id } },
+
+					...(gameData.player2Id && user2 && {
+						player2Id: gameData.player2Id,
+						player2: { connect: { id: gameData.player2Id } }
+					}),
+
+					score1: gameData.score1,
+					score2: gameData.score2,
+					winnerId: gameData.winnerId,
+					playedAt: new Date(gameData.playedAt),
+					lasted: gameData.lasted,
+					pointsUp: gameData.pointsUp,
+					pointsDown: gameData.pointsDown,
+					iaMode: gameData.iaMode || false,
+					tournamentMode: gameData.tournamentMode || false,
+					multiMode: gameData.multiMode || false,
 				}
-			})
-		]);
-		reply.send({
-			success: true,
-			gameId: game.id,
-		});
+			});
+
+			console.log("GAME CREATED:", game);
+			await Promise.all([
+				prisma.user.update({
+					where: { id: gameData.player1Id },
+					data: {
+						gamesPlayed: { increment: 1 },
+						matchesAsPlayer1: { connect: { id: game.id } }
+					}
+				}),
+				prisma.user.update({
+					where: { id: gameData.player2Id },
+					data: {
+						gamesPlayed: { increment: 1 },
+						matchesAsPlayer2: { connect: { id: game.id } }
+					}
+				})
+			]);
+			reply.send({
+				success: true,
+				gameId: game.id,
+			});
+		} catch (error) {
+			console.error("Error while creating match:", error);
+			reply.status(500).send({
+				error: "Internal server error",
+				details: error.message
+			});
+		}
 	});
 
 	app.get("/api/game/stats", async(
