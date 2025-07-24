@@ -93,4 +93,24 @@ const start = async () => {
         process.exit(1);
     }
 };
+// process.on('SIGINT', async () => {
+//     console.log('🛑 Received SIGINT, shutting down gracefully...');
+//     await app.close();
+//     await prisma.$disconnect();
+//     process.exit(0);
+// });
+// process.on('SIGTERM', async () => {
+//     console.log('🛑 Received SIGTERM, shutting down gracefully...');
+//     await app.close();
+//     await prisma.$disconnect();
+//     process.exit(0);
+// });
+// process.on('unhandledRejection', (reason, promise) => {
+//     console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+//     process.exit(1);
+// });
+// process.on('uncaughtException', (error) => {
+//     console.error('❌ Uncaught Exception:', error);
+//     process.exit(1);
+// });
 start();

@@ -195,70 +195,19 @@ services:
 
 
 
-  node-exporter:
-    image: prom/node-exporter:latest
-    container_name: trans-node-exporter
+
+  prod:
+    container_name: trans-prod
+    image: ima-prod
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+      target: prod
+    # volumes:
+    #   - ..:/app
+    # - /app/node_modules
     ports:
-      - "${NODE_EXP_PORT}:9100"
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
-    command:
-      - '--path.procfs=/host/proc'
-      - '--path.rootfs=/rootfs'
-      - '--path.sysfs=/host/sys'
-      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
-      - '--collector.systemd'
-      - '--collector.processes'
-    networks:
-      - app-network
-    pid: host
-    restart: unless-stopped
-
-
-
-  grafana:
-    image: grafana/grafana:latest
-    container_name: trans-grafana
-    ports:
-      - "${GRAFANA_PORT}:3000"
-    volumes:
-    - ./../monitoring/grafana/grafana.ini:/etc/grafana/grafana.ini:ro
-    - ./../monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
-    - grafana_data:/var/lib/grafana
+    - "3000:3001"
+    command: ["npm", "start"]
     environment:
-      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
-      - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_INSTALL_PLUGINS=grafana-clock-panel
-      - GF_PROVISIONING_ENABLED=true
-      - GF_LOG_LEVEL=info
-      - GF_METRICS_ENABLED=true
-      - GF_USERS_HOME_PAGE=${GRAFANA_DASHBOARD}
-      - GF_SECURITY_COOKIE_SECURE=false  # a passer en 'true' en production apres implementation de HTTPS
-      - GF_SECURITY_COOKIE_SAMESITE=strict
-      - GF_AUTH_ANONYMOUS_ENABLED=false
-      - GF_DASHBOARDS_VERSIONS_TO_KEEP=10
-    depends_on:
-      - prometheus
-    networks:
-      - app-network
-    restart: unless-stopped
-
-
-
-volumes:
-  elasticsearch_data:
-  kibana_data:
-  prometheus_data:
-  shared_data:
-  log_cleanup_data:
-  grafana_data:
-
-
-
-networks:
-  app-network:
-    name: app-network
-    driver: bridge
+      - NODE_ENV=production
