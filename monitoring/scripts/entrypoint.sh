@@ -13,21 +13,10 @@ printenv | grep -E '^(ELASTIC_)' | sed 's/^/export /' > /etc/cron.environment
 echo "Variables d'environnement préparées:"
 cat /etc/cron.environment
 
-# echo "Configuration de rsyslog..."
-# cat > /etc/rsyslog.d/50-transcendence.conf << EOF
-# local0.*    /var/log/transcendence-cleanup.log
-# local1.*    /var/log/transcendence-cleanup-metrics.log
-# EOF
-
 touch /var/log/transcendence-cleanup.log
 touch /var/log/transcendence-cleanup-metrics.log
 chmod 644 /var/log/transcendence-cleanup.log
 chmod 644 /var/log/transcendence-cleanup-metrics.log
-
-# echo "Démarrage de rsyslog..."
-# rsyslogd
-
-# sleep 2
 
 echo "Test de l'environnement cron..."
 if [ -f "/etc/cron.environment" ]; then
