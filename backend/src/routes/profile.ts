@@ -329,7 +329,6 @@ export async function registerProfileRoute(
 		if (!friend) return reply.status(404).send({ error: "user not found" });
 		if (user.id === friend.id) return reply.status(400).send({ error: "Cannot add yourself" });
 
-		// Vérifie si déjà ami
 		const alreadyFriend = await prisma.user.findFirst({
 			where: {
 				id: user.id,

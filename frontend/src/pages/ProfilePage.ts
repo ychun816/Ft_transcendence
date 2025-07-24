@@ -699,7 +699,7 @@ function setupAddFriendFeature(page: HTMLDivElement) {
 }
 
 
-async function getDashboard(page: HTMLDivElement) {
+async function getDashboardStats(page: HTMLDivElement) {
 	try{
 		const user = await getUserInfo();
 		if (!user) return null;
