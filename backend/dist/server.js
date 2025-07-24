@@ -1,92 +1,95 @@
-import fastify from "fastify";
-import { registerNewUser } from "./routes/signup.js";
-import { handleLogIn } from "./routes/login.js";
-import { registerProfileRoute } from "./routes/profile.js";
-import fastifyStatic from "@fastify/static";
-import fastifyWebsocket from "@fastify/websocket"; // ✅ Import corrigé
-import fastifyMultipart from "@fastify/multipart";
-import path from "path";
-import { fileURLToPath } from "url";
-import { PrismaClient } from "@prisma/client";
-import chatWebSocketRoutes from "./routes/chat.js";
-import cookie from '@fastify/cookie';
-import { registerNotificationRoutes } from "./routes/notifications.js";
+import fastify from 'fastify';
+import { registerNewUser } from './signup.js';
+import { handleLogIn } from './login.js';
+import { registerProfileRoute } from './profile.js';
+import fastifyStatic from '@fastify/static';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { PrismaClient } from '@prisma/client';
+import { logger } from './utils/logger.js';
+import { metricsPlugin } from './utils/metricsPlugin.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 export const PROJECT_ROOT = path.resolve(__dirname, "../../");
 const prisma = new PrismaClient();
-const app = fastify({
-    logger: true
+const app = fastify({ logger: false, disableRequestLogging: false });
+logger.info("Enregistrement du plugin de métriques Prometheus");
+app.register(metricsPlugin);
+function scrappingMessage(method, url, userAgent) {
+    if (url === '/metrics' && userAgent && userAgent.includes('Prometheus')) {
+        return 'Scrapping';
+    }
+}
+app.addHook('onRequest', async (request, reply) => {
+    request.startTime = Date.now();
+    const baseMessage = request.body;
+    const scrapping = scrappingMessage(request.method, request.url, request.headers['user-agent']);
+    logger.info({
+        type: 'http_request',
+        message: scrapping || baseMessage,
+        method: request.method,
+        url: request.url,
+        ip: request.ip,
+        userAgent: request.headers['user-agent']
+    });
 });
+app.addHook('onResponse', async (request, reply) => {
+    const responseTime = Date.now() - (request.startTime || 0);
+    const baseMessage = request.body;
+    const scrapping = scrappingMessage(request.method, request.url, request.headers['user-agent']);
+    logger.info({
+        type: 'http_response',
+        message: scrapping || baseMessage,
+        method: request.method,
+        url: request.url,
+        statusCode: reply.statusCode,
+        responseTime: responseTime
+    });
+});
+app.addHook('onError', async (request, reply, error) => {
+    logger.error({
+        type: 'http_error',
+        method: request.method,
+        url: request.url,
+        error: error.message,
+        stack: error.stack
+    });
+});
+let root = path.join(__dirname, 'frontend');
+logger.info("Configuration du serveur");
+app.register(fastifyStatic, {
+    root: path.join(__dirname, '../../frontend/src'),
+    prefix: '/',
+});
+app.setNotFoundHandler((_req, reply) => {
+    reply.sendFile('index.html');
+});
+app.register(fastifyStatic, {
+    root: path.join(PROJECT_ROOT, 'public'),
+    prefix: '/public/',
+    decorateReply: false
+});
+logger.info("REGISTERING NEW USER");
+registerNewUser(app, prisma);
+logger.info("LOGGING IN NEW USER");
+handleLogIn(app, prisma);
+logger.info("GET USER INFO FOR FRONTEND");
+registerProfileRoute(app, prisma);
 const start = async () => {
     try {
-        console.log("🚀 Starting server...");
-        console.log("📦 Registering plugins...");
-        await app.register(cookie, {
-            secret: process.env.COOKIE_SECRET || 'fallback-secret-key',
-            parseOptions: {},
-        });
-        await app.register(fastifyWebsocket, {
-            options: {
-                maxPayload: 1024 * 1024 * 10, // 10MB
-                clientTracking: true,
-                perMessageDeflate: false,
-            },
-        });
-        await app.register(fastifyMultipart, {
-            limits: {
-                fileSize: 5 * 1024 * 1024, // 5MB
-                files: 1
-            }
-        });
-        console.log("📂 Registering static files...");
-        await app.register(fastifyStatic, {
-            root: path.join(__dirname, "../../frontend/src"),
-            prefix: "/",
-        });
-        await app.register(fastifyStatic, {
-            root: path.join(PROJECT_ROOT, "public"),
-            prefix: "/public/",
-            decorateReply: false,
-        });
-        await app.register(fastifyStatic, {
-            root: path.join(PROJECT_ROOT, "public/avatars"),
-            prefix: "/avatars/",
-            decorateReply: false,
-        });
-        app.setNotFoundHandler((_req, reply) => {
-            reply.sendFile("index.html");
-        });
-        // app.register(async function (app) {
-        // 	app.get('/ws', { websocket: true }, (connection, req) => {
-        // 		connection.socket.on('message', message => {
-        // 		});
-        // 	});
-        // });
-        console.log("🗄️ Testing database connection...");
-        await prisma.$connect();
-        console.log("✅ Database connected successfully");
-        console.log("🛣️ Registering routes...");
-        console.log("REGISTERING NEW USER");
-        registerNewUser(app, prisma);
-        console.log("LOGGING IN NEW USER");
-        handleLogIn(app, prisma);
-        console.log("GET USER INFO FOR FRONTEND");
-        registerProfileRoute(app, prisma);
-        console.log("🔌 Registering WebSocket routes...");
-        await chatWebSocketRoutes(app, prisma);
-        // Register WebSocket routes
-        await registerNotificationRoutes(app, prisma);
-        console.log("🎧 Starting to listen...");
-        await app.listen({
-            port: 3001,
-            host: '0.0.0.0'
-        });
-        console.log(`🎉 Server is listening on port: 3000`);
-        console.log(`🌐 Access your app at: http://localhost:3000`);
+        await app.listen({ port: 3000, host: '0.0.0.0' });
+        logger.info(`App is listening on port: 3000`);
     }
     catch (err) {
-        console.error("❌ Server startup failed:", err);
+        if (typeof err === 'string') {
+            logger.error(err);
+        }
+        else if (err instanceof Error) {
+            logger.error({
+                error: err.message,
+                stack: err.stack
+            });
+        }
         process.exit(1);
     }
 };

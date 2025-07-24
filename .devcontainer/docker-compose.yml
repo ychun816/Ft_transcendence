@@ -1,35 +1,213 @@
 services:
-    dev:
-        container_name: trans-dev
-        image: ima-dev
-        build:
-            context: ..
-            dockerfile: .devcontainer/Dockerfile
-            target: dev
-        volumes:
-            - ..:/app
-            - /app/node_modules
-        ports:
-            - "3001:3000"
-            - "3443:3443"
-            - "5174:5174"
-        environment:
-            - NODE_ENV=development
-            - DEBUG=true
-        restart: unless-stopped
 
-    # prod:
-    #     container_name: trans-prod
-    #     image: ima-prod
-    #     build:
-    #         context: ..
-    #         dockerfile: .devcontainer/Dockerfile
-    #         target: prod
-    #     # volumes:
-    #     #   - ..:/app
-    #     # - /app/node_modules
-    #     ports:
-    #         - "3000:3001"
-    #     command: ["npm", "start"]
-    #     environment:
-    #         - NODE_ENV=production
+
+#  Test alerte prometheus
+
+# MAJ pour connected user
+
+  dev:
+    container_name: trans-dev
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+      target: dev
+    volumes:
+      - ..:/app
+      - /app/node_modules
+    # ports:
+    # - "3000:3000"
+    # - "5173:5173"
+    environment:
+      - NODE_ENV=development
+      - DEBUG=true
+      - LOGSTASH_HOST=${LOGSTASH_HOST}
+      - LOGSTASH_PORT=${LOGSTASH_PORT}
+      - ELASTIC_URL=${ELASTIC_URL}
+      - ELASTIC_USER=${ELASTIC_USER}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    restart: unless-stopped
+    depends_on:
+      - logstash
+    networks:
+      - app-network
+
+  # prod:
+  #   container_name: trans-prod
+  #   build:
+  #     context: ..
+  #     dockerfile: .devcontainer/Dockerfile
+  #     target: prod
+  #   # volumes:
+  #   #   - ..:/app
+  #   # - /app/node_modules
+  #   ports:
+  #     - "3000:3000"
+  #   command: ["npm", "start"]
+    # environment:
+    #   - NODE_ENV=production
+    #   - LOGSTASH_HOST=${LOGSTASH_HOST}
+    #   - LOGSTASH_PORT=${LOGSTASH_PORT}
+  #   depends_on:
+  #     - logstash
+  #   networks:
+  #     - app-network
+  #   restart: unless-stopped
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: trans-elasticsearch
+    environment:
+      - cluster.name=${CLUSTER_NAME}
+      - node.name=${NODE_NAME}
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+      - "ES_JAVA_OPTS=${ES_JAVA_OPTS}"
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - xpack.license.self_generated.type=basic
+    ports:
+      - "${ELASTIC_PORT}:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+      - ./../monitoring/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+    networks:
+      - app-network
+    restart: unless-stopped
+
+
+
+  log-cleanup:
+    image: debian:bookworm-slim
+    container_name: trans-log-cleanup
+    user: root
+    environment:
+      - ELASTIC_URL=${ELASTIC_URL}
+      - ELASTIC_USER=${ELASTIC_USER}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    depends_on:
+      - elasticsearch
+    volumes:
+      - ./../monitoring/scripts/logs-cleanup.sh:/usr/local/bin/logs-cleanup.sh:ro
+      - ./../monitoring/scripts/entrypoint.sh:/usr/local/bin/entrypoint.sh:ro
+      - log_cleanup_data:/var/log
+      - ./../monitoring/scripts/logs-cleanup:/etc/cron.d/logs-cleanup:ro
+    command: ["sh", "-c", "/usr/local/bin/entrypoint.sh"]
+    restart: unless-stopped
+    networks:
+      - app-network
+
+
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.11.0
+    container_name: trans-logstash
+    ports:
+      - "${LOGSTASH_PORT}:5044"
+    volumes:
+      - ./../monitoring/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    depends_on:
+      - elasticsearch
+    environment:
+      - "LS_JAVA_OPTS=${LS_JAVA_OPTS}"
+      - ELASTIC_USER=${ELASTIC_USER}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ELASTIC_HOST=${ELASTIC_HOST}
+      - LOGSTASH_HOST=${LOGSTASH_HOST}
+      - LOGSTASH_PORT=${LOGSTASH_PORT}
+    networks:
+      - app-network
+    restart: unless-stopped
+
+
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: trans-kibana
+    ports:
+      - "${KIBANA_PORT}:5601"
+    environment:
+      - KIBANA_PORT=${KIBANA_PORT}
+      - ELASTIC_URL=${ELASTIC_URL}
+      - SERVER_NAME=${KIBANA_SERV_NAME}
+      - REPORTING_KEY=${REPORTING_KEY}
+      - SECURITY_KEY=${SECURITY_KEY}
+      - SAVED_OBJECTS_KEY=${SAVED_OBJECTS_KEY}
+      - XPACK_SECURITY_ENABLED=true
+      - XPACK_SECURITY_ENROLLMENT_ENABLED=false
+      - LOGGING_ROOT_LEVEL=info
+    volumes:
+      - ./../monitoring/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+      - ./../monitoring/kibana/entrypoint.sh:/usr/local/bin/entrypoint.sh:ro
+      - shared_data:/shared
+      - kibana_data:/usr/share/kibana/data
+    entrypoint: ["/usr/local/bin/entrypoint.sh"]
+    depends_on:
+      - elasticsearch
+    networks:
+      - app-network
+    restart: unless-stopped
+
+
+
+  kibana-init:
+    container_name: trans-init-kibana
+    image: debian:bookworm-slim
+    user: root
+    depends_on:
+      - kibana
+    environment:
+      - ELASTIC_URL=${ELASTIC_URL}
+      - ELASTIC_USER=${ELASTIC_USER}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    volumes:
+      - ./../monitoring/kibana/saved_objects:/usr/share/kibana/saved_objects:ro
+      - ./../monitoring/kibana/init.sh:/init.sh:ro
+      - shared_data:/shared
+    command: ["sh", "-c", "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y curl && /init.sh"]
+    restart: "no"
+    networks:
+      - app-network
+
+
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: trans-prometheus
+    ports:
+      - "${PROMETHEUS_PORT}:9090"
+    volumes:
+      - ./../monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./../monitoring/prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--storage.tsdb.retention.size=10GB'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    networks:
+      - app-network
+    restart: unless-stopped
+
+
+
+
+  prod:
+    container_name: trans-prod
+    image: ima-prod
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+      target: prod
+    # volumes:
+    #   - ..:/app
+    # - /app/node_modules
+    ports:
+    - "3000:3001"
+    command: ["npm", "start"]
+    environment:
+      - NODE_ENV=production

@@ -36,6 +36,7 @@ export default defineConfig({
 				ws: true,
 				changeOrigin: true,
 			},
+			'/metrics': 'http://localhost:3000'
 		},
 	},
 	css: {
