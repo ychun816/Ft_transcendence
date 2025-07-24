@@ -18,7 +18,6 @@ async function initApp() {
 
   // Configuration des routes - CHANGEMENT MINIMAL : GamePage sur la route racine
   router
-<<<<<<< HEAD
 	  .addRoute('/', createLoginPage)
 	  .addRoute('/login', createLoginPage)
 	  .addRoute('/signup', createSignUpPage)
@@ -29,16 +28,6 @@ async function initApp() {
 	  .addRoute('/404', createNotFoundPage)
 	  .addRoute('/2fa-verify', createTwoFactorVerifyPage); // register the 2FA page
 
-=======
-    .addRoute('/', createGamePage)           // SEUL CHANGEMENT : GamePage au lieu de createLoginPage
-    .addRoute('/login', createLoginPage)
-    .addRoute('/signup', createSignUpPage)
-    .addRoute('/home', createHomePage)
-    .addRoute('/game', createGamePage)       // Garde l'alias /game pour cohérence
-    .addRoute('/profile', createProfilePage)
-    .addRoute('/chat', createChatPage)
-    .addRoute('/404', createNotFoundPage);
->>>>>>> main
 
   // Route dynamique pour les profils utilisateur
   router.addDynamicRoute('/profile/:username', createUserProfilePage);
