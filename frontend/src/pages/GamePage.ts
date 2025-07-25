@@ -3,7 +3,6 @@ import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
 import { Game_solo } from "../components/game/game_solo.js";
 import { Game_ligne } from "../components/game/game_ligne.js";
 import { Game_tournoi } from "../components/game/game_tournoi.js";
-import { clear } from "console";
 
 export function createGamePage(): HTMLElement {
 	const page = document.createElement("div");
@@ -207,6 +206,28 @@ export function createGamePage(): HTMLElement {
 		<!-- Champ d'étoiles -->
 		<div class="starfield"></div>
 		
+		<!-- Bouton LOG-IN en haut à gauche -->
+		<div class="absolute top-4 left-4 z-50">
+			<div class="login-dropdown">
+				<button id="loginBtn" class="retro-button text-purple-300 font-bold py-2 px-4 rounded-lg transition-all duration-300">
+					<span class="relative z-10">LOG-IN</span>
+				</button>
+				<div class="mx-auto">
+					<button class="retro-button text-white font-bold py-2 px-4 rounded-lg" id="profilBtn">
+						PROFIL
+					</button>
+					<button class="retro-button text-white font-bold py-2 px-4 rounded-lg" id="chatBtn">
+						CHAT
+					</button>
+				</div>
+					<button id="logoutBtn" class="retro-button text-red-300 font-bold py-2 px-4 rounded-lg transition-all duration-300">
+						<span class="relative z-10">LOG-OUT</span>
+					</button>				
+				</div>
+			</div>
+		</div>
+
+
 		<!-- Conteneur principal avec effet scan -->
 		<div class="min-h-screen flex flex-col items-center justify-center p-4 scan-lines relative">
 			
@@ -476,6 +497,11 @@ export function createGamePage(): HTMLElement {
 		const controlPlayer1Command = page.querySelector("#control_player_1_command") as HTMLElement;
 		const multiError = page.querySelector("#multiError") as HTMLElement;
 
+		const loginBtn = page.querySelector("#loginBtn") as HTMLButtonElement;
+		const logoutBtn = page.querySelector('#logoutBtn') as HTMLButtonElement;;	
+		const chatBtn = page.querySelector("#chatBtn") as HTMLButtonElement;
+		const profilBtn = page.querySelector("#profilBtn") as HTMLButtonElement;
+
 		// reinitialiser page 1v1
 		// si remote il y a
 
@@ -502,6 +528,25 @@ export function createGamePage(): HTMLElement {
 		if (controlPlayer2Command) {
 			controlPlayer2Command.textContent = 'ARROW UP / ARROW DOWN';
 		}
+
+		// gerer le log-in
+		const token = sessionStorage.getItem("authToken");
+        if (!token)
+		{
+			//console.log("pas connecte");
+			loginBtn.classList.remove("hidden");
+			chatBtn.classList.add("hidden");
+			profilBtn.classList.add("hidden");
+			logoutBtn.classList.add("hidden");
+		}
+		else
+		{
+			loginBtn.classList.add("hidden");
+			chatBtn.classList.remove("hidden");
+			profilBtn.classList.remove("hidden");
+			logoutBtn.classList.remove("hidden");
+		}
+        
 	}
 
 	function resetTournoiInterface(): void
@@ -574,6 +619,28 @@ export function createGamePage(): HTMLElement {
 		let start1v1 = page.querySelector("#start1v1") as HTMLButtonElement;
 		let error1v1 = page.querySelector("#error1v1") as HTMLElement;
 
+		const loginBtn = page.querySelector("#loginBtn") as HTMLButtonElement;
+		const logoutBtn = page.querySelector('#logoutBtn') as HTMLButtonElement;;	
+		const chatBtn = page.querySelector("#chatBtn") as HTMLButtonElement;
+		const profilBtn = page.querySelector("#profilBtn") as HTMLButtonElement;
+
+		// connecte ou non
+		const token = sessionStorage.getItem("authToken");
+        if (!token)
+		{
+			//console.log("pas connecte");
+			loginBtn.classList.remove("hidden");
+			chatBtn.classList.add("hidden");
+			profilBtn.classList.add("hidden");
+			logoutBtn.classList.add("hidden");
+		}
+		else
+		{
+			loginBtn.classList.add("hidden");
+			logoutBtn.classList.remove("hidden");
+			chatBtn.classList.remove("hidden");
+			profilBtn.classList.remove("hidden");
+		}
 		
 		function chooseMode(mode: 'local' | 'ligne'): void
 		{
@@ -587,11 +654,14 @@ export function createGamePage(): HTMLElement {
 			}
 			else
 			{
-				// if (client pas connecte) // if client pas connecte
-				// {
-				// 	multiError.classList.remove('hidden');
-				// }
-				multiError.classList.add('hidden');
+				const token = sessionStorage.getItem("authToken");
+				if (!token)
+				{
+					menu.style.display = "block";
+					multiError.classList.remove('hidden');
+					return ;
+					
+				}
 				menuLigne.style.display = "block";
 			}
 		}
@@ -757,6 +827,10 @@ export function createGamePage(): HTMLElement {
 				menuTournoi.style.display = "none";
 				game.style.display = "block";
 				backToMenuBtn.style.display = "none";
+				loginBtn.classList.add("hidden");
+				logoutBtn.classList.add("hidden");			
+				profilBtn.classList.add("hidden");
+				chatBtn.classList.add("hidden");
 			}
 
 			function showGameInterface(player1: string, player2: string)
@@ -809,12 +883,17 @@ export function createGamePage(): HTMLElement {
 			menuLigne.style.display = "none";
 			game.style.display = "block";
 			restart.style.display = "block";
+			loginBtn.classList.add("hidden");
+			logoutBtn.classList.add("hidden");			
+			profilBtn.classList.add("hidden");
+			chatBtn.classList.add("hidden");
 			
-			// Configurer l'interface selon le mode
-			// if (joueurp1 connecte)
-			// {
-			// 	scorep1.textContent = //son nom;
-			// }
+			const token = sessionStorage.getItem("authToken");
+			if (token)
+			{
+				const userId = sessionStorage.getItem("username");
+				scorep1.textContent = `${userId} : 0`;
+			}
 			if (mode === "solo") {
 				controlPlayer2.textContent = 'IA';
 				controlPlayer2Command.textContent = "";
@@ -841,12 +920,19 @@ export function createGamePage(): HTMLElement {
 		function startGame2v2Local(): void
 		{
 			cleanupCurrentGame();
+
+			scorep1.textContent = "Equipe 1 : 0"
+			scorep2.textContent = "Equipe 2 : 0"
 			currentGame = new Game_ligne();
 			
 			menuLocal.style.display = "none";
 			menuLigne.style.display = "none";
 			game.style.display = "block";
 			control2.style.display = 'block';
+			loginBtn.classList.add("hidden");
+			logoutBtn.classList.add("hidden");			
+			profilBtn.classList.add("hidden");
+			chatBtn.classList.add("hidden");
 			
 			currentGame.start_game_loop();
 		}
@@ -863,8 +949,34 @@ export function createGamePage(): HTMLElement {
 			menuLigne.style.display = "none";
 			game.style.display = "none";
 			menu1v1.style.display = "block";
+			loginBtn.classList.add("hidden");
+			logoutBtn.classList.add("hidden");			
+			profilBtn.classList.add("hidden");
+			chatBtn.classList.add("hidden");
 			
 			//currentGame.start_game_loop();
+		}
+
+		function login()
+		{
+			import("../router/router.js").then(({ router }) => {
+				router.navigate("/login");
+			});
+		}
+
+		function go_profil()
+		{
+			import("../router/router.js").then(({ router }) => {
+				router.navigate("/profile");
+			});
+		}
+
+
+		function go_chat()
+		{
+			import("../router/router.js").then(({ router }) => {
+				router.navigate("/chat");
+			});
 		}
 		
 		localBtn.addEventListener('click', () => chooseMode('local'));
@@ -883,6 +995,33 @@ export function createGamePage(): HTMLElement {
 		multiBtn.addEventListener('click', () => startGame2v2Local());
 
         tournoiBtn.addEventListener('click', () => startTournoi());
+		loginBtn.addEventListener('click', () => login());
+		logoutBtn.addEventListener('click', async () => {
+			try {
+				const response = await fetch("/api/logout", {
+					method: "POST",
+					headers: {
+						'Authorization': `Bearer ${sessionStorage.getItem('authToken')}`
+					}
+				});
+
+				if (response.ok) {
+					console.log("Logout successful on backend.");
+				} else {
+					console.error("Backend logout failed.");
+				}
+			} catch (error) {
+				console.error("Error during logout fetch:", error);
+			} finally {
+				sessionStorage.clear();
+				import('../router/router.js').then(({ router }) => {
+					router.navigate('/game');
+				});
+			}
+		});
+
+		profilBtn.addEventListener('click', () => go_profil());
+		chatBtn.addEventListener('click', () => go_chat());
 
 	}
 
