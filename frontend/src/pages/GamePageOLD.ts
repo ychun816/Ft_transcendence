@@ -10,26 +10,89 @@ export function createGamePage(): HTMLElement {
 	page.className = "min-h-screen bg-gray-900 text-white font-mono overflow-hidden";
 
 	let currentGame: Game_solo | Game_ligne | Game_tournoi | null = null;
-
+	
 	const renderContent = () => {
 		page.innerHTML = `
 		<style>
-			/* Styles personnalisés pour les effets néon */
+			/* Styles rétro gaming noir et violet */
+			@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+			
+			* {
+				font-family: 'Orbitron', monospace;
+			}
+			
 			.neon-text {
-				text-shadow: 
-					0 0 5px currentColor,
-					0 0 10px currentColor,
-					0 0 15px currentColor,
-					0 0 20px currentColor;
+				color: #bb86fc;
+				text-shadow:
+					0 0 3px #bb86fc,
+					0 0 6px #bb86fc,
+					0 0 9px #bb86fc;
+				animation: neonFlicker 2s infinite alternate;
+			}
+			
+			@keyframes neonFlicker {
+				0%, 100% {
+					text-shadow: 
+						0 0 5px #9d4edd,
+						0 0 10px #9d4edd,
+						0 0 15px #9d4edd,
+						0 0 20px #9d4edd,
+						0 0 35px #9d4edd;
+				}
+				50% {
+					text-shadow: 
+						0 0 2px #9d4edd,
+						0 0 5px #9d4edd,
+						0 0 8px #9d4edd,
+						0 0 12px #9d4edd,
+						0 0 25px #9d4edd;
+				}
 			}
 			
 			.neon-border {
+				border: 2px solid #9d4edd;
 				box-shadow: 
-					0 0 10px currentColor,
-					inset 0 0 10px currentColor;
+					0 0 10px #9d4edd,
+					inset 0 0 10px #9d4edd,
+					0 0 20px #9d4edd40;
+				background: linear-gradient(135deg, #0a0a0a 0%, #1a0d1a 50%, #0a0a0a 100%);
 			}
 			
-			.particles {
+			.retro-button {
+				background: linear-gradient(135deg, #1a0d1a 0%, #0a0a0a 50%, #1a0d1a 100%);
+				border: 2px solid #9d4edd;
+				box-shadow: 
+					0 0 10px #9d4edd40,
+					inset 0 0 10px #9d4edd20;
+				transition: all 0.3s ease;
+				position: relative;
+				overflow: hidden;
+			}
+			
+			.retro-button::before {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: -100%;
+				width: 100%;
+				height: 100%;
+				background: linear-gradient(90deg, transparent, #9d4edd40, transparent);
+				transition: left 0.5s;
+			}
+			
+			.retro-button:hover {
+				border-color: #c77dff;
+				box-shadow: 
+					0 0 20px #9d4edd,
+					inset 0 0 20px #9d4edd30;
+				transform: scale(1.05);
+			}
+			
+			.retro-button:hover::before {
+				left: 100%;
+			}
+			
+			.starfield {
 				position: fixed;
 				top: 0;
 				left: 0;
@@ -37,20 +100,29 @@ export function createGamePage(): HTMLElement {
 				height: 100%;
 				pointer-events: none;
 				z-index: -1;
+				background: radial-gradient(2px 2px at 20px 30px, #9d4edd, transparent),
+							radial-gradient(2px 2px at 40px 70px, #c77dff, transparent),
+							radial-gradient(1px 1px at 90px 40px, #9d4edd, transparent),
+							radial-gradient(1px 1px at 130px 80px, #c77dff, transparent),
+							radial-gradient(2px 2px at 160px 30px, #9d4edd, transparent),
+							radial-gradient(1px 1px at 200px 90px, #c77dff, transparent),
+							radial-gradient(2px 2px at 240px 20px, #9d4edd, transparent);
+				background-size: 250px 150px;
+				animation: twinkle 4s ease-in-out infinite alternate;
 			}
 			
-			.particle {
-				position: absolute;
-				width: 2px;
-				height: 2px;
-				background: #00ff41;
-				border-radius: 50%;
-				animation: float 6s ease-in-out infinite;
+			@keyframes twinkle {
+				0% { opacity: 0.5; }
+				100% { opacity: 1; }
 			}
 			
-			@keyframes float {
-				0%, 100% { transform: translateY(0px) rotate(0deg); }
-				50% { transform: translateY(-20px) rotate(180deg); }
+			.retro-panel {
+				background: #050505;
+				border: 2px solid #9d4edd;
+				box-shadow: 
+					0 0 15px #9d4edd40,
+					inset 0 0 15px #9d4edd20;
+				backdrop-filter: blur(5px);
 			}
 			
 			.scan-lines::before {
@@ -62,7 +134,7 @@ export function createGamePage(): HTMLElement {
 				bottom: 0;
 				background: linear-gradient(
 					transparent 0%,
-					rgba(0, 255, 65, 0.03) 50%,
+					#9d4edd10 50%,
 					transparent 100%
 				);
 				background-size: 100% 4px;
@@ -74,184 +146,259 @@ export function createGamePage(): HTMLElement {
 				0% { background-position: 0 0; }
 				100% { background-position: 0 4px; }
 			}
+			
+			.retro-title {
+				font-size: 4rem;
+				font-weight: 900;
+				background: linear-gradient(45deg, #9d4edd, #c77dff, #9d4edd);
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+				text-align: center;
+				animation: titleGlow 3s ease-in-out infinite alternate;
+			}
+			
+			@keyframes titleGlow {
+				0% { filter: drop-shadow(0 0 10px #9d4edd); }
+				100% { filter: drop-shadow(0 0 30px #c77dff); }
+			}
+			
+			.retro-input {
+				background: linear-gradient(135deg, #0a0a0a 0%, #1a0d1a 100%);
+				border: 2px solid #9d4edd;
+				color: #c77dff;
+				box-shadow: 
+					0 0 10px #9d4edd40,
+					inset 0 0 10px #9d4edd20;
+			}
+			
+			.retro-input:focus {
+				border-color: #c77dff;
+				box-shadow: 
+					0 0 20px #9d4edd,
+					inset 0 0 20px #9d4edd30;
+				outline: none;
+			}
+			
+			.scoreboard-panel {
+				background: linear-gradient(135deg, #0a0a0a 0%, #1a0d1a 50%, #0a0a0a 100%);
+				border: 2px solid #9d4edd;
+				box-shadow: 
+					0 0 20px #9d4edd60,
+					inset 0 0 20px #9d4edd30;
+			}
+			
+			.game-canvas-frame {
+				background: #050505;
+				border: 3px solid #9d4edd;
+				box-shadow: 
+					0 0 30px #9d4edd80,
+					inset 0 0 30px #9d4edd40;
+			}
+			
+			.corner-indicator {
+				width: 20px;
+				height: 20px;
+				border: 3px solid #9d4edd;
+				box-shadow: 0 0 10px #9d4edd;
+			}
 		</style>
 		
-		<!-- Particules d'arrière-plan -->
-		<div class="particles">
-			<div class="particle" style="left: 10%; animation-delay: 0s;"></div>
-			<div class="particle" style="left: 20%; animation-delay: 1s;"></div>
-			<div class="particle" style="left: 30%; animation-delay: 2s;"></div>
-			<div class="particle" style="left: 40%; animation-delay: 3s;"></div>
-			<div class="particle" style="left: 50%; animation-delay: 4s;"></div>
-			<div class="particle" style="left: 60%; animation-delay: 5s;"></div>
-			<div class="particle" style="left: 70%; animation-delay: 2s;"></div>
-			<div class="particle" style="left: 80%; animation-delay: 1s;"></div>
-			<div class="particle" style="left: 90%; animation-delay: 3s;"></div>
-		</div>
+		<!-- Champ d'étoiles -->
+		<div class="starfield"></div>
 		
 		<!-- Conteneur principal avec effet scan -->
 		<div class="min-h-screen flex flex-col items-center justify-center p-4 scan-lines relative">
 			
 			<!-- Titre principal avec effet néon -->
-			<h1 class="text-6xl font-bold text-green-400 neon-text mb-8">
-				🏓 PONG
+			<h1 class="retro-title neon-text mb-12">
+				🏓 RETRO PONG
 			</h1>
 			
 			<!-- Menu principal -->
-			<div id="menu" class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-8 border border-green-400 border-opacity-30 neon-border">
-				<button class="mb-4 bg-gradient-to-r from-gray-500 from-opacity-30 to-gray-600 to-opacity-30 hover:from-gray-500 hover:from-opacity-50 hover:to-gray-600 hover:to-opacity-50 text-white font-bold py-2 px-4 rounded-lg border border-gray-500 border-opacity-50 transition-all duration-300 transform hover:scale-105" data-route="/home">
-					← Retour à l'accueil
+			<div id="menu" class="retro-panel rounded-2xl p-8">
+				<button class="mb-6 retro-button text-white font-bold py-2 px-6 rounded-lg transition-all duration-300" data-route="/home">
+					← RETOUR ACCUEIL
 				</button>
-				<h2 class="text-3xl font-bold text-blue-400 mb-8 text-center">Mode de Jeu</h2>
-				<div class="flex flex-col gap-4">
-					<button id="localBtn" class="group relative bg-gradient-to-r from-green-400 from-opacity-20 to-blue-700 to-opacity-20 hover:from-green-400 hover:from-opacity-40 hover:to-blue-400 hover:to-opacity-40 text-white font-bold py-4 px-8 rounded-xl border border-green-400 border-opacity-50 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl">
-						<span class="relative z-10">🎮 Jouer en local</span>
+				<h2 class="text-3xl font-bold text-purple-300 mb-8 text-center">MODE DE JEU</h2>
+				<div class="flex flex-col gap-6">
+					<button id="localBtn" class="retro-button text-purple-300 font-bold py-4 px-8 rounded-xl transition-all duration-300">
+						<span class="relative z-10">🎮 JOUER EN LOCAL</span>
 					</button>
-					<button id="ligneBtn" class="group relative bg-gradient-to-r from-purple-400 from-opacity-20 to-pink-700 to-opacity-20 hover:from-purple-400 hover:from-opacity-40 hover:to-pink-400 hover:to-opacity-40 text-white font-bold py-4 px-8 rounded-xl border border-purple-400 border-opacity-50 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl">
-						<span class="relative z-10">🌐 Jouer en ligne</span>
+					<button id="ligneBtn" class="retro-button text-purple-300 font-bold py-4 px-8 rounded-xl transition-all duration-300">
+						<span class="relative z-10">🌐 JOUER EN LIGNE</span>
+					</button>
+				</div>
+			</div>
+			<div>
+				<p id="multiError" class="mt-4 text-red-400 hidden text-lg font-bold neon-text">
+					Tu dois être connecté pour jouer en ligne				
+				</p>
+			</div>
+			
+			<!-- Menu local -->
+			<div id="menu_local" class="hidden retro-panel rounded-2xl p-8">
+				<button id="backToMainBtn" class="mb-6 retro-button text-white font-bold py-2 px-6 rounded-lg transition-all duration-300">
+					← RETOUR MENU PRINCIPAL
+				</button>
+				<h2 class="text-3xl font-bold text-purple-300 mb-8 text-center">MODE LOCAL</h2>
+				<div class="flex flex-col gap-6">
+					<button id="soloBtn" class="retro-button text-purple-300 font-bold py-4 px-8 rounded-xl transition-all duration-300">
+						🤖 SOLO (VS IA)
+					</button>
+					<button id="versusBtn" class="retro-button text-purple-300 font-bold py-4 px-8 rounded-xl transition-all duration-300">
+						👥 VERSUS (2 JOUEURS)
+					</button>
+					<button id="multiBtn" class="retro-button text-purple-300 font-bold py-4 px-8 rounded-xl transition-all duration-300">
+						🎯 MULTIJOUEUR (2v2)
+					</button>
+					<button id="tournoiBtn" class="retro-button text-purple-300 font-bold py-4 px-8 rounded-xl transition-all duration-300">
+						🏆 TOURNOI
 					</button>
 				</div>
 			</div>
 			
-			<!-- Menu local -->
-			<div id="menu_local" class="hidden bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-8 border border-blue-400 border-opacity-30">
-				<button id="backToMainBtn" class="mb-4 bg-gradient-to-r from-gray-500 from-opacity-30 to-gray-600 to-opacity-30 hover:from-gray-500 hover:from-opacity-50 hover:to-gray-600 hover:to-opacity-50 text-white font-bold py-2 px-4 rounded-lg border border-gray-500 border-opacity-50 transition-all duration-300 transform hover:scale-105">
-					← Retour au menu principal
-				</button>
-				<h2 class="text-3xl font-bold text-green-400 mb-8 text-center">En Local</h2>
-				<div class="flex flex-col gap-4">
-					<button id="soloBtn" class="bg-gradient-to-r from-orange-300 from-opacity-20 to-red-500 to-opacity-20 hover:from-orange-500 hover:from-opacity-40 hover:to-red-500 hover:to-opacity-40 text-white font-bold py-4 px-8 rounded-xl border border-orange-500 border-opacity-50 transition-all duration-300 transform hover:scale-105">
-						🤖 Solo (vs IA)
-					</button>
-					<button id="versusBtn" class="bg-gradient-to-r from-green-400 from-opacity-20 to-teal-500 to-opacity-20 hover:from-green-500 hover:from-opacity-40 hover:to-teal-500 hover:to-opacity-40 text-white font-bold py-4 px-8 rounded-xl border border-green-500 border-opacity-50 transition-all duration-300 transform hover:scale-105">
-						👥 Versus (2 joueurs)
-					</button>
-					<button id="tournoiBtn" class="bg-gradient-to-r from-yellow-300 from-opacity-20 to-orange-500 to-opacity-20 hover:from-yellow-500 hover:from-opacity-40 hover:to-orange-500 hover:to-opacity-40 text-white font-bold py-4 px-8 rounded-xl border border-yellow-500 border-opacity-50 transition-all duration-300 transform hover:scale-105">
-						🏆 Tournoi
-					</button>
-				</div>
-			</div>
 			<!-- Menu en ligne -->
-			<div id="menu_ligne" class="hidden bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-8 border border-purple-400 border-opacity-30">
-				<button id="backToMainBtn2" class="mb-4 bg-gradient-to-r from-gray-500 from-opacity-30 to-gray-600 to-opacity-30 hover:from-gray-500 hover:from-opacity-50 hover:to-gray-600 hover:to-opacity-50 text-white font-bold py-2 px-4 rounded-lg border border-gray-500 border-opacity-50 transition-all duration-300 transform hover:scale-105">
-					← Retour au menu principal
+			<div id="menu_ligne" class="hidden retro-panel rounded-2xl p-8">
+				<button id="backToMainBtn2" class="mb-6 retro-button text-white font-bold py-2 px-6 rounded-lg transition-all duration-300">
+					← RETOUR MENU PRINCIPAL
 				</button>
-				<h2 class="text-3xl font-bold text-purple-400 mb-8 text-center">En Ligne</h2>
-				<div class="flex flex-col gap-4">
-					<button id="solo_ligneBtn" class="bg-gradient-to-r from-blue-500 from-opacity-20 to-cyan-500 to-opacity-20 hover:from-blue-500 hover:from-opacity-40 hover:to-cyan-500 hover:to-opacity-40 text-white font-bold py-4 px-8 rounded-xl border border-blue-500 border-opacity-50 transition-all duration-300 transform hover:scale-105">
-						⚔️ 1v1
+				<h2 class="text-3xl font-bold text-purple-300 mb-8 text-center">MODE EN LIGNE</h2>
+				<div class="flex flex-col gap-6">
+					<button id="solo_ligneBtn" class="retro-button text-purple-300 font-bold py-4 px-8 rounded-xl transition-all duration-300">
+						⚔️ 1V1
 					</button>
-					<button id="multiBtn" class="bg-gradient-to-r from-purple-500 from-opacity-20 to-pink-500 to-opacity-20 hover:from-purple-500 hover:from-opacity-40 hover:to-pink-500 hover:to-opacity-40 text-white font-bold py-4 px-8 rounded-xl border border-purple-500 border-opacity-50 transition-all duration-300 transform hover:scale-105">
-						🎯 Multijoueur
+					<button id="multiBtn" class="retro-button text-purple-300 font-bold py-4 px-8 rounded-xl transition-all duration-300">
+						🎯 MULTIJOUEUR (2v2)
 					</button>
 				</div>
 			</div>
-            <!-- Interface Tournoi -->
-			<div id="menu_tournoi" class="hidden bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-8 border border-purple-400 border-opacity-30">
-				<button id="backToMainBtn3" class="mb-4 bg-gradient-to-r from-gray-500 from-opacity-30 to-gray-600 to-opacity-30 hover:from-gray-500 hover:from-opacity-50 hover:to-gray-600 hover:to-opacity-50 text-white font-bold py-2 px-4 rounded-lg border border-gray-500 border-opacity-50 transition-all duration-300 transform hover:scale-105">
-					← Retour au menu principal
+			
+			<!-- Interface Tournoi -->
+			<div id="menu_tournoi" class="hidden retro-panel rounded-2xl p-8">
+				<button id="backToMainBtn3" class="mb-6 retro-button text-white font-bold py-2 px-6 rounded-lg transition-all duration-300">
+					← RETOUR MENU PRINCIPAL
 				</button>
-				<h2 class="text-3xl font-bold text-yellow-400 mb-8 text-center">🏆 Tournoi - Entrée des joueurs</h2>
+				<h2 class="text-3xl font-bold neon-text mb-8 text-center">🏆 TOURNOI - INSCRIPTION</h2>
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 					${[1,2,3,4].map(i => `
-					<div class="flex flex-col items-center bg-gray-700 bg-opacity-30 rounded-xl p-4 border border-yellow-400 border-opacity-30">
-						<img src="/assets/avatar${i}.png" alt="Joueur ${i}" class="w-24 h-24  mb-4">
-						<input type="text" placeholder="Nom Joueur ${i}" class="px-4 py-2 text-black rounded-lg w-full text-center focus:outline-none">
+					<div class="flex flex-col items-center retro-panel rounded-xl p-6">
+						<div class="w-16 h-16 rounded-full retro-panel mb-4 flex items-center justify-center text-2xl neon-text">
+							P${i}
+						</div>
+						<input type="text" placeholder="NOM JOUEUR ${i}" class="retro-input px-4 py-2 rounded-lg w-full text-center font-bold">
 					</div>`).join("")}
 				</div>
-				<div class="mt-6 text-center">
-					<button id="startTournoiMatchmaking" class="hidden bg-gradient-to-r from-green-400 from-opacity-20 to-blue-500 to-opacity-20 hover:from-green-400 hover:from-opacity-40 hover:to-blue-500 hover:to-opacity-40 text-white font-bold py-4 px-8 rounded-xl border border-green-400 border-opacity-50 transition-all duration-300 transform hover:scale-105">
-						Valider les noms
+				<div class="mt-8 text-center">
+					<button id="startTournoiMatchmaking" class="hidden retro-button text-purple-300 font-bold py-4 px-8 rounded-xl transition-all duration-300">
+						VALIDER LES NOMS
 					</button>
-					<p id="tournoiError" class="mt-4 text-red-400 text-lg font-bold hidden">
-						🚫 Tous les noms doivent être remplis et uniques !
+					<p id="tournoiError" class="mt-4 text-red-400 text-lg font-bold hidden neon-text">
+						⚠️ TOUS LES NOMS DOIVENT ÊTRE REMPLIS ET UNIQUES !
 					</p>
-					<p id="tournoimess" class="m-8 text-green-400 text-lg font-bold hidden">
+					<p id="tournoimess" class="m-8 text-purple-300 text-lg font-bold hidden neon-text">
 					</p>
-					<button id="startTournoi" class="hidden bg-gradient-to-r from-green-400 from-opacity-20 to-blue-500 to-opacity-20 hover:from-green-400 hover:from-opacity-40 hover:to-blue-500 hover:to-opacity-40 text-white font-bold py-4 px-8 rounded-xl border border-green-400 border-opacity-50 transition-all duration-300 transform hover:scale-105">
-						🎯 Commencer le tournoi
+					<button id="startTournoi" class="hidden retro-button text-purple-300 font-bold py-4 px-8 rounded-xl transition-all duration-300">
+						🎯 COMMENCER TOURNOI
 					</button>
 				</div>
 			</div>
+
+			<!-- Interface 1v1 ligne -->
+			<div id="menu_1v1" class="hidden retro-panel rounded-2xl p-8">
+				<button id="backToMainBtn3" class="mb-6 retro-button text-white font-bold py-2 px-6 rounded-lg transition-all duration-300">
+					← RETOUR MENU PRINCIPAL
+				</button>
+				<h2 class="text-3xl font-bold neon-text mb-8 text-center">Inviter un ami</h2>
+				<div class="mt-8 text-center">
+					<button id="start1v1" class="hidden retro-button text-purple-300 font-bold py-4 px-8 rounded-xl transition-all duration-300">
+						Commencer la partie
+					</button>
+					<p id="1v1Error" class="mt-4 text-red-400 text-lg font-bold hidden neon-text">
+						Aucun ami n'a rejoint votre sesion
+					</p>
+				</div>
+			</div>
+			
 			<!-- Zone de jeu -->
 			<div id="game" class="hidden w-full max-w-6xl">
 				<!-- Bouton retour -->
-				<button id="backToMenuBtn" class="mb-6 bg-gradient-to-r from-gray-500 from-opacity-30 to-gray-600 to-opacity-30 hover:from-gray-500 hover:from-opacity-50 hover:to-gray-600 hover:to-opacity-50 text-white font-bold py-2 px-4 rounded-lg border border-gray-500 border-opacity-50 transition-all duration-300 transform hover:scale-105">
-					← Retour au menu
+				<button id="backToMenuBtn" class="mb-6 retro-button text-white font-bold py-2 px-6 rounded-lg transition-all duration-300">
+					← RETOUR MENU
 				</button>
 				
-				<!-- Bouton restart stylisé -->
-				<button id="restartBtn" class="hidden mb-6 mx-auto bg-gradient-to-r from-green-400 from-opacity-30 to-blue-400 to-opacity-30 hover:from-green-400 hover:from-opacity-50 hover:to-blue-400 hover:to-opacity-50 text-white font-bold py-2 px-4 rounded-lg border border-green-400 border-opacity-50 transition-all duration-300 transform hover:scale-105">
-					New Game
+				<!-- Bouton restart -->
+				<button id="restartBtn" class="hidden mb-6 mx-auto retro-button text-purple-300 font-bold py-2 px-6 rounded-lg transition-all duration-300">
+					NOUVELLE PARTIE
 				</button>
 				
-				<!-- Tableau de score moderne -->
-				<div id="scoreboard" class="bg-gray-800 bg-opacity-70 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-blue-400 border-opacity-20">
+				<!-- Tableau de score -->
+				<div id="scoreboard" class="scoreboard-panel rounded-2xl p-6 mb-6">
 					<div class="grid grid-cols-2 gap-8 text-center">
-						<div class="bg-gradient-to-r from-blue-500 from-opacity-20 to-cyan-500 to-opacity-20 rounded-xl p-4 border border-blue-500 border-opacity-30">
-							<p id="scoreP1" class="text-2xl font-bold text-blue-100">Joueur 1 : 0</p>
+						<div class="retro-panel rounded-xl p-4">
+							<p id="scoreP1" class="text-2xl font-bold text-purple-300">JOUEUR 1 : 0</p>
 						</div>
-						<div class="bg-gradient-to-r from-pink-500 from-opacity-20 to-pink-500 to-opacity-20 rounded-xl p-4 border border-red-500 border-opacity-30">
-							<p id="scoreP2" class="text-2xl font-bold text-pink-100">Joueur 2 : 0</p>
+						<div class="retro-panel rounded-xl p-4">
+							<p id="scoreP2" class="text-2xl font-bold text-purple-300">JOUEUR 2 : 0</p>
 						</div>
 					</div>
 				</div>
 				
 				<!-- Canvas avec cadre futuriste -->
-				<div class="relative bg-gray-800 bg-opacity-30 rounded-2xl border border-green-400 border-opacity-30 neon-border mx-auto" style="width: 800px; height: 600px;">
-					<canvas id="gameCanvas" width="800" height="600" class="rounded-xl bg-gray-700 bg-opacity-50 border border-green-400 border-opacity-20 shadow-2xl w-full h-full"></canvas>
-					<!-- Indicateurs de coin décoratifs -->
-					<div class="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-green-400"></div>
-					<div class="absolute top-2 right-2 w-4 h-4 border-r-2 border-t-2 border-green-400"></div>
-					<div class="absolute bottom-2 left-2 w-4 h-4 border-l-2 border-b-2 border-green-400"></div>
-					<div class="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-green-400"></div>
+				<div class="relative game-canvas-frame rounded-2xl mx-auto" style="width: 800px; height: 600px;">
+					<canvas id="gameCanvas" width="800" height="600" class="rounded-xl bg-black w-full h-full"></canvas>
+					<!-- Indicateurs de coin -->
+					<div class="absolute top-2 left-2 corner-indicator border-l-2 border-t-2"></div>
+					<div class="absolute top-2 right-2 corner-indicator border-r-2 border-t-2"></div>
+					<div class="absolute bottom-2 left-2 corner-indicator border-l-2 border-b-2"></div>
+					<div class="absolute bottom-2 right-2 corner-indicator border-r-2 border-b-2"></div>
 				</div>
 				
-				<!-- Compte à rebours stylisé -->
-				<div id="countdowndisplay" class="text-5xl font-bold text-green-400 neon-text mt-6 text-center"></div>
+				<!-- Compte à rebours -->
+				<div id="countdowndisplay" class="text-6xl font-bold neon-text mt-8 text-center"></div>
 				
 				<!-- Message de fin de partie -->
-				<div id="endMessage" class="text-2xl font-bold text-green-400 neon-text mt-6 text-center">
+				<div id="endMessage" class="text-3xl font-bold neon-text mt-8 text-center">
 				</div>
-				<button id="nextMatchBtn" class="hidden m-6 mx-auto bg-gradient-to-r from-green-400 from-opacity-30 to-blue-400 to-opacity-30 hover:from-green-400 hover:from-opacity-50 hover:to-blue-400 hover:to-opacity-50 text-white font-bold py-2 px-4 rounded-lg border border-green-400 border-opacity-50 transition-all duration-300 transform hover:scale-105">
-					Next Game
+				<button id="nextMatchBtn" class="hidden m-6 mx-auto retro-button text-purple-300 font-bold py-2 px-6 rounded-lg transition-all duration-300">
+					MATCH SUIVANT
 				</button>
-				<button id="finalMatchBtn" class="hidden m-6 mx-auto bg-gradient-to-r from-green-400 from-opacity-30 to-blue-400 to-opacity-30 hover:from-green-400 hover:from-opacity-50 hover:to-blue-400 hover:to-opacity-50 text-white font-bold py-2 px-4 rounded-lg border border-green-400 border-opacity-50 transition-all duration-300 transform hover:scale-105">
-					GO TO THE FINAL !
+				<button id="finalMatchBtn" class="hidden m-6 mx-auto retro-button text-purple-300 font-bold py-2 px-6 rounded-lg transition-all duration-300">
+					FINALE !
 				</button>
 				
-				<!-- Contrôles avec design moderne -->
-				<div id="control_1" class="hidden bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-6 mt-6 border border-blue-400 border-opacity-20">
-					<h3 class="text-xl font-bold text-blue-400 mb-4 text-center">🎮 Contrôles</h3>
+				<!-- Contrôles -->
+				<div id="control_1" class="hidden retro-panel rounded-2xl p-6 mt-8">
+					<h3 class="text-xl font-bold text-purple-300 mb-4 text-center">🎮 CONTRÔLES</h3>
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
-						<div class="bg-blue-500 bg-opacity-10 rounded-lg p-3 border border-blue-500 border-opacity-30">
-							<p id="control_player_1" class="text-blue-400 font-semibold">Joueur 1</p>
+						<div class="retro-panel rounded-lg p-4">
+							<p id="control_player_1" class="text-purple-300 font-semibold">JOUEUR 1</p>
 							<p id="control_player_1_command" class="text-sm text-gray-300">W / S</p>
 						</div>
-						<div class="bg-pink-500 bg-opacity-10 rounded-lg p-3 border border-pink-500 border-opacity-30">
-							<p id="control_player_2" class="text-pink-400 font-semibold">Joueur 2</p>
+						<div class="retro-panel rounded-lg p-4">
+							<p id="control_player_2" class="text-purple-300 font-semibold">JOUEUR 2</p>
 							<p id="control_player_2_command" class="text-sm text-gray-300">ARROW UP / ARROW DOWN</p>
 						</div>
 					</div>
 				</div>
 				
-				<div id="control_2" class="hidden bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-6 mt-6 border border-blue-400 border-opacity-20">
-					<h3 class="text-xl font-bold text-blue-400 mb-4 text-center">🎮 Contrôles</h3>
+				<div id="control_2" class="hidden retro-panel rounded-2xl p-6 mt-8">
+					<h3 class="text-xl font-bold text-purple-300 mb-4 text-center">🎮 CONTRÔLES</h3>
 					<div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
-						<div class="bg-blue-500 bg-opacity-10 rounded-lg p-3 border border-blue-500 border-opacity-30">
-							<p class="text-blue-400 font-semibold">Joueur 1</p>
+						<div class="retro-panel rounded-lg p-3">
+							<p class="text-purple-300 font-semibold">JOUEUR 1</p>
 							<p class="text-sm text-gray-300">W / S</p>
 						</div>
-						<div class="bg-blue-500 bg-opacity-10 rounded-lg p-3 border border-blue-500 border-opacity-30">
-							<p class="text-blue-400 font-semibold">Joueur 2</p>
+						<div class="retro-panel rounded-lg p-3">
+							<p class="text-purple-300 font-semibold">JOUEUR 2</p>
 							<p class="text-sm text-gray-300">J / M</p>
 						</div>
-						<div class="bg-pink-500 bg-opacity-10 rounded-lg p-3 border border-pink-500 border-opacity-30">
-							<p class="text-pink-400 font-semibold">Joueur 3</p>
+						<div class="retro-panel rounded-lg p-3">
+							<p class="text-purple-300 font-semibold">JOUEUR 3</p>
 							<p class="text-sm text-gray-300">9 / 6</p>
 						</div>
-						<div class="bg-pink-500 bg-opacity-10 rounded-lg p-3 border border-pink-500 border-opacity-30">
-							<p class="text-pink-400 font-semibold">Joueur 4</p>
+						<div class="retro-panel rounded-lg p-3">
+							<p class="text-purple-300 font-semibold">JOUEUR 4</p>
 							<p class="text-sm text-gray-300">ARROW UP / ARROW DOWN</p>
 						</div>
 					</div>
@@ -278,14 +425,9 @@ export function createGamePage(): HTMLElement {
 	window.addEventListener('languageChanged', renderContent);
 
 	page.addEventListener("click", (e) => {
-		/*
-		Cette fonction est appelée quand l'utilisateur clique sur un bouton.
-		Elle trouve la route ciblée et navigue vers elle.
-		*/
 		const target = e.target as HTMLElement;
 		const route = target.getAttribute("data-route");
 		if (route) {
-			// Nettoyer le jeu en cours avant de naviguer
 			cleanupCurrentGame();
 			
 			import("../router/router.js").then(({ router }) => {
@@ -294,40 +436,30 @@ export function createGamePage(): HTMLElement {
 		}
 	});
 
-	/**
-	 * Fonction pour nettoyer proprement le jeu en cours
-	 * Cette fonction s'assure que toutes les ressources sont libérées
-	 */
+
 	function cleanupCurrentGame(): void
     {
 		if (currentGame)
         {
 			console.log('Nettoyage du jeu en cours...');
 			
-			//Vérifier si la méthode cleanup existe et l'appeler
 			if (typeof currentGame.cleanup === 'function') {
 				currentGame.cleanup();
 			}
 			
-			//Vérifier si la méthode back_to_menu existe et l'appeler
 			if (typeof currentGame.back_to_menu === 'function') {
 				currentGame.back_to_menu();
 			}
 			
-			//Vérifier si la méthode destroy existe et l'appeler
 			if (typeof currentGame.destroy === 'function') {
 				currentGame.destroy();
 			}
-			
-			//Réinitialiser la référence
+
 			currentGame = null;
 		}
 	}
 
-	/**
-	 * Fonction pour réinitialiser l'interface utilisateur
-	 * Cette fonction remet tous les éléments dans leur état initial
-	 */
+	// reinitialiser l'interface
 	function resetUIState(): void
 	{
 		const menu = page.querySelector("#menu") as HTMLElement;
@@ -342,9 +474,15 @@ export function createGamePage(): HTMLElement {
 		const controlPlayer2Command = page.querySelector("#control_player_2_command") as HTMLElement;
 		const controlPlayer1 = page.querySelector("#control_player_1") as HTMLElement;
 		const controlPlayer1Command = page.querySelector("#control_player_1_command") as HTMLElement;
+		const multiError = page.querySelector("#multiError") as HTMLElement;
+
+		// reinitialiser page 1v1
+		// si remote il y a
 
 		//reinitialiser la page tournoi
 		resetTournoiInterface();
+
+		multiError.classList.add('hidden');
 		
 		// Cacher tous les menus sauf le menu principal
 		menuLocal.style.display = "none";
@@ -358,7 +496,6 @@ export function createGamePage(): HTMLElement {
 		control1.style.display = "none";
 		control2.style.display = "none";
 		
-		// Remettre les textes par défaut
 		if (controlPlayer2) {
 			controlPlayer2.textContent = 'Joueur 2';
 		}
@@ -394,7 +531,8 @@ export function createGamePage(): HTMLElement {
 		tournoiMess.innerText = '';
 	}
 
-	function initializeGameLogic() {
+	function initializeGameLogic()
+	{
 		const menu = page.querySelector("#menu") as HTMLElement;
 		const localBtn = page.querySelector('#localBtn') as HTMLButtonElement;
 		const ligneBtn = page.querySelector('#ligneBtn') as HTMLButtonElement;
@@ -430,31 +568,37 @@ export function createGamePage(): HTMLElement {
 		const tournoiInputs = page.querySelectorAll('#menu_tournoi input') as NodeListOf<HTMLInputElement>;
 		let startTournoiBtn = page.querySelector('#startTournoi') as HTMLButtonElement | HTMLElement;
 
+		let multiError = page.querySelector("#multiError") as HTMLElement;
+
+		let menu1v1 = page.querySelector("#menu1v1") as HTMLElement;
+		let start1v1 = page.querySelector("#start1v1") as HTMLButtonElement;
+		let error1v1 = page.querySelector("#error1v1") as HTMLElement;
+
 		
-		/**
-		 * Fonction pour choisir le mode de jeu (local ou ligne)
-		 */
-		function chooseMode(mode: 'local' | 'ligne'): void {
-			// Nettoyer le jeu en cours avant de changer de mode
+		function chooseMode(mode: 'local' | 'ligne'): void
+		{
 			cleanupCurrentGame();
 			
 			menu.style.display = "none";
-			if (mode === 'local') {
+			if (mode === 'local')
+			{
 				menuLocal.style.display = "block";
-			} else {
+				multiError.classList.add('hidden');
+			}
+			else
+			{
+				// if (client pas connecte) // if client pas connecte
+				// {
+				// 	multiError.classList.remove('hidden');
+				// }
+				multiError.classList.add('hidden');
 				menuLigne.style.display = "block";
 			}
 		}
 		
-		/**
-		 * Fonction pour retourner au menu principal
-		 * Cette fonction nettoie le jeu et remet l'interface dans son état initial
-		 */
-		function backToMainMenu(): void {
-			// Nettoyer le jeu en cours
+		function backToMainMenu(): void
+		{
 			cleanupCurrentGame();
-			
-			// Réinitialiser l'interface utilisateur
 			resetUIState();
 		}
 
@@ -467,8 +611,6 @@ export function createGamePage(): HTMLElement {
 			menuTournoi.style.display = "block";
 
 			const errorText = page.querySelector('#tournoiError') as HTMLElement;
-
-			// Laisse le bouton visible par défaut
 			startTournoiMatchmakingBtn.style.display = 'inline-block';
 
 			startTournoiMatchmakingBtn.addEventListener('click', () =>
@@ -480,15 +622,8 @@ export function createGamePage(): HTMLElement {
 				if (allFilled && allUnique) {
 					errorText.classList.add("hidden");
 
-					// Lancer le matchmaking ou les matchs ici
-					//console.log("Match 1 :", names[0], "vs", names[2]);
-					//console.log("Match 2 :", names[1], "vs", names[3]);
-					// TODO : startMatch(names[0], names[2]) etc.
-
 					startTournoiMatchmakingBtn.style.display = 'none';
-					//startTournoiBtn.style.display = 'block';
 					let random1 = random_number(0, 1);
-					//let random2 = randomMatchmaking();
 
 					function random_number(min: number, max: number): number
 					{
@@ -548,84 +683,75 @@ export function createGamePage(): HTMLElement {
 				startMatch1();
 			});
 
-			function startMatch1() {
+			function startMatch1()
+			{
 				cleanupCurrentGame();
-
-				// Créer une nouvelle instance du jeu
 				currentGame = new Game_tournoi(player_a, player_b, 0);
 
-				// Changer l'affichage
 				hideMenus();
 				showGameInterface(player_a, player_b);
 
 				currentGame.start_game_loop();
 
-				// Attendre la fin du match 1
 				waitForMatchEnd((winner) => {
 					finaliste_1 = winner;
 					showNextMatchButton(() => startMatch2());
 				});
 			}
 
-			function startMatch2() {
+			function startMatch2()
+			{
 				hideButton(nextMatchBtn);
 				cleanupCurrentGame();
-
-				// Créer une nouvelle instance du jeu
 				currentGame = new Game_tournoi(player_c, player_d, 0);
 
-				// Changer l'affichage
 				hideMenus();
 				showGameInterface(player_c, player_d);
 
 				currentGame.start_game_loop();
 
-				// Attendre la fin du match 2
 				waitForMatchEnd((winner) => {
 					finaliste_2 = winner;
 					showFinalMatchButton(() => startFinal());
 				});
 			}
 
-			function startFinal() {
+			function startFinal()
+			{
 				console.log("la FINAAALE");
 				hideButton(finalMatchBtn);
 				cleanupCurrentGame();
 
-				// Créer une nouvelle instance du jeu
 				currentGame = new Game_tournoi(finaliste_1, finaliste_2, 1);
 
-				// Changer l'affichage
 				hideMenus();
 				showGameInterface(finaliste_1, finaliste_2);
-
 				currentGame.start_game_loop();
 
-				// Attendre la fin de la finale
 				waitForMatchEnd((winner) => {
 					// Le tournoi est terminé, afficher le bouton retour menu
 					backToMenuBtn.style.display = "block";
 				});
 			}
 
-			// Fonction utilitaire pour attendre la fin d'un match
-			function waitForMatchEnd(callback: (winner: string) => void) {
+			function waitForMatchEnd(callback: (winner: string) => void)
+			{
 				const interval = setInterval(() => {
 					const result = currentGame.check_end_game();
 					if (result === 1) {
 						clearInterval(interval);
-						const winner = currentGame.getPlayer1Name(); // Supposé que cette méthode existe
+						const winner = currentGame.getPlayer1Name(); // existe que pour game_tournoi
 						callback(winner);
 					} else if (result === 2) {
 						clearInterval(interval);
-						const winner = currentGame.getPlayer2Name(); // Supposé que cette méthode existe
+						const winner = currentGame.getPlayer2Name(); // existe que pour game_tournoi
 						callback(winner);
 					}
-				}, 1000); // Réduit à 1 seconde pour plus de réactivité
+				}, 1000);
 			}
 
-			// Fonction utilitaire pour cacher les menus
-			function hideMenus() {
+			function hideMenus()
+			{
 				menuLocal.style.display = "none";
 				menuLigne.style.display = "none";
 				menuTournoi.style.display = "none";
@@ -633,8 +759,8 @@ export function createGamePage(): HTMLElement {
 				backToMenuBtn.style.display = "none";
 			}
 
-			// Fonction utilitaire pour afficher l'interface de jeu
-			function showGameInterface(player1: string, player2: string) {
+			function showGameInterface(player1: string, player2: string)
+			{
 				controlPlayer1.textContent = player1;
 				scorep1.textContent = `${player1} : 0`;
 				controlPlayer1Command.textContent = 'W / S';
@@ -646,8 +772,8 @@ export function createGamePage(): HTMLElement {
 				control1.style.display = 'block';
 			}
 
-			// Fonction utilitaire pour afficher le bouton "Next Match"
-			function showNextMatchButton(callback: () => void) {
+			function showNextMatchButton(callback: () => void)
+			{
 				// Nettoyer l'ancien event listener
 				const newNextBtn = nextMatchBtn.cloneNode(true) as HTMLElement;
 				nextMatchBtn.parentNode?.replaceChild(newNextBtn, nextMatchBtn);
@@ -657,8 +783,8 @@ export function createGamePage(): HTMLElement {
 				nextMatchBtn.addEventListener('click', callback);
 			}
 
-			// Fonction utilitaire pour afficher le bouton "Final Match"
-			function showFinalMatchButton(callback: () => void) {
+			function showFinalMatchButton(callback: () => void)
+			{
 				console.log("bouton final");
 				// Nettoyer l'ancien event listener
 				const newFinalBtn = finalMatchBtn.cloneNode(true) as HTMLElement;
@@ -669,23 +795,16 @@ export function createGamePage(): HTMLElement {
 				finalMatchBtn.addEventListener('click', callback);
 			}
 
-			// Fonction utilitaire pour cacher un bouton
 			function hideButton(button: HTMLElement) {
 				button.style.display = 'none';
 			}
 		}
 		
-		/**
-		 * Fonction pour démarrer un jeu solo ou versus
-		 */
-		function startGameSolo(mode: 'solo' | 'versus'): void {
-			// Nettoyer le jeu précédent s'il existe
+		function startGameSolo(mode: 'solo' | 'versus'): void
+		{
 			cleanupCurrentGame();
-			
-			// Créer une nouvelle instance du jeu
 			currentGame = new Game_solo(mode);
 			
-			// Changer l'affichage
 			menuLocal.style.display = "none";
 			menuLigne.style.display = "none";
 			game.style.display = "block";
@@ -706,77 +825,48 @@ export function createGamePage(): HTMLElement {
 			
 			control1.style.display = 'block';
 			
-			//Configurer le bouton restart
 			restart.onclick = () =>
             {
 				if (currentGame)
                 {
-					// Nettoyer le jeu actuel
 					cleanupCurrentGame();
-					
-					// Créer une nouvelle instance
 					currentGame = new Game_solo(mode);
 					currentGame.start_game_loop();
                 }
 			};
-			
-			// Démarrer le jeu
 			currentGame.start_game_loop();
 		}
 		
-		/**
-		 * Fonction pour démarrer un jeu multijoueur
-		 */
-		function startGameMulti(): void {
-			// Nettoyer le jeu précédent s'il existe
+		// 2v2 EN LOCAL
+		function startGame2v2Local(): void
+		{
 			cleanupCurrentGame();
-			
-			// Créer une nouvelle instance du jeu
 			currentGame = new Game_ligne();
 			
-			// Changer l'affichage
-			menuLigne.style.display = "none";
-			game.style.display = "block";
-			
-			control2.style.display = 'block';
-			
-			// Démarrer le jeu
-			currentGame.start_game_loop();
-		}
-		
-		/**
-		 * Fonction pour démarrer un jeu solo en ligne
-		 */
-		function startGameLigneSolo(): void {
-			// Nettoyer le jeu précédent s'il existe
-			cleanupCurrentGame();
-			
-			// Créer une nouvelle instance du jeu
-			currentGame = new Game_solo('solo');
-			
-			// Changer l'affichage
 			menuLocal.style.display = "none";
 			menuLigne.style.display = "none";
 			game.style.display = "block";
-			restart.style.display = "block";
+			control2.style.display = 'block';
 			
-			// Configurer le bouton restart
-			restart.onclick = () => {
-				if (currentGame) {
-					// Nettoyer le jeu actuel
-					cleanupCurrentGame();
-					
-					// Créer une nouvelle instance
-					currentGame = new Game_solo('solo');
-					currentGame.start_game_loop();
-				}
-			};
-			
-			// Démarrer le jeu
 			currentGame.start_game_loop();
 		}
 		
-		// Event listeners pour la navigation
+		// REMOTE 1v1 (a voir apres)
+		function startGameLigneSolo(): void
+		{
+			//cleanupCurrentGame();
+			
+			// Créer une nouvelle instance du jeu
+			//currentGame = new Game_solo(mode);
+			
+			menuLocal.style.display = "none";
+			menuLigne.style.display = "none";
+			game.style.display = "none";
+			menu1v1.style.display = "block";
+			
+			//currentGame.start_game_loop();
+		}
+		
 		localBtn.addEventListener('click', () => chooseMode('local'));
 		ligneBtn.addEventListener('click', () => chooseMode('ligne'));
 		
@@ -784,39 +874,18 @@ export function createGamePage(): HTMLElement {
 		backToMainBtn2.addEventListener('click', () => backToMainMenu());
         backToMainBtn3.addEventListener('click', () => backToMainMenu());
 		
-		// Event listener pour le bouton "Retour au menu" pendant le jeu
 		backToMenuBtn.addEventListener('click', () => backToMainMenu());
 		
-		// Event listeners pour démarrer les jeux
 		soloBtn.addEventListener('click', () => startGameSolo('solo'));
 		versusBtn.addEventListener('click', () => startGameSolo('versus'));
 		
 		soloLigneBtn.addEventListener('click', () => startGameLigneSolo());
-		multiBtn.addEventListener('click', () => startGameMulti());
+		multiBtn.addEventListener('click', () => startGame2v2Local());
 
         tournoiBtn.addEventListener('click', () => startTournoi());
-        // startTournoiBtn.addEventListener('click', () => {
-        // // Récupère les noms entrés
-        // const inputs = page.querySelectorAll('#menu_tournoi input');
-        // const playerNames: string[] = [];
-
-        // inputs.forEach((input) => {
-        //     const name = (input as HTMLInputElement).value.trim();
-        //     playerNames.push(name || "Joueur inconnu");
-        // });
-
-        // // Affiche les matchs prévus
-        // console.log("Match 1 :", playerNames[0], "vs", playerNames[2]);
-        // console.log("Match 2 :", playerNames[1], "vs", playerNames[3]);
-
-        // // TODO : ici, tu peux démarrer le match 1 dans une nouvelle fonction ou page.
-        // // Exemple : startMatch(playerNames[0], playerNames[2]);
-
-        // });
 
 	}
 
-	// Nettoyer le jeu quand la page est détruite
 	window.addEventListener('beforeunload', () => {
 		cleanupCurrentGame();
 	});

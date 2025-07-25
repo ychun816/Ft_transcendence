@@ -196,6 +196,7 @@ class Pong
     private fixed_timestep: number = 16.67;
     private last_frame_time: number = 0;
     private data: data_score;
+    private player_name: string | null;
 
 
     constructor(canvas : HTMLCanvasElement, mode: 'solo' | 'versus')
@@ -206,6 +207,15 @@ class Pong
         this.count_down = document.getElementById("countdowndisplay") as HTMLDivElement;
         this.animation_id = 0;
         this.end_message = document.getElementById('endMessage');
+        const token = sessionStorage.getItem("authToken");
+        if (token)
+        {
+            const userId = sessionStorage.getItem("username");
+            this.player_name =  userId;
+        }
+        else
+            this.player_name = "Joueur 1";
+        
 
         this.config =
         {
@@ -1073,7 +1083,7 @@ class Pong
         }
 
         if (score_P1)
-            score_P1.textContent = `Joueur 1 : ${this.state.left_score}`;
+            score_P1.textContent = `${this.player_name} : ${this.state.left_score}`;
         if (score_P2)
             score_P2.textContent = `Joueur 2 : ${this.state.right_score}`;
     }
