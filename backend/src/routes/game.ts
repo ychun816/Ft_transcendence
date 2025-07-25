@@ -49,10 +49,6 @@ export async function registerGameRoute(
 			}
 
 			console.log("GAME DATA : ", gameData);
-			if (!gameData.player1Id) {
-				reply.status(400).send({ error: "Player IDs are required" });
-				return;
-			}
 			console.log("PLAYER ID1 CHECK OK");
 			if (!gameData.player1Id) {
 				return reply.status(400).send({ error: "Player1 ID is required" });
@@ -85,11 +81,11 @@ export async function registerGameRoute(
 				data: {
 					players: gameData.players,
 					player1Id: gameData.player1Id,
-					player1: { connect: { id: gameData.player1Id } },
+					//player1: { connect: { id: gameData.player1Id } },
 
 					...(gameData.player2Id && user2 && {
 						player2Id: gameData.player2Id,
-						player2: { connect: { id: gameData.player2Id } }
+						//player2: { connect: { id: gameData.player2Id } }
 					}),
 
 					score1: gameData.score1,
@@ -106,24 +102,30 @@ export async function registerGameRoute(
 			});
 
 			console.log("GAME CREATED:", game);
-			await Promise.all([
-				prisma.user.update({
+			await prisma.user.update({
 					where: { id: gameData.player1Id },
 					data: {
 						gamesPlayed: { increment: 1 },
+						...(gameData.player1Id === gameData.winnerId
+							? { wins: { increment: 1 } }
+							: { losses: { increment: 1 } }
+						),
 						matchesAsPlayer1: { connect: { id: game.id } }
 					}
-				}),
-				if (gameData.player2Id){
-					prisma.user.update({
-						where: { id: gameData.player2Id },
-						data: {
-							gamesPlayed: { increment: 1 },
-							matchesAsPlayer2: { connect: { id: game.id } }
-						}
-					});
-				}
-			]);
+				});
+			if (gameData.player2Id){
+				await prisma.user.update({
+					where: { id: gameData.player2Id },
+					data: {
+						gamesPlayed: { increment: 1 },
+						...(gameData.player1Id === gameData.winnerId
+							? { wins: { increment: 1 } }
+							: { losses: { increment: 1 } }
+						),
+						matchesAsPlayer2: { connect: { id: game.id } }
+					}
+				});
+			}
 			reply.send({
 				success: true,
 				gameId: game.id,
