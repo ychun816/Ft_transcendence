@@ -49,24 +49,24 @@ export async function registerGameRoute(
 			}
 
 			console.log("GAME DATA : ", gameData);
-			if (!gameData.player1Id || !gameData.player2Id) {
+			if (!gameData.player1Id) {
 				reply.status(400).send({ error: "Player IDs are required" });
 				return;
 			}
-
+			console.log("PLAYER ID1 CHECK OK");
 			if (!gameData.player1Id) {
 				return reply.status(400).send({ error: "Player1 ID is required" });
 			}
 
-			// Vérification du player1
+			console.log("PLAYER ID1 CHECK OK");
 			const user1 = await findUser(prisma, gameData.player1Id);
 			if (!user1) {
 				return reply.status(400).send({
 					error: `Player 1 (ID: ${gameData.player1Id}) doesn't exist`
 				});
 			}
+			console.log("USER1 FOUND IN PRISMA");
 
-			// Vérification conditionnelle du player2
 			let user2 = null;
 			if (gameData.player2Id) {
 				user2 = await findUser(prisma, gameData.player2Id);
@@ -78,8 +78,8 @@ export async function registerGameRoute(
 			}
 
 			console.log("USER1 : ", user1);
-			console.log("USER2 : ", user2);
-
+			//console.log("USER2 : ", user2);
+			console.log("PRISMA CREATE MATCH");
 			// Création du match avec les corrections ci-dessus
 			const game = await prisma.match.create({
 				data: {
@@ -114,13 +114,15 @@ export async function registerGameRoute(
 						matchesAsPlayer1: { connect: { id: game.id } }
 					}
 				}),
-				prisma.user.update({
-					where: { id: gameData.player2Id },
-					data: {
-						gamesPlayed: { increment: 1 },
-						matchesAsPlayer2: { connect: { id: game.id } }
-					}
-				})
+				if (gameData.player2Id){
+					prisma.user.update({
+						where: { id: gameData.player2Id },
+						data: {
+							gamesPlayed: { increment: 1 },
+							matchesAsPlayer2: { connect: { id: game.id } }
+						}
+					});
+				}
 			]);
 			reply.send({
 				success: true,
