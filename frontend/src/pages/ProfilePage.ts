@@ -1,96 +1,139 @@
 import { i18n } from "../services/i18n.js";
 import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
 import { createLogoutSwitcher } from "../components/logoutSwitcher.js";
-import { createNeonContainer } from "../styles/neonTheme.js";
+import { classes } from "../styles/retroStyles.js";
 
 export function createProfilePage(): HTMLElement {
 	const page = document.createElement("div");
 	page.className = "min-h-screen bg-gray-900 text-white font-mono overflow-hidden";
 
-
 	const render = () => {
-		const content = `
-			<div class="min-h-screen flex items-center justify-center p-4 scan-lines relative">
+		page.innerHTML = `
+			<style>
+				/* Import de la police Orbitron pour le thème rétro */
+				@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 
-			<!-- Conteneur principal avec disposition côte à côte - centré -->
-			<div class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-8 border border-blue-400 border-opacity-30 neon-border flex gap-10 items-start" style="height: 80vh; max-width: 1300px; width: 95%;">
-				<!-- Colonne de gauche : Profile + Friends - largeur fixe (moitié du match history) -->
-				<div class="flex flex-col gap-6 h-full" style="width: 800px;">
-					<!-- Bloc Profile Principal -->
-					<div class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-6 border border-cyan-400 border-opacity-30 neon-border w-full flex flex-col items-center flex-shrink-0">
-						<header class="w-full mb-6">
-							<button class="bg-gradient-to-r from-gray-500 from-opacity-30 to-gray-600 to-opacity-30 hover:from-gray-500 hover:from-opacity-50 hover:to-gray-600 hover:to-opacity-50 text-white font-bold py-2 px-4 rounded-lg border border-gray-500 border-opacity-50 transition-all duration-300 transform hover:scale-105" data-route="/home">${i18n.t('profile.back')}</button>
-							<h2 class="text-3xl font-bold text-cyan-400 neon-text text-center mt-4">${i18n.t('profile.my_profile')}</h2>
-						</header>
-						<main class="w-full flex flex-col items-center">
-							<div class="flex items-center gap-8 mb-8">
-								<div class="relative w-32 h-32 rounded-full border-4 border-cyan-400 border-opacity-50 neon-border overflow-hidden">
-									<img src="/default-avatar.png" id="user-avatar" class="w-full h-full object-cover">
-									<button id="edit-avatar" title="${i18n.t('profile.edit_avatar')}" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-cyan-400 bg-opacity-20 hover:bg-opacity-40 text-cyan-400 rounded-full p-2 transition-all duration-300">
-										<img src="../assets/edit.svg" alt="Edit" style="width:20px; height:20px;">
-									</button>
-									<input type="file" id="avatar-file-input" accept="image/png, image/jpeg" style="display:none;" />
-								</div>
-								<div class="flex-1">
-									<div class="flex items-center gap-3 mb-3">
-										<h3 id="username" class="text-2xl font-bold text-cyan-400 neon-text">Username</h3>
-										<button id="edit-username" title="${i18n.t('profile.edit_username')}" class="bg-gradient-to-r from-cyan-400 from-opacity-20 to-blue-400 to-opacity-20 hover:from-cyan-400 hover:from-opacity-40 hover:to-blue-400 hover:to-opacity-40 text-cyan-400 font-bold py-1 px-2 rounded-lg border border-cyan-400 border-opacity-50 transition-all duration-300 transform hover:scale-105">
-											<img src="../assets/edit.svg" alt="Edit" style="width:16px; height:16px;">
+				* {
+					font-family: 'Orbitron', monospace;
+				}
+			</style>
+
+			<!-- Conteneur principal avec effet scan -->
+			<div class="min-h-screen flex items-center justify-center p-4 ${classes.scanLinesContainer}">
+
+				<!-- Conteneur principal avec disposition côte à côte - centré -->
+				<div class="${classes.retroPanel} rounded-2xl p-8 flex gap-10 items-start" style="height: 80vh; max-width: 1300px; width: 95%;">
+
+					<!-- Colonne de gauche : Profile + Friends -->
+					<div class="flex flex-col gap-6 h-full" style="width: 600px;">
+
+						<!-- Bloc Profile Principal -->
+						<div class="${classes.retroPanel} rounded-2xl p-6 w-full flex flex-col items-center flex-shrink-0">
+							<header class="w-full mb-6">
+								<button class="${classes.backButton}" data-route="/home">
+									${i18n.t('profile.back')}
+								</button>
+								<h2 class="${classes.sectionTitle} mt-4">
+									${i18n.t('profile.my_profile')}
+								</h2>
+							</header>
+
+							<main class="w-full flex flex-col items-center">
+								<div class="flex items-center gap-8 mb-8">
+									<!-- Avatar avec bordure néon -->
+									<div class="relative w-32 h-32 rounded-full ${classes.neonBorder} overflow-hidden">
+										<img src="/default-avatar.png" id="user-avatar" class="w-full h-full object-cover">
+										<button id="edit-avatar" title="${i18n.t('profile.edit_avatar')}"
+											class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
+											bg-purple-400 bg-opacity-20 hover:bg-opacity-40 text-purple-400 rounded-full p-2
+											transition-all duration-300 border border-purple-400 border-opacity-50">
+											<img src="../assets/edit.svg" alt="Edit" class="w-5 h-5">
 										</button>
+										<input type="file" id="avatar-file-input" accept="image/png, image/jpeg" class="hidden" />
 									</div>
-									<div class="flex items-center gap-3 mb-3">
-										<span id="password" class="text-gray-300">${i18n.t('profile.password_display')}</span>
-										<button id="edit-password" title="${i18n.t('profile.edit_password')}" class="bg-gradient-to-r from-cyan-400 from-opacity-20 to-blue-400 to-opacity-20 hover:from-cyan-400 hover:from-opacity-40 hover:to-blue-400 hover:to-opacity-40 text-cyan-400 font-bold py-1 px-2 rounded-lg border border-cyan-400 border-opacity-50 transition-all duration-300 transform hover:scale-105">
-											<img src="../assets/edit.svg" alt="Edit" style="width:16px; height:16px;">
-										</button>
-									</div>
-									<div class="bg-gray-700 bg-opacity-50 p-4 rounded-xl border border-blue-400 border-opacity-30">
-										<p id="user-stats" class="text-blue-400 text-sm">${i18n.t('profile.games_played_stats', {games: '0', wins: '0', losses: '0'})}</p>
+
+									<!-- Informations utilisateur -->
+									<div class="flex-1">
+										<div class="flex items-center gap-3 mb-3">
+											<h3 id="username" class="text-2xl font-bold ${classes.neonText}">Username</h3>
+											<button id="edit-username" title="${i18n.t('profile.edit_username')}"
+												class="bg-purple-400 bg-opacity-20 hover:bg-opacity-40 text-purple-400 font-bold
+												py-1 px-2 rounded-lg border border-purple-400 border-opacity-50 transition-all duration-300
+												transform hover:scale-105">
+												<img src="../assets/edit.svg" alt="Edit" class="w-4 h-4">
+											</button>
+										</div>
+
+										<div class="flex items-center gap-3 mb-3">
+											<span id="password" class="text-gray-300">${i18n.t('profile.password_display')}</span>
+											<button id="edit-password" title="${i18n.t('profile.edit_password')}"
+												class="bg-purple-400 bg-opacity-20 hover:bg-opacity-40 text-purple-400 font-bold
+												py-1 px-2 rounded-lg border border-purple-400 border-opacity-50 transition-all duration-300
+												transform hover:scale-105">
+												<img src="../assets/edit.svg" alt="Edit" class="w-4 h-4">
+											</button>
+										</div>
+
+										<!-- Stats avec panneau rétro -->
+										<div class="${classes.retroPanel} rounded-xl p-4">
+											<p id="user-stats" class="text-purple-300 text-sm font-bold">
+												${i18n.t('profile.games_played_stats', {games: '0', wins: '0', losses: '0'})}
+											</p>
+										</div>
 									</div>
 								</div>
-							</div>
-						</main>
+							</main>
+						</div>
+
+						<!-- Bloc Friends List -->
+						<div id="friends-block" class="${classes.retroPanel} rounded-2xl p-6 w-full flex flex-col flex-1">
+							<header class="w-full flex-shrink-0 mb-4 flex items-center justify-between">
+								<h2 class="text-2xl font-bold text-green-400 drop-shadow-sm animate-pulse">
+									${i18n.t('profile.friends_list')}
+								</h2>
+								<!-- Le bouton (+) sera ajouté ici par JS -->
+							</header>
+
+							<main class="w-full flex-1 overflow-y-auto">
+								<!-- Le contenu de la liste d'amis sera ajouté ici -->
+							</main>
+						</div>
 					</div>
 
-					<!-- Bloc Friends List - occupe le reste de l'espace -->
-					<div id="friends-block" class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-6 border border-green-400 border-opacity-30 neon-border w-full flex flex-col flex-1">
-						<header class="w-full flex-shrink-0 mb-4 flex items-center justify-between">
-							<h2 class="text-2xl font-bold text-green-400 neon-text">${i18n.t('profile.friends_list')}</h2>
-							<!-- Le bouton (+) sera ajouté ici par JS -->
-						</header>
-						<main class="w-full flex-1 overflow-y-auto">
-							<!-- Le contenu de la liste d'amis sera ajouté ici -->
-							<!-- Plus d'amis peuvent être ajoutés ici -->
-						</main>
-					</div>
-				</div>
+					<!-- Colonne de droite : Match History + Dashboard -->
+					<div class="flex flex-col gap-6 h-full" style="width: 600px;">
 
-				<!-- Colonne de droite : Match History - largeur fixe -->
-				<div class="flex flex-col gap-6 h-full" style="width: 800px;">
-					<div id="match-block" class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-6 border border-purple-400 border-opacity-30 neon-border w-full flex flex-col h-full">
-						<header class="w-full mb-4">
-							<h2 class="text-2xl font-bold text-purple-400 neon-text">${i18n.t('profile.match_history')}</h2>
-						</header>
-						<main class="w-full flex-1 overflow-y-auto">
-							<!-- Le contenu de l'historique des matchs sera ajouté ici -->
-						</main>
-					</div>
-					<div id="dashboard" class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-6 border border-purple-400 border-opacity-30 neon-border w-full flex flex-col h-full">
-						<header class="w-full mb-4">
-							<h2 class="text-2xl font-bold text-purple-400 neon-text">${i18n.t('profile.dashboard')}</h2>
-						</header>
-						<main class="w-full flex-1 overflow-y-auto">
-							<!-- Le contenu de l'historique des matchs sera ajouté ici -->
-						</main>
+						<!-- Match History -->
+						<div id="match-block" class="${classes.retroPanel} rounded-2xl p-6 w-full flex flex-col" style="height: 50%;">
+							<header class="w-full mb-4">
+								<h2 class="text-2xl font-bold text-purple-400 ${classes.neonText}">
+									${i18n.t('profile.match_history')}
+								</h2>
+							</header>
+							<main class="w-full flex-1 overflow-y-auto">
+								<!-- Le contenu de l'historique des matchs sera ajouté ici -->
+							</main>
+						</div>
+
+						<!-- Dashboard -->
+						<div id="dashboard" class="${classes.retroPanel} rounded-2xl p-6 w-full flex flex-col" style="height: 50%;">
+							<header class="w-full mb-4">
+								<h2 class="text-2xl font-bold text-purple-400 ${classes.neonText}">
+									${i18n.t('profile.dashboard')}
+								</h2>
+							</header>
+							<main class="w-full flex-1 overflow-y-auto">
+								<!-- Le contenu du dashboard sera ajouté ici -->
+							</main>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
+
+			<!-- Commutateurs de langue et déconnexion -->
 			<div class="absolute top-4 right-4" id="language-switcher-container"></div>
 			<div class="absolute top-4 left-4" id="logout-container"></div>
 		`;
-
-		page.innerHTML = createNeonContainer(content);
 
 		// Insérer le commutateur de langue
 		const languageSwitcherContainer = page.querySelector('#language-switcher-container');
