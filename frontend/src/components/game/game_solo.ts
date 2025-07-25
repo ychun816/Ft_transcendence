@@ -1,3 +1,4 @@
+import { i18n } from "../../services/i18n.js";
 
 // -------------------------- INTERFACES ------------------------------------
 
@@ -214,8 +215,15 @@ class Pong
             this.player_name =  userId;
         }
         else
-            this.player_name = "Joueur 1";
-        
+        {
+            if (i18n.getCurrentLanguage() == "en")
+                this.player_name = "PLAYER 1";
+            else if (i18n.getCurrentLanguage() == "fr")
+                this.player_name = "JOUEUR 1";
+            else
+                this.player_name = "JUGADOR 1";
+        }
+
 
         this.config =
         {
@@ -338,32 +346,48 @@ class Pong
         this.keys_pressed[e.key] = false;
     };
 
-    start(): void
-    {
-        this.draw(1);
-        //console.log("ca demarre");
-        let countdown = 3;
-        this.count_down.innerText = `Debut de partie dans`;
-        setTimeout(() =>
-        {
-            this.state.count_down_active = true;
+    start(): void {
+        // Vérifier et récupérer l'élément countdown au moment où on en a besoin
+        this.ensureCountdownElement();
 
-            if (!this.count_down)
-            {
-                //console.error("Element countdown non trouve");
+        if (!this.count_down) {
+            //console.error("Impossible de démarrer : élément countdown introuvable");
+            return;
+        }
+
+        this.draw(1);
+        let countdown = 3;
+
+        if (i18n.getCurrentLanguage() == "en")
+            this.count_down.innerText = `The game will start in`;
+        else if (i18n.getCurrentLanguage() == "fr")
+            this.count_down.innerText = `Debut de partie dans`;
+        else
+            this.count_down.innerText = `El partido empieza en`;
+
+        setTimeout(() => {
+            // Vérifier à nouveau avant d'utiliser l'élément
+            if (!this.count_down) {
+                //console.error("Élément countdown perdu pendant le setTimeout");
                 return;
             }
 
+            this.state.count_down_active = true;
             this.count_down.innerText = `${countdown}`;
 
-            let count_down_interval = setInterval(() =>
-            {
+            let count_down_interval = setInterval(() => {
                 countdown--;
 
-                if (countdown > 0)
+                // Vérification à chaque itération
+                if (!this.count_down) {
+                    //console.error("Élément countdown perdu pendant le countdown");
+                    clearInterval(count_down_interval);
+                    return;
+                }
+
+                if (countdown > 0) {
                     this.count_down.innerText = `${countdown}`;
-                else
-                {
+                } else {
                     clearInterval(count_down_interval);
                     this.count_down.innerText = "";
                     this.state.count_down_active = false;
@@ -374,6 +398,55 @@ class Pong
             }, 1000);
         }, 1000);
     }
+
+    // Nouvelle méthode pour s'assurer que l'élément existe
+    private ensureCountdownElement(): void {
+        if (!this.count_down) {
+            //console.log("Récupération de l'élément countdown...");
+            this.count_down = document.getElementById("countdowndisplay") as HTMLDivElement;
+        }
+    }
+
+    // start(): void
+    // {
+    //     this.draw(1);
+    //     //console.log("ca demarre");
+    //     let countdown = 3;
+
+    //     if (i18n.getCurrentLanguage() == "en")
+    //         this.count_down.innerText = `The game will start in`;
+    //     else
+    //         this.count_down.innerText = `Debut de partie dans`;
+    //     setTimeout(() =>
+    //     {
+    //         this.state.count_down_active = true;
+
+    //         if (!this.count_down)
+    //         {
+    //             //console.error("Element countdown non trouve");
+    //             return;
+    //         }
+
+    //         this.count_down.innerText = `${countdown}`;
+
+    //         let count_down_interval = setInterval(() =>
+    //         {
+    //             countdown--;
+
+    //             if (countdown > 0)
+    //                 this.count_down.innerText = `${countdown}`;
+    //             else
+    //             {
+    //                 clearInterval(count_down_interval);
+    //                 this.count_down.innerText = "";
+    //                 this.state.count_down_active = false;
+    //                 this.start_time = performance.now();
+    //                 this.last_frame_time = performance.now();
+    //                 this.game_loop();
+    //             }
+    //         }, 1000);
+    //     }, 1000);
+    // }
 
 
     game_loop(): void
@@ -448,10 +521,23 @@ class Pong
         setTimeout(() =>
         {
             if (this.state.left_score == this.config.score_to_win)
-                message = '🏆 Joueur 1 gagne la partie !';
+            {
+                if (i18n.getCurrentLanguage() == "en")
+                    message = '🏆 Player 1 win the game !';
+                else if (i18n.getCurrentLanguage() == "fr")
+                    message = '🏆 Joueur 1 gagne la partie !';
+                else
+                    message = '🏆 Jugador 1 gana el partido !';
+            }
             else
-                message = '🏆 Joueur 2 gagne la partie !';
-
+            {
+                if (i18n.getCurrentLanguage() == "en")
+                    message = '🏆 Player 2 win the game !';
+                else if (i18n.getCurrentLanguage() == "fr")
+                    message = '🏆 Joueur 2 gagne la partie !';
+                else
+                    message = '🏆 Jugador 2 gana el partido !';
+            }
             if (this.end_message)
             {
                 this.end_message.textContent = message;
@@ -658,7 +744,10 @@ class Pong
         this.config.ball_speed = 4.5 * (3/2);
         this.config.paddle_speed = 8.5 * (3/2);
 
-        this.count_down.innerText = "Nouvelle partie...";
+        if (i18n.getCurrentLanguage() == "en")
+            this.count_down.innerText = "New game...";
+        else
+            this.count_down.innerText = "Nouvelle partie...";
 
         this.restart_timeout = setTimeout(() =>
         {
@@ -718,7 +807,10 @@ class Pong
     start_count_down_for_restart(): void
     {
         let countdown = 3;
-        this.count_down.innerText = `Reprise dans : ${countdown}`;
+        if (i18n.getCurrentLanguage() == "en")
+            this.count_down.innerText = `Start in : ${countdown}`;
+        else
+            this.count_down.innerText = `Reprise dans : ${countdown}`;
         this.state.count_down_active = true;
 
         this.countdown_interval = setInterval(() => {
@@ -732,7 +824,10 @@ class Pong
 
             if (countdown > 0)
             {
-                this.count_down.innerText = `Reprise dans : ${countdown}`;
+                if (i18n.getCurrentLanguage() == "en")
+                    this.count_down.innerText = `Start in : ${countdown}`;
+                else
+                    this.count_down.innerText = `Reprise dans : ${countdown}`;
                 //console.log(`⏰ Countdown : ${countdown}`);
             }
             else
@@ -1085,7 +1180,14 @@ class Pong
         if (score_P1)
             score_P1.textContent = `${this.player_name} : ${this.state.left_score}`;
         if (score_P2)
-            score_P2.textContent = `Joueur 2 : ${this.state.right_score}`;
+        {
+            if (i18n.getCurrentLanguage() == "en")
+                score_P2.textContent = `PLAYER 2 : ${this.state.right_score}`;
+            else if (i18n.getCurrentLanguage() == "fr")
+                score_P2.textContent = `JOUEUR 2 : ${this.state.right_score}`;
+            else
+                score_P2.textContent = `JUGADOR 2 : ${this.state.right_score}`;
+        }
     }
 
     // Fonction start_count_down corrigée (après un but)
@@ -1110,7 +1212,12 @@ class Pong
             }
 
             this.state.count_down_active = true;
-            this.count_down.innerText = `Reprise dans : ${countdown}`;
+            if (i18n.getCurrentLanguage() == "en")
+                this.count_down.innerText = `Start in : ${countdown}`;
+            else if (i18n.getCurrentLanguage() == "fr")
+                this.count_down.innerText = `Reprise dans : ${countdown}`;
+            else
+                this.count_down.innerText = `Empieza en : ${countdown}`;
 
             // Utiliser this.countdown_interval
             this.countdown_interval = setInterval(() => {
@@ -1124,8 +1231,14 @@ class Pong
 
                 if (countdown > 0)
                 {
-                    this.count_down.innerText = `Reprise dans : ${countdown}`;
-                } else
+                    if (i18n.getCurrentLanguage() == "en")
+                        this.count_down.innerText = `Start in : ${countdown}`;
+                    else if (i18n.getCurrentLanguage() == "fr")
+                        this.count_down.innerText = `Reprise dans : ${countdown}`;
+                    else
+                        this.count_down.innerText = `Empieza en : ${countdown}`;
+                }
+                else
                 {
                     clearInterval(this.countdown_interval!);
                     this.countdown_interval = null;
