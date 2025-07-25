@@ -39,7 +39,7 @@ export async function handleLogIn(app: FastifyInstance<any, any, any, any>, pris
 				
 				// Check if 2FA is enabled
 				console.log("before 2fa")
-				if (user.twoFactorEnabled && user.twoFactorSecret) {
+				if (user.isTwoFactorEnabled && user.twoFactorSecret) {
 					if (!twoFactorToken) {
 						return reply.status(200).send({
 							success: false,
@@ -50,7 +50,7 @@ export async function handleLogIn(app: FastifyInstance<any, any, any, any>, pris
 				console.log("after 2fa")
 
 					// Verify 2FA token
-					const { TwoFactorService } = await import('../services/twoFactorService.js');
+					const { TwoFactorService } = await import('../services/TwoFactorService.js');
 					const is2FAValid = TwoFactorService.verifyToken(twoFactorToken, user.twoFactorSecret);
 					
 					if (!is2FAValid) {

@@ -1,9 +1,3 @@
-// bcrypt: To compare hashed passwords.
-// jsonwebtoken (JWT): To issue access tokens after login.
-
-// Fastify route handlers for endpoints like /api/2fa/email/send and /api/2fa/email/verify.
-// These routes should call functions from your twoFactorService.ts.
-
 import { FastifyInstance } from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
@@ -14,7 +8,7 @@ import {
   generateTOTPSecret,
   verifyTOTPCode,
   send2FACodeEmail 
-} from '../services/twoFactorService';
+} from '../services/TwoFactorService';
 
 // Only one exported function for all 2FA routes!
 export async function twoFactorRoutes(fastify: FastifyInstance, prisma: PrismaClient) {
@@ -26,15 +20,12 @@ export async function twoFactorRoutes(fastify: FastifyInstance, prisma: PrismaCl
       const { userId, password } = request.body as { userId: number; password: string };
       const user = await prisma.user.findUnique({ where: { id: userId } });
       if (!user) 
-        // Handle: User not found
         return reply.status(404).send({ error: 'User not found' });
 
       const isValidPassword = await bcrypt.compare(password, user.passwordHash);
       if (!isValidPassword) 
-        // Handle: Password incorrect
         return reply.status(400).send({ error: 'Invalid password' });
 
-      // Disable 2FA and clear all related fields
       await prisma.user.update({
         where: { id: userId },
         data: {
@@ -48,7 +39,6 @@ export async function twoFactorRoutes(fastify: FastifyInstance, prisma: PrismaCl
       });
       return reply.send({ message: '2FA successfully disabled' });
     } catch (error) {
-      // Handle: Unexpected server error
       console.error('2FA disable error:', error);
       return reply.status(500).send({ error: 'Internal server error' });
     }
@@ -67,51 +57,41 @@ export async function twoFactorRoutes(fastify: FastifyInstance, prisma: PrismaCl
 
       const user = await prisma.user.findUnique({ where: { username } });
       if (!user) 
-        // Handle: User not found
         return reply.status(400).send({ error: 'Invalid credentials' });
 
       const isValidPassword = await bcrypt.compare(password, user.passwordHash);
       if (!isValidPassword) 
-        // Handle: Password incorrect
         return reply.status(400).send({ error: 'Invalid credentials' });
 
-      // If 2FA is enabled, validate the code
       if (user.isTwoFactorEnabled) {
         if (user.twoFactorType === 'email') {
           if (!user.twoFactorCode || !user.twoFactorCodeExpires) 
-            // Handle: No code generated/requested
             return reply.status(400).send({ error: '2FA code not requested' });
 
           const now = new Date();
           if (user.twoFactorCode !== twoFactorCode || user.twoFactorCodeExpires < now) 
-            // Handle: Code mismatch or expired
             return reply.status(400).send({ error: 'Invalid or expired 2FA code' });
 
-          // Clear code after successful login
           await prisma.user.update({
             where: { id: user.id },
             data: { twoFactorCode: null, twoFactorCodeExpires: null }
           });
         } else if (user.twoFactorType === 'totp') {
           if (!user.twoFactorSecret) 
-            // Handle: TOTP not set up
             return reply.status(400).send({ error: '2FA secret missing' });
 
           const verified = verifyTOTPCode(user.twoFactorSecret, twoFactorCode);
           if (!verified)
-            // Handle: Invalid TOTP code
             return reply.status(400).send({ error: 'Invalid TOTP code' });
         }
       }
 
-      // Generate JWT token for session
       const token = jwt.sign(
         { userId: user.id, username: user.username },
         process.env.COOKIE_SECRET || 'secret-key',
         { expiresIn: '24h' }
       );
 
-      // Respond with token and user info
       return reply.send({
         token,
         user: {
@@ -124,7 +104,6 @@ export async function twoFactorRoutes(fastify: FastifyInstance, prisma: PrismaCl
         }
       });
     } catch (error) {
-      // Handle: Unexpected server error
       console.error('2FA login error:', error);
       return reply.status(500).send({ error: 'Internal server error' });
     }
@@ -138,11 +117,9 @@ export async function twoFactorRoutes(fastify: FastifyInstance, prisma: PrismaCl
       const { userId } = request.body as { userId: number };
       const user = await prisma.user.findUnique({ where: { id: userId } });
       if (!user)
-        // Handle: User not found
         return reply.status(404).send({ error: 'User not found' });
 
       if (user.twoFactorType === 'email') {
-        // Generate and send email code
         const code = await generateEmailCode();
         const expires = new Date(Date.now() + 5 * 60 * 1000);
         await prisma.user.update({
@@ -152,17 +129,13 @@ export async function twoFactorRoutes(fastify: FastifyInstance, prisma: PrismaCl
         await send2FACodeEmail(user.email, code);
       } else if (user.twoFactorType === 'totp') {
         if (!user.twoFactorSecret)
-          // Handle: TOTP not set up
           return reply.status(400).send({ error: '2FA secret missing' });
-        // For TOTP, just confirm secret exists
         return reply.send({ message: 'TOTP is enabled. Use your authenticator app.' });
       } else {
-        // Handle: 2FA type not set
         return reply.status(400).send({ error: '2FA type not set' });
       }
       return reply.send({ message: '2FA code sent to your email.' });
     } catch (error) {
-      // Handle: Unexpected server error
       console.error('2FA send error:', error);
       return reply.status(500).send({ error: 'Internal server error' });
     }
@@ -177,15 +150,12 @@ export async function twoFactorRoutes(fastify: FastifyInstance, prisma: PrismaCl
       const user = await prisma.user.findUnique({ where: { id: userId } });
 
       if (!user || !user.twoFactorCode || !user.twoFactorCodeExpires)
-        // Handle: No code generated/requested
         return reply.status(400).send({ error: '2FA not requested or expired' });
 
       const now = new Date();
       if (user.twoFactorCode !== code || user.twoFactorCodeExpires < now)
-        // Handle: Code mismatch or expired
         return reply.status(400).send({ error: 'Invalid or expired code' });
 
-      // Enable 2FA and clear stored code
       await prisma.user.update({
         where: { id: userId },
         data: {
@@ -198,7 +168,6 @@ export async function twoFactorRoutes(fastify: FastifyInstance, prisma: PrismaCl
       });
       return reply.send({ message: '2FA enabled successfully (email)' });
     } catch (error) {
-      // Handle: Unexpected server error
       console.error('2FA email verify error:', error);
       return reply.status(500).send({ error: 'Internal server error' });
     }
@@ -212,19 +181,15 @@ export async function twoFactorRoutes(fastify: FastifyInstance, prisma: PrismaCl
       const { userId } = request.body as { userId: number };
       const user = await prisma.user.findUnique({ where: { id: userId } });
       if (!user)
-        // Handle: User not found
         return reply.status(404).send({ error: 'User not found' });
 
-      // Generate a new secret for TOTP
       const secretObj = await generateTOTPSecret(user.username);
       await prisma.user.update({
         where: { id: userId },
         data: { twoFactorSecret: secretObj.base32 }
       });
-      // Respond with the otpauth URL and secret
       return reply.send({ otpauth_url: secretObj.otpauth_url, secret: secretObj.base32 });
     } catch (error) {
-      // Handle: Unexpected server error
       console.error('TOTP setup error:', error);
       return reply.status(500).send({ error: 'Internal server error' });
     }
@@ -238,16 +203,12 @@ export async function twoFactorRoutes(fastify: FastifyInstance, prisma: PrismaCl
       const { userId, code } = request.body as { userId: number; code: string };
       const user = await prisma.user.findUnique({ where: { id: userId } });
       if (!user || !user.twoFactorSecret)
-        // Handle: TOTP not set up
         return reply.status(400).send({ error: 'TOTP not set up' });
 
-      // Verify the TOTP code
       const verified = await verifyTOTPCode(user.twoFactorSecret, code);
       if (!verified)
-        // Handle: Invalid TOTP code
         return reply.status(400).send({ error: 'Invalid TOTP code' });
 
-      // Enable 2FA and set the type to TOTP
       await prisma.user.update({
         where: { id: userId },
         data: {
@@ -258,7 +219,6 @@ export async function twoFactorRoutes(fastify: FastifyInstance, prisma: PrismaCl
       });
       return reply.send({ message: '2FA enabled successfully (TOTP)' });
     } catch (error) {
-      // Handle: Unexpected server error
       console.error('TOTP verify error:', error);
       return reply.status(500).send({ error: 'Internal server error' });
     }
@@ -272,41 +232,33 @@ export async function twoFactorRoutes(fastify: FastifyInstance, prisma: PrismaCl
       const { username, code } = request.body as { username: string; code: string };
       const user = await prisma.user.findUnique({ where: { username } });
       if (!user || !user.isTwoFactorEnabled) {
-        // Handle: User not found or 2FA not enabled
         return reply.status(400).send({ success: false, message: "2FA not enabled" });
       }
 
       if (user.twoFactorType === 'email') {
         if (!user.twoFactorCode || !user.twoFactorCodeExpires) {
-          // Handle: No code generated/requested
           return reply.status(400).send({ success: false, message: "2FA code not requested" });
         }
         const now = new Date();
         if (user.twoFactorCode !== code || user.twoFactorCodeExpires < now) {
-          // Handle: Code mismatch or expired
           return reply.status(400).send({ success: false, message: "Invalid or expired 2FA code" });
         }
-        // Clear code after successful verification
         await prisma.user.update({
           where: { id: user.id },
           data: { twoFactorCode: null, twoFactorCodeExpires: null }
         });
       } else if (user.twoFactorType === 'totp') {
         if (!user.twoFactorSecret) {
-          // Handle: TOTP not set up
           return reply.status(400).send({ success: false, message: "2FA secret missing" });
         }
         const verified = verifyTOTPCode(user.twoFactorSecret, code);
         if (!verified) {
-          // Handle: Invalid TOTP code
           return reply.status(400).send({ success: false, message: "Invalid TOTP code" });
         }
       } else {
-        // Handle: 2FA type not set
         return reply.status(400).send({ success: false, message: "2FA type not set" });
       }
 
-      // Generate JWT token for session
       const token = jwt.sign(
         { id: user.id, username: user.username },
         process.env.COOKIE_SECRET || 'fallback-secret-key',
@@ -326,7 +278,6 @@ export async function twoFactorRoutes(fastify: FastifyInstance, prisma: PrismaCl
         }
       });
     } catch (error) {
-      // Handle: Unexpected server error
       console.error('2FA verify error:', error);
       return reply.status(500).send({ success: false, message: 'Internal server error' });
     }
@@ -343,4 +294,8 @@ export async function twoFactorRoutes(fastify: FastifyInstance, prisma: PrismaCl
 | `POST /api/2fa/totp/setup`   | Setup TOTP for 2FA               |
 | `POST /api/2fa/totp/verify`  | Verify TOTP code and enable 2FA  |
 | `POST /api/2fa/verify`       | 2FA login challenge (frontend)   |
+
+
+If you use request.params in any route, add a similar type assertion:
+const params = request.params as { id: string };
 */
