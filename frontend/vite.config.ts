@@ -31,7 +31,7 @@ export default defineConfig({
 
     proxy: {
       "/api": {
-        target: "http://localhost:3000",
+        target: "https://localhost:3000",
         changeOrigin: true,
         secure: false, // Accepte les certificats auto-signés
       },
@@ -44,7 +44,7 @@ export default defineConfig({
       },
 
       '/metrics': {
-        target: 'http://localhost:3001',
+        target: 'https://localhost:3001',
         changeOrigin: true,
         secure: false,
       }
