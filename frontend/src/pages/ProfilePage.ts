@@ -120,7 +120,7 @@ export function createProfilePage(): HTMLElement {
 
 					const isDevMode = window.location.port === '5173'; // Vite dev server
 					const serverUrl = isDevMode
-						? `https://${window.location.hostname}:3444`
+						? `https://${window.location.hostname}:3443`
 						: window.location.origin;
 
 					const fullAvatarUrl = data.avatarUrl.startsWith('http')
