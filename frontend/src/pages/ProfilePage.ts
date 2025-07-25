@@ -510,7 +510,15 @@ async function displayMatchHistory(page: HTMLDivElement) {
 
 	for (const match of history) {
 		const isPlayer1 = match.player1.username === username;
-		const opponent = isPlayer1 ? match.player2.username : match.player1.username;
+		let opponent;
+		if (match.player2){
+			opponent = match.player2.username;
+		} else if (match.iaMode){
+			opponent = "IA";
+		} else {
+			opponent = "Local";
+		}
+		//const opponent = match.player2.username : match.player1.username;
 		const result = match.winnerId === (isPlayer1 ? match.player1Id : match.player2Id) ? i18n.t('profile.victory') : i18n.t('profile.defeat');
 		const date = new Date(match.playedAt).toLocaleDateString();
 		const statusClass = result === i18n.t('profile.victory') ? "status-victory" : "status-defeat";
