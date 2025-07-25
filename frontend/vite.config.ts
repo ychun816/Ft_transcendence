@@ -22,12 +22,12 @@ export default defineConfig({
 		},
 		proxy: {
 			"/api": {
-				target: "https://localhost:3445",
+				target: "https://localhost:3444",
 				changeOrigin: true,
 				secure: false,
 			},
 			"/ws": {
-				target: "ws://localhost:3445",
+				target: "ws://localhost:3444",
 				ws: true,
 				changeOrigin: true,
 			},

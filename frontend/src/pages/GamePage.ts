@@ -29,10 +29,14 @@ export function createGamePage(): HTMLElement {
 			<div class="absolute top-4 left-4 z-50">
 				<div class="login-dropdown">
 					<button id="loginBtn" class="${classes.backButton}">
-						<span class="relative z-10">LOG-IN</span>
+						<span class="relative z-10">
+						${i18n.t('game.connexion')}
+						</span>
 					</button>
 					<button id="logoutBtn" class="${classes.backButton} text-red-300">
-						<span class="relative z-10">LOG-OUT</span>
+						<span class="relative z-10">
+						${i18n.t('game.deco')}
+						</span>
 					</button>			
 				</div>
 			</div>
@@ -42,7 +46,7 @@ export function createGamePage(): HTMLElement {
 			<div class="absolute top-0 flex flex-col items-center justify-center gap-4 mt-20">
 				<div class="flex gap-4">
 					<button class="${classes.backButton}" id="profilBtn">
-						PROFIL
+						${i18n.t('game.profile')}
 					</button>
 					<button class="${classes.backButton}" id="chatBtn">
 						CHAT
@@ -378,19 +382,19 @@ export function createGamePage(): HTMLElement {
 						</div>
 						<div class="${classes.controlItem}">
 							<p class="text-purple-300 font-semibold">
-							${i18n.t('game.p1')}
+							${i18n.t('game.p2')}
 							</p>
 							<p class="text-sm text-gray-300">J / M</p>
 						</div>
 						<div class="${classes.controlItem}">
 							<p class="text-purple-300 font-semibold">
-							${i18n.t('game.p1')}
+							${i18n.t('game.p3')}
 							</p>
 							<p class="text-sm text-gray-300">9 / 6</p>
 						</div>
 						<div class="${classes.controlItem}">
 							<p class="text-purple-300 font-semibold">
-							${i18n.t('game.p1')}
+							${i18n.t('game.p4')}
 							</p>
 							<p class="text-sm text-gray-300">
 							↑ / ↓
@@ -476,7 +480,6 @@ export function createGamePage(): HTMLElement {
 		const chatBtn = page.querySelector("#chatBtn") as HTMLButtonElement;
 		const profilBtn = page.querySelector("#profilBtn") as HTMLButtonElement;
 		const nameId = page.querySelector("#nameId") as HTMLElement;
-
 
 		// reinitialiser page 1v1
 		reset1v1RemoteInterface();
@@ -737,13 +740,13 @@ export function createGamePage(): HTMLElement {
 			let finaliste_1: string;
 			let finaliste_2: string;
 			const tournoiMess = page.querySelector('#tournoimess') as HTMLElement;
-
-			tournoiMess.innerText = `Le premier match entre ${player_a} et ${player_b} va commencer !`;
 			
-			// if(c'est en ANGLAIIIIIIIIIIIIIIIIIIS)
-			// 	tournoiMess.innerText = `The first match between ${player_a} and ${player_b} is going to start !`;
-			// else
-			// 	tournoiMess.innerText = `Le premier match entre ${player_a} et ${player_b} va commencer !`;
+			if (i18n.getCurrentLanguage() == "en")
+				tournoiMess.innerText = `The first match between ${player_a} and ${player_b} is going to start !`;
+			else if (i18n.getCurrentLanguage() == "fr")
+				tournoiMess.innerText = `Le premier match entre ${player_a} et ${player_b} va commencer !`;
+			else
+				tournoiMess.innerText = `El primer partido entre ${player_a} y ${player_b} va a comenzar !`;
 
 			tournoiMess.classList.remove("hidden");
 
@@ -847,7 +850,7 @@ export function createGamePage(): HTMLElement {
 
 				controlPlayer2.textContent = player2;
 				scorep2.textContent = `${player2} : 0`;
-				controlPlayer2Command.textContent = 'ARROW UP / ARROW DOWN';
+				// controlPlayer2Command.textContent = 'ARROW UP / ARROW DOWN';
 
 				control1.style.display = 'block';
 			}
@@ -894,30 +897,122 @@ export function createGamePage(): HTMLElement {
 			profilBtn.classList.add("hidden");
 			chatBtn.classList.add("hidden");
 			nameId.classList.add("hidden");
-			
+
 			const token = sessionStorage.getItem("authToken");
-			if (token)
+			if (i18n.getCurrentLanguage() == "en")
 			{
-				const userId = sessionStorage.getItem("username");
-				scorep1.textContent = `${userId} : 0`;
+				if (token)
+				{
+					const userId = sessionStorage.getItem("username");
+					scorep1.textContent = `${userId} : 0`;
+					controlPlayer1.textContent = "Player 1";
+					if (mode == "solo")
+					{
+						scorep2.textContent = "PLAYER 2 : 0"
+						controlPlayer2.textContent = 'IA';
+						controlPlayer2Command.textContent = "";
+					}
+					else
+					{
+						scorep2.textContent = "PLAYER 2 : 0"
+						controlPlayer2.textContent = 'Player 2';
+						controlPlayer2Command.textContent = "↑ / ↓";
+					}
+				}
+				else
+				{
+					scorep1.textContent = "PLAYER 1 : 0";
+					controlPlayer1.textContent = "Player 1";
+					if (mode == "solo")
+					{
+						scorep2.textContent = "PLAYER 2 : 0"
+						controlPlayer2.textContent = 'IA';
+						controlPlayer2Command.textContent = "";
+					}
+					else
+					{
+						scorep2.textContent = "PLAYER 2 : 0"
+						controlPlayer2.textContent = 'Player 2';
+						controlPlayer2Command.textContent = "↑ / ↓";
+					}
+				}
 			}
-			if (mode === "solo")
+			else if (i18n.getCurrentLanguage() == "fr")
 			{
-				controlPlayer2.textContent = 'IA';
-				controlPlayer2Command.textContent = "";
+				if (token)
+				{
+					const userId = sessionStorage.getItem("username");
+					scorep1.textContent = `${userId} : 0`;
+					controlPlayer1.textContent = "Joueur 1";
+					if (mode == "solo")
+					{
+						scorep2.textContent = "JOUEUR 2 : 0"
+						controlPlayer2.textContent = 'IA';
+						controlPlayer2Command.textContent = "";
+					}
+					else
+					{
+						scorep2.textContent = "JOUEUR 2 : 0"
+						controlPlayer2.textContent = 'Joueur 2';
+						controlPlayer2Command.textContent = "↑ / ↓";
+					}
+				}
+				else
+				{
+					scorep1.textContent = "JOUEUR 1 : 0";
+					controlPlayer1.textContent = "Joueur 1";
+					if (mode == "solo")
+					{
+						scorep2.textContent = "JOUEUR 2 : 0"
+						controlPlayer2.textContent = 'IA';
+						controlPlayer2Command.textContent = "";
+					}
+					else
+					{
+						scorep2.textContent = "JOUEUR 2 : 0"
+						controlPlayer2.textContent = 'Joueur 2';
+						controlPlayer2Command.textContent = "↑ / ↓";
+					}
+				}
 			}
 			else
 			{
-				controlPlayer2.textContent = 'Joueur 2';
-				controlPlayer2Command.textContent = 'ARROW UP / ARROW DOWN';
+				if (token)
+				{
+					const userId = sessionStorage.getItem("username");
+					scorep1.textContent = `${userId} : 0`;
+					controlPlayer1.textContent = "Jugador 1";
+					if (mode == "solo")
+					{
+						scorep2.textContent = "JUGADOR 2 : 0"
+						controlPlayer2.textContent = 'IA';
+						controlPlayer2Command.textContent = "";
+					}
+					else
+					{
+						scorep2.textContent = "JUGADOR 2 : 0"
+						controlPlayer2.textContent = 'Jugador 2';
+						controlPlayer2Command.textContent = "↑ / ↓";
+					}
+				}
+				else
+				{
+					scorep1.textContent = "JUGADOR 1 : 0";
+					controlPlayer1.textContent = "Jugador 1";
+					if (mode == "solo")
+					{
+						scorep2.textContent = "JUGADOR 2 : 0"
+						controlPlayer2.textContent = 'IA';
+						controlPlayer2Command.textContent = "";
+					}
+					else
+					{
+						scorep2.textContent = "JUGADOR 2 : 0"
+						controlPlayer2.textContent = 'Jugador 2';
+						controlPlayer2Command.textContent = "↑ / ↓";
+					}
+				}
 			}
-
-			// IF ANGLAIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIS
-			// scorep2.textContent = "PLAYER 2 : 0";
-
-			scorep2.textContent = "JOUEUR 2 : 0";
-
-			
 			control1.style.display = 'block';
 			
 			restart.onclick = () =>
@@ -937,25 +1032,22 @@ export function createGamePage(): HTMLElement {
 		{
 			cleanupCurrentGame();
 
-
-			// if(c'est en ANGLAIIIIIIIIIIIIIIIIIIS)
-			// {
-			// 	scorep1.textContent = "Team 1 : 0"
-			// 	scorep2.textContent = "Team 2 : 0"
-			// }
-			// else
-			// {
-			// 	scorep1.textContent = "Equipe 1 : 0"
-			// 	scorep2.textContent = "Equipe 2 : 0"
-			// }
-
-			scorep1.textContent = "Equipe 1 : 0"
-			scorep2.textContent = "Equipe 2 : 0"
+			if(i18n.getCurrentLanguage() == "en")
+			{
+				scorep1.textContent = "Team 1 : 0"
+				scorep2.textContent = "Team 2 : 0"
+			}
+			else
+			{
+				scorep1.textContent = "Equipe 1 : 0"
+				scorep2.textContent = "Equipe 2 : 0"
+			}
 
 			currentGame = new Game_ligne();
 			
 			menuLocal.style.display = "none";
 			menuLigne.style.display = "none";
+			restart.classList.add("hidden");
 			game.style.display = "block";
 			control2.style.display = 'block';
 			loginBtn.classList.add("hidden");
