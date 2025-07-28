@@ -1,4 +1,3 @@
-import "./style.css";
 import { router } from "./router/router";
 import { createLoginPage } from "./pages/LoginPage";
 import { createHomePage } from "./pages/HomePage";
@@ -15,13 +14,13 @@ async function initApp() {
   // Initialize i18n before starting router
   await i18n.init();
 
-  // Configuration des routes - CHANGEMENT MINIMAL : GamePage sur la route racine
+  // Configuration des routes
   router
-    .addRoute('/', createGamePage)           // SEUL CHANGEMENT : GamePage au lieu de createLoginPage
+    .addRoute('/', createGamePage)           
     .addRoute('/login', createLoginPage)
     .addRoute('/signup', createSignUpPage)
     .addRoute('/home', createHomePage)
-    .addRoute('/game', createGamePage)       // Garde l'alias /game pour cohérence
+    .addRoute('/game', createGamePage)       
     .addRoute('/profile', createProfilePage)
     .addRoute('/chat', createChatPage)
     .addRoute('/404', createNotFoundPage);
@@ -29,16 +28,12 @@ async function initApp() {
   // Route dynamique pour les profils utilisateur
   router.addDynamicRoute('/profile/:username', createUserProfilePage);
   
-  // Récupération du token (logique existante conservée)
   const token = sessionStorage.getItem('authToken');
   const currentPath = window.location.pathname;
 
-  // LOGIQUE SIMPLIFIEE : laissons le router faire son travail normal
   if (currentPath === '/') {
-    // Pour la route racine, utiliser directement le router sans logique spéciale
     router.start();
   } else {
-    // Pour toutes les autres routes, comportement normal
     router.start();
   }
 }
