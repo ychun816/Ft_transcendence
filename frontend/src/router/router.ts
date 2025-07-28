@@ -93,33 +93,46 @@ class Router {
     }
 
     private async renderRoute(route: string): Promise<void> {
+        console.log("🎯 renderRoute called with route:", route);
+        
         // Check exact routes first
         let routeHandler = this.routes.get(route);
         let routeParams: any = {};
 
+        console.log("🔍 Available routes:", Array.from(this.routes.keys()));
+        console.log("🎮 Route handler found:", !!routeHandler);
+
         // If no exact match, check dynamic routes
         if (!routeHandler) {
+            console.log("🔍 Checking dynamic routes...");
             for (const dynamicRoute of this.dynamicRoutes) {
                 const params = this.extractParams(route, dynamicRoute.pattern);
                 if (params) {
                     routeHandler = dynamicRoute.handler;
                     routeParams = params;
+                    console.log("✅ Dynamic route matched:", dynamicRoute.pattern);
                     break;
                 }
             }
         }
 
         if (!routeHandler) {
+            console.error("❌ No route handler found for:", route);
             this.navigate('/404');
             return;
         }
 
         const app = document.getElementById('app');
         if (app) {
+            console.log("🎨 Rendering route:", route);
             app.innerHTML = '';
             // Store route params globally so components can access them
             (window as any).routeParams = routeParams;
-            app.appendChild(routeHandler());
+            const element = routeHandler();
+            app.appendChild(element);
+            console.log("✅ Route rendered successfully:", route);
+        } else {
+            console.error("❌ App element not found");
         }
     }
 
