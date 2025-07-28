@@ -609,7 +609,7 @@ class Pong
                 score2: this.data.score2,
                 winnerId: this.data.winnerId,
                 playedAt: this.data.played_at,
-                lasted: Math.round(this.data.game_time), // En millisecondes
+                lasted: Math.round(this.data.game_time / 1000 / 60), // En millisecondes
                 pointsUp: this.data.win_point_up,
                 pointsDown: this.data.win_point_down,
                 iaMode: this.data.iaMode,

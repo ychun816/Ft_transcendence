@@ -127,6 +127,7 @@ export async function registerProfileRoute(
 				return;
 			}
 			const { code, data } = await getUserInfo(username, prisma);
+			
 			reply.status(code).send(data);
 		}
 	);
