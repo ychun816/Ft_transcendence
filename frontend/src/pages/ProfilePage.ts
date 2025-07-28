@@ -2,6 +2,7 @@ import { i18n } from "../services/i18n.js";
 import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
 import { createLogoutSwitcher } from "../components/logoutSwitcher.js";
 import { classes } from "../styles/retroStyles.js";
+import { Chart, registerables } from "chart.js"
 
 export function createProfilePage(): HTMLElement {
 	const page = document.createElement("div");
@@ -22,10 +23,10 @@ export function createProfilePage(): HTMLElement {
 			<div class="min-h-screen flex items-center justify-center p-4 ${classes.scanLinesContainer}">
 
 				<!-- Conteneur principal avec disposition côte à côte - centré -->
-				<div class="${classes.retroPanel} rounded-2xl p-8 flex gap-10 items-start" style="height: 80vh; max-width: 1300px; width: 95%;">
+				<div class="${classes.retroPanel} rounded-2xl p-8 flex gap-10 items-start" style="height: 90vh; max-width: 2000px; width: 95%;">
 
 					<!-- Colonne de gauche : Profile + Friends -->
-					<div class="flex flex-col gap-6 h-full" style="width: 600px;">
+					<div class="flex flex-col gap-6 h-full" style="width: 1000px;">
 
 						<!-- Bloc Profile Principal -->
 						<div class="${classes.retroPanel} rounded-2xl p-6 w-full flex flex-col items-center flex-shrink-0">
@@ -101,7 +102,7 @@ export function createProfilePage(): HTMLElement {
 					</div>
 
 					<!-- Colonne de droite : Match History + Dashboard -->
-					<div class="flex flex-col gap-6 h-full" style="width: 600px;">
+					<div class="flex flex-col gap-6 h-full" style="width: 1000px;">
 
 						<!-- Match History -->
 						<div id="match-block" class="${classes.retroPanel} rounded-2xl p-6 w-full flex flex-col" style="height: 50%;">
@@ -111,7 +112,6 @@ export function createProfilePage(): HTMLElement {
 								</h2>
 							</header>
 							<main class="w-full flex-1 overflow-y-auto">
-								<!-- Le contenu de l'historique des matchs sera ajouté ici -->
 							</main>
 						</div>
 
@@ -123,14 +123,12 @@ export function createProfilePage(): HTMLElement {
 								</h2>
 							</header>
 							<main class="w-full flex-1 overflow-y-auto">
-								<!-- Le contenu du dashboard sera ajouté ici -->
 							</main>
 						</div>
 					</div>
 				</div>
 			</div>
 
-			<!-- Commutateurs de langue et déconnexion -->
 			<div class="absolute top-4 right-4" id="language-switcher-container"></div>
 			<div class="absolute top-4 left-4" id="logout-container"></div>
 		`;
@@ -229,6 +227,7 @@ export function createProfilePage(): HTMLElement {
 
 		displayMatchHistory(page);
 		displayFriendsList(page);
+		displayDashboard(page);
 	};
 
 	render();
@@ -547,7 +546,7 @@ async function displayMatchHistory(page: HTMLDivElement) {
 					<th>${i18n.t('profile.opponent')}</th>
 					<th>${i18n.t('profile.result')}</th>
 				</tr>
-			</thead>
+			</thead>	
 			<tbody>
 	`;
 
@@ -776,39 +775,296 @@ async function getDashboardStats(page: HTMLDivElement) {
 	}
 }
 
-// async function displayDashboard(page: HTMLDivElement)
-// {
-// 	const stats = getDashboard(page);
-// 	const statDiv = page.querySelector("#dashboard");
-// 	if (!statDiv) return;
+async function displayDashboard(page: HTMLDivElement)
+{
+	try{
+		Chart.register(...registerables);
+		const stats = await getDashboardStats(page);
+		const statDiv = page.querySelector("#dashboard main");
+		if (!statDiv){
+			console.error('Dashboard container not found');
+			return;
+		}
 
-// 	let html = `
-// 		<table class="data-table">
-// 			<thead>
-// 				<tr>
-// 					<th>${i18n.t('profile.date')}</th>
-// 					<th>${i18n.t('profile.opponent')}</th>
-// 					<th>${i18n.t('profile.result')}</th>
-// 				</tr>
-// 			</thead>
-// 			<tbody>
-// 	`;
+		statDiv.innerHTML = `
+		<div class="dashboard-container" style="display: flex; flex-direction: column; gap: 20px; height: 100%;">
+			<div class="dashboard-data" style="display: flex; flex-direction: row; gap: 20px; height: 100%;">
+				<div class="time-section" style="flex: 1; min-height: 200px;">
+					<h3 style="color: #a855f7; font-size: 16px; margin-bottom: 10px; text-align: center;">
+						${i18n.t('profile.total_game_time')}
+					</h3>
+					<div id="gameTime" style="max-height: 180px;"></div>
+				</div>
 
-// 	for (const match of history) {
-// 		const isPlayer1 = match.player1.username === username;
-// 		const opponent = isPlayer1 ? match.player2.username : match.player1.username;
-// 		const result = match.winnerId === (isPlayer1 ? match.player1Id : match.player2Id) ? i18n.t('profile.victory') : i18n.t('profile.defeat');
-// 		const date = new Date(match.playedAt).toLocaleDateString();
-// 		const statusClass = result === i18n.t('profile.victory') ? "status-victory" : "status-defeat";
+				<div class="side-section" style="flex: 1; min-height: 200px;">
+					<h3 style="color: #a855f7; font-size: 16px; margin-bottom: 10px; text-align: center;">
+						${i18n.t('profile.side_point')}
+					</h3>
+					<div id="gameSide" style="max-height: 180px;"></div>
+				</div>
+			</div>
+			<div class="dashboard-graph" style="display: flex; flex-direction: row; gap: 20px; height: 100%;">
+				<div class="chart-section" style="flex: 1; min-height: 200px;">
+					<h3 style="color: #a855f7; font-size: 16px; margin-bottom: 10px; text-align: center;">
+						${i18n.t('profile.game_types_distribution')}
+					</h3>
+					<canvas id="gameTypesChart" style="max-height: 180px;"></canvas>
+				</div>
 
-// 		html += `
-// 			<tr>
-// 				<td>${date}</td>
-// 				<td>${opponent}</td>
-// 				<td><span class="${statusClass}">${result}</span></td>
-// 			</tr>
-// 		`;
-// 	}
-// 	html += `</tbody></table>`;
-// 	histDiv.innerHTML = html;
-// }
+				<div class="chart-section" style="flex: 1; min-height: 200px;">
+					<h3 style="color: #a855f7; font-size: 16px; margin-bottom: 10px; text-align: center;">
+						${i18n.t('profile.winrate_by_type')}
+					</h3>
+					<canvas id="performanceChart" style="max-height: 180px;"></canvas>
+				</div>
+			</div>
+		</div>
+		`;
+
+		await createGameTypesChart(stats);
+		await createPerformanceChart(stats);
+		await displayGameTime(stats);
+		await displaySidePoint(stats);
+
+	} catch (error){
+		console.error('Error with dashboard display:', error);
+		const dashboardMain = page.querySelector("#dashboard main");
+		if (dashboardMain) {
+			dashboardMain.innerHTML = `
+				<div style="text-align: center; color: #ef4444; padding: 20px;">
+					<p>Error while loading user stats</p>
+					<button onclick="location.reload()" style="margin-top: 10px; padding: 8px 16px; background: #a855f7; color: white; border: none; border-radius: 4px; cursor: pointer;">
+						Reload
+					</button>
+				</div>
+			`;
+		}
+	}
+}
+
+async function displaySidePoint(stats: any)
+{
+	const container = document.getElementById('gameSide') as HTMLDivElement;
+	if (!container) return;
+
+	const topPoints = (stats.iaStats?.pointsUp + stats.tournamentStats?.pointsUp + stats.multiStats?.pointsUp) || 0;
+	const bottomPoints = (stats.iaStats?.pointsDown + stats.tournamentStats?.pointsDown + stats.multiStats?.pointsDown) || 0;
+
+	const totalPoints = topPoints + bottomPoints;
+
+	if (totalPoints === 0) {
+		container.innerHTML = `
+			<div style="text-align: center; color: #9ca3af; padding: 40px;">
+				<p>No games played at the moment</p>
+			</div>
+		`;
+		return;
+	} else {
+		container.innerHTML = `
+			<div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center;">
+				<div style="display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin-top: 20px; margin-left: 20px;">
+
+					<div style="display: flex; flex-direction: row; align-items: center;">
+						<div style="height: 70px; width: 20px; background-color: #ef4444; border-radius: 4px; margin-right: 8px;"></div>
+						<div style="font-size: 12px; color: #e5e7eb;">
+							${i18n.t('profile.top_points')}: ${topPoints}
+						</div>
+					</div>
+
+					<div style="height: 2px; width: 100%; background-color: #a855f7; margin-left: 2px;"></div>
+
+					<div style="display: flex; flex-direction: row; align-items: center;">
+						<div style="height: 70px; width: 20px; background-color: #10b981; border-radius: 4px; margin-right: 8px;"></div>
+						<div style="font-size: 12px; color: #e5e7eb;">
+							${i18n.t('profile.bottom_points')}: ${bottomPoints}
+						</div>
+					</div>
+				</div>
+			</div>
+		`;
+	}
+}
+
+async function 	displayGameTime(stats: any)
+{
+	const container = document.getElementById('gameTime') as HTMLDivElement;
+	if (!container) return;
+
+	const iaTime = (stats.iaStats?.lasted || 0);
+	const tournamentTime = (stats.tournamentStats?.lasted || 0);
+	const multiTime = (stats.multiStats?.lasted || 0);
+
+	const totalTime = iaTime + tournamentTime + multiTime;
+
+	if (totalTime === 0) {
+		container.innerHTML = `
+			<div style="text-align: center; color: #9ca3af; padding: 40px;">
+				<p>No games played at the moment</p>
+			</div>
+		`;
+		return;
+	} else {
+		const toMinutes = (s: number) => Math.floor(s / 60);
+		const totalMin = toMinutes(totalTime);
+		const iaMin = toMinutes(iaTime);
+		const tournamentMin = toMinutes(tournamentTime);
+		const multiMin = toMinutes(multiTime);
+
+		const iaPercent = totalMin ? (iaMin / totalMin) * 100 : 0;
+		const tournamentPercent = totalMin ? (tournamentMin / totalMin) * 100 : 0;
+		const multiPercent = totalMin ? (multiMin / totalMin) * 100 : 0;
+
+		container.innerHTML = `
+			<div style="display: flex; flex-direction: column; align-items: center; width: 100%; padding-top: 10px;">
+				<div style="font-size: 28px; color: #a855f7; font-weight: bold; margin-bottom: 16px;">
+					${totalMin} min
+				</div>
+
+				<div style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 400px;">
+					<div>
+						<div style="font-size: 12px; color: #ef4444; margin-bottom: 2px;">
+							${i18n.t('profile.ia_games')}: ${iaMin} min
+						</div>
+						<div style="height: 10px; background: #ef4444; width: ${iaPercent}%; border-radius: 4px;"></div>
+					</div>
+
+					<div>
+						<div style="font-size: 12px; color: #f59e0b; margin-bottom: 2px;">
+							${i18n.t('profile.tournament_games')}: ${tournamentMin} min
+						</div>
+						<div style="height: 10px; background: #f59e0b; width: ${tournamentPercent}%; border-radius: 4px;"></div>
+					</div>
+
+					<div>
+						<div style="font-size: 12px; color: #10b981; margin-bottom: 2px;">
+							${i18n.t('profile.multiplayer_games')}: ${multiMin} min
+						</div>
+						<div style="height: 10px; background: #10b981; width: ${multiPercent}%; border-radius: 4px;"></div>
+					</div>
+				</div>
+			</div>
+		`;
+	}
+}
+
+async function createGameTypesChart(stats: any) {
+	const ctx = document.getElementById('gameTypesChart') as HTMLCanvasElement;
+	if (!ctx) return;
+
+	const iaGames = (stats.iaStats?.winner || 0) + (stats.iaStats?.loser || 0);
+	const tournamentGames = (stats.tournamentStats?.winner || 0) + (stats.tournamentStats?.loser || 0);
+	const multiGames = (stats.multiStats?.winner || 0) + (stats.multiStats?.loser || 0);
+
+	const totalGames = iaGames + tournamentGames + multiGames;
+
+	if (totalGames === 0) {
+		ctx.style.display = 'none';
+		const container = ctx.parentElement;
+		if (container) {
+			container.innerHTML = `
+				<div style="text-align: center; color: #9ca3af; padding: 40px;">
+					<p>No games played at the moment</p>
+				</div>
+			`;
+		}
+		return;
+	} else {
+		new Chart(ctx, {
+			type: 'doughnut',
+			data: {
+				labels: [
+					i18n.t('profile.ia_games'),
+					i18n.t('profile.tournament_games'),
+					i18n.t('profile.multiplayer_games')
+				],
+				datasets: [{
+					data: [iaGames, tournamentGames, multiGames],
+					backgroundColor: ['#ef4444', '#f59e0b','#10b981'],
+					borderColor: ['#dc2626', '#d97706', '#059669'],
+					borderWidth: 2,
+					hoverOffset: 10
+				}]
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					legend: {
+						position: 'bottom',
+						labels: {
+							color: '#e5e7eb',
+							font: {
+								family: 'Orbitron',
+								size: 11
+							},
+							padding: 15,
+							usePointStyle: true
+						}
+					},
+					tooltip: {
+						backgroundColor: 'rgba(0, 0, 0, 0.8)',
+						titleColor: '#e5e7eb',
+						bodyColor: '#e5e7eb',
+						borderColor: '#a855f7',
+						borderWidth: 1,
+						cornerRadius: 8,
+						displayColors: true,
+						callbacks: {
+							label: function(context: any) {
+								const percentage = ((context.parsed / totalGames) * 100).toFixed(1);
+								return `${context.label}: ${context.parsed} parties (${percentage}%)`;
+							}
+						}
+					}
+				},
+				elements: {
+					arc: {
+						borderWidth: 2
+					}
+				}
+			}
+		});
+	}
+}
+
+async function createPerformanceChart(stats: any) {
+	const ctx = document.getElementById('performanceChart') as HTMLCanvasElement;
+	if (!ctx) return;
+
+	const calculateWinRate = (winner: number, loser: number) => {
+		const total = winner + loser;
+		return total > 0 ? (winner / total) * 100 : 0;
+	};
+
+	const iaWinRate = calculateWinRate(stats.iaStats?.winner || 0, stats.iaStats?.loser || 0);
+	const tournamentWinRate = calculateWinRate(stats.tournamentStats?.winner || 0, stats.tournamentStats?.loser || 0);
+	const multiWinRate = calculateWinRate(stats.multiStats?.winner || 0, stats.multiStats?.loser || 0);
+
+	new Chart(ctx, {
+		type: 'bar',
+		data: {
+			labels: [
+				i18n.t('profile.ia_games'),
+				i18n.t('profile.tournament_games'),
+				i18n.t('profile.multiplayer_games')
+			],
+			datasets: [{
+				label: i18n.t('profile.victory_rate'),
+				data: [iaWinRate, tournamentWinRate, multiWinRate],
+				backgroundColor: ['rgba(239, 68, 68, 0.7)', 'rgba(245, 158, 11, 0.7)', 'rgba(16, 185, 129, 0.7)'],
+				borderColor: ['#ef4444', '#f59e0b', '#10b981'],
+				borderWidth: 2
+			}]
+		},
+		options: {
+			responsive: true,
+			maintainAspectRatio: false,
+			scales: {
+				y: {
+					beginAtZero: true,
+					max: 100
+				}
+			}
+		}
+	});
+}

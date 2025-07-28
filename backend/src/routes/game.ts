@@ -17,9 +17,9 @@ interface GameDataRequest {
 	lasted: number;
 	pointsUp: number;
 	pointsDown: number;
-    iaMode?: boolean;
-    tournamentMode?: boolean;
-    multiMode?: boolean;
+	iaMode?: boolean;
+	tournamentMode?: boolean;
+	multiMode?: boolean;
 }
 
 async function findUser(prisma: PrismaClient, playerId: number)
@@ -195,9 +195,13 @@ async function getWinnerStatus(prisma: PrismaClient, username: string, matche: M
 	return matche.winnerId === user.id ? 1 : -1;
 }
 
-function addUpGameStats(matche: Match, tab: GlobalStat, winCount: number, gamesPlayed: number)
+function addUpGameStats(matche: Match, tab: GlobalStat, winCount: number)
 {
-	winCount < 0 ? tab.loser += gamesPlayed - tab.winner : tab.winner += winCount;
+	if (winCount > 0) {
+		tab.winner += 1;
+	} else if (winCount < 0) {
+		tab.loser += 1;
+	}
 	tab.lasted += matche.lasted;
 	tab.pointsUp += matche.pointsUp;
 	tab.pointsDown += matche.pointsDown;
@@ -219,19 +223,19 @@ async function handleMatches(
 		{
 			iaGames++;
 			let winCount = await getWinnerStatus(prisma, username, matche);
-			addUpGameStats(matche, iaStats, winCount, iaGames);
+			addUpGameStats(matche, iaStats, winCount);
 		}
 		else if (matche.tournamentMode == true)
 		{
 			tounamentGames++;
 			let winCount = await getWinnerStatus(prisma, username, matche);
-			addUpGameStats(matche, tournamentStats, winCount, tounamentGames);
+			addUpGameStats(matche, tournamentStats, winCount);
 		}
-		else (matche.multiMode == true)
+		else if (matche.multiMode == true)
 		{
 			multiGames++;
 			let winCount = await getWinnerStatus(prisma, username, matche);
-			addUpGameStats(matche, multiStats, winCount, multiGames);
+			addUpGameStats(matche, multiStats, winCount);
 		}
 	}
 }
