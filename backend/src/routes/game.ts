@@ -22,13 +22,13 @@ interface GameDataRequest {
 	multiMode?: boolean;
 }
 
-async function findUser(prisma: PrismaClient, playerId: number)
-{
-	const user = await prisma.user.findUnique({
-		where: {id: playerId}
-	});
-	return user;
-}
+// async function findUser(prisma: PrismaClient, playerId: number)
+// {
+// 	const user = await prisma.user.findUnique({
+// 		where: {id: playerId}
+// 	});
+// 	return user;
+// }
 
 export async function registerGameRoute(
 	app: FastifyInstance<any, any, any, any>,
