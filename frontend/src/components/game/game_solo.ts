@@ -1,9 +1,6 @@
 
 // -------------------------- INTERFACES ------------------------------------
 
-//import { selected_game_mode } from "./menu.js";
-
-
 interface game_config
 {
     canvas_width: number;
@@ -35,6 +32,8 @@ interface ball_interface
 {
     ball_x: number;
     ball_y: number;
+    prev_x: number;
+    prev_y: number;
     ball_dir_x: number;
     ball_dir_y: number;
     angle: number;
@@ -79,6 +78,24 @@ interface ia_interface
     error_percent: number;
 }
 
+interface data_score
+{
+    id: number;
+    player1Id: string | null;
+    ia_mode: boolean;
+    winnerId: string | null;
+    score1: number;
+    score2: number;
+    tournoi_mode: boolean;
+    multi_mode: boolean;
+    played_at: Date;
+    game_time: number;
+    win_point_up: number;
+    win_point_down: number;
+    lose_point_up: number;
+    lose_point_down: number;
+}
+
 
 
 // ------------------------ FONCTIONS UTILES -----------------------
@@ -92,14 +109,14 @@ function get_random_playable_angle(): number
         angle = Math.random() * 2 * Math.PI;
 
         const is_too_vertical = (
-        (angle >= 1 && angle <= 2.1) ||   // proche de π/2
-        (angle >= 4.4 && angle <= 5.1)      // proche de 3π/2
+        (angle >= 1 && angle <= 2.1) ||   
+        (angle >= 4.4 && angle <= 5.1)   
         );
 
         const is_too_horizontal = (
-        (angle >= 0 && angle <= 0.4) ||                   // proche de 0
-        (angle >= 2 * Math.PI - 0.4 && angle <= 2 * Math.PI) ||  // proche de 2π
-        (angle >= Math.PI - 0.4 && angle <= Math.PI + 0.4)       // proche de π
+        (angle >= 0 && angle <= 0.4) ||                
+        (angle >= 2 * Math.PI - 0.4 && angle <= 2 * Math.PI) || 
+        (angle >= Math.PI - 0.4 && angle <= Math.PI + 0.4) 
         );
 
         if (is_too_vertical || is_too_horizontal) 
@@ -108,6 +125,12 @@ function get_random_playable_angle(): number
         return angle;
     }
 }
+
+function create_ID(): number
+{
+    return Math.floor(Math.random() * 1_000_001);
+}
+
 
 function random_number(min: number, max: number): number
 {
@@ -169,6 +192,8 @@ class Pong
     private accumulator: number = 0;
     private fixed_timestep: number = 16.67;
     private last_frame_time: number = 0;
+    private data: data_score;
+    private player_name: string | null;
 
 
     constructor(canvas : HTMLCanvasElement, mode: 'solo' | 'versus')
@@ -179,6 +204,15 @@ class Pong
         this.count_down = document.getElementById("countdowndisplay") as HTMLDivElement;
         this.animation_id = 0;
         this.end_message = document.getElementById('endMessage');
+        const token = sessionStorage.getItem("authToken");
+        if (token)
+        {
+            const userId = sessionStorage.getItem("username");
+            this.player_name =  userId;
+        }
+        else
+            this.player_name = "Joueur 1";
+        
 
         this.config =
         {
@@ -189,7 +223,7 @@ class Pong
             ball_real_speed: 8 * (3/2),
             ball_speed: 4.5 * (3/2),
             ball_max_speed: 12 * (3/2),
-            paddle_speed: 8.5 * (3/2),
+            paddle_speed: 7.5 * (3/2),
             score_to_win: 5,
             increase_vitesse: 175, //250,
             time_before_new_ball: 3000
@@ -211,6 +245,8 @@ class Pong
         {
             ball_x: this.config.canvas_width / 2,
             ball_y: this.config.canvas_height / 2,
+            prev_x: 0,
+            prev_y: 0,
             ball_dir_x: 0,
             ball_dir_y: 0,
             angle: 0,
@@ -255,6 +291,24 @@ class Pong
             error_percent: 0.2
         }
 
+        this.data = 
+        {
+            id: 0,
+            player1Id: "default",
+            ia_mode: false,
+            tournoi_mode: false,
+            multi_mode: false,
+            winnerId: "default",
+            score1: 0,
+            score2: 0,
+            played_at: new Date(),
+            game_time: performance.now(),
+            win_point_up: 0,
+            win_point_down: 0,
+            lose_point_up: 0,
+            lose_point_down: 0,
+        }
+
         this.setup_event();
         this.init_ball_direction();
     }
@@ -282,7 +336,7 @@ class Pong
 
     start(): void
     {
-        this.draw();
+        this.draw(1);
         //console.log("ca demarre");
         let countdown = 3;
         this.count_down.innerText = `Debut de partie dans`;
@@ -321,10 +375,23 @@ class Pong
     game_loop(): void
     {
         const current_time = performance.now()
-        const delta_time = current_time - this.last_frame_time;
-        this.last_frame_time = current_time;
-        //let frame_fois = 0;
 
+        // protection spirale de la mort
+        const raw_delta_time = current_time - this.last_frame_time;
+        let delta_time;
+        if (raw_delta_time > 1000)
+        {
+            console.log("Très long délai détecté, réinitialisation du timing");
+            delta_time = this.fixed_timestep; // Traiter comme un frame normal
+        }
+        else
+            delta_time = Math.min(raw_delta_time, 250); // Protection normale
+
+        if (raw_delta_time > 250)
+            console.warn(`Spirale de la mort évitée ! Temps réel: ${raw_delta_time.toFixed(2)}ms, temps traité: ${delta_time}ms`);
+        
+
+        this.last_frame_time = current_time;
         this.accumulator += delta_time;
 
         while(this.accumulator >= this.fixed_timestep)
@@ -357,8 +424,11 @@ class Pong
             //frame_fois++;
         }
         //console.log(`fois frame = ${frame_fois}`)
+
+        const interpolation = this.accumulator / this.fixed_timestep;
+
         if (!this.state.is_paused)
-            this.draw();
+            this.draw(interpolation);
 
 
         if (this.state.game_running == true)
@@ -368,6 +438,7 @@ class Pong
     end_game(): void
     {
         let message = '';
+        this.handle_data();
         setTimeout(() =>
         {
             if (this.state.left_score == this.config.score_to_win)
@@ -384,6 +455,138 @@ class Pong
         this.state.game_running = false;
     }   
 
+    handle_data()
+    {
+        const token = sessionStorage.getItem("authToken");
+        if (!token)
+            return;
+        const userId = sessionStorage.getItem("userId");
+        this.data.player1Id = userId;
+
+        this.data.id = create_ID();
+
+        if (this.state.ia_mode == true)
+            this.data.ia_mode = true;
+
+
+
+        this.data.score1 = this.state.left_score;
+        this.data.score2 = this.state.right_score;
+        if (this.data.score1 > this.data.score2)
+            this.data.winnerId = this.data.player1Id;
+
+
+        this.data.tournoi_mode = false;
+        this.data.multi_mode = false;
+        this.data.played_at = new Date();
+
+        // mesure de la duree
+        let t0 = this.data.game_time;
+        let t1 = performance.now();
+        this.data.game_time = t1 - t0;
+
+        //console.log("DATA ENVOYE AU BACKEND !")
+    
+        // const response = await fetch("/api/game/add", {
+        //     method: "POST",
+        //     ContentType: {
+        //         "application/json",
+        //     }
+        //     body?: this.data,
+        // }
+
+        // )
+    }
+
+
+    cleanup(): void
+    {
+        console.log("🧹 Nettoyage des ressources du jeu...");
+        
+        this.clear_all_timers();
+        this.state.game_running = false;
+        this.state.is_paused = true;
+        this.state.count_down_active = false;
+        
+        this.ball.ball_x = this.config.canvas_width / 2;
+        this.ball.ball_y = this.config.canvas_height / 2;
+        this.ball.ball_dir_x = 0;
+        this.ball.ball_dir_y = 0;
+        
+        this.paddle.left_paddle_y = (this.config.canvas_height - this.config.paddle_height) / 2;
+        this.paddle.right_paddle_y = (this.config.canvas_height - this.config.paddle_height) / 2;
+        
+        this.update_score(0);
+        
+        if (this.count_down) {
+            this.count_down.innerText = "";
+        }
+        
+        if (this.end_message) {
+            this.end_message.style.display = 'none';
+            this.end_message.textContent = '';
+        }
+        
+        this.ctx.clearRect(0, 0, this.config.canvas_width, this.config.canvas_height);
+        console.log("✅ Nettoyage terminé");
+    }
+
+    back_to_menu(): void
+    {
+        console.log("🏠 Retour au menu principal...");
+        
+        this.cleanup();
+        this.state.restart_active = false;
+        this.state.ia_mode = false;
+        
+        this.ia.service = true;
+        this.ia.continue_flag = true;
+        this.ia.counter = 0;
+        this.ia.rebond = 0;
+        this.ia.random_move_1 = false;
+        this.ia.random_move_2 = false;
+        this.ia.move_flag = false;
+        this.ia.super_flag = true;
+        this.ia.random_paddle_move = false;
+        
+        this.data.id = 0;
+        this.data.player1Id = "default";
+        this.data.ia_mode = false;
+        this.data.tournoi_mode = false;
+        this.data.multi_mode = false;
+        this.data.winnerId = "default";
+        this.data.score1 = 0;
+        this.data.score2 = 0;
+        this.data.played_at = new Date();
+        this.data.game_time = 0;
+        this.data.win_point_down = 0;
+        this.data.win_point_up = 0;
+        this.data.lose_point_down = 0;
+        this.data.lose_point_up = 0;
+        
+        this.config.ball_speed = 4.5 * (3/2);
+        this.config.paddle_speed = 7.5 * (3/2);
+        
+        console.log("✅ Retour au menu préparé");
+    }
+
+    destroy(): void
+    {
+        console.log("💥 Destruction de l'instance de jeu...");
+        
+        this.cleanup();
+        document.removeEventListener("keydown", this.handle_keydown);
+        document.removeEventListener("keyup", this.handle_keyup);
+        
+        this.ctx.clearRect(0, 0, this.config.canvas_width, this.config.canvas_height);
+        this.count_down = null as any;
+        this.end_message = null;
+        this.keys_pressed = {};
+        this.state.game_running = false;
+        
+        console.log("✅ Instance détruite");
+    }
+
     restart(): void
     {
         console.log("🔄 RESTART demandé");
@@ -395,7 +598,7 @@ class Pong
             this.end_message.style.display = 'none';
         this.state.is_paused = true;
         this.state.count_down_active = false;
-        this.state.game_running = true; // Important : garder le jeu actif
+        this.state.game_running = true; 
         this.last_frame_time = performance.now();
         
         this.ball.ball_dir_x = 0;
@@ -411,20 +614,18 @@ class Pong
         {
             console.log("🚀 Nouvelle partie");
             
-            // Repositionner tous les éléments
             this.last_frame_time = performance.now();
             this.ball.ball_x = this.config.canvas_width / 2;
             this.ball.ball_y = this.config.canvas_height / 2;
             this.paddle.left_paddle_y = (this.config.canvas_height - this.config.paddle_height) / 2;
             this.paddle.right_paddle_y = (this.config.canvas_height - this.config.paddle_height) / 2;
-            this.draw();
+            this.draw(1);
             this.start_count_down_for_restart();
             this.state.restart_active = false;
 
         }, 1500);
     }
 
-    // Fonction améliorée pour nettoyer TOUS les timers
     clear_all_timers(): void
     {        
         if (this.countdown_interval)
@@ -473,7 +674,6 @@ class Pong
         this.countdown_interval = setInterval(() => {
             countdown--;
             
-            // Vérifier si le restart est toujours valide
             if (this.state.restart_active)
             {
                 //console.log("⚠️ Restart annulé pendant le countdown");
@@ -525,35 +725,26 @@ class Pong
         }
     }
 
-    // Fonction utilitaire pour la détection continue de collision
-    // Cette fonction vérifie si un segment de droite (trajectoire de la balle) 
-    // intersecte avec un rectangle (paddle)
+    // detection collision
     private checkLineRectCollision(
         lineStart: { x: number; y: number },
         lineEnd: { x: number; y: number },
         rect: { x: number; y: number; width: number; height: number }
     ): { collision: boolean; intersectionPoint?: { x: number; y: number } } {
         
-        // Vérifier d'abord si le point de fin est déjà dans le rectangle
-        // (cas où la balle est déjà en collision)
+
         if (lineEnd.x >= rect.x && lineEnd.x <= rect.x + rect.width &&
             lineEnd.y >= rect.y && lineEnd.y <= rect.y + rect.height) {
             return { collision: true, intersectionPoint: lineEnd };
         }
         
-        // Calculer les 4 côtés du rectangle
         const rectLines = [
-            // Côté gauche
             { start: { x: rect.x, y: rect.y }, end: { x: rect.x, y: rect.y + rect.height } },
-            // Côté droit  
             { start: { x: rect.x + rect.width, y: rect.y }, end: { x: rect.x + rect.width, y: rect.y + rect.height } },
-            // Côté haut
             { start: { x: rect.x, y: rect.y }, end: { x: rect.x + rect.width, y: rect.y } },
-            // Côté bas
             { start: { x: rect.x, y: rect.y + rect.height }, end: { x: rect.x + rect.width, y: rect.y + rect.height } }
         ];
         
-        // Vérifier l'intersection avec chaque côté du rectangle
         for (const rectLine of rectLines) {
             const intersection = this.getLineIntersection(lineStart, lineEnd, rectLine.start, rectLine.end);
             if (intersection) {
@@ -564,7 +755,7 @@ class Pong
         return { collision: false };
     }
 
-    // Fonction pour calculer l'intersection entre deux segments de droite
+    // calculer intersections entre 2 segmenst
     private getLineIntersection(
         p1: { x: number; y: number }, p2: { x: number; y: number },
         p3: { x: number; y: number }, p4: { x: number; y: number }
@@ -575,15 +766,12 @@ class Pong
         const x3 = p3.x, y3 = p3.y;
         const x4 = p4.x, y4 = p4.y;
         
-        // Calculer les dénominateurs pour éviter la division par zéro
         const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
-        if (Math.abs(denom) < 1e-10) return null; // Lignes parallèles
+        if (Math.abs(denom) < 1e-10) return null;
         
-        // Calculer les paramètres t et u
         const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / denom;
         const u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / denom;
         
-        // Vérifier si l'intersection est dans les deux segments
         if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
             return {
                 x: x1 + t * (x2 - x1),
@@ -599,7 +787,11 @@ class Pong
         if (this.state.is_paused || this.state.count_down_active)
             return;
 
-        // Sauvegarder la position précédente pour la détection continue
+        // garder en memoire les positions differentes pour l'interpolation
+        this.ball.prev_x = this.ball.ball_x;
+        this.ball.prev_y = this.ball.ball_y;
+
+        // Sauvegarder la position précédente pour la détection continue (deja fait au dessus mais on sait jamais)
         const previousX = this.ball.ball_x;
         const previousY = this.ball.ball_y;
 
@@ -614,8 +806,7 @@ class Pong
             this.start_time = performance.now();
         }
 
-        // Vérifier les collisions avec les paddles AVANT de mettre à jour la position
-        // Cela évite que la balle traverse les paddles même à haute vitesse
+        // verification collision avant de mttre a jour les coordonnes
         
         // Collision avec le paddle gauche
         if (this.ball.ball_dir_x < 0)
@@ -663,7 +854,7 @@ class Pong
                     this.ball.current_rebond = 0;
                     this.paddle.current_shot++;
                 }
-                return; // Sortir de la fonction pour éviter d'autres collisions cette frame
+                return;
             }
         }
 
@@ -674,7 +865,7 @@ class Pong
             {
                 x: this.config.canvas_width - 40,
                 y: this.paddle.right_paddle_y - this.paddle.marge,
-                width: 15, // De canvas_width-40 à canvas_width-25
+                width: 15,
                 height: this.config.paddle_height + (this.paddle.marge * 2)
             };
             
@@ -708,15 +899,15 @@ class Pong
                     this.state.ia_mode = false;
                     this.ball.current_rebond = 0;
                 }
-                return; // Sortir de la fonction pour éviter d'autres collisions cette frame
+                return;
             }
         }
 
-        // Si aucune collision avec les paddles, mettre à jour la position normalement
-        this.ball.ball_x = newX;
-        this.ball.ball_y = newY;
+        // // Si aucune collision avec les paddles, mettre à jour la position normalement
+        // this.ball.ball_x = newX;
+        // this.ball.ball_y = newY;
 
-        // Vérifier les buts (logique inchangée)
+        // Vérifier les buts
         if (this.ball.ball_x < 0 || this.ball.ball_x > this.config.canvas_width)
         {
             this.state.is_paused = true;
@@ -733,17 +924,33 @@ class Pong
             return;
         }
 
-        // Rebonds sur les murs haut et bas (logique inchangée)
+        // Si aucune collision avec les paddles, mettre à jour la position normalement
+        this.ball.ball_x = newX;
+        this.ball.ball_y = newY;
+
+        // Rebonds sur les murs haut et bas
         if (this.ball.ball_y <= 5 || this.ball.ball_y >= this.config.canvas_height - 5)
         {
-            if (this.ball.ball_x <= 50)
+            console.log(`AVANT rebond avec ball_x = ${this.ball.ball_x} et ball_y = ${this.ball.ball_y}`);
+
+            if (this.ball.ball_x <= 70 )
             {
-                this.ball.ball_y = this.ball.ball_y <= 5 ? 6 : this.config.canvas_height - 6;
+                if (this.ball.ball_y <= 5)
+                    this.ball.ball_y = 6;
+                else
+                    this.ball.ball_y = this.config.canvas_height - 6;
+                console.log("ca passe ici zeubi")
             }
-            if (this.ball.ball_x >= this.config.canvas_width - 50)
+            if (this.ball.ball_x >= this.config.canvas_width - 70)
             {
-                this.ball.ball_y = this.ball.ball_y <= 5 ? 6 : this.config.canvas_height - 6;
+                if (this.ball.ball_y <= 5)
+                    this.ball.ball_y = 6;
+                else
+                    this.ball.ball_y = this.config.canvas_height - 6;
+                console.log("ca passe ici woula")
             }
+
+            console.log(`APRES rebond avec ball_x = ${this.ball.ball_x} et ball_y = ${this.ball.ball_y}`);
             
             this.ball.ball_dir_y *= -1;
             this.ball.current_rebond++;
@@ -751,100 +958,25 @@ class Pong
         }
     }
 
-
-
-        // if (this.ball.ball_x < 0 || this.ball.ball_x > this.config.canvas_width)
-        // {
-        //     this.state.is_paused = true;
-        //     console.log(`🎯 BUT ! ball_x = ${this.ball.ball_x} et ballspeed = ${this.config.ball_speed} et rebond = ${this.ball.current_rebond} et delta error = ${this.ia.delta_error} et delta_paddle = ${this.ia.delta_paddle}`);
-        //     this.handle_goal();
-        //     if (this.state.game_mode == "solo")
-        //     {
-        //         this.state.ia_mode = false;
-        //         this.ia.service = true;
-        //         this.paddle.current_shot = 0;
-        //         this.ia.delta_error = 0;
-        //         this.ia.delta_paddle = 0;
-        //     }
-        //     return;
-        // }
-
-        // // Rebonds sur les murs haut et bas
-        // if (this.ball.ball_y <= 5 || this.ball.ball_y >= this.config.canvas_height - 5) 
-        // {
-
-        //     //console.log(`AVANT rebond avec ball_x = ${this.ball.ball_x} et ball_y = ${this.ball.ball_y}`);
-
-        //     if (this.ball.ball_x <= 50 )
-        //     {
-        //         if (this.ball.ball_y <= 5)
-        //             this.ball.ball_y = 6;
-        //         else
-        //             this.ball.ball_y = this.config.canvas_height - 6;
-        //         //console.log("ca passe ici zeubi")
-        //     }
-        //     if (this.ball.ball_x >= this.config.canvas_width - 50)
-        //     {
-        //         if (this.ball.ball_y <= 5)
-        //             this.ball.ball_y = 6;
-        //         else
-        //             this.ball.ball_y = this.config.canvas_height - 6;
-        //         //console.log("ca passe ici woula")
-        //     }
-
-        //     //console.log(`APRES rebond avec ball_x = ${this.ball.ball_x} et ball_y = ${this.ball.ball_y}`);
-        //     this.ball.ball_dir_y *= -1;
-        //     this.ball.current_rebond++;
-        //     this.normalize_ball_speed();
-        // }
-        
-        // // raquette gauche
-        // if (
-        //     this.ball.ball_x <= 40 &&
-        //     this.ball.ball_x >= 25 &&
-        //     this.ball.ball_y >= this.paddle.left_paddle_y - this.paddle.marge &&
-        //     this.ball.ball_y <= this.paddle.left_paddle_y + this.config.paddle_height + this.paddle.marge &&
-        //     this.ball.ball_dir_x < 0)
-        // {
-        //     console.log(`🏓 Rebond raquette gauche à x=${this.ball.ball_x} et y=${this.ball.ball_y}`);
-        //     if (this.config.ball_speed < this.config.ball_real_speed)
-        //         this.config.ball_speed = this.config.ball_real_speed;
-        //     this.update_ball_dir(0);
-        //     this.normalize_ball_speed();
-        //     if (this.state.game_mode == "solo")
-        //     {
-        //         this.state.ia_mode = true;
-        //         this.ia_init();
-        //         this.ia_detection();
-        //         this.ia_init_difficulty();
-        //         this.ia.counter = 0;
-        //         this.ball.current_rebond = 0;
-        //         this.paddle.current_shot++;
-        //     }
-        // }
-
-        // // raquette droite
-        // if (
-        //     this.ball.ball_x >= this.config.canvas_width - 40 &&
-        //     this.ball.ball_x <= this.config.canvas_width - 25 &&
-        //     this.ball.ball_y >= this.paddle.right_paddle_y - this.paddle.marge &&
-        //     this.ball.ball_y <= this.paddle.right_paddle_y + this.config.paddle_height + this.paddle.marge &&
-        //     this.ball.ball_dir_x > 0)
-        // {
-        //     console.log(`🏓 Rebond raquette droite à x=${this.ball.ball_x} et y=${this.ball.ball_y}`);
-        //     if (this.config.ball_speed < this.config.ball_real_speed)
-        //         this.config.ball_speed = this.config.ball_real_speed;
-        //     this.update_ball_dir(1);
-        //     this.normalize_ball_speed();
-        //     if (this.state.game_mode == "solo")
-        //     {
-        //         this.state.ia_mode = false;
-        //         this.ball.current_rebond = 0;
-        //     }
-        // }
-
     handle_goal(): void
     {
+        // mettre a jour data
+        if (this.ball.ball_x < 0)
+        {
+            if (this.ball.ball_y <= this.config.canvas_height)
+                this.data.lose_point_up++;
+            else
+                this.data.lose_point_down++;
+        }
+        else
+        {
+            if (this.ball.ball_y <= this.config.canvas_height)
+                this.data.win_point_up++;
+            else
+                this.data.win_point_down++;
+        }
+
+
         this.ball.ball_dir_x = 0;
         this.ball.ball_dir_y = 0;
         this.update_score(1);
@@ -862,7 +994,7 @@ class Pong
             this.ball.ball_y = this.config.canvas_height / 2;
             this.paddle.left_paddle_y = (this.config.canvas_height - this.config.paddle_height) / 2;
             this.paddle.right_paddle_y = (this.config.canvas_height - this.config.paddle_height) / 2;
-            this.draw();
+            this.draw(1);
             this.start_count_down();
         }, 1500);
 
@@ -901,7 +1033,7 @@ class Pong
         }
 
         if (score_P1)
-            score_P1.textContent = `Joueur 1 : ${this.state.left_score}`;
+            score_P1.textContent = `${this.player_name} : ${this.state.left_score}`;
         if (score_P2)
             score_P2.textContent = `Joueur 2 : ${this.state.right_score}`;
     }
@@ -976,17 +1108,23 @@ class Pong
         }
     }
 
-    draw(): void {
-        if (!this.ctx) return;
+    draw(interpolation: number): void
+    {
+        if (!this.ctx)
+            return;
 
-        // === 1. FOND NOIR AVEC DÉGRADÉ ===
+        // calcul des coordonnees interpoles
+        const interpolated_x = this.ball.prev_x + (this.ball.ball_x - this.ball.prev_x) * interpolation;
+        const interpolated_y = this.ball.prev_y + (this.ball.ball_y - this.ball.prev_y) * interpolation;
+
+        // fond noir degrade
         let bgGradient = this.ctx.createLinearGradient(0, 0, 0, this.config.canvas_height);
         bgGradient.addColorStop(0, "#0f0f0f");
         bgGradient.addColorStop(1, "#1a1a1a");
         this.ctx.fillStyle = bgGradient;
         this.ctx.fillRect(0, 0, this.config.canvas_width, this.config.canvas_height);
 
-        // === 4. LIGNES DU MILIEU EN POINTILLÉS (optionnel mais rétro) ===
+        // ligne centrale de pointilles
         this.ctx.shadowBlur = 0;
         this.ctx.setLineDash([10, 15]);
         this.ctx.strokeStyle = "#444";
@@ -997,8 +1135,8 @@ class Pong
         this.ctx.stroke();
         this.ctx.setLineDash([]);
 
-        // === 2. RAQUETTES STYLE NÉON ===
-        // Effet glow : couleur + ombre
+        // raquettes
+        // effet glow : couleur + ombre
         this.ctx.shadowColor = "#00ffff";
         this.ctx.shadowBlur = 20;
 
@@ -1017,26 +1155,33 @@ class Pong
         this.ctx.fillStyle = paddleGradientRight;
         this.ctx.fillRect(this.config.canvas_width - 30 - this.config.paddle_width, this.paddle.right_paddle_y, this.config.paddle_width, this.config.paddle_height);
 
-        // === 3. BALLE PULSANTE ET CLIGNOTANTE ===
+        // balle
         const pulse = 10 + Math.sin(Date.now() / 100) * 2;
         const blink = Math.floor(Date.now() / 200) % 2 === 0;
         this.ctx.shadowColor = blink ? "#ffff00" : "#ff00ff";
         this.ctx.shadowBlur = 25;
         this.ctx.fillStyle = blink ? "#ffff00" : "#ff00ff";
         this.ctx.beginPath();
-        this.ctx.arc(this.ball.ball_x, this.ball.ball_y, pulse, 0, Math.PI * 2);
+        //this.ctx.arc(this.ball.ball_x, this.ball.ball_y, pulse, 0, Math.PI * 2);
+        this.ctx.arc(interpolated_x, interpolated_y, 10, 0, Math.PI * 2);
         this.ctx.fill();
 
-        // === 5. HUD (score, vitesse) AVEC POLICE PIXEL ===
-        this.ctx.shadowBlur = 0;
-        this.ctx.fillStyle = "#00ffcc";
-        this.ctx.font = "bold 18px 'Courier New', monospace";
-        const currentSpeed = calculate_ball_speed(this.ball);
-        this.ctx.fillText(`🎯 Vitesse: ${currentSpeed.toFixed(2)}`, 20, 30);
+        // balle fantome
+        // this.ctx.beginPath();
+        // this.ctx.fillStyle = "gray";
+        // this.ctx.arc(this.ball.ia_x, this.ball.ia_y, 10, 0,  Math.PI * 2)
+        // this.ctx.fill();
 
-        this.ctx.fillStyle = "#ff66cc";
-        this.ctx.font = "14px 'Courier New', monospace";
-        this.ctx.fillText(`⏱️ Temps: ${get_time(this.start_time).toFixed(0)} ms`, 20, 55);
+        // === 5. HUD (score, vitesse) AVEC POLICE PIXEL ===
+        // this.ctx.shadowBlur = 0;
+        // this.ctx.fillStyle = "#00ffcc";
+        // this.ctx.font = "bold 18px 'Courier New', monospace";
+        // const currentSpeed = calculate_ball_speed(this.ball);
+        // this.ctx.fillText(`🎯 Vitesse: ${currentSpeed.toFixed(2)}`, 20, 30);
+
+        // this.ctx.fillStyle = "#ff66cc";
+        // this.ctx.font = "14px 'Courier New', monospace";
+        // this.ctx.fillText(`⏱️ Temps: ${get_time(this.start_time).toFixed(0)} ms`, 20, 55);
     }
 
 
@@ -1107,15 +1252,12 @@ class Pong
     ia_init_difficulty()
     {
         let random_depart = random_number(0.1, 0.2);
-        //let random_depart = 0.10;
         this.ia.depart = random_depart * this.ball.time_ia_in_frame;
 
         let random_move_2 = random_number(0.1, 0.25);
-        //let random_move_2 = 0.35;
         this.ia.move_2 = random_move_2 * this.ball.time_ia_in_frame;
 
         let random_move_1 = 1 - random_move_2 - random_depart;
-        //let random_move_1 = 0.55;
         this.ia.move_1 = random_move_1 * this.ball.time_ia_in_frame;
 
         console.log(`TIME IN FRAME = ${this.ball.time_ia_in_frame}`);
@@ -1183,10 +1325,10 @@ class Pong
                 if (Math.abs(distance) < 30)
                     this.ia.random_move_2 = false;
             }
-            if (this.config.ball_speed > 11)
-                this.ia_ajustement(10, this.ia.random_move_2);
+            if (this.config.ball_speed > 13)
+                this.ia_ajustement(12, this.ia.random_move_2);
             else
-                this.ia_ajustement(5, this.ia.random_move_2);
+                this.ia_ajustement(8, this.ia.random_move_2);
             //console.log("FIN DE MOOOOVE");
             return ;
         }
@@ -1228,10 +1370,10 @@ class Pong
                 if (Math.abs(distance) < 30)
                     this.ia.random_move_2 = false;
             }
-            if (this.config.ball_speed > 11)
-                this.ia_ajustement(10, this.ia.random_move_2);
+            if (this.config.ball_speed > 13)
+                this.ia_ajustement(12, this.ia.random_move_2);
             else
-                this.ia_ajustement(5, this.ia.random_move_2);
+                this.ia_ajustement(10, this.ia.random_move_2);
             //console.log("FIN DE MOOOOVE");
             return ;
         }
@@ -1273,10 +1415,10 @@ class Pong
                 if (Math.abs(distance) < 30)
                     this.ia.random_move_2 = false;
             }            
-            if (this.config.ball_speed > 11)
-            this.ia_ajustement(10, false);
+            if (this.config.ball_speed > 13)
+                this.ia_ajustement(12, false);
             else
-                this.ia_ajustement(5, false);
+                this.ia_ajustement(10, false);
             //console.log("FIN DE MOOOOVE");
             return ;
         }
@@ -1318,10 +1460,10 @@ class Pong
                 if (Math.abs(distance) < 30)
                     this.ia.random_move_2 = false;
             }      
-            if (this.config.ball_speed > 11)
-                this.ia_ajustement(10, false);
+            if (this.config.ball_speed > 13)
+                this.ia_ajustement(12, false);
             else
-                this.ia_ajustement(5, false);
+                this.ia_ajustement(10, false);
             //console.log("FIN DE MOOOOVE");
             return ;
         }
@@ -1488,36 +1630,36 @@ class Pong
             ajust_percent_lose = 0.20;
 
         if (this.state.right_score - this.state.left_score >= 4)
-            ajust_percent_lose = 0.30;
+            ajust_percent_lose = 0.25;
 
         if (this.paddle.current_shot < 9)
         {
             if (random < 0.15 + ajust_percent_lose)
             {
                 if (this.ia.delta_paddle > 0)
-                    this.ia.delta_error = 80 - this.ia.delta_paddle;
+                    this.ia.delta_error = 70 - this.ia.delta_paddle;
                 else
-                    this.ia.delta_error = (80 + this.ia.delta_paddle) * -1;
+                    this.ia.delta_error = (70 + this.ia.delta_paddle) * -1;
             }
         }        
         else if (this.paddle.current_shot < 12)
         {
-            if (random < 0.25 + ajust_percent_lose)
+            if (random < 0.20 + ajust_percent_lose)
             {
                 if (this.ia.delta_paddle > 0)
-                    this.ia.delta_error = 80 - this.ia.delta_paddle;
+                    this.ia.delta_error = 70 - this.ia.delta_paddle;
                 else
-                    this.ia.delta_error = (80 + this.ia.delta_paddle) * -1;
+                    this.ia.delta_error = (70 + this.ia.delta_paddle) * -1;
             }
         }        
         else
         {
-            if (random < 0.35 + ajust_percent_lose)
+            if (random < 0.30 + ajust_percent_lose)
             {
                 if (this.ia.delta_paddle > 0)
-                    this.ia.delta_error = 80 - this.ia.delta_paddle;
+                    this.ia.delta_error = 70 - this.ia.delta_paddle;
                 else
-                    this.ia.delta_error = (80 + this.ia.delta_paddle) * -1;
+                    this.ia.delta_error = (70 + this.ia.delta_paddle) * -1;
             }
         }
 
@@ -1539,16 +1681,14 @@ class GamePong
 export class Game_solo
 {
     private current_game: Pong | null = null;
-    private restart_btn: HTMLButtonElement;
     private canvas: HTMLCanvasElement; 
     private mode: 'solo' | 'versus';
+
 
     constructor(mode : 'solo' | 'versus')
     {
         this.mode = mode;
         this.canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
-        this.restart_btn = document.getElementById("restartBtn") as HTMLButtonElement;
-        this.restart_btn.addEventListener('click', () => this.restart());
         this.current_game = GamePong.create_game(this.canvas, this.mode);
     }
 
@@ -1563,6 +1703,30 @@ export class Game_solo
         if (this.current_game)
         {
             this.current_game.restart();
+        }
+    }
+
+    cleanup()
+    {
+        if (this.current_game)
+        {
+            this.current_game.cleanup();
+        }
+    }    
+    
+    back_to_menu()
+    {
+        if (this.current_game)
+        {
+            this.current_game.back_to_menu();
+        }
+    }    
+    
+    destroy()
+    {
+        if (this.current_game)
+        {
+            this.current_game.destroy();
         }
     }
 }
