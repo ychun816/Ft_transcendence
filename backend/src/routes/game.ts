@@ -22,13 +22,13 @@ interface GameDataRequest {
 	multiMode?: boolean;
 }
 
-// async function findUser(prisma: PrismaClient, playerId: number)
-// {
-// 	const user = await prisma.user.findUnique({
-// 		where: {id: playerId}
-// 	});
-// 	return user;
-// }
+async function findUser(prisma: PrismaClient, playerId: number)
+{
+	const user = await prisma.user.findUnique({
+		where: {id: playerId}
+	});
+	return user;
+}
 
 export async function registerGameRoute(
 	app: FastifyInstance<any, any, any, any>,
@@ -118,7 +118,7 @@ export async function registerGameRoute(
 					where: { id: gameData.player2Id },
 					data: {
 						gamesPlayed: { increment: 1 },
-						...(gameData.player1Id === gameData.winnerId
+						...(gameData.player2Id === gameData.winnerId
 							? { wins: { increment: 1 } }
 							: { losses: { increment: 1 } }
 						),
@@ -130,7 +130,7 @@ export async function registerGameRoute(
 				success: true,
 				gameId: game.id,
 			});
-		} catch (error) {
+		} catch (error: any) {
 			console.error("Error while creating match:", error);
 			reply.status(500).send({
 				error: "Internal server error",
@@ -149,10 +149,18 @@ export async function registerGameRoute(
 		}
 
 		const username = request.query.username as string;
-		const {iaStats, tournamentStats, multiStats} = await generateStats(prisma, username)
+		const statResults = await generateStats(prisma, username)
+        if (statResults === null) {
+            console.log(`❌ stat Results not found for user: ${username}`);
+            return reply.status(404).send({ error: 'stat Results not found for user' });
+        }
+		const {iaStats, tournamentStats, multiStats} = statResults;
 		if (!iaStats || !tournamentStats || !multiStats)
-			reply.status(400).send({ error: "No game stats" });
-		reply.status(200).send({sucess:true, iaStats, tournamentStats, multiStats});
+			return reply.status(400).send({ error: "No game stats" });
+		console.log("iaStats: ", iaStats);
+		console.log("tournamentStats: ", tournamentStats);
+		console.log("multiStats: ", multiStats);
+		return reply.status(200).send({success:true, iaStats, tournamentStats, multiStats});
 	});
 }
 
@@ -175,10 +183,12 @@ async function generateStats(prisma: PrismaClient, username: string)
 			gamesPlayed: true,
 		}
 	});
+	if (!matches)
+		return null;
 	let iaStats = new GlobalStat;
 	let tournamentStats = new GlobalStat;
 	let multiStats = new GlobalStat;
-	if (matches){
+	if (matches.matchesAsPlayer1.length > 0 || matches.matchesAsPlayer2.length > 0){
 		await handleMatches(matches.matchesAsPlayer1, prisma, username, iaStats, tournamentStats, multiStats)
 		await handleMatches(matches.matchesAsPlayer2, prisma, username, iaStats, tournamentStats, multiStats)
 	}

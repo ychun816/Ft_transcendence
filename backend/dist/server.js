@@ -20,6 +20,8 @@ import os from 'os';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 export const PROJECT_ROOT = path.resolve(__dirname, "../../");
+const HTTP_PORT = process.env.HTTP_PORT ? parseInt(process.env.HTTP_PORT) : 3001;
+const HTTPS_PORT = process.env.HTTPS_PORT ? parseInt(process.env.HTTPS_PORT) : 3443;
 // Configuration des ports adaptée à votre .env
 const MAIN_PORT = process.env.MAIN_PORT ? parseInt(process.env.MAIN_PORT) : 3000;
 const HTTP_REDIRECT_PORT = process.env.HTTP_REDIRECT_PORT ? parseInt(process.env.HTTP_REDIRECT_PORT) : 8080;

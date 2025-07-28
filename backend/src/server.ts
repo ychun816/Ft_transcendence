@@ -24,24 +24,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 export const PROJECT_ROOT = path.resolve(__dirname, "../../");
 
-const prisma = new PrismaClient();
-
 const HTTP_PORT = process.env.HTTP_PORT ? parseInt(process.env.HTTP_PORT) : 3001;
 const HTTPS_PORT = process.env.HTTPS_PORT ? parseInt(process.env.HTTPS_PORT) : 3443;
 
-const PUBLIC_IP = '10.16.13.4';
-
-let httpsOptions;
-try{
-	httpsOptions = {
-		key: fs.readFileSync(path.join(__dirname, '../ssl/key.pem')),
-		cert: fs.readFileSync(path.join(__dirname, '../ssl/cert.pem'))
-	};
-	console.log("✅ Certificats SSL chargés avec succès");
-} catch (error) {
-	  console.error("❌ Erreur lors du chargement des certificats SSL:", error.message);
-
-	  // Extension du type FastifyRequest pour les métriques
+// Extension du type FastifyRequest pour les métriques
 declare module 'fastify' {
   interface FastifyRequest {
     startTime?: number;
