@@ -242,7 +242,7 @@ const setupMainServer = async () => {
     console.log("📁 Enregistrement des fichiers statiques du frontend...");
     await app.register(async function (fastify) {
         await fastify.register(fastifyStatic, {
-            root: path.join(__dirname, "../../frontend/src"),
+            root: path.join(__dirname, "../../frontend/dist"),
             prefix: "/",
         });
     });
