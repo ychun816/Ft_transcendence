@@ -31,7 +31,7 @@ export function createProfilePage(): HTMLElement {
 						<!-- Bloc Profile Principal -->
 						<div class="${classes.retroPanel} rounded-2xl p-6 w-full flex flex-col items-center flex-shrink-0">
 							<header class="w-full mb-6">
-								<button class="${classes.backButton}" data-route="/home">
+								<button class="${classes.backButton}" data-route="/game">
 									${i18n.t('profile.back')}
 								</button>
 								<h2 class="${classes.sectionTitle} mt-4">
@@ -546,7 +546,7 @@ async function displayMatchHistory(page: HTMLDivElement) {
 					<th>${i18n.t('profile.opponent')}</th>
 					<th>${i18n.t('profile.result')}</th>
 				</tr>
-			</thead>	
+			</thead>
 			<tbody>
 	`;
 
@@ -764,7 +764,12 @@ async function getDashboardStats(page: HTMLDivElement) {
 		if (response.ok) {
 			const stats = await response.json();
 			console.log('Game stats retrieved!', stats);
-			return stats;
+			if (stats.success && stats.iaStats && stats.tournamentStats && stats.multiStats) {
+				return stats;
+			} else {
+				console.error('Invalid stats structure:', stats);
+				return null;
+			}
 		} else {
 			console.error('Failed to retrieve game stats');
 			return null;
@@ -780,6 +785,7 @@ async function displayDashboard(page: HTMLDivElement)
 	try{
 		Chart.register(...registerables);
 		const stats = await getDashboardStats(page);
+		console.log("STATS: ", stats);
 		const statDiv = page.querySelector("#dashboard main");
 		if (!statDiv){
 			console.error('Dashboard container not found');
