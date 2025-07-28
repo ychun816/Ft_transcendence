@@ -15,7 +15,7 @@ class Router {
         // Définir les routes qui nécessitent une authentification
         this.protectedRoutes.add('/home');
         this.protectedRoutes.add('/profile');
-        this.protectedRoutes.add('/game');
+        //this.protectedRoutes.add('/game');
         this.protectedRoutes.add('/chat');
         this.protectedRoutes.add('/leaderboard');
     }
