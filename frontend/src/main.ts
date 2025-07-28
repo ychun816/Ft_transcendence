@@ -11,6 +11,7 @@ import { createServerGamePage } from "./pages/ServerGamePage";
 import { createServerGameSoloPage } from "./pages/ServerGameSoloPage";
 import { createServerGameVersusPage } from "./pages/ServerGameVersusPage";
 import { createServerGameMultiPage } from "./pages/ServerGameMultiPage";
+import { createTwoFactorVerifyPage } from "./pages/TwoFactorVerifyPage";
 import { i18n } from "./services/i18n";
 
 // Initialize app
@@ -31,7 +32,8 @@ async function initApp() {
     .addRoute('/server-game/multi', createServerGameMultiPage) 
     .addRoute('/profile', createProfilePage)
     .addRoute('/chat', createChatPage)
-    .addRoute('/404', createNotFoundPage);
+    .addRoute('/404', createNotFoundPage)
+    .addRoute('/2fa-verify', createTwoFactorVerifyPage); // register the 2FA page
 
   // Route dynamique pour les profils utilisateur
   router.addDynamicRoute('/profile/:username', createUserProfilePage);

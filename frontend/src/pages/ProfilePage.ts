@@ -1,5 +1,6 @@
 import { i18n } from "../services/i18n.js";
 import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
+import { createTwoFactorSetup } from '../components/TwoFactorSetup.js'; //FOR 2FA
 import { createLogoutSwitcher } from "../components/logoutSwitcher.js";
 import { createNeonContainer } from "../styles/neonTheme.js";
 
@@ -47,6 +48,16 @@ export function createProfilePage(): HTMLElement {
 									<div class="bg-gray-700 bg-opacity-50 p-4 rounded-xl border border-blue-400 border-opacity-30">
 										<p id="user-stats" class="text-blue-400 text-sm">${i18n.t('profile.games_played_stats', {games: '0', wins: '0', losses: '0'})}</p>
 									</div>
+								</div>
+							</div>
+							
+							<!-- Security Section -->
+							<div class="w-full mb-4">
+								<h4 class="text-lg font-semibold mb-3">${i18n.t('profile.security') || 'Security'}</h4>
+								<div class="space-y-2">
+									<button id="manage-2fa" class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 text-sm">
+										🔐 ${i18n.t('profile.manage_2fa') || 'Manage Two-Factor Authentication'}
+									</button>
 								</div>
 							</div>
 						</main>
@@ -108,7 +119,9 @@ export function createProfilePage(): HTMLElement {
 		editAvatar(page);
 		editUsername(page);
 		editPassword(page);
+		manage2FA(page); // <-- ADD to enable the 2FA button
 
+		
 		getUserInfo().then(data => {
 			if (data) {
 				console.log("🔍 User data received:", data);
@@ -120,7 +133,7 @@ export function createProfilePage(): HTMLElement {
 
 					const isDevMode = window.location.port === '5173'; // Vite dev server
 					const serverUrl = isDevMode
-						? `https://${window.location.hostname}:3444`
+						? `https://${window.location.hostname}:3445`
 						: window.location.origin;
 
 					const fullAvatarUrl = data.avatarUrl.startsWith('http')
@@ -579,7 +592,7 @@ async function displayFriendsList(page: HTMLDivElement){
 		// Déterminer l'URL du serveur correct
 		const isDevMode = window.location.port === '5173';
 		const serverUrl = isDevMode
-			? `https://${window.location.hostname}:3444`
+			? `https://${window.location.hostname}:3445`
 			: window.location.origin;
 
 		// Construire l'URL complète
@@ -697,43 +710,3 @@ function setupAddFriendFeature(page: HTMLDivElement) {
 		});
 	};
 }
-
-
-// async function displayDashboard(page: HTMLDivElement) {
-// 	const username = sessionStorage.getItem("username");
-// 	const history = await generateStatDashboard();
-// 	if (!history) return;
-
-// 	const histDiv = page.querySelector("#match-block main");
-// 	if (!histDiv) return;
-
-// 	let html = `
-// 		<table class="data-table">
-// 			<thead>
-// 				<tr>
-// 					<th>${i18n.t('profile.date')}</th>
-// 					<th>${i18n.t('profile.opponent')}</th>
-// 					<th>${i18n.t('profile.result')}</th>
-// 				</tr>
-// 			</thead>
-// 			<tbody>
-// 	`;
-
-// 	for (const match of history) {
-// 		const isPlayer1 = match.player1.username === username;
-// 		const opponent = isPlayer1 ? match.player2.username : match.player1.username;
-// 		const result = match.winnerId === (isPlayer1 ? match.player1Id : match.player2Id) ? i18n.t('profile.victory') : i18n.t('profile.defeat');
-// 		const date = new Date(match.playedAt).toLocaleDateString();
-// 		const statusClass = result === i18n.t('profile.victory') ? "status-victory" : "status-defeat";
-
-// 		html += `
-// 			<tr>
-// 				<td>${date}</td>
-// 				<td>${opponent}</td>
-// 				<td><span class="${statusClass}">${result}</span></td>
-// 			</tr>
-// 		`;
-// 	}
-// 	html += `</tbody></table>`;
-// 	histDiv.innerHTML = html;
-// }
