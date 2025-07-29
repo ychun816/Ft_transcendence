@@ -2,7 +2,8 @@ import { i18n } from "../services/i18n.js";
 import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
 import { createTwoFactorSetup } from "../components/TwoFactorSetup.js"; //FOR 2FA
 import { createLogoutSwitcher } from "../components/logoutSwitcher.js";
-import { createNeonContainer } from "../styles/neonTheme.js";
+import { classes } from "../styles/retroStyles.js";
+import { Chart, registerables } from "chart.js"
 
 // Déplacer la fonction manage2FA ici, avant son utilisation
 async function manage2FA(page: HTMLDivElement) {
@@ -76,102 +77,132 @@ async function manage2FA(page: HTMLDivElement) {
 
 export function createProfilePage(): HTMLElement {
 	const page = document.createElement("div");
-	page.className =
-		"min-h-screen bg-gray-900 text-white font-mono overflow-hidden";
+	page.className = "min-h-screen bg-gray-900 text-white font-mono overflow-hidden";
 
 	const render = () => {
-		const content = `
-			<div class="min-h-screen flex items-center justify-center p-4 scan-lines relative">
+		page.innerHTML = `
+			<style>
+				/* Import de la police Orbitron pour le thème rétro */
+				@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 
-			<!-- Conteneur principal avec disposition côte à côte - centré -->
-			<div class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-8 border border-blue-400 border-opacity-30 neon-border flex gap-10 items-start" style="height: 80vh; max-width: 1300px; width: 95%;">
-				<!-- Colonne de gauche : Profile + Friends - largeur fixe (moitié du match history) -->
-				<div class="flex flex-col gap-6 h-full" style="width: 800px;">
-					<!-- Bloc Profile Principal -->
-					<div class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-6 border border-cyan-400 border-opacity-30 neon-border w-full flex flex-col items-center flex-shrink-0">
-						<header class="w-full mb-6">
-							<button class="bg-gradient-to-r from-gray-500 from-opacity-30 to-gray-600 to-opacity-30 hover:from-gray-500 hover:from-opacity-50 hover:to-gray-600 hover:to-opacity-50 text-white font-bold py-2 px-4 rounded-lg border border-gray-500 border-opacity-50 transition-all duration-300 transform hover:scale-105" data-route="/home">${i18n.t("profile.back")}</button>
-							<h2 class="text-3xl font-bold text-cyan-400 neon-text text-center mt-4">${i18n.t("profile.my_profile")}</h2>
-						</header>
-						<main class="w-full flex flex-col items-center">
-							<div class="flex items-center gap-8 mb-8">
-								<div class="relative w-32 h-32 rounded-full border-4 border-cyan-400 border-opacity-50 neon-border overflow-hidden">
-									<img src="/default-avatar.png" id="user-avatar" class="w-full h-full object-cover">
-									<button id="edit-avatar" title="${i18n.t("profile.edit_avatar")}" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-cyan-400 bg-opacity-20 hover:bg-opacity-40 text-cyan-400 rounded-full p-2 transition-all duration-300">
-										<img src="../assets/edit.svg" alt="Edit" style="width:20px; height:20px;">
-									</button>
-									<input type="file" id="avatar-file-input" accept="image/png, image/jpeg" style="display:none;" />
-								</div>
-								<div class="flex-1">
-									<div class="flex items-center gap-3 mb-3">
-										<h3 id="username" class="text-2xl font-bold text-cyan-400 neon-text">Username</h3>
-										<button id="edit-username" title="${i18n.t("profile.edit_username")}" class="bg-gradient-to-r from-cyan-400 from-opacity-20 to-blue-400 to-opacity-20 hover:from-cyan-400 hover:from-opacity-40 hover:to-blue-400 hover:to-opacity-40 text-cyan-400 font-bold py-1 px-2 rounded-lg border border-cyan-400 border-opacity-50 transition-all duration-300 transform hover:scale-105">
-											<img src="../assets/edit.svg" alt="Edit" style="width:16px; height:16px;">
+				* {
+					font-family: 'Orbitron', monospace;
+				}
+			</style>
+
+			<!-- Conteneur principal avec effet scan -->
+			<div class="min-h-screen flex items-center justify-center p-4 ${classes.scanLinesContainer}">
+
+				<!-- Conteneur principal avec disposition côte à côte - centré -->
+				<div class="${classes.retroPanel} rounded-2xl p-8 flex gap-10 items-start" style="height: 90vh; max-width: 2000px; width: 95%;">
+
+					<!-- Colonne de gauche : Profile + Friends -->
+					<div class="flex flex-col gap-6 h-full" style="width: 1000px;">
+
+						<!-- Bloc Profile Principal -->
+						<div class="${classes.retroPanel} rounded-2xl p-6 w-full flex flex-col items-center flex-shrink-0">
+							<header class="w-full mb-6">
+								<button class="${classes.backButton}" data-route="/game">
+									${i18n.t('profile.back')}
+								</button>
+								<h2 class="${classes.sectionTitle} mt-4">
+									${i18n.t('profile.my_profile')}
+								</h2>
+							</header>
+
+							<main class="w-full flex flex-col items-center">
+								<div class="flex items-center gap-8 mb-8">
+									<!-- Avatar avec bordure néon -->
+									<div class="relative w-32 h-32 rounded-full ${classes.neonBorder} overflow-hidden">
+										<img src="/default-avatar.png" id="user-avatar" class="w-full h-full object-cover">
+										<button id="edit-avatar" title="${i18n.t('profile.edit_avatar')}"
+											class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
+											bg-purple-400 bg-opacity-20 hover:bg-opacity-40 text-purple-400 rounded-full p-2
+											transition-all duration-300 border border-purple-400 border-opacity-50">
+											<img src="../assets/edit.svg" alt="Edit" class="w-5 h-5">
 										</button>
+										<input type="file" id="avatar-file-input" accept="image/png, image/jpeg" class="hidden" />
 									</div>
-									<div class="flex items-center gap-3 mb-3">
-										<span id="password" class="text-gray-300">${i18n.t("profile.password_display")}</span>
-										<button id="edit-password" title="${i18n.t("profile.edit_password")}" class="bg-gradient-to-r from-cyan-400 from-opacity-20 to-blue-400 to-opacity-20 hover:from-cyan-400 hover:from-opacity-40 hover:to-blue-400 hover:to-opacity-40 text-cyan-400 font-bold py-1 px-2 rounded-lg border border-cyan-400 border-opacity-50 transition-all duration-300 transform hover:scale-105">
-											<img src="../assets/edit.svg" alt="Edit" style="width:16px; height:16px;">
-										</button>
-									</div>
-									<div class="bg-gray-700 bg-opacity-50 p-4 rounded-xl border border-blue-400 border-opacity-30">
-										<p id="user-stats" class="text-blue-400 text-sm">${i18n.t("profile.games_played_stats", { games: "0", wins: "0", losses: "0" })}</p>
+
+									<!-- Informations utilisateur -->
+									<div class="flex-1">
+										<div class="flex items-center gap-3 mb-3">
+											<h3 id="username" class="text-2xl font-bold ${classes.neonText}">Username</h3>
+											<button id="edit-username" title="${i18n.t('profile.edit_username')}"
+												class="bg-purple-400 bg-opacity-20 hover:bg-opacity-40 text-purple-400 font-bold
+												py-1 px-2 rounded-lg border border-purple-400 border-opacity-50 transition-all duration-300
+												transform hover:scale-105">
+												<img src="../assets/edit.svg" alt="Edit" class="w-4 h-4">
+											</button>
+										</div>
+
+										<div class="flex items-center gap-3 mb-3">
+											<span id="password" class="text-gray-300">${i18n.t('profile.password_display')}</span>
+											<button id="edit-password" title="${i18n.t('profile.edit_password')}"
+												class="bg-purple-400 bg-opacity-20 hover:bg-opacity-40 text-purple-400 font-bold
+												py-1 px-2 rounded-lg border border-purple-400 border-opacity-50 transition-all duration-300
+												transform hover:scale-105">
+												<img src="../assets/edit.svg" alt="Edit" class="w-4 h-4">
+											</button>
+										</div>
+
+										<!-- Stats avec panneau rétro -->
+										<div class="${classes.retroPanel} rounded-xl p-4">
+											<p id="user-stats" class="text-purple-300 text-sm font-bold">
+												${i18n.t('profile.games_played_stats', {games: '0', wins: '0', losses: '0'})}
+											</p>
+										</div>
 									</div>
 								</div>
-							</div>
-							
-							<!-- Security Section -->
-							<div class="w-full mb-4">
-								<h4 class="text-lg font-semibold mb-3">${i18n.t("profile.security") || "Security"}</h4>
-								<div class="space-y-2">
-									<button id="manage-2fa" class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 text-sm">
-										🔐 ${i18n.t("profile.manage_2fa") || "Manage Two-Factor Authentication"}
-									</button>
-								</div>
-							</div>
-						</main>
+							</main>
+						</div>
+
+						<!-- Bloc Friends List -->
+						<div id="friends-block" class="${classes.retroPanel} rounded-2xl p-6 w-full flex flex-col flex-1">
+							<header class="w-full flex-shrink-0 mb-4 flex items-center justify-between">
+								<h2 class="text-2xl font-bold text-green-400 drop-shadow-sm animate-pulse">
+									${i18n.t('profile.friends_list')}
+								</h2>
+								<!-- Le bouton (+) sera ajouté ici par JS -->
+							</header>
+
+							<main class="w-full flex-1 overflow-y-auto">
+								<!-- Le contenu de la liste d'amis sera ajouté ici -->
+							</main>
+						</div>
 					</div>
 
-					<!-- Bloc Friends List - occupe le reste de l'espace -->
-					<div id="friends-block" class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-6 border border-green-400 border-opacity-30 neon-border w-full flex flex-col flex-1">
-						<header class="w-full flex-shrink-0 mb-4 flex items-center justify-between">
-							<h2 class="text-2xl font-bold text-green-400 neon-text">${i18n.t("profile.friends_list")}</h2>
-							<!-- Le bouton (+) sera ajouté ici par JS -->
-						</header>
-						<main class="w-full flex-1 overflow-y-auto">
-							<!-- Le contenu de la liste d'amis sera ajouté ici -->
-							<!-- Plus d'amis peuvent être ajoutés ici -->
-						</main>
-					</div>
-				</div>
+					<!-- Colonne de droite : Match History + Dashboard -->
+					<div class="flex flex-col gap-6 h-full" style="width: 1000px;">
 
-				<!-- Colonne de droite : Match History - largeur fixe -->
-				<div class="flex flex-col gap-6 h-full" style="width: 800px;">
-					<div id="match-block" class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-6 border border-purple-400 border-opacity-30 neon-border w-full flex flex-col h-full">
-						<header class="w-full mb-4">
-							<h2 class="text-2xl font-bold text-purple-400 neon-text">${i18n.t("profile.match_history")}</h2>
-						</header>
-						<main class="w-full flex-1 overflow-y-auto">
-							<!-- Le contenu de l'historique des matchs sera ajouté ici -->
-						</main>
-					</div>
-					<div id="dashboard" class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-6 border border-purple-400 border-opacity-30 neon-border w-full flex flex-col h-full">
-						<header class="w-full mb-4">
-							<h2 class="text-2xl font-bold text-purple-400 neon-text">${i18n.t("profile.dashboard")}</h2>
-						</header>
-						<main class="w-full flex-1 overflow-y-auto">
-							<!-- Le contenu de l'historique des matchs sera ajouté ici -->
-						</main>
+						<!-- Match History -->
+						<div id="match-block" class="${classes.retroPanel} rounded-2xl p-6 w-full flex flex-col" style="height: 50%;">
+							<header class="w-full mb-4">
+								<h2 class="text-2xl font-bold text-purple-400 ${classes.neonText}">
+									${i18n.t('profile.match_history')}
+								</h2>
+							</header>
+							<main class="w-full flex-1 overflow-y-auto">
+							</main>
+						</div>
+
+						<!-- Dashboard -->
+						<div id="dashboard" class="${classes.retroPanel} rounded-2xl p-6 w-full flex flex-col" style="height: 50%;">
+							<header class="w-full mb-4">
+								<h2 class="text-2xl font-bold text-purple-400 ${classes.neonText}">
+									${i18n.t('profile.dashboard')}
+								</h2>
+							</header>
+							<main class="w-full flex-1 overflow-y-auto">
+							</main>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
+
 			<div class="absolute top-4 right-4" id="language-switcher-container"></div>
 			<div class="absolute top-4 left-4" id="logout-container"></div>
 		`;
-
-		page.innerHTML = createNeonContainer(content);
 
 		// Insérer le commutateur de langue
 		const languageSwitcherContainer = page.querySelector(
@@ -208,7 +239,7 @@ export function createProfilePage(): HTMLElement {
 
 					const isDevMode = window.location.port === "5173"; // Vite dev server
 					const serverUrl = isDevMode
-						? `https://${window.location.hostname}:3445`
+						? `https://${window.location.hostname}:3443`
 						: window.location.origin;
 
 					const fullAvatarUrl = data.avatarUrl.startsWith("http")
@@ -294,6 +325,7 @@ export function createProfilePage(): HTMLElement {
 
 		displayMatchHistory(page);
 		displayFriendsList(page);
+		displayDashboard(page);
 	};
 
 	render();
@@ -641,13 +673,16 @@ async function displayMatchHistory(page: HTMLDivElement) {
 
 	for (const match of history) {
 		const isPlayer1 = match.player1.username === username;
-		const opponent = isPlayer1
-			? match.player2.username
-			: match.player1.username;
-		const result =
-			match.winnerId === (isPlayer1 ? match.player1Id : match.player2Id)
-				? i18n.t("profile.victory")
-				: i18n.t("profile.defeat");
+		let opponent;
+		if (match.player2){
+			opponent = match.player2.username;
+		} else if (match.iaMode){
+			opponent = "IA";
+		} else {
+			opponent = "Local";
+		}
+		//const opponent = match.player2.username : match.player1.username;
+		const result = match.winnerId === (isPlayer1 ? match.player1Id : match.player2Id) ? i18n.t('profile.victory') : i18n.t('profile.defeat');
 		const date = new Date(match.playedAt).toLocaleDateString();
 		const statusClass =
 			result === i18n.t("profile.victory")
@@ -848,4 +883,331 @@ function setupAddFriendFeature(page: HTMLDivElement) {
 			}
 		});
 	};
+}
+
+
+async function getDashboardStats(page: HTMLDivElement) {
+	try{
+		const user = await getUserInfo();
+		if (!user) return null;
+		const token = sessionStorage.getItem('authToken');
+		const response = await fetch(`/api/game/stats?username=${encodeURIComponent(user.username)}`, {
+			method: "GET",
+			headers:{
+				"Content-Type": "application/json",
+				"Authorization": `Bearer ${token}`
+			},
+		});
+		if (response.ok) {
+			const stats = await response.json();
+			console.log('Game stats retrieved!', stats);
+			if (stats.success && stats.iaStats && stats.tournamentStats && stats.multiStats) {
+				return stats;
+			} else {
+				console.error('Invalid stats structure:', stats);
+				return null;
+			}
+		} else {
+			console.error('Failed to retrieve game stats');
+			return null;
+		}
+	} catch (error) {
+		console.error('Error fetching game stats:', error);
+		return null;
+	}
+}
+
+async function displayDashboard(page: HTMLDivElement)
+{
+	try{
+		Chart.register(...registerables);
+		const stats = await getDashboardStats(page);
+		console.log("STATS: ", stats);
+		const statDiv = page.querySelector("#dashboard main");
+		if (!statDiv){
+			console.error('Dashboard container not found');
+			return;
+		}
+
+		statDiv.innerHTML = `
+		<div class="dashboard-container" style="display: flex; flex-direction: column; gap: 20px; height: 100%;">
+			<div class="dashboard-data" style="display: flex; flex-direction: row; gap: 20px; height: 100%;">
+				<div class="time-section" style="flex: 1; min-height: 200px;">
+					<h3 style="color: #a855f7; font-size: 16px; margin-bottom: 10px; text-align: center;">
+						${i18n.t('profile.total_game_time')}
+					</h3>
+					<div id="gameTime" style="max-height: 180px;"></div>
+				</div>
+
+				<div class="side-section" style="flex: 1; min-height: 200px;">
+					<h3 style="color: #a855f7; font-size: 16px; margin-bottom: 10px; text-align: center;">
+						${i18n.t('profile.side_point')}
+					</h3>
+					<div id="gameSide" style="max-height: 180px;"></div>
+				</div>
+			</div>
+			<div class="dashboard-graph" style="display: flex; flex-direction: row; gap: 20px; height: 100%;">
+				<div class="chart-section" style="flex: 1; min-height: 200px;">
+					<h3 style="color: #a855f7; font-size: 16px; margin-bottom: 10px; text-align: center;">
+						${i18n.t('profile.game_types_distribution')}
+					</h3>
+					<canvas id="gameTypesChart" style="max-height: 180px;"></canvas>
+				</div>
+
+				<div class="chart-section" style="flex: 1; min-height: 200px;">
+					<h3 style="color: #a855f7; font-size: 16px; margin-bottom: 10px; text-align: center;">
+						${i18n.t('profile.winrate_by_type')}
+					</h3>
+					<canvas id="performanceChart" style="max-height: 180px;"></canvas>
+				</div>
+			</div>
+		</div>
+		`;
+
+		await createGameTypesChart(stats);
+		await createPerformanceChart(stats);
+		await displayGameTime(stats);
+		await displaySidePoint(stats);
+
+	} catch (error){
+		console.error('Error with dashboard display:', error);
+		const dashboardMain = page.querySelector("#dashboard main");
+		if (dashboardMain) {
+			dashboardMain.innerHTML = `
+				<div style="text-align: center; color: #ef4444; padding: 20px;">
+					<p>Error while loading user stats</p>
+					<button onclick="location.reload()" style="margin-top: 10px; padding: 8px 16px; background: #a855f7; color: white; border: none; border-radius: 4px; cursor: pointer;">
+						Reload
+					</button>
+				</div>
+			`;
+		}
+	}
+}
+
+async function displaySidePoint(stats: any)
+{
+	const container = document.getElementById('gameSide') as HTMLDivElement;
+	if (!container) return;
+
+	const topPoints = (stats.iaStats?.pointsUp + stats.tournamentStats?.pointsUp + stats.multiStats?.pointsUp) || 0;
+	const bottomPoints = (stats.iaStats?.pointsDown + stats.tournamentStats?.pointsDown + stats.multiStats?.pointsDown) || 0;
+
+	const totalPoints = topPoints + bottomPoints;
+
+	if (totalPoints === 0) {
+		container.innerHTML = `
+			<div style="text-align: center; color: #9ca3af; padding: 40px;">
+				<p>No games played at the moment</p>
+			</div>
+		`;
+		return;
+	} else {
+		container.innerHTML = `
+			<div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center;">
+				<div style="display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin-top: 20px; margin-left: 20px;">
+
+					<div style="display: flex; flex-direction: row; align-items: center;">
+						<div style="height: 70px; width: 20px; background-color: #ef4444; border-radius: 4px; margin-right: 8px;"></div>
+						<div style="font-size: 12px; color: #e5e7eb;">
+							${i18n.t('profile.top_points')}: ${topPoints}
+						</div>
+					</div>
+
+					<div style="height: 2px; width: 100%; background-color: #a855f7; margin-left: 2px;"></div>
+
+					<div style="display: flex; flex-direction: row; align-items: center;">
+						<div style="height: 70px; width: 20px; background-color: #10b981; border-radius: 4px; margin-right: 8px;"></div>
+						<div style="font-size: 12px; color: #e5e7eb;">
+							${i18n.t('profile.bottom_points')}: ${bottomPoints}
+						</div>
+					</div>
+				</div>
+			</div>
+		`;
+	}
+}
+
+async function 	displayGameTime(stats: any)
+{
+	const container = document.getElementById('gameTime') as HTMLDivElement;
+	if (!container) return;
+
+	const iaTime = (stats.iaStats?.lasted || 0);
+	const tournamentTime = (stats.tournamentStats?.lasted || 0);
+	const multiTime = (stats.multiStats?.lasted || 0);
+
+	const totalTime = iaTime + tournamentTime + multiTime;
+
+	if (totalTime === 0) {
+		container.innerHTML = `
+			<div style="text-align: center; color: #9ca3af; padding: 40px;">
+				<p>No games played at the moment</p>
+			</div>
+		`;
+		return;
+	} else {
+		const toMinutes = (s: number) => Math.floor(s / 60);
+		const totalMin = toMinutes(totalTime);
+		const iaMin = toMinutes(iaTime);
+		const tournamentMin = toMinutes(tournamentTime);
+		const multiMin = toMinutes(multiTime);
+
+		const iaPercent = totalMin ? (iaMin / totalMin) * 100 : 0;
+		const tournamentPercent = totalMin ? (tournamentMin / totalMin) * 100 : 0;
+		const multiPercent = totalMin ? (multiMin / totalMin) * 100 : 0;
+
+		container.innerHTML = `
+			<div style="display: flex; flex-direction: column; align-items: center; width: 100%; padding-top: 10px;">
+				<div style="font-size: 28px; color: #a855f7; font-weight: bold; margin-bottom: 16px;">
+					${totalMin} min
+				</div>
+
+				<div style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 400px;">
+					<div>
+						<div style="font-size: 12px; color: #ef4444; margin-bottom: 2px;">
+							${i18n.t('profile.ia_games')}: ${iaMin} min
+						</div>
+						<div style="height: 10px; background: #ef4444; width: ${iaPercent}%; border-radius: 4px;"></div>
+					</div>
+
+					<div>
+						<div style="font-size: 12px; color: #f59e0b; margin-bottom: 2px;">
+							${i18n.t('profile.tournament_games')}: ${tournamentMin} min
+						</div>
+						<div style="height: 10px; background: #f59e0b; width: ${tournamentPercent}%; border-radius: 4px;"></div>
+					</div>
+
+					<div>
+						<div style="font-size: 12px; color: #10b981; margin-bottom: 2px;">
+							${i18n.t('profile.multiplayer_games')}: ${multiMin} min
+						</div>
+						<div style="height: 10px; background: #10b981; width: ${multiPercent}%; border-radius: 4px;"></div>
+					</div>
+				</div>
+			</div>
+		`;
+	}
+}
+
+async function createGameTypesChart(stats: any) {
+	const ctx = document.getElementById('gameTypesChart') as HTMLCanvasElement;
+	if (!ctx) return;
+
+	const iaGames = (stats.iaStats?.winner || 0) + (stats.iaStats?.loser || 0);
+	const tournamentGames = (stats.tournamentStats?.winner || 0) + (stats.tournamentStats?.loser || 0);
+	const multiGames = (stats.multiStats?.winner || 0) + (stats.multiStats?.loser || 0);
+
+	const totalGames = iaGames + tournamentGames + multiGames;
+
+	if (totalGames === 0) {
+		ctx.style.display = 'none';
+		const container = ctx.parentElement;
+		if (container) {
+			container.innerHTML = `
+				<div style="text-align: center; color: #9ca3af; padding: 40px;">
+					<p>No games played at the moment</p>
+				</div>
+			`;
+		}
+		return;
+	} else {
+		new Chart(ctx, {
+			type: 'doughnut',
+			data: {
+				labels: [
+					i18n.t('profile.ia_games'),
+					i18n.t('profile.tournament_games'),
+					i18n.t('profile.multiplayer_games')
+				],
+				datasets: [{
+					data: [iaGames, tournamentGames, multiGames],
+					backgroundColor: ['#ef4444', '#f59e0b','#10b981'],
+					borderColor: ['#dc2626', '#d97706', '#059669'],
+					borderWidth: 2,
+					hoverOffset: 10
+				}]
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					legend: {
+						position: 'bottom',
+						labels: {
+							color: '#e5e7eb',
+							font: {
+								family: 'Orbitron',
+								size: 11
+							},
+							padding: 15,
+							usePointStyle: true
+						}
+					},
+					tooltip: {
+						backgroundColor: 'rgba(0, 0, 0, 0.8)',
+						titleColor: '#e5e7eb',
+						bodyColor: '#e5e7eb',
+						borderColor: '#a855f7',
+						borderWidth: 1,
+						cornerRadius: 8,
+						displayColors: true,
+						callbacks: {
+							label: function(context: any) {
+								const percentage = ((context.parsed / totalGames) * 100).toFixed(1);
+								return `${context.label}: ${context.parsed} parties (${percentage}%)`;
+							}
+						}
+					}
+				},
+				elements: {
+					arc: {
+						borderWidth: 2
+					}
+				}
+			}
+		});
+	}
+}
+
+async function createPerformanceChart(stats: any) {
+	const ctx = document.getElementById('performanceChart') as HTMLCanvasElement;
+	if (!ctx) return;
+
+	const calculateWinRate = (winner: number, loser: number) => {
+		const total = winner + loser;
+		return total > 0 ? (winner / total) * 100 : 0;
+	};
+
+	const iaWinRate = calculateWinRate(stats.iaStats?.winner || 0, stats.iaStats?.loser || 0);
+	const tournamentWinRate = calculateWinRate(stats.tournamentStats?.winner || 0, stats.tournamentStats?.loser || 0);
+	const multiWinRate = calculateWinRate(stats.multiStats?.winner || 0, stats.multiStats?.loser || 0);
+
+	new Chart(ctx, {
+		type: 'bar',
+		data: {
+			labels: [
+				i18n.t('profile.ia_games'),
+				i18n.t('profile.tournament_games'),
+				i18n.t('profile.multiplayer_games')
+			],
+			datasets: [{
+				label: i18n.t('profile.victory_rate'),
+				data: [iaWinRate, tournamentWinRate, multiWinRate],
+				backgroundColor: ['rgba(239, 68, 68, 0.7)', 'rgba(245, 158, 11, 0.7)', 'rgba(16, 185, 129, 0.7)'],
+				borderColor: ['#ef4444', '#f59e0b', '#10b981'],
+				borderWidth: 2
+			}]
+		},
+		options: {
+			responsive: true,
+			maintainAspectRatio: false,
+			scales: {
+				y: {
+					beginAtZero: true,
+					max: 100
+				}
+			}
+		}
+	});
 }

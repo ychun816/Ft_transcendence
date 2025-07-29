@@ -31,13 +31,13 @@ export async function registerGameRoute(
 	gameManager: GameManager
 ) {
 	// =============== SERVER-SIDE PONG API ROUTES ===============
-	
+
 	// Créer une nouvelle partie
 	app.post("/api/game/create", async (request, reply) => {
 		try {
 			const { mode } = request.body as { mode?: 'solo' | 'versus' };
 			const gameId = gameManager.createGame(mode || 'versus');
-			
+
 			reply.send({
 				success: true,
 				gameId,
@@ -54,11 +54,11 @@ export async function registerGameRoute(
 		try {
 			const { gameId } = request.params as { gameId: string };
 			const gameState = gameManager.getGameState(gameId);
-			
+
 			if (!gameState) {
 				return reply.status(404).send({ error: 'Game not found' });
 			}
-			
+
 			reply.send({
 				success: true,
 				gameId,
@@ -75,11 +75,11 @@ export async function registerGameRoute(
 		try {
 			const { gameId } = request.params as { gameId: string };
 			const gameState = gameManager.getGameState(gameId);
-			
+
 			if (!gameState) {
 				return reply.status(404).send({ error: 'Game not found' });
 			}
-			
+
 			reply.send({
 				success: true,
 				gameId,
@@ -102,11 +102,11 @@ export async function registerGameRoute(
 		try {
 			const { gameId } = request.params as { gameId: string };
 			const gameState = gameManager.getGameState(gameId);
-			
+
 			if (!gameState) {
 				return reply.status(404).send({ error: 'Game not found' });
 			}
-			
+
 			reply.send({
 				success: true,
 				gameId,
@@ -126,11 +126,11 @@ export async function registerGameRoute(
 		try {
 			const { gameId } = request.params as { gameId: string };
 			const gameState = gameManager.getGameState(gameId);
-			
+
 			if (!gameState) {
 				return reply.status(404).send({ error: 'Game not found' });
 			}
-			
+
 			reply.send({
 				success: true,
 				gameId,
@@ -154,7 +154,7 @@ export async function registerGameRoute(
 	app.get("/api/games", async (request, reply) => {
 		try {
 			const games = gameManager.getAllGames();
-			
+
 			reply.send({
 				success: true,
 				games,
@@ -167,7 +167,7 @@ export async function registerGameRoute(
 	});
 
 	// =============== ANCIENNE API POUR SAUVEGARDER LES MATCHES ===============
-	
+
 	app.post("/api/game/add", async(request, reply) => {
 		const auth = extractTokenFromRequest(request);
 		if (!auth) {
