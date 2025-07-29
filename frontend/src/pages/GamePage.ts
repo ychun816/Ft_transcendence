@@ -481,6 +481,9 @@ export function createGamePage(): HTMLElement {
 		const profilBtn = page.querySelector("#profilBtn") as HTMLButtonElement;
 		const nameId = page.querySelector("#nameId") as HTMLElement;
 
+		const languageSwitcherContainer = page.querySelector('#language-switcher-container');
+		languageSwitcherContainer?.classList.remove("hidden");
+
 		// reinitialiser page 1v1
 		reset1v1RemoteInterface();
 
@@ -678,6 +681,8 @@ export function createGamePage(): HTMLElement {
 		{
 			cleanupCurrentGame();
 
+			const languageSwitcherContainer = page.querySelector('#language-switcher-container');
+			languageSwitcherContainer?.classList.add("hidden");
 			menuLocal.style.display = "none";
 			menuLigne.style.display = "none";
 			menuTournoi.style.display = "block";
@@ -886,6 +891,8 @@ export function createGamePage(): HTMLElement {
 		function startGameSolo(mode: 'solo' | 'versus'): void
 		{
 			cleanupCurrentGame();
+			const languageSwitcherContainer = page.querySelector('#language-switcher-container');
+			languageSwitcherContainer?.classList.add("hidden");
 			currentGame = new Game_solo(mode);
 			
 			menuLocal.style.display = "none";
@@ -1031,6 +1038,8 @@ export function createGamePage(): HTMLElement {
 		function startGame2v2Local(): void
 		{
 			cleanupCurrentGame();
+			const languageSwitcherContainer = page.querySelector('#language-switcher-container');
+			languageSwitcherContainer?.classList.add("hidden");
 
 			if(i18n.getCurrentLanguage() == "en")
 			{
@@ -1078,6 +1087,13 @@ export function createGamePage(): HTMLElement {
 			//currentGame.start_game_loop();
 		}
 
+		function startGameRemote()
+		{
+			import("../router/router.js").then(({ router }) => {
+				router.navigate("/remote");
+			});
+		}
+
 		function login()
 		{
 			import("../router/router.js").then(({ router }) => {
@@ -1113,7 +1129,8 @@ export function createGamePage(): HTMLElement {
 		soloBtn.addEventListener('click', () => startGameSolo('solo'));
 		versusBtn.addEventListener('click', () => startGameSolo('versus'));
 		
-		soloLigneBtn.addEventListener('click', () => startGameLigneSolo());
+		//soloLigneBtn.addEventListener('click', () => startGameLigneSolo());
+		soloLigneBtn.addEventListener('click', () => startGameRemote());
 		multiBtn.addEventListener('click', () => startGame2v2Local());
 
         tournoiBtn.addEventListener('click', () => startTournoi());

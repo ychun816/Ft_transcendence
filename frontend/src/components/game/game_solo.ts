@@ -77,6 +77,7 @@ interface ia_interface
     delta_paddle: number;
     delta_error: number;
     error_percent: number;
+    data: number;
 }
 
 interface data_score
@@ -253,8 +254,8 @@ class Pong
         {
             ball_x: this.config.canvas_width / 2,
             ball_y: this.config.canvas_height / 2,
-            prev_x: 0,
-            prev_y: 0,
+            prev_x: this.config.canvas_width / 2,
+            prev_y: this.config.canvas_height / 2,
             ball_dir_x: 0,
             ball_dir_y: 0,
             angle: 0,
@@ -296,7 +297,8 @@ class Pong
             service: true,
             delta_paddle: 0,
             delta_error: 0,
-            error_percent: 0.2
+            error_percent: 0.2,
+            data: 0,
         }
 
         this.data = 
@@ -596,6 +598,8 @@ class Pong
         
         this.ball.ball_x = this.config.canvas_width / 2;
         this.ball.ball_y = this.config.canvas_height / 2;
+        this.ball.prev_x = this.ball.ball_x;
+        this.ball.prev_y = this.ball.ball_y;
         this.ball.ball_dir_x = 0;
         this.ball.ball_dir_y = 0;
         
@@ -706,6 +710,8 @@ class Pong
             this.last_frame_time = performance.now();
             this.ball.ball_x = this.config.canvas_width / 2;
             this.ball.ball_y = this.config.canvas_height / 2;
+            this.ball.prev_x = this.ball.ball_x;
+            this.ball.prev_y = this.ball.ball_y;
             this.paddle.left_paddle_y = (this.config.canvas_height - this.config.paddle_height) / 2;
             this.paddle.right_paddle_y = (this.config.canvas_height - this.config.paddle_height) / 2;
             this.draw(1);
@@ -1087,6 +1093,8 @@ class Pong
         {
             this.ball.ball_x = this.config.canvas_width / 2;
             this.ball.ball_y = this.config.canvas_height / 2;
+            this.ball.prev_x = this.ball.ball_x;
+            this.ball.prev_y = this.ball.ball_y;
             this.paddle.left_paddle_y = (this.config.canvas_height - this.config.paddle_height) / 2;
             this.paddle.right_paddle_y = (this.config.canvas_height - this.config.paddle_height) / 2;
             this.draw(1);
@@ -1205,9 +1213,10 @@ class Pong
     init_ball_direction(): void
     {
         this.ball.angle = get_random_playable_angle();
-        //this.ball.angle = 0;
         this.ball.ball_dir_x = this.config.ball_speed * Math.cos(this.ball.angle);
         this.ball.ball_dir_y = this.config.ball_speed * Math.sin(this.ball.angle);
+        this.ball.prev_x = this.ball.ball_x;
+        this.ball.prev_y = this.ball.ball_y;
     }
 
     normalize_ball_speed(): void
@@ -1302,6 +1311,8 @@ class Pong
     {
         this.ia.random_move_1 = random_bool();
         this.ia.random_move_2 = random_bool();
+        // this.ia.random_move_1 = false;
+        // this.ia.random_move_2 = false;
         this.ia.random_paddle_move = random_bool();
         this.ia.continue_flag = true;
         this.ia.move_flag = false;
@@ -1312,6 +1323,7 @@ class Pong
         this.ia.close_rebond = false;
         this.ia.far_rebond = false;
         this.ia.far_far_rebond = false;
+        this.ia.data = 0;
         this.ia.delta_paddle = this.ia_delta_paddle();
         if (this.paddle.current_shot >= 4)
             this.handle_ia_error();
@@ -1411,6 +1423,11 @@ class Pong
             if (this.ia.ia_debug == true)
             {
                 console.log("****** TIME move 1 *********");
+                let center_paddle = this.ia.delta_error + this.ia.delta_paddle + this.paddle.right_paddle_y + this.config.paddle_height / 2;
+                let target_y = this.ball.ia_y;
+                let distance = target_y - center_paddle;
+                if (Math.abs(distance) > 250)
+                    this.ia.random_move_1 = false;
                 this.ia.ia_debug = false;
             }
             this.ia_ajustement(80, this.ia.random_move_1);
@@ -1456,9 +1473,14 @@ class Pong
             if (this.ia.ia_debug == true)
             {
                 console.log("****** 1 CLOSE move 1 *********");
+                let center_paddle = this.ia.delta_error + this.ia.delta_paddle + this.paddle.right_paddle_y + this.config.paddle_height / 2;
+                let target_y = this.ball.ia_y;
+                let distance = target_y - center_paddle;
+                if (Math.abs(distance) > 250)
+                    this.ia.random_move_1 = false;
                 this.ia.ia_debug = false;
             }            
-            this.ia_ajustement(200, this.ia.random_move_1);
+            this.ia_ajustement(120, this.ia.random_move_1);
             return ;
         }
         if (this.ia.super_flag == true)
@@ -1501,9 +1523,16 @@ class Pong
             if (this.ia.ia_debug == true)
             {
                 console.log("****** 1 FAR move 1 *********");
+                let center_paddle = this.ia.delta_error + this.ia.delta_paddle + this.paddle.right_paddle_y + this.config.paddle_height / 2;
+                let target_y = this.ball.ia_y;
+                let distance = target_y - center_paddle;
+                this.ia.data = distance;
                 this.ia.ia_debug = false;
-            }    
-            this.ia_ajustement_rebond(200);
+            }  
+            if (this.ia.data > 250)
+                this.ia_ajustement(120, false);
+            else  
+                this.ia_ajustement_rebond(120);
             return ;
         }
         if (this.ia.super_flag == true)
@@ -1546,9 +1575,16 @@ class Pong
             if (this.ia.ia_debug == true)
             {
                 console.log("****** 2 REBONDS move 1 *********");
+                let center_paddle = this.ia.delta_error + this.ia.delta_paddle + this.paddle.right_paddle_y + this.config.paddle_height / 2;
+                let target_y = this.ball.ia_y;
+                let distance = target_y - center_paddle;
+                this.ia.data = distance;
                 this.ia.ia_debug = false;
-            }           
-            this.ia_ajustement_rebond(200);
+            }  
+            if (this.ia.data > 250)
+                this.ia_ajustement(120, false);
+            else  
+                this.ia_ajustement_rebond(120);
             return ;
         }
         if (this.ia.super_flag == true)

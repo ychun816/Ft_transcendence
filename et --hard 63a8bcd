@@ -1,0 +1,176 @@
+* [33m7f2abff[m[33m ([m[1;36mHEAD -> [m[1;32mdiego[m[33m, [m[1;31morigin/diego[m[33m)[m remote try
+* [33m59081ba[m trad finish
+* [33ma90e333[m Trad finish
+* [33mcc15ba0[m Add new binary file for Prisma configuration
+* [33m7f38aa3[m archi faite
+*   [33m8171577[m merge main
+[32m|[m[33m\[m  
+[32m|[m * [33m6fd1206[m Avatar upload fixed
+[32m|[m * [33m2311a06[m Avatar upload fixed
+[32m|[m * [33m199fd79[m Logout fixed + Friends list translation + Leaderboard return button routing + Https certificate
+[32m|[m * [33mfaa72d3[m Fixed connected status
+[32m|[m * [33mee72b8a[m HTTPS debug
+* [33m|[m [33md880d4f[m local finish
+* [33m|[m [33m26ae0a5[m local finish
+* [33m|[m [33mb346f1a[m tournoi a finir
+* [33m|[m [33m9a65cc1[m Tournoi a implementer
+* [33m|[m [33m2842136[m la
+* [33m|[m [33mab2952e[m ready to remote
+* [33m|[m [33m4b27721[m test
+[33m|[m[33m/[m  
+*   [33mb6ba064[m merging main
+[34m|[m[35m\[m  
+[34m|[m * [33made7b6d[m Navigation prev/next + Connected status implemented + logout redir & clean up
+[34m|[m * [33m9d40270[m Friends list added
+[34m|[m *   [33m198b62b[m Merge branch 'user'
+[34m|[m [36m|[m[1;31m\[m  
+[34m|[m [36m|[m * [33mcb8b098[m Edit username + password fixed
+[34m|[m * [1;31m|[m [33m9f5cf10[m[33m ([m[1;31morigin/test[m[33m)[m css opt
+[34m|[m [1;31m|[m[1;31m/[m  
+[34m|[m * [33mbb2b4ac[m pong merge
+* [1;31m|[m [33mbf71e39[m Add new binary file for backend prisma configuration
+[1;31m|[m[1;31m/[m  
+* [33m86be4cd[m User avatar change fixe
+* [33mb179506[m User game data fixed
+*   [33m8640d0e[m Merge pull request #10 from Canybardeloton/main
+[1;32m|[m[1;33m\[m  
+[1;32m|[m *   [33m4a62cca[m Merge pull request #9 from Canybardeloton/user
+[1;32m|[m [1;34m|[m[1;32m\[m  
+[1;32m|[m [1;34m|[m[1;32m/[m  
+[1;32m|[m[1;32m/[m[1;34m|[m   
+* [1;34m|[m [33mec8b276[m Merge branch 'main' into user
+[1;36m|[m[1;34m\[m[1;34m|[m 
+[1;36m|[m *   [33m68bd66c[m Friends list
+[1;36m|[m [32m|[m[33m\[m  
+* [32m|[m [33m|[m [33m74f6b4e[m Friends list
+* [32m|[m [33m|[m [33md92ad3c[m Comkit checkout
+[33m|[m[32m\[m[32m|[m [33m|[m 
+[33m|[m [32m|[m[33m/[m  
+[33m|[m[33m/[m[32m|[m   
+[33m|[m * [33mb405434[m Comkit checkout
+* [35m|[m [33maff0e92[m more sober ui and translation
+* [35m|[m [33m63aa416[m userprofile implement
+* [35m|[m [33m6aa2bbe[m message fix
+* [35m|[m [33ma9c00b9[m chat ok
+* [35m|[m   [33m69383a9[m Merge branch 'notification'
+[36m|[m[1;31m\[m [35m\[m  
+[36m|[m * [35m|[m [33mb9b6994[m[33m ([m[1;31morigin/notification[m[33m)[m messages fix
+[36m|[m * [35m|[m [33me5ce660[m msg update
+[36m|[m * [35m|[m [33m8e5939c[m notif
+[36m|[m * [35m|[m [33me63422b[m[33m ([m[1;31morigin/liveChat[m[33m)[m init
+* [1;31m|[m [35m|[m [33ma9e5832[m Signup fixed + session token implemented + Avatar upload in progress
+* [1;31m|[m [35m|[m [33ma9d2132[m User authorized check added. Signup need fixing
+* [1;31m|[m [35m|[m [33m19d63e7[m Serveur auto exit fixed
+* [1;31m|[m [35m|[m [33m308f8a7[m Debug
+* [1;31m|[m [35m|[m [33m3fc27e5[m eiugfegf
+* [1;31m|[m [35m|[m [33m9f893ee[m revert
+[1;31m|[m[1;31m/[m [35m/[m  
+* [35m/[m [33mc2a7641[m Match History working
+[35m|[m[35m/[m  
+* [33m1e682bb[m Match History working
+* [33m0926b64[m Merge main seed
+*   [33mdb1df54[m Add initial database migration for User, Match, and UserFriends tables
+[1;32m|[m[1;33m\[m  
+[1;32m|[m * [33m42fcdd1[m add routes folder + websocket
+* [1;33m|[m [33ma1964eb[m Merge main seed
+[1;33m|[m[1;33m/[m  
+* [33me49cb0f[m Match History
+* [33mb3e410d[m Match History added
+* [33m4cdd40b[m Adding to do list
+*   [33m6b101ca[m Merge branch 'main' of github.com:Canybardeloton/Transcende_me_if_you_can
+[1;34m|[m[1;35m\[m  
+[1;34m|[m * [33m964b43a[m Container fully set for dev & prod
+* [1;35m|[m [33m9b4ae97[m Wroking version
+* [1;35m|[m [33mea753e2[m Merge
+* [1;35m|[m   [33m46e6bdf[m Merge branch 'user' of github.com:Canybardeloton/Transcende_me_if_you_can into user
+[1;36m|[m[31m\[m [1;35m\[m  
+[1;36m|[m * [1;35m|[m [33m0cf2f56[m Code working
+* [31m|[m [1;35m|[m [33m2672e37[m Debugging
+[31m|[m[31m/[m [1;35m/[m  
+* [1;35m/[m [33m5433cdf[m Avatar loading debugging
+[1;35m|[m[1;35m/[m  
+* [33md6c4641[m Avatar display debugging
+* [33m1a77f3e[m Edit username + password working
+* [33m786b799[m Profile page: username & password edit frontend
+* [33mcd61df3[m User profil fixed display + button chnage avatar working
+*   [33mc562e2f[m Merge pull request #8 from Canybardeloton/main
+[32m|[m[33m\[m  
+[32m|[m * [33m24c67e8[m Signup refactored
+[32m|[m[32m/[m  
+* [33m8e457c3[m Signup fix. Avatar upload Ok
+* [33mf43e509[m signupfixing
+* [33m1007166[m Fully merged
+*   [33m9e37c70[m merge with main
+[34m|[m[35m\[m  
+[34m|[m * [33m1db469f[m tailwind correct
+[34m|[m * [33m8a3a7ce[m tailwind
+[34m|[m * [33m433b89a[m tailwind plus correctif structure
+[34m|[m * [33m764cfe3[m Dev Container Ready
+* [35m|[m [33m820f4a7[m User profile update + avatar edit : edit click dont work
+* [35m|[m [33mb1ac79c[m JWT init
+* [35m|[m [33m259e01a[m JWT init
+* [35m|[m [33m4e8b748[m User login check
+* [35m|[m [33m31e7d8a[m Pass
+[35m|[m[35m/[m  
+* [33m00abf46[m Password hidden
+* [33m3358aa9[m User signup complete
+* [33m1925ece[m User signup complete
+*   [33m8c2c227[m Merge branch 'user'
+[36m|[m[1;31m\[m  
+[36m|[m * [33m72b02af[m chore: update dependencies and improve backend dev script
+[36m|[m * [33mc1df50f[m User signup + DB addition working
+[36m|[m * [33m89910da[m User signup info form retrieval
+[36m|[m * [33meee24d8[m Debugging prisma new user
+[36m|[m * [33me79020c[m Signup promise fixed
+[36m|[m * [33m12a5f82[m In progress: Signup prisma linking
+[36m|[m *   [33m2ad6331[m Merge branch 'user' of github.com:Canybardeloton/Transcende_me_if_you_can into user
+[36m|[m [1;32m|[m[1;33m\[m  
+[36m|[m * [1;33m|[m [33m2b649e4[m Revert "Prisma added friends"
+* [1;33m|[m [1;33m|[m [33m1799568[m Removed signup data check
+[1;33m|[m [1;33m|[m[1;33m/[m  
+[1;33m|[m[1;33m/[m[1;33m|[m   
+* [1;33m|[m [33m5900415[m Signup value check
+[1;33m|[m[1;33m/[m  
+* [33mdd51548[m Sign Up page
+* [33mddc43a2[m Prisma added friends
+* [33me54321b[m Prisma added friends
+*   [33m8aa397f[m Merge pull request #4 from Canybardeloton/main
+[1;34m|[m[1;35m\[m  
+[1;34m|[m * [33mee7c116[m Functionnal website with urls
+[1;34m|[m *   [33m6025a20[m Merge pull request #3 from Canybardeloton/user
+[1;34m|[m [1;36m|[m[1;34m\[m  
+[1;34m|[m [1;36m|[m[1;34m/[m  
+[1;34m|[m[1;34m/[m[1;36m|[m   
+* [1;36m|[m [33mbab5166[m Merge pull request #2 from Canybardeloton/main
+[32m|[m[1;36m\[m[1;36m|[m 
+[32m|[m * [33m86f6ed2[m pckage script corrected
+[32m|[m *   [33me718684[m Merge branch 'user'
+[32m|[m [34m|[m[32m\[m  
+[32m|[m [34m|[m[32m/[m  
+[32m|[m[32m/[m[34m|[m   
+* [34m|[m [33m5ee6a6a[m Project restructuring + backend/frontend connection
+[35m|[m *   [33m2752b9a[m Merge pull request #1 from Canybardeloton/user
+[35m|[m [36m|[m[35m\[m  
+[35m|[m [36m|[m[35m/[m  
+[35m|[m[35m/[m[36m|[m   
+* [36m|[m [33m9685a15[m Node init
+[1;32m|[m[36m\[m[36m|[m 
+[1;32m|[m * [33m1147755[m route && database
+[1;32m|[m * [33mafb8e8e[m route && database
+[1;32m|[m * [33m66023c9[m route && database
+[1;32m|[m *   [33m6bc3fe3[m route && database
+[1;32m|[m [1;34m|[m[1;35m\[m  
+[1;32m|[m * [1;35m|[m [33mccb80c3[m init
+* [1;35m|[m [1;35m|[m [33m88a8b8c[m Node init
+* [1;35m|[m [1;35m|[m [33m21205a3[m project reste
+* [1;35m|[m [1;35m|[m [33m29d28c7[m Node base config tuto
+[1;35m|[m [1;35m|[m[1;35m/[m  
+[1;35m|[m[1;35m/[m[1;35m|[m   
+* [1;35m|[m [33me29387e[m vite build
+* [1;35m|[m [33m6f6b79d[m init npm
+[1;35m|[m[1;35m/[m  
+* [33mc1766a7[m Update README.md
+* [33m1f0771c[m Update README.md
+* [33m15d4148[m Update README.md
+* [33ma77ca44[m Subject import
+* [33m3962a1d[m Initial commit

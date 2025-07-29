@@ -8,6 +8,7 @@ import { createChatPage } from "./pages/ChatPage";
 import { createNotFoundPage } from "./pages/NotFoundPage";
 import { createSignUpPage } from "./pages/SignUpPage";
 import { createUserProfilePage } from "./pages/UserProfilePage";
+import { createRemotePage } from "./pages/RemotePage"; 
 import { i18n } from "./services/i18n";
 
 // Initialize app
@@ -24,6 +25,7 @@ async function initApp() {
     .addRoute('/game', createGamePage)       // Garde l'alias /game pour cohérence
     .addRoute('/profile', createProfilePage)
     .addRoute('/chat', createChatPage)
+    .addRoute('/remote', createRemotePage)
     .addRoute('/404', createNotFoundPage);
 
   // Route dynamique pour les profils utilisateur
