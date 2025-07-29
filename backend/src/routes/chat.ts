@@ -3,7 +3,7 @@ import "@fastify/websocket";
 import { PrismaClient } from "@prisma/client";
 
 // Store active connections with user information
-const activeConnections = new Map<
+export const activeConnections = new Map<
 	string,
 	{
 		connection: any;

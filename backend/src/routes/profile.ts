@@ -8,7 +8,7 @@ import { PROJECT_ROOT } from "../server.js";
 import { createHash } from "crypto";
 import jwt from "jsonwebtoken";
 import { request } from "http";
-
+import { activeConnections } from "./chat.js";
 /*
 TO DO:
 - Ajuster la regle de mot de passe
@@ -135,6 +135,33 @@ export async function registerProfileRoute(
 		}
 	);
 
+	app.get('/api/profile/user/:username/online', {
+		handler: async (request, reply) => {
+		try {
+
+			const auth = extractTokenFromRequest(request);
+			if (!auth) {
+				return reply.status(401).send({ error: "Unauthorized" });
+			}
+
+			const { username } = request.params as { username: string };
+			const isOnline = activeConnections.has(username);
+
+			reply.send({
+			success: true,
+			username: username,
+			isOnline: isOnline
+			});
+		} catch (error) {
+			console.error('Error checking user online status:', error);
+			reply.status(500).send({
+			success: false,
+			error: 'Failed to check online status'
+			});
+		}
+		}
+	});
+
 	app.get(
 		"/api/profile",
 		async (
@@ -152,7 +179,7 @@ export async function registerProfileRoute(
 				return;
 			}
 			const { code, data } = await getUserInfo(username, prisma);
-			
+
 			reply.status(code).send(data);
 		}
 	);
