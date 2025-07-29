@@ -4,7 +4,7 @@ FROM node:22-slim AS dev
 WORKDIR /app
 
 RUN apt-get update && \
-apt-get install -y bash git curl procps && \
+apt-get install -y bash git curl procps lsof  iproute2 iputils-ping net-tools && \
 rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
@@ -13,35 +13,34 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 3000 5173 3443
+EXPOSE 3000 5173
 
-CMD ["bash", "-c", "exec npm run dev"]
-
+CMD ["bash", "-c", "echo 'Container ready. Run npm run dev manually.' && tail -f /dev/null"]
 
 # FOR PROD
-# FROM node:22-slim AS prod
+FROM node:22-slim AS prod
 
-# WORKDIR /app
+WORKDIR /app
 
-# RUN apt-get update && \
-#     apt-get install -y openssl && \
-#     rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get install -y openssl && \
+    rm -rf /var/lib/apt/lists/*
 
-# COPY package*.json ./
+COPY package*.json ./
 
-# RUN npm ci && \
-#     npm cache clean --force
+RUN npm ci && \
+    npm cache clean --force
 
-# COPY . .
+COPY . .
 
-# RUN npm run build
+RUN npm run build
 
-# RUN rm -rf backend/src/ && \
-#     rm -rf *.config.js && \
-#     rm -rf backend/tsconfig.json && \
-#     rm -rf node_modules && \
-#     npm ci --only=production
+RUN rm -rf backend/src/ && \
+    rm -rf *.config.js && \
+    rm -rf backend/tsconfig.json && \
+    rm -rf node_modules && \
+    npm ci --only=production
 
-# EXPOSE 3000
+EXPOSE 3000
 
-# CMD ["npm", "start"]
+CMD ["npm", "start"]

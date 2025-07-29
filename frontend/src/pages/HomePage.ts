@@ -18,6 +18,7 @@ export function createHomePage(): HTMLElement {
 				<h1 class="neon-title mb-8 text-center">🚀 Transcendence</h1>
 				<nav class="neon-nav">
 					<button class="neon-btn neon-btn-primary" data-route="/game">${i18n.t('navigation.game')}</button>
+					<button class="neon-btn neon-btn-accent" data-route="/server-game">🖥️ Server-Side Pong</button>
 					<button class="neon-btn neon-btn-secondary" data-route="/profile">${i18n.t('navigation.profile')}</button>
 					<button class="neon-btn neon-btn-secondary" data-route="/chat">${i18n.t('navigation.chat')}</button>
 					<button class="neon-btn neon-btn-secondary" data-route="/leaderboard">${i18n.t('navigation.leaderboard')}</button>
@@ -39,7 +40,7 @@ export function createHomePage(): HTMLElement {
 		if (languageSwitcherContainer) {
 			languageSwitcherContainer.appendChild(createLanguageSwitcher());
 		}
-		
+
 		const logoutContainer = page.querySelector('#logout-container');
 		if (logoutContainer)
 			logoutContainer?.appendChild(createLogoutSwitcher());

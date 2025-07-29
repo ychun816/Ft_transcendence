@@ -13,34 +13,98 @@ import { createHash } from "crypto";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-async function fillUserInArray(
+const BCRYPT_ROUNDS = 12;
+
+interface ParsedUserData {
+	usernameValue: string;
+	passwordValue: string;
+	emailValue?: string;
+	hashedPassword: string;
+	avatarFile: any | null;
+}
+
+const AVATAR_CONFIG = {
+    maxSize: 5 * 1024 * 1024, // 5MB
+    allowedMimes: ['image/jpeg', 'image/png', 'image/webp'],
+    allowedExts: ['jpg', 'jpeg', 'png', 'webp']
+};
+
+function validateAvatarFile(file: any): boolean {
+	if (!file) return false;
+
+	if (file.file && file.file.bytesRead > AVATAR_CONFIG.maxSize) {
+		return false;
+	}
+
+	if (!AVATAR_CONFIG.allowedMimes.includes(file.mimetype)) {
+		return false;
+	}
+
+	return true;
+}
+
+async function parseUserFormData(
 	parts: AsyncIterableIterator<Multipart>,
 	reply: FastifyReply
-) {
+): Promise<ParsedUserData | null> {
 	const fields: Record<string, any> = {};
 	let avatarFile: any = null;
-	for await (const part of parts) {
-		if (part.type === "file" && part.fieldname === "avatar") {
-			avatarFile = part;
-		} else if (part.type === "field") {
-			fields[part.fieldname] = part.value;
-		}
-	}
-	const usernameValue = fields.username;
-	const passwordValue = fields.password;
 
-	console.log("usernameValue: ", usernameValue);
-	console.log("passwordValue: ", passwordValue);
-	if (!usernameValue || !passwordValue) {
-		reply
-			.code(400)
-			.send({
-				error: "Invalid user info: missing username or password.",
+	try {
+		for await (const part of parts) {
+			if (part.type === "file" && part.fieldname === "avatar") {
+				if (!validateAvatarFile(part)) {
+					reply.code(400).send({
+						error: "Invalid avatar file. Must be an image under 5MB."
+					});
+					return null;
+				}
+				avatarFile = part;
+			} else if (part.type === "field") {
+				const value = typeof part.value === 'string' ? part.value.trim() : part.value;
+				fields[part.fieldname] = value;
+			}
+		}
+
+		const usernameValue = fields.username;
+		const passwordValue = fields.password;
+		const emailValue = fields.email;
+
+		if (!usernameValue || !passwordValue) {
+			reply.code(400).send({
+				error: "Username and password are required fields."
 			});
+			return null;
+		}
+
+		if (typeof passwordValue !== 'string' || passwordValue.length > 128) {
+			reply.code(400).send({
+				error: "Password must be a string and cannot exceed 128 characters."
+			});
+			return null;
+		}
+		const hashedPassword = await bcrypt.hash(passwordValue, BCRYPT_ROUNDS);
+
+		console.log("Parsed user data:", {
+			username: usernameValue,
+			hasEmail: !!emailValue,
+			hasAvatar: !!avatarFile
+		});
+
+		return {
+			usernameValue,
+			passwordValue,
+			emailValue,
+			hashedPassword,
+			avatarFile
+		};
+	} catch (error) {
+		console.error("Error parsing form data:", error);
+		reply.code(400).send({
+			error: "Invalid form data format."
+		});
 		return null;
 	}
-	const hashedPassword = await bcrypt.hash(passwordValue, 10);
-	return { usernameValue, passwordValue, hashedPassword, avatarFile };
 }
 
 async function saveAvatar(avatarFile: any, username: string): Promise<string> {
@@ -65,7 +129,8 @@ async function createUser(
 	prisma: PrismaClient,
 	username: string,
 	hashedPassword: string,
-	avatarPath: string
+	avatarPath: string,
+	emailValue: string
 ) {
 	const existingUser = await prisma.user.findUnique({
 		where: { username }
@@ -79,7 +144,7 @@ async function createUser(
 	// Générer un email unique avec timestamp et random
 	const timestamp = Date.now();
 	const random = Math.random().toString(36).substring(2, 8);
-	const uniqueEmail = `${username}_${timestamp}_${random}@transcendence.local`;
+	const uniqueEmail = emailValue || `${username}_${timestamp}_${random}@transcendence.local`;
 
 	const user = await prisma.user.create({
 		data: {
@@ -88,12 +153,12 @@ async function createUser(
 			email: uniqueEmail,
 			avatarUrl: avatarPath || null,
 		},
-        select: {
-            id: true,
-            username: true,
-            email: true,
-            avatarUrl: true
-        }
+		select: {
+			id: true,
+			username: true,
+			email: true,
+			avatarUrl: true
+		}
 	});
 	return user;
 }
@@ -104,17 +169,18 @@ export async function registerNewUser(
 ) {
 	app.post("/api/signup", async (request, reply) => {
 		const parts = request.parts();
-		const userData = await fillUserInArray(parts, reply);
+		const userData = await parseUserFormData(parts, reply);
 		if (!userData){return;}
 		const userInfoForValidation = {
 			username: userData.usernameValue,
 			password: userData.passwordValue,
-			avatar: userData.avatarFile
+			avatar: userData.avatarFile,
+			email: userData.emailValue
 		};
 		console.log("userInfoForValidation: ", userInfoForValidation);
 		const checkResult = UserSignUpCheck(userInfoForValidation);
 		if (checkResult === true){
-			const { usernameValue, hashedPassword, avatarFile } =
+			const { usernameValue, hashedPassword, avatarFile, emailValue } =
 				userData;
 			console.log("AFTER USER SIGNUP CHECK");
 			try {
@@ -125,7 +191,8 @@ export async function registerNewUser(
 					prisma,
 					usernameValue,
 					hashedPassword,
-					avatarPath
+					avatarPath,
+					emailValue || ""
 				);
 
 				console.log("Created user:", created);
