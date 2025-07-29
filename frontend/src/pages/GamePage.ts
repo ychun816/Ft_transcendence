@@ -4,7 +4,6 @@ import { Game_solo } from "../components/game/game_solo.js";
 import { Game_ligne } from "../components/game/game_ligne.js";
 import { Game_tournoi } from "../components/game/game_tournoi.js";
 import { classes } from "../styles/retroStyles.js";
-import { start } from "repl";
 
 export function createGamePage(): HTMLElement {
 	const page = document.createElement("div");
@@ -493,7 +492,7 @@ export function createGamePage(): HTMLElement {
 		const nameId = page.querySelector("#nameId") as HTMLElement;
 
 		// reinitialiser page 1v1
-		reset1v1RemoteInterface();
+		//reset1v1RemoteInterface();
 
 		//reinitialiser la page tournoi
 		resetTournoiInterface();
