@@ -8,7 +8,7 @@ import {
 	generateTOTPSecret,
 	verifyTOTPCode,
 	send2FACodeEmail,
-} from "../services/TwoFactorService";
+} from "../services/TwoFactorService.js";
 
 // Only one exported function for all 2FA routes!
 export async function twoFactorRoutes(
@@ -121,7 +121,7 @@ export async function twoFactorRoutes(
 						<p>Once you've added the account to Google Authenticator:</p>
 						<ol>
 							<li>Look at the 6-digit code in the app</li>
-							<li>Go to: <strong>http://localhost:3000/api/2fa/verify-totp-temp/${username}/YOUR_6_DIGIT_CODE</strong></li>
+							<li>Go to: <strong>https://localhost:3000/api/2fa/verify-totp-temp/${username}/YOUR_6_DIGIT_CODE</strong></li>
 							<li>Replace YOUR_6_DIGIT_CODE with the actual code</li>
 						</ol>
 					</div>
@@ -210,7 +210,7 @@ export async function twoFactorRoutes(
 						<h2>TOTP 2FA Enabled for ${username}</h2>
 						<p>Google Authenticator is now configured and active.</p>
 						<p><strong>Next time you login, you'll need to enter the 6-digit code from Google Authenticator!</strong></p>
-						<p><a href="http://localhost:3000">🔗 Go back to login page</a></p>
+						<p><a href="https://localhost:3000">🔗 Go back to login page</a></p>
 					</div>
 				</body>
 				</html>

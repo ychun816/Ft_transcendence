@@ -2,7 +2,7 @@
 // generate codes / send emails / verify codes
 
 import speakeasy from "speakeasy";
-import { sendEmail } from "../sendEmail";
+import { sendEmail } from "../sendEmail.js";
 
 export function generateEmailCode() {
 	return Math.floor(100000 + Math.random() * 900000).toString();
@@ -10,7 +10,11 @@ export function generateEmailCode() {
 
 export function verifyEmailCode(user: any, code: string) {
 	const now = new Date();
-	return user.twoFactorCode === code && user.twoFactorCodeExpires > now;
+	return (
+		user.twoFactorCode &&
+		user.twoFactorCode === code &&
+		user.twoFactorCodeExpires > now
+	);
 }
 
 export function generateTOTPSecret(username: string) {
