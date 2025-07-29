@@ -152,6 +152,14 @@ export function createProfilePage(): HTMLElement {
 												${i18n.t('profile.games_played_stats', {games: '0', wins: '0', losses: '0'})}
 											</p>
 										</div>
+										<!-- Security Section -->
+										<div class="w-full mb-4">
+											<div class="space-y-2">
+												<button id="manage-2fa" class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 text-sm">
+													🔐 ${i18n.t("profile.manage_2fa") || "Manage Two-Factor Authentication"}
+												</button>
+											</div>
+										</div>
 									</div>
 								</div>
 							</main>
@@ -202,9 +210,9 @@ export function createProfilePage(): HTMLElement {
 
 			<div class="absolute top-4 right-4" id="language-switcher-container"></div>
 			<div class="absolute top-4 left-4" id="logout-container"></div>
+
 		`;
 
-		// Insérer le commutateur de langue
 		const languageSwitcherContainer = page.querySelector(
 			"#language-switcher-container"
 		);
@@ -747,7 +755,6 @@ async function displayFriendsList(page: HTMLDivElement) {
 	function fixAvatarUrl(avatarUrl: string | null): string {
 		if (!avatarUrl) return "/default-avatar.png";
 
-		// Si c'est une URL externe, l'utiliser telle quelle
 		if (avatarUrl.startsWith("http")) {
 			return avatarUrl;
 		}
@@ -777,7 +784,7 @@ async function displayFriendsList(page: HTMLDivElement) {
 	`;
 
 	for (const friend of friendsList) {
-		const status = friend.connected;
+		const status = await isUserOnline(friend.username);
 		const avatar = fixAvatarUrl(friend.avatarUrl);
 		const name = friend.username;
 		const played = friend.gamesPlayed;
@@ -801,6 +808,32 @@ async function displayFriendsList(page: HTMLDivElement) {
 	html += `</tbody></table></div>`;
 	friendsMain.innerHTML = html;
 	setupAddFriendFeature(page);
+}
+
+async function isUserOnline(username: string): Promise<boolean> {
+  try {
+    const token = sessionStorage.getItem('authToken');
+    if (!token) {
+      return false;
+    }
+
+    const response = await fetch(`/api/profile/user/${encodeURIComponent(username)}/online`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.isOnline;
+    }
+    return false;
+  } catch (error) {
+    console.error('Error checking user online status:', error);
+    return false;
+  }
 }
 
 function setupAddFriendFeature(page: HTMLDivElement) {
