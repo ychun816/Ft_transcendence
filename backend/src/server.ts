@@ -22,8 +22,8 @@ export const PROJECT_ROOT = path.resolve(__dirname, "../../");
 
 const prisma = new PrismaClient();
 
-const HTTP_PORT = process.env.HTTP_PORT ? parseInt(process.env.HTTP_PORT) : 3002;
-const HTTPS_PORT = process.env.HTTPS_PORT ? parseInt(process.env.HTTPS_PORT) : 3445;
+const HTTP_PORT = process.env.HTTP_PORT ? parseInt(process.env.HTTP_PORT) : 3001;
+const HTTPS_PORT = process.env.HTTPS_PORT ? parseInt(process.env.HTTPS_PORT) : 3444;
 
 //const PUBLIC_IP = '192.168.1.196';
 
