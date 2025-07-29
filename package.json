@@ -4,19 +4,6 @@
   "type": "module",
   "description": "Ft_transcendence : 155",
   "main": "index.js",
-  "author": "",
-  "license": "ISC",
-  "keywords": [],
-  "scripts": {
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:backend": "cd backend && prisma generate && tsx src/server.ts",
-    "dev:frontend": "cd frontend && npm install && vite --host",
-    "build": "npm run build:frontend && npm run build:backend",
-    "build:backend": "npx prisma generate --schema=./backend/prisma/schema.prisma && cd backend && tsc",
-    "build:frontend": "cd frontend && npm install && vite build",
-    "start": "npx prisma generate --schema=./backend/prisma/schema.prisma && cd backend && node dist/server.js",
-    "db:seed": "cd backend && npx tsx prisma/seed.ts"
-  },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
     "@types/cookie": "^0.6.0",
