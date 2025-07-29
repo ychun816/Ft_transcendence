@@ -152,6 +152,7 @@ export async function registerProfileRoute(
 				return;
 			}
 			const { code, data } = await getUserInfo(username, prisma);
+			
 			reply.status(code).send(data);
 		}
 	);
@@ -381,7 +382,6 @@ export async function registerProfileRoute(
 		if (user.id === friend.id)
 			return reply.status(400).send({ error: "Cannot add yourself" });
 
-		// Vérifie si déjà ami
 		const alreadyFriend = await prisma.user.findFirst({
 			where: {
 				id: user.id,

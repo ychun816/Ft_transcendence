@@ -1,4 +1,4 @@
-type Language = 'fr' | 'en';
+type Language = 'fr' | 'en' | 'es';
 
 interface Translations {
   [key: string]: any;
@@ -28,7 +28,7 @@ const translations: Record<Language, Translations> = {
     "auth": {
       "username": "Nom d'utilisateur",
       "password": "Mot de passe",
-      "login_title": "Transcendence",
+      "login_title": "Connexion",
       "create_account": "Créer un compte",
       "login_error": "Erreur lors de la connexion",
       "invalid_credentials": "Identifiants incorrects"
@@ -69,7 +69,19 @@ const translations: Record<Language, Translations> = {
 	    "status": "Status",
 	    "avatar": "Avatar",
 	    "name": "Nom",
-	    "Games_played": "Parties Jouées"
+	    "Games_played": "Parties Jouées",
+	  "dashboard": "Dashboard",
+	  "game_types_distribution": "Répartition des types de jeux",
+	  "winrate_by_type": "Taux de victoire par type",
+	  "ia_games": "Parties IA",
+	  "tournament_games": "Tournois",
+	  "multiplayer_games": "Multijoueur",
+	  "victory_rate": "Taux de victoire (%)",
+	   "total_game_time": "Temps de jeu",
+	   "side_point" : "Points gagnes par section",
+	   "top_points" : "Partie haute",
+	   "bottom_points" : "Partie basse",
+
     },
     "chat": {
       "title": "Chat",
@@ -96,6 +108,7 @@ const translations: Record<Language, Translations> = {
       "login_link": "Se connecter",
       "user_info_error": "Impossible de récupérer les informations utilisateur.",
       "reconnect_link": "Se reconnecter"
+
     },
     "signup": {
       "title": "Créer votre compte",
@@ -115,7 +128,32 @@ const translations: Record<Language, Translations> = {
       "back": "← Retour",
       "score": "Score",
       "start": "Démarrer",
-      "pause": "Pause"
+      "pause": "Pause",
+      "game_mode": "Mode de jeu",
+      "local_mode": "🎮 JOUER EN LOCAL",
+      "line_mode": "🌐 JOUER EN LIGNE",
+      "mess_line_err": "Tu dois être connecté pour jouer en ligne",
+      "multi": "🎯 MULTIJOUEUR (2v2)",
+      "tournament": "🏆 TOURNOI",
+      "mode_local": "MODE LOCAL",
+      "mode_line": "MODE EN LIGNE",
+      "valid_name": "VALIDER LES NOMS",
+      "mess_valid_err": "⚠️ TOUS LES NOMS DOIVENT ÊTRE REMPLIS ET UNIQUES !",
+      "start_tournament": "🎯 COMMENCER TOURNOI",
+      "new_game": "NOUVELLE PARTIE",
+      "player_1": "JOUEUR 1 : 0",
+      "player_2": "JOUEUR 2 : 0",
+      "next_game": "MATCH SUIVANT",
+      "final": "FINAL",
+      "control": "🎮 CONTRÔLES",
+      "p1": "JOUEUR 1",
+      "p2": "JOUEUR 2",
+      "p3": "JOUEUR 3",
+      "p4": "JOUEUR 4",
+      "up_down": "ARROW UP / ARROW DOWN",
+      "deco": "DECONNEXION",
+      "profile": "PROFILE",
+      "connexion": "CONNEXION"
     },
     "not_found": {
       "title": "404",
@@ -164,7 +202,7 @@ const translations: Record<Language, Translations> = {
     "auth": {
       "username": "Username",
       "password": "Password",
-      "login_title": "Transcendence",
+      "login_title": "Connexion",
       "create_account": "Create Account",
       "login_error": "Login error",
       "invalid_credentials": "Invalid credentials"
@@ -198,6 +236,8 @@ const translations: Record<Language, Translations> = {
       "avatar_error": "Error updating avatar",
       "date": "Date",
       "opponent": "Opponent",
+	  	"dashboard": "Dashboard",
+		"victory_rate": "Victory rate (%)",
       "result": "Result",
       "victory": "Victory",
       "defeat": "Defeat",
@@ -205,7 +245,16 @@ const translations: Record<Language, Translations> = {
 	    "status": "Status",
 	    "avatar": "Avatar",
 	    "name": "Username",
-	    "Games_played": "Games Played"
+	    "Games_played": "Games Played",
+		"game_types_distribution": "Game types distribution",
+		"winrate_by_type": "Winrate by type",
+		"ia_games": "IA Games",
+		"tournament_games": "Tournaments",
+		"multiplayer_games": "Multiplayer",
+		"total_game_time": "Total game time",
+		"side_point" : "Points won by section",
+		"top_points" : "Top section",
+	   "bottom_points" : "Bottom section",
     },
     "chat": {
       "title": "Chat",
@@ -251,7 +300,33 @@ const translations: Record<Language, Translations> = {
       "back": "← Back",
       "score": "Score",
       "start": "Start",
-      "pause": "Pause"
+      "pause": "Pause",
+      "game_mode": "Game mode",
+      "local_mode": "🎮 PLAY LOCALLY",
+      "line_mode": "🌐 PLAY ONLINE",
+      "mess_line_err": "You must been connected to play online",
+      "multi": "🎯 MULTIPLAYER (2v2)",
+      "tournament": "🏆 TOURNAMENT",
+      "mode_local": "LOCAL MODE",
+      "mode_line": "ONLINE MODE",
+      "valid_name": "VALIDATE THE NAMES",
+      "mess_valid_err": "⚠️ ALL NAMES MUST BE FILLED IN AND UNIQUE !",
+      "start_tournament": "🎯 START TOURNAMENT",
+      "new_game": "NEW GAME",
+      "player_1": "PLAYER 1 : 0",
+      "player_2": "PLAYER 2 : 0",
+      "next_game": "NEXT GAME",
+      "final": "FINAL",
+      "control": "🎮 CONTROLS",
+      "p1": "PLAYER 1",
+      "p2": "PLAYER 2",
+      "p3": "PLAYER 3",
+      "p4": "PLAYER 4",
+      "up_down": "ARROW UP / ARROW DOWN",
+      "deco": "LOG-OUT",
+      "profile": "PROFIL",
+      "connexion": "LOG-IN"
+
     },
     "not_found": {
       "title": "404",
@@ -276,6 +351,166 @@ const translations: Record<Language, Translations> = {
       "history_load_error": "Error loading history",
       "game_invite_todo": "Game invite for {{username}} (to be implemented)"
     }
+  },
+  es: {
+    "common": {
+      "login": "Iniciar sesión",
+      "logout": "Cerrar sesión",
+      "register": "Crear cuenta",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "delete": "Eliminar",
+      "edit": "Editar",
+      "loading": "Cargando...",
+      "error": "Error",
+      "success": "Éxito"
+    },
+    "navigation": {
+      "home": "Inicio",
+      "game": "Jugar",
+      "profile": "Perfil",
+      "chat": "Chat",
+      "leaderboard": "Clasificación"
+    },
+    "auth": {
+      "username": "Nombre de usuario",
+      "password": "Contraseña",
+      "login_title": "Iniciar sesión",
+      "create_account": "Crear cuenta",
+      "login_error": "Error al iniciar sesión",
+      "invalid_credentials": "Credenciales incorrectas"
+    },
+    "home": {
+      "welcome": "Bienvenido a Transcendence",
+      "subtitle": "El juego de Pong definitivo en tiempo real",
+      "start_game": "Empezar una partida"
+    },
+    "profile": {
+      "title": "Perfil",
+      "my_profile": "Mi perfil",
+      "back": "← Volver",
+      "stats": "Estadísticas",
+      "matches": "Partidas",
+      "wins": "Victorias",
+      "losses": "Derrotas",
+      "edit_avatar": "Editar avatar",
+      "edit_username": "Editar nombre",
+      "edit_password": "Editar contraseña",
+      "password_display": "Contraseña: **********",
+      "match_history": "Historial de partidas",
+      "games_played_stats": "Partidas jugadas: {{games}} | Victorias: {{wins}} | Derrotas: {{losses}}",
+      "validate": "Validar",
+      "cancel": "Cancelar",
+      "username_updated": "¡Nombre de usuario actualizado con éxito!",
+      "username_error": "Error al actualizar el nombre de usuario",
+      "password_updated": "¡Contraseña actualizada con éxito!",
+      "password_error": "Error al actualizar la contraseña",
+      "avatar_updated": "¡Avatar actualizado!",
+      "avatar_error": "Error al actualizar el avatar",
+      "date": "Fecha",
+      "opponent": "Oponente",
+      "result": "Resultado",
+      "victory": "Victoria",
+      "defeat": "Derrota",
+	    "friends_list": "Lista de amigos",
+	    "status": "Estado",
+	    "avatar": "Avatar",
+	    "name": "Nombre",
+	    "Games_played": "Partidas Jugadas"
+    },
+    "chat": {
+      "title": "Chat",
+      "send": "Enviar",
+      "type_message": "Escribe tu mensaje...",
+      "back": "← Volver",
+      "online_users": "Usuarios en línea",
+      "connecting": "Conectando...",
+      "conversations": "Conversaciones",
+      "select_conversation": "Selecciona una conversación",
+      "no_conversations": "Sin conversaciones",
+      "no_messages": "No hay mensajes en esta conversación",
+      "connection_lost": "Conexión perdida",
+      "reconnect": "Reconectar",
+      "connection_error": "Error de conexión",
+      "no_users_online": "No hay usuarios en línea",
+      "view_profile": "Ver perfil",
+      "block_user": "Bloquear",
+      "user_blocked": "Usuario bloqueado",
+      "user_blocked_you": "Este usuario te ha bloqueado",
+      "send_message": "💬 Enviar mensaje",
+      "invite_game": "🎮 Invitar a jugar",
+      "login_required": "Debes iniciar sesión para acceder al chat.",
+      "login_link": "Iniciar sesión",
+      "user_info_error": "No se pudo obtener la información del usuario.",
+      "reconnect_link": "Reconectar"
+    },
+    "signup": {
+      "title": "Crea tu cuenta",
+      "back_to_login": "← Volver al inicio de sesión",
+      "username": "Nombre de usuario",
+      "password": "Contraseña",
+      "avatar_label": "Elige una foto de perfil:",
+      "create_account": "Crear cuenta",
+      "signup_successful": "Registro exitoso",
+      "signup_error": "Error en el registro",
+      "wrong_input": "Entrada incorrecta"
+    },
+    "game": {
+      "title": "Juego Pong",
+      "back": "← Volver",
+      "score": "Puntuación",
+      "start": "Empezar",
+      "pause": "Pausa",
+      "game_mode": "Modo de juego",
+      "local_mode": "🎮 JUGAR LOCALMENTE",
+      "line_mode": "🌐 JUGAR EN LÍNEA",
+      "mess_line_err": "Debes estar conectado para jugar en línea",
+      "multi": "🎯 MULTIJUGADOR (2v2)",
+      "tournament": "🏆 TORNEO",
+      "mode_local": "MODO LOCAL",
+      "mode_line": "MODO EN LÍNEA",
+      "valid_name": "VALIDAR LOS NOMBRES",
+      "mess_valid_err": "⚠️ ¡TODOS LOS NOMBRES DEBEN ESTAR COMPLETOS Y SER ÚNICOS!",
+      "start_tournament": "🎯 EMPEZAR TORNEO",
+      "new_game": "NUEVA PARTIDA",
+      "player_1": "JUGADOR 1 : 0",
+      "player_2": "JUGADOR 2 : 0",
+      "next_game": "SIGUIENTE PARTIDA",
+      "final": "FINAL",
+      "control": "🎮 CONTROLES",
+      "p1": "JUGADOR 1",
+      "p2": "JUGADOR 2",
+      "p3": "JUGADOR 3",
+      "p4": "JUGADOR 4",
+      "up_down": "FLECHA ARRIBA / FLECHA ABAJO",
+      "deco": "DESCONEXION",
+      "profile": "PERFIL",
+      "connexion": "CONEXION"
+
+    },
+    "not_found": {
+      "title": "404",
+      "message": "Página no encontrada",
+      "back_home": "Volver al inicio"
+    },
+    "user_profile": {
+      "title": "Perfil de",
+      "back_to_chat": "← Volver al chat",
+      "member_since": "Miembro desde:",
+      "games_played": "Partidas jugadas",
+      "wins": "Victorias",
+      "losses": "Derrotas",
+      "match_history": "Historial de partidas",
+      "loading": "Cargando...",
+      "no_matches": "Aún no se han jugado partidas",
+      "vs": "vs",
+      "error_title": "Error",
+      "username_missing": "Falta el nombre de usuario.",
+      "back_to_home": "Volver al inicio",
+      "profile_load_error": "No se pudo cargar el perfil de",
+      "history_load_error": "Error al cargar el historial",
+      "game_invite_todo": "Invitación de juego para {{username}} (por implementar)"
+    }
   }
 };
 
@@ -288,7 +523,7 @@ class I18nService {
     if (this.isLoaded) return;
 
     const savedLang = localStorage.getItem('language') as Language;
-    if (savedLang && (savedLang === 'fr' || savedLang === 'en')) {
+    if (savedLang && (savedLang === 'fr' || savedLang === 'en' || savedLang === 'es')) {
       this.currentLanguage = savedLang;
     }
 
@@ -339,7 +574,8 @@ class I18nService {
   getAvailableLanguages(): { code: Language; name: string }[] {
     return [
       { code: 'fr', name: 'Français' },
-      { code: 'en', name: 'English' }
+      { code: 'en', name: 'English' },
+      { code: 'es', name: 'Español' }
     ];
   }
 }
