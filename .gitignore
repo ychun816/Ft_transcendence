@@ -25,4 +25,6 @@ generated/
 *.sln
 *.sw?
 
+backend/.env
+
 .devcontainer/.env
