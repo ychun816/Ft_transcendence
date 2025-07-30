@@ -2,8 +2,9 @@ services:
 
 
 #  Test alerte prometheus
-
+# ip public
 # MAJ pour connected user
+# logger a check
 
   dev:
     user: "0:0"
@@ -16,7 +17,7 @@ services:
       - ..:/app
       - /app/node_modules
     ports:
-      - "5173:5173"
+      # - "5173:5173"
       - "${MAIN_PORT}:3000"
       - "${METRICS_PORT}:3001"
       - "${HTTP_REDIRECT_PORT}:8080"
@@ -52,12 +53,26 @@ services:
   #   #   - ..:/app
   #   # - /app/node_modules
   #   ports:
-  #     - "3000:3000"
+  #     - "${MAIN_PORT}:3000"
+    #   - "${METRICS_PORT}:3001"
+    #   - "${HTTP_REDIRECT_PORT}:8080"
   #   command: ["npm", "start"]
     # environment:
     #   - NODE_ENV=production
+    #   - NODE_ENV=development
+    #   - DEBUG=true
     #   - LOGSTASH_HOST=${LOGSTASH_HOST}
     #   - LOGSTASH_PORT=${LOGSTASH_PORT}
+    #   - ELASTIC_URL=${ELASTIC_URL}
+    #   - ELASTIC_USER=${ELASTIC_USER}
+    #   - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    #   - DATABASE_URL=${DATABASE_URL}
+    #   - MAIN_PORT=${MAIN_PORT}
+    #   - METRICS_PORT=${METRICS_PORT}
+    #   - HTTP_REDIRECT_PORT=${HTTP_REDIRECT_PORT}
+    #   - PUBLIC_IP=${PUBLIC_IP}
+    #   - COOKIE_SECRET=${COOKIE_SECRET}
+    #   - SECURITY_KEY=${SECURITY_KEY}
   #   depends_on:
   #     - logstash
   #   networks:
@@ -65,7 +80,7 @@ services:
   #   restart: unless-stopped
 
   elasticsearch:
-    user: "0:0"
+    # user: "0:0"
     image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
     container_name: trans-elasticsearch
     environment:
@@ -135,8 +150,9 @@ services:
 
 
   kibana:
-    user: "0:0"
-    image: docker.elastic.co/kibana/kibana:8.11.0
+    build:
+      context: ./../monitoring/kibana
+      dockerfile: Dockerfile
     container_name: trans-kibana
     ports:
       - "${KIBANA_PORT}:5601"
@@ -147,12 +163,13 @@ services:
       - REPORTING_KEY=${REPORTING_KEY}
       - SECURITY_KEY=${SECURITY_KEY}
       - SAVED_OBJECTS_KEY=${SAVED_OBJECTS_KEY}
-      - XPACK_SECURITY_ENABLED=true
+      # - XPACK_SECURITY_ENABLED=true
+      - xpack.security.enabled=true
       - XPACK_SECURITY_ENROLLMENT_ENABLED=false
       - LOGGING_ROOT_LEVEL=info
     volumes:
       - ./../monitoring/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
-      - ./../monitoring/kibana/entrypoint.sh:/usr/local/bin/entrypoint.sh:ro
+      # - ./../monitoring/kibana/entrypoint.sh:/usr/local/bin/entrypoint.sh:ro
       - shared_data:/shared
       - kibana_data:/usr/share/kibana/data
     entrypoint: ["/usr/local/bin/entrypoint.sh"]
@@ -163,9 +180,7 @@ services:
     restart: unless-stopped
 
 
-
   kibana-init:
-    user: "0:0"
     container_name: trans-init-kibana
     image: debian:bookworm-slim
     depends_on:
