@@ -47,10 +47,10 @@ export async function handleLogIn(
 					return reply
 						.status(401)
 						.send({ success: false, message: "User not found" });
-				const passwordCheck = user.passwordHash ? await bcrypt.compare(
+				const passwordCheck = await bcrypt.compare(
 					password,
 					user.passwordHash
-				) : false;
+				);
 				if (!passwordCheck)
 					return reply
 						.status(401)

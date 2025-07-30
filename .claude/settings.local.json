@@ -3,8 +3,7 @@
     "allow": [
       "Bash(npm run build:*)",
       "Bash(cp:*)",
-      "Bash(rm:*)",
-      "Bash(npm install:*)"
+      "Bash(rm:*)"
     ],
     "deny": []
   }

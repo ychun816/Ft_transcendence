@@ -1,21 +1,5 @@
 // server.ts - Configuration améliorée pour Docker avec détection IP intelligente
 
-// Charger les variables d'environnement en premier
-import { config } from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import fs from 'fs';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const envPath = path.join(__dirname, '../.env');
-console.log('🔍 Chemin du fichier .env:', envPath);
-console.log('🔍 Fichier .env existe:', fs.existsSync(envPath));
-
-const result = config({ path: envPath });
-console.log('🔍 Résultat chargement .env:', result.error ? result.error.message : 'Succès');
-
 import { logger } from "./utils/logger.js";
 import { metricsPlugin } from "./utils/metricsPlugin.js";
 import fastify from "fastify";
@@ -25,6 +9,8 @@ import { registerProfileRoute } from "./routes/profile.js";
 import fastifyStatic from "@fastify/static";
 import fastifyWebsocket from "@fastify/websocket";
 import fastifyMultipart from "@fastify/multipart";
+import path from "path";
+import { fileURLToPath } from "url";
 import { PrismaClient } from "@prisma/client";
 import chatWebSocketRoutes from "./routes/chat.js";
 import cookie from "@fastify/cookie";
@@ -32,12 +18,14 @@ import type { FastifyCookieOptions } from "@fastify/cookie";
 import { registerNotificationRoutes } from "./routes/notifications.js";
 import { registerGameRoute } from "./routes/game.js";
 import { GameManager } from "./game/GameManager.js";
+import fs from "fs";
 import os from "os";
 import { execSync } from "child_process"; // Import manquant ajouté !
 import { twoFactorRoutes } from "./routes/two-factor.js";
-import googleAuthRoutes from "./routes/google-auth.js";
 
 // Configuration des chemins
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 export const PROJECT_ROOT = path.resolve(__dirname, "../../");
 
 // Extension du type FastifyRequest pour les métriques
@@ -480,8 +468,6 @@ const setupMainServer = async () => {
 	await registerProfileRoute(app, prisma);
 	await chatWebSocketRoutes(app, prisma);
 	await registerNotificationRoutes(app, prisma);
-	await twoFactorRoutes(app, prisma);
-	await app.register(googleAuthRoutes, { prefix: '/api' });
 
 	// =============== SERVER-SIDE PONG SETUP ===============
 	console.log("🎮 Initializing Game Manager for Server-Side Pong...");
@@ -493,6 +479,8 @@ const setupMainServer = async () => {
 	} catch (error) {
 		console.error("❌ Error initializing GameManager:", error);
 	}
+
+	await twoFactorRoutes(app, prisma);
 
 	// Route de santé pour le monitoring
 	app.get("/health", async (request, reply) => {
