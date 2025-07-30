@@ -6,6 +6,7 @@
   "main": "index.js",
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
+    "@types/chart.js": "^2.9.41",
     "@types/cookie": "^0.6.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.0.3",
@@ -34,6 +35,8 @@
     "@types/speakeasy": "^2.0.10",
     "axios": "^1.10.0",
     "bcrypt": "^6.0.0",
+    "chart": "^0.1.2",
+    "chart.js": "^4.5.0",
     "env-schema": "^6.0.1",
     "esbuild": "^0.25.5",
     "fastify": "^5.4.0",
@@ -54,6 +57,7 @@
     "react-dom": "^19.1.0",
     "rollup": "^4.43.0",
     "source-map-js": "^1.2.1",
+    "speakeasy": "^2.0.0",
     "tinyglobby": "^0.2.14"
   },
   "scripts": {
