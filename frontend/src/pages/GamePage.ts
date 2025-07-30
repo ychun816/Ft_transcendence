@@ -70,9 +70,14 @@ export function createGamePage(): HTMLElement {
 						${i18n.t('game.local_mode')}
 						</span>
 					</button>
-					<button id="ligneBtn" class="${classes.gameModeButton}">
+					<button id="ligneBtn" class="hidden ${classes.gameModeButton}">
 						<span class="relative z-10">
 						${i18n.t('game.line_mode')}
+						</span>
+					</button>
+					<button id="serverBtn" class="${classes.gameModeButton}">
+						<span class="relative z-10">
+						${i18n.t('game.server_side')}
 						</span>
 					</button>
 				</div>
@@ -466,6 +471,7 @@ export function createGamePage(): HTMLElement {
 		const menu = page.querySelector("#menu") as HTMLElement;
 		const menuLocal = page.querySelector("#menu_local") as HTMLElement;
 		const menuLigne = page.querySelector("#menu_ligne") as HTMLElement;
+		const serverBtn = page.querySelector("#serverBtn") as HTMLButtonElement;
 		const menuTournoi = page.querySelector("#menu_tournoi") as HTMLElement;
 		const game = page.querySelector("#game") as HTMLElement;
 		const restart = page.querySelector("#restartBtn") as HTMLButtonElement;
@@ -578,6 +584,7 @@ export function createGamePage(): HTMLElement {
 		const menu = page.querySelector("#menu") as HTMLElement;
 		const localBtn = page.querySelector("#localBtn") as HTMLButtonElement;
 		const ligneBtn = page.querySelector("#ligneBtn") as HTMLButtonElement;
+		const serverBtn = page.querySelector("#serverBtn") as HTMLButtonElement;
 
 		const menuLocal = page.querySelector("#menu_local") as HTMLElement;
 		const soloBtn = page.querySelector("#soloBtn") as HTMLButtonElement;
@@ -1107,6 +1114,13 @@ export function createGamePage(): HTMLElement {
 			import("../router/router.js").then(({ router }) => {
 				router.navigate("/remote");
 			});
+		}		
+		
+		function go_server_side()
+		{
+			import("../router/router.js").then(({ router }) => {
+				router.navigate("/server-game");
+			});
 		}
 
 		function login()
@@ -1252,6 +1266,7 @@ export function createGamePage(): HTMLElement {
 
 		profilBtn.addEventListener("click", () => go_profil());
 		chatBtn.addEventListener("click", () => go_chat());
+		serverBtn.addEventListener("click", () => go_server_side());
 	}
 
 	window.addEventListener("beforeunload", () => {

@@ -21,11 +21,56 @@ interface GameDataRequest {
 	multiMode?: boolean;
 }
 
+interface CreateGameRequest {
+	mode: 'solo' | 'versus' | 'multi' | 'tournoi';
+}
+
 async function findUser(prisma: PrismaClient, playerId: number) {
 	const user = await prisma.user.findUnique({
 		where: {id: playerId}
 	});
 	return user;
+}
+
+// ✅ FONCTION UTILITAIRE POUR VALIDER LES MODES
+function isValidMode(mode: string): mode is 'solo' | 'versus' | 'multi' | 'tournoi' {
+	return ['solo', 'versus', 'multi', 'tournoi'].includes(mode);
+}
+
+// ✅ FONCTION UTILITAIRE POUR LES INFOS DES MODES
+function getModeInfo(mode: 'solo' | 'versus' | 'multi' | 'tournoi') {
+	const modeInfos = {
+		solo: {
+			name: 'Solo',
+			description: 'Joueur contre IA',
+			players: 1,
+			hasAI: true,
+			scoreToWin: 5
+		},
+		versus: {
+			name: 'Versus', 
+			description: 'Joueur contre Joueur',
+			players: 2,
+			hasAI: false,
+			scoreToWin: 5
+		},
+		multi: {
+			name: 'Multi',
+			description: 'Équipe contre Équipe (2v2)',
+			players: 4,
+			hasAI: false,
+			scoreToWin: 5
+		},
+		tournoi: {
+			name: 'Tournoi',
+			description: 'Match de tournoi',
+			players: 2,
+			hasAI: false,
+			scoreToWin: 3
+		}
+	};
+
+	return modeInfos[mode];
 }
 
 export async function registerGameRoute(
@@ -38,17 +83,38 @@ export async function registerGameRoute(
 	// Créer une nouvelle partie
 	app.post("/api/game/create", async (request, reply) => {
 		try {
-			const { mode } = request.body as { mode?: 'solo' | 'versus' };
-			const gameId = gameManager.createGame(mode || 'versus');
+			const body = request.body as CreateGameRequest;
+			const { mode } = body;
+
+			if (!mode || !isValidMode(mode)) {
+				return reply.status(400).send({ 
+					error: 'Invalid game mode',
+					validModes: ['solo', 'versus', 'multi', 'tournoi'],
+					received: mode
+				});
+			}
+
+			const gameId = gameManager.createGame(mode);
+			const modeInfo = getModeInfo(mode);
+
+			console.log(`🎮 API: Created ${mode} game: ${gameId}`);
 
 			reply.send({
 				success: true,
 				gameId,
-				message: `Game created: ${gameId}`
+				mode,
+				modeInfo,
+				message: `${modeInfo.name} game created: ${gameId}`,
+				websocketUrl: `/ws/game/${gameId}`,
+				playersNeeded: modeInfo.players,
+				hasAI: modeInfo.hasAI
 			});
-		} catch (error) {
-			console.error('Error creating game:', error);
-			reply.status(500).send({ error: 'Failed to create game' });
+		} catch (error: any) {
+			console.error('❌ Error creating game:', error);
+			reply.status(500).send({ 
+				error: 'Failed to create game',
+				details: error.message 
+			});
 		}
 	});
 
@@ -62,14 +128,26 @@ export async function registerGameRoute(
 				return reply.status(404).send({ error: 'Game not found' });
 			}
 
-			reply.send({
+			// ✅ CORRECTION TYPESCRIPT : Casting pour accéder aux propriétés
+			const response = {
 				success: true,
 				gameId,
-				state: gameState
+				timestamp: Date.now(),
+				state: gameState,
+				serverInfo: {
+					isServerSide: true,
+					version: "2.0.0",
+					mode: (gameState.state as any).game_mode || 'unknown'
+				}
+			};
+
+			reply.send(response);
+		} catch (error: any) {
+			console.error('❌ Error getting game state:', error);
+			reply.status(500).send({ 
+				error: 'Failed to get game state',
+				details: error.message 
 			});
-		} catch (error) {
-			console.error('Error getting game state:', error);
-			reply.status(500).send({ error: 'Failed to get game state' });
 		}
 	});
 
@@ -83,24 +161,34 @@ export async function registerGameRoute(
 				return reply.status(404).send({ error: 'Game not found' });
 			}
 
+			const speed = Math.sqrt(
+				gameState.ball.ball_dir_x ** 2 + 
+				gameState.ball.ball_dir_y ** 2
+			);
+
 			reply.send({
 				success: true,
 				gameId,
+				timestamp: Date.now(),
 				ball: {
 					x: gameState.ball.ball_x,
 					y: gameState.ball.ball_y,
 					dirX: gameState.ball.ball_dir_x,
 					dirY: gameState.ball.ball_dir_y,
-					speed: Math.sqrt(gameState.ball.ball_dir_x ** 2 + gameState.ball.ball_dir_y ** 2)
+					speed: parseFloat(speed.toFixed(2)),
+					angle: (gameState.ball as any).angle || 0
 				}
 			});
-		} catch (error) {
-			console.error('Error getting ball position:', error);
-			reply.status(500).send({ error: 'Failed to get ball position' });
+		} catch (error: any) {
+			console.error('❌ Error getting ball position:', error);
+			reply.status(500).send({ 
+				error: 'Failed to get ball position',
+				details: error.message 
+			});
 		}
 	});
 
-	// Obtenir seulement les positions des paddles
+	// ✅ CORRECTION TYPESCRIPT : Gestion des différents types de paddles
 	app.get("/api/game/:gameId/paddles", async (request, reply) => {
 		try {
 			const { gameId } = request.params as { gameId: string };
@@ -110,17 +198,45 @@ export async function registerGameRoute(
 				return reply.status(404).send({ error: 'Game not found' });
 			}
 
+			let paddlesData: any;
+
+			// ✅ CORRECTION : Casting pour accéder aux propriétés
+			const paddle = gameState.paddle as any;
+
+			// Vérifier si c'est le mode multi (4 raquettes)
+			if (paddle.paddles) {
+				paddlesData = {
+					mode: 'multi',
+					team1: {
+						p1_y: paddle.paddles.p1_y,
+						p2_y: paddle.paddles.p2_y
+					},
+					team2: {
+						p3_y: paddle.paddles.p3_y,
+						p4_y: paddle.paddles.p4_y
+					}
+				};
+			} else {
+				// Mode solo/versus (2 raquettes)
+				paddlesData = {
+					mode: 'versus',
+					left: paddle.left_paddle_y,
+					right: paddle.right_paddle_y
+				};
+			}
+
 			reply.send({
 				success: true,
 				gameId,
-				paddles: {
-					left: gameState.paddle.left_paddle_y,
-					right: gameState.paddle.right_paddle_y
-				}
+				timestamp: Date.now(),
+				paddles: paddlesData
 			});
-		} catch (error) {
-			console.error('Error getting paddle positions:', error);
-			reply.status(500).send({ error: 'Failed to get paddle positions' });
+		} catch (error: any) {
+			console.error('❌ Error getting paddle positions:', error);
+			reply.status(500).send({ 
+				error: 'Failed to get paddle positions',
+				details: error.message 
+			});
 		}
 	});
 
@@ -137,19 +253,33 @@ export async function registerGameRoute(
 			reply.send({
 				success: true,
 				gameId,
+				timestamp: Date.now(),
 				score: {
 					left: gameState.state.left_score,
-					right: gameState.state.right_score
+					right: gameState.state.right_score,
+					scoreToWin: gameState.config.score_to_win
 				},
 				gameStatus: {
 					running: gameState.state.game_running,
 					paused: gameState.state.is_paused,
-					mode: gameState.state.game_mode
+					countdownActive: (gameState.state as any).count_down_active,
+					mode: (gameState.state as any).game_mode || 'unknown'
+				},
+				config: {
+					ballSpeed: gameState.config.ball_speed,
+					paddleSpeed: gameState.config.paddle_speed,
+					canvasSize: {
+						width: gameState.config.canvas_width,
+						height: gameState.config.canvas_height
+					}
 				}
 			});
-		} catch (error) {
-			console.error('Error getting game score:', error);
-			reply.status(500).send({ error: 'Failed to get game score' });
+		} catch (error: any) {
+			console.error('❌ Error getting game score:', error);
+			reply.status(500).send({ 
+				error: 'Failed to get game score',
+				details: error.message 
+			});
 		}
 	});
 
@@ -157,19 +287,67 @@ export async function registerGameRoute(
 	app.get("/api/games", async (request, reply) => {
 		try {
 			const games = gameManager.getAllGames();
+			const stats = gameManager.getStats();
+
+			const enrichedGames = games.map(game => {
+				const gameState = gameManager.getGameState(game.id);
+				return {
+					...game,
+					status: gameState ? {
+						running: gameState.state.game_running,
+						paused: gameState.state.is_paused,
+						score: {
+							left: gameState.state.left_score,
+							right: gameState.state.right_score
+						}
+					} : null,
+					age: Date.now() - game.createdAt
+				};
+			});
 
 			reply.send({
 				success: true,
-				games,
-				totalGames: games.length
+				games: enrichedGames,
+				totalGames: games.length,
+				serverStats: {
+					totalConnections: stats.totalConnections,
+					memoryUsage: stats.memoryUsage,
+					uptime: stats.uptime
+				},
+				lastUpdate: Date.now()
 			});
-		} catch (error) {
-			console.error('Error listing games:', error);
-			reply.status(500).send({ error: 'Failed to list games' });
+		} catch (error: any) {
+			console.error('❌ Error listing games:', error);
+			reply.status(500).send({ 
+				error: 'Failed to list games',
+				details: error.message 
+			});
 		}
 	});
 
-	// =============== ANCIENNE API POUR SAUVEGARDER LES MATCHES ===============
+	// Informations sur les modes de jeu disponibles
+	app.get("/api/game/modes", async (request, reply) => {
+		try {
+			const modes = ['solo', 'versus', 'multi', 'tournoi'].map(mode => ({
+				mode,
+				info: getModeInfo(mode as any)
+			}));
+
+			reply.send({
+				success: true,
+				modes,
+				totalModes: modes.length
+			});
+		} catch (error: any) {
+			console.error('❌ Error getting game modes:', error);
+			reply.status(500).send({ 
+				error: 'Failed to get game modes',
+				details: error.message 
+			});
+		}
+	});
+
+	// =============== ANCIENNES API POUR SAUVEGARDER LES MATCHES ===============
 
 	app.post("/api/game/add", async(request, reply) =>{
 		try{
@@ -211,18 +389,15 @@ export async function registerGameRoute(
 			}
 
 			console.log("USER1 : ", user1);
-			//console.log("USER2 : ", user2);
 			console.log("PRISMA CREATE MATCH");
-			// Création du match avec les corrections ci-dessus
+			
 			const game = await prisma.match.create({
 				data: {
 					players: gameData.players,
 					player1Id: gameData.player1Id,
-					//player1: { connect: { id: gameData.player1Id } },
 
 					...(gameData.player2Id && user2 && {
 						player2Id: gameData.player2Id,
-						//player2: { connect: { id: gameData.player2Id } }
 					}),
 
 					score1: gameData.score1,
@@ -238,18 +413,20 @@ export async function registerGameRoute(
 				}
 			});
 
-			console.log("GAME CREATED:", game);
+			console.log("✅ GAME CREATED (SERVER-SIDE):", game);
+			
 			await prisma.user.update({
-					where: { id: gameData.player1Id },
-					data: {
-						gamesPlayed: { increment: 1 },
-						...(gameData.player1Id === gameData.winnerId
-							? { wins: { increment: 1 } }
-							: { losses: { increment: 1 } }
-						),
-						matchesAsPlayer1: { connect: { id: game.id } }
-					}
-				});
+				where: { id: gameData.player1Id },
+				data: {
+					gamesPlayed: { increment: 1 },
+					...(gameData.player1Id === gameData.winnerId
+						? { wins: { increment: 1 } }
+						: { losses: { increment: 1 } }
+					),
+					matchesAsPlayer1: { connect: { id: game.id } }
+				}
+			});
+
 			if (gameData.player2Id){
 				await prisma.user.update({
 					where: { id: gameData.player2Id },
@@ -263,12 +440,15 @@ export async function registerGameRoute(
 					}
 				});
 			}
+
 			reply.send({
 				success: true,
 				gameId: game.id,
+				serverSide: true,
+				message: "Match saved successfully"
 			});
 		} catch (error: any) {
-			console.error("Error while creating match:", error);
+			console.error("❌ Error while creating match:", error);
 			reply.status(500).send({
 				error: "Internal server error",
 				details: error.message
@@ -291,15 +471,27 @@ export async function registerGameRoute(
             console.log(`❌ stat Results not found for user: ${username}`);
             return reply.status(404).send({ error: 'stat Results not found for user' });
         }
+
 		const {iaStats, tournamentStats, multiStats} = statResults;
 		if (!iaStats || !tournamentStats || !multiStats)
 			return reply.status(400).send({ error: "No game stats" });
-		console.log("iaStats: ", iaStats);
-		console.log("tournamentStats: ", tournamentStats);
-		console.log("multiStats: ", multiStats);
-		return reply.status(200).send({success:true, iaStats, tournamentStats, multiStats});
+		
+		console.log("✅ iaStats: ", iaStats);
+		console.log("✅ tournamentStats: ", tournamentStats);
+		console.log("✅ multiStats: ", multiStats);
+		
+		return reply.status(200).send({
+			success: true, 
+			iaStats, 
+			tournamentStats, 
+			multiStats,
+			serverSide: true,
+			generatedAt: new Date().toISOString()
+		});
 	});
 }
+
+// =============== CLASSES ET FONCTIONS UTILITAIRES ===============
 
 class GlobalStat {
 	winner: number = 0;
@@ -322,9 +514,11 @@ async function generateStats(prisma: PrismaClient, username: string)
 	});
 	if (!matches)
 		return null;
+	
 	let iaStats = new GlobalStat;
 	let tournamentStats = new GlobalStat;
 	let multiStats = new GlobalStat;
+	
 	if (matches.matchesAsPlayer1.length > 0 || matches.matchesAsPlayer2.length > 0){
 		await handleMatches(matches.matchesAsPlayer1, prisma, username, iaStats, tournamentStats, multiStats)
 		await handleMatches(matches.matchesAsPlayer2, prisma, username, iaStats, tournamentStats, multiStats)

@@ -23,6 +23,7 @@ class Router {
         this.protectedRoutes.add('/chat');
         this.protectedRoutes.add('/leaderboard');
         this.protectedRoutes.add('/remote');
+        this.protectedRoutes.add('/serverGame');
     }
 
     private isProtectedRoute(route: string): boolean {

@@ -2,16 +2,17 @@ import { router } from "./router/router";
 import { createLoginPage } from "./pages/LoginPage";
 import { createHomePage } from "./pages/HomePage";
 import { createGamePage } from "./pages/GamePage";
+import { createServerGamePage } from "./pages/GameServerPage";
 import { createProfilePage } from "./pages/ProfilePage";
 import { createChatPage } from "./pages/ChatPage";
 import { createNotFoundPage } from "./pages/NotFoundPage";
 import { createSignUpPage } from "./pages/SignUpPage";
 import { createUserProfilePage } from "./pages/UserProfilePage";
 import { createRemotePage } from "./pages/RemotePage"; 
-import { createServerGamePage } from "./pages/ServerGamePage";
-import { createServerGameSoloPage } from "./pages/ServerGameSoloPage";
-import { createServerGameVersusPage } from "./pages/ServerGameVersusPage";
-import { createServerGameMultiPage } from "./pages/ServerGameMultiPage";
+// import { createServerGamePage } from "./pages/ServerGamePage";
+// import { createServerGameSoloPage } from "./pages/ServerGameSoloPage";
+// import { createServerGameVersusPage } from "./pages/ServerGameVersusPage";
+// import { createServerGameMultiPage } from "./pages/ServerGameMultiPage";
 import { createTwoFactorVerifyPage } from "./pages/TwoFactorVerifyPage";
 import { i18n } from "./services/i18n";
 
@@ -22,15 +23,16 @@ async function initApp() {
 
   // Configuration des routes
   router
-    .addRoute('/', createGamePage)           
+    .addRoute('/', createGamePage)         
+    .addRoute('/server-game', createServerGamePage)         
     .addRoute('/login', createLoginPage)
     .addRoute('/signup', createSignUpPage)
     .addRoute('/home', createHomePage)
     .addRoute('/game', createGamePage)       
-    .addRoute('/server-game', createServerGamePage)
-    .addRoute('/server-game/solo', createServerGameSoloPage)
-    .addRoute('/server-game/versus', createServerGameVersusPage)
-    .addRoute('/server-game/multi', createServerGameMultiPage) 
+    // .addRoute('/server-game', createServerGamePage)
+    // .addRoute('/server-game/solo', createServerGameSoloPage)
+    // .addRoute('/server-game/versus', createServerGameVersusPage)
+    // .addRoute('/server-game/multi', createServerGameMultiPage) 
     .addRoute('/profile', createProfilePage)
     .addRoute('/chat', createChatPage)
     .addRoute('/remote', createRemotePage)

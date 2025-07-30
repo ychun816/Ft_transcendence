@@ -1,11 +1,13 @@
 import { FastifyInstance, FastifyRequest } from "fastify";
-import { ServerPong, GameStateMessage } from "./ServerPongGame.js";
+import { ServerPong, GameStateMessage } from "./ServerGame_solo.js";
+import { ServerPongMulti, GameStateMessage as MultiGameStateMessage } from "./ServerGame_ligne.js";
+import { ServerPongTournoi, GameStateMessage as TournoiGameStateMessage } from "./ServerGame_tournoi.js";
 
 interface GameRoom {
 	id: string;
-	game: ServerPong;
+	game: ServerPong | ServerPongMulti | ServerPongTournoi;
 	players: Map<string, { connection: any; lastPing: number }>; // WebSocket connection avec heartbeat
-	mode: "solo" | "versus" | "multi";
+	mode: "solo" | "versus" | "multi" | "tournoi";
 	createdAt: number;
 	// ✅ AJOUT : timeout pour nettoyage
 	cleanupTimeout?: NodeJS.Timeout;
@@ -48,7 +50,7 @@ export class GameManager {
 				const params = req.params as { gameId: string };
 				const query = req.query as {
 					playerId?: string;
-					mode?: "solo" | "versus" | "multi";
+					mode?: "solo" | "versus" | "multi" | "tournoi";
 				};
 
 				const gameId = params.gameId;
@@ -97,7 +99,7 @@ export class GameManager {
 				console.log(`⚙️ Setting up game callbacks for ${gameId}`);
 				try {
 					gameRoom.game.setCallbacks(
-						(state: GameStateMessage) =>
+						(state: GameStateMessage | MultiGameStateMessage | TournoiGameStateMessage) =>
 							this.broadcastGameState(gameId, state),
 						(winner: "left" | "right") =>
 							this.handleGameEnd(gameId, winner)
@@ -112,7 +114,6 @@ export class GameManager {
 				try {
 					const initialState = gameRoom.game.getGameState();
 					console.log(`🔍 Connection type:`, typeof connection);
-					console.log(`🔍 Connection keys:`, Object.keys(connection));
 
 					// connection EST directement le WebSocket
 					connection.send(JSON.stringify(initialState));
@@ -216,9 +217,30 @@ export class GameManager {
 
 	private createGameRoom(
 		gameId: string,
-		mode: "solo" | "versus" | "multi"
+		mode: "solo" | "versus" | "multi" | "tournoi"
 	): GameRoom {
-		const game = new ServerPong(gameId, mode);
+		let game: ServerPong | ServerPongMulti | ServerPongTournoi;
+
+		// Créer le bon type de jeu selon le mode
+		switch (mode) {
+			case "solo":
+				game = new ServerPong(gameId, "solo");
+				break;
+			case "versus":
+				game = new ServerPong(gameId, "versus");
+				break;
+			case "multi":
+				game = new ServerPongMulti(gameId);
+				break;
+			case "tournoi":
+				// Pour le tournoi, on aurait besoin des noms des joueurs
+				// Pour l'instant, on utilise des noms par défaut
+				game = new ServerPongTournoi(gameId, "Player1", "Player2", 0);
+				break;
+			default:
+				throw new Error(`Unknown game mode: ${mode}`);
+		}
+
 		const gameRoom: GameRoom = {
 			id: gameId,
 			game,
@@ -350,8 +372,8 @@ export class GameManager {
 
 		// Arrêter le jeu
 		try {
-			if (typeof gameRoom.game.end_game === "function") {
-				gameRoom.game.end_game();
+			if (typeof gameRoom.game.cleanup === "function") {
+				gameRoom.game.cleanup();
 			}
 		} catch (error) {
 			console.error(`Error ending game ${gameId}:`, error);
@@ -382,7 +404,10 @@ export class GameManager {
 				break;
 
 			case "restartGame":
-				// Gérer le restart (si implémenté)
+				// Gérer le restart
+				if (typeof gameRoom.game.restart === "function") {
+					gameRoom.game.restart();
+				}
 				break;
 
 			default:
@@ -421,7 +446,7 @@ export class GameManager {
 		}
 	}
 
-	private broadcastGameState(gameId: string, state: GameStateMessage) {
+	private broadcastGameState(gameId: string, state: GameStateMessage | MultiGameStateMessage | TournoiGameStateMessage) {
 		const gameRoom = this.games.get(gameId);
 		if (!gameRoom) return;
 
@@ -470,7 +495,7 @@ export class GameManager {
 	}
 
 	// Méthodes publiques pour l'API REST
-	public getGameState(gameId: string): GameStateMessage | null {
+	public getGameState(gameId: string): GameStateMessage | MultiGameStateMessage | TournoiGameStateMessage | null {
 		const gameRoom = this.games.get(gameId);
 		return gameRoom ? gameRoom.game.getGameState() : null;
 	}
@@ -505,7 +530,7 @@ export class GameManager {
 		return gamesList;
 	}
 
-	public createGame(mode: "solo" | "versus" | "multi" = "versus"): string {
+	public createGame(mode: "solo" | "versus" | "multi" | "tournoi" = "versus"): string {
 		if (this.games.size >= this.MAX_GAMES) {
 			console.warn(
 				`⚠️ Maximum number of games reached (${this.MAX_GAMES}). Cleaning up old games...`

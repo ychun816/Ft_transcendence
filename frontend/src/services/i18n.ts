@@ -153,7 +153,8 @@ const translations: Record<Language, Translations> = {
       "up_down": "ARROW UP / ARROW DOWN",
       "deco": "DECONNEXION",
       "profile": "PROFILE",
-      "connexion": "CONNEXION"
+      "connexion": "CONNEXION",
+      "server_side" : "🖥️ JOUER COTE SERVEUR"
     },
     "not_found": {
       "title": "404",
@@ -325,7 +326,8 @@ const translations: Record<Language, Translations> = {
       "up_down": "ARROW UP / ARROW DOWN",
       "deco": "LOG-OUT",
       "profile": "PROFIL",
-      "connexion": "LOG-IN"
+      "connexion": "LOG-IN",
+      "server_side" : "🖥️ SERVER SIDE"
 
     },
     "not_found": {
@@ -485,7 +487,8 @@ const translations: Record<Language, Translations> = {
       "up_down": "FLECHA ARRIBA / FLECHA ABAJO",
       "deco": "DESCONEXION",
       "profile": "PERFIL",
-      "connexion": "CONEXION"
+      "connexion": "CONEXION",
+      "server_side" : "🖥️ JUGAR DEL LADO DEL SERVIDOR"
 
     },
     "not_found": {

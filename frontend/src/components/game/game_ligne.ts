@@ -188,7 +188,7 @@ class Pong
             ball_speed: 4.5 * (3/2),
             ball_max_speed: 12 * (3/2),
             paddle_speed: 5.25 * (3/2),
-            score_to_win: 5,
+            score_to_win: 3,
             increase_vitesse: 250,
             time_before_new_ball: 3000
         }

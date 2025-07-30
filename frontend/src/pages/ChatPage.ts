@@ -1,5 +1,6 @@
 import { i18n } from "../services/i18n.js";
 import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
+import { classes } from "../styles/retroStyles.js";
 
 export function createChatPage(): HTMLElement {
 	const page = document.createElement("div");
@@ -8,129 +9,106 @@ export function createChatPage(): HTMLElement {
 	const renderContent = () => {
 		page.innerHTML = `
 		<style>
-			/* Styles personnalisés pour les effets néon */
-			.neon-text {
-				text-shadow:
-					0 0 5px currentColor,
-					0 0 10px currentColor,
-					0 0 15px currentColor,
-					0 0 20px currentColor;
+			/* Import de la police Orbitron pour le thème rétro */
+			@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+			* {
+				font-family: 'Orbitron', monospace;
 			}
 
-			.neon-border {
-				box-shadow:
-					0 0 10px currentColor,
-					inset 0 0 10px currentColor;
+			/* Animation personnalisée pour le spinner */
+			@keyframes retro-spin {
+				0% { transform: rotate(0deg); }
+				100% { transform: rotate(360deg); }
 			}
 
-			.particles {
-				position: fixed;
-				top: 0;
-				left: 0;
-				width: 100%;
-				height: 100%;
-				pointer-events: none;
-				z-index: -1;
-			}
-
-			.particle {
-				position: absolute;
-				width: 2px;
-				height: 2px;
-				background: #00ff41;
-				border-radius: 50%;
-				animation: float 6s ease-in-out infinite;
-			}
-
-			@keyframes float {
-				0%, 100% { transform: translateY(0px) rotate(0deg); }
-				50% { transform: translateY(-20px) rotate(180deg); }
-			}
-
-			.scan-lines::before {
-				content: '';
-				position: absolute;
-				top: 0;
-				left: 0;
-				right: 0;
-				bottom: 0;
-				background: linear-gradient(
-					transparent 0%,
-					rgba(0, 255, 65, 0.03) 50%,
-					transparent 100%
-				);
-				background-size: 100% 4px;
-				animation: scan 0.1s linear infinite;
-				pointer-events: none;
-			}
-
-			@keyframes scan {
-				0% { background-position: 0 0; }
-				100% { background-position: 0 4px; }
+			.retro-spinner {
+				animation: retro-spin 1s linear infinite;
 			}
 		</style>
 
-		<!-- Particules d'arrière-plan -->
-		<div class="particles">
-			<div class="particle" style="left: 10%; animation-delay: 0s;"></div>
-			<div class="particle" style="left: 20%; animation-delay: 1s;"></div>
-			<div class="particle" style="left: 30%; animation-delay: 2s;"></div>
-			<div class="particle" style="left: 40%; animation-delay: 3s;"></div>
-			<div class="particle" style="left: 50%; animation-delay: 4s;"></div>
-			<div class="particle" style="left: 60%; animation-delay: 5s;"></div>
-			<div class="particle" style="left: 70%; animation-delay: 2s;"></div>
-			<div class="particle" style="left: 80%; animation-delay: 1s;"></div>
-			<div class="particle" style="left: 90%; animation-delay: 3s;"></div>
-		</div>
+		<!-- Champ d'étoiles en arrière-plan -->
+		<div class="${classes.starfield}"></div>
 
-		<div class="absolute top-4 right-4" id="language-switcher-container"></div>
-		<div class="min-h-screen flex items-center justify-center p-4 scan-lines relative">
-			<div class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-8 border border-cyan-400 border-opacity-30 neon-border max-w-6xl w-full flex flex-col items-center"
-		  <header class="w-full flex items-center gap-4 mb-6">
-			<button class="bg-gradient-to-r from-gray-500 from-opacity-30 to-gray-600 to-opacity-30 hover:from-gray-500 hover:from-opacity-50 hover:to-gray-600 hover:to-opacity-50 text-white font-bold py-2 px-4 rounded-lg border border-gray-500 border-opacity-50 transition-all duration-300 transform hover:scale-105" data-route="/home">${i18n.t('chat.back')}</button>
-			<h2 class="text-3xl font-bold text-cyan-400 neon-text">${i18n.t('chat.title')}</h2>
-		  </header>
-      <main class="w-full flex flex-col items-center">
-        <div class="flex w-full h-96">
-          <!-- Online Users -->
-          <div class="w-1/4 border-r border-cyan-400 border-opacity-30 flex flex-col bg-gray-800 bg-opacity-30 rounded-l-xl">
-            <div class="p-4 border-b border-cyan-400 border-opacity-30">
-              <h3 class="font-semibold text-cyan-400 neon-text">${i18n.t('chat.online_users')}</h3>
-            </div>
-            <div class="flex-1 overflow-y-auto" id="online-users-list">
-              <div class="p-4 text-cyan-400 text-center">
-                <div class="animate-spin inline-block w-4 h-4 border-2 border-cyan-400 border-t-green-400 rounded-full mb-2"></div>
-                <div>${i18n.t('chat.connecting')}</div>
-              </div>
-            </div>
-          </div>
+		<!-- Container principal avec effet scan -->
+		<div class="min-h-screen flex items-center justify-center p-4 ${classes.scanLinesContainer} relative">
+			
+			<!-- Sélecteur de langue en haut à droite -->
+			<div class="absolute top-4 right-4 z-50" id="language-switcher-container"></div>
 
-          <!-- Conversations List -->
-          <div class="w-1/3 border-r border-cyan-400 border-opacity-30 flex flex-col bg-gray-800 bg-opacity-30">
-            <div class="p-4 border-b border-cyan-400 border-opacity-30">
-              <h3 class="font-semibold text-cyan-400 neon-text">${i18n.t('chat.conversations')}</h3>
-            </div>
-            <div class="flex-1 overflow-y-auto" id="conversations-list">
-              <!-- Conversations will appear here -->
-            </div>
-          </div>
+			<!-- Interface principale -->
+			<div class="${classes.retroPanel} rounded-2xl p-8 max-w-6xl w-full flex flex-col items-center">
+				
+				<!-- Header avec bouton retour et titre -->
+				<header class="w-full flex items-center gap-4 mb-6">
+					<button class="${classes.backButton}" data-route="/home">
+						<span class="relative z-10">
+							${i18n.t('chat.back')}
+						</span>
+					</button>
+					<h2 class="text-3xl font-bold text-cyan-400 ${classes.neonText}">
+						${i18n.t('chat.title')}
+					</h2>
+				</header>
 
-          <!-- Chat Area -->
-          <div class="flex-1 flex flex-col bg-gray-800 bg-opacity-30 rounded-r-xl">
-            <div class="p-4 border-b border-cyan-400 border-opacity-30" id="chat-header">
-              <h3 class="font-semibold text-cyan-400 neon-text">${i18n.t('chat.select_conversation')}</h3>
-            </div>
-            <div class="flex-1 p-4 overflow-y-auto" id="chat-messages">
-              <!-- Messages will appear here -->
-            </div>
-            <div class="bg-gray-700 bg-opacity-50 border-t border-cyan-400 border-opacity-30 p-4 flex gap-2">
-              <input type="text" placeholder="${i18n.t('chat.type_message')}" id="message-input" class="flex-1 bg-gray-600 bg-opacity-50 text-white border border-cyan-400 border-opacity-30 rounded-lg px-4 py-2 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400 focus:ring-opacity-50">
-              <button id="send-message" class="bg-gradient-to-r from-cyan-400 from-opacity-30 to-blue-400 to-opacity-30 hover:from-cyan-400 hover:from-opacity-50 hover:to-blue-400 hover:to-opacity-50 text-white font-bold py-2 px-4 rounded-lg border border-cyan-400 border-opacity-50 transition-all duration-300 transform hover:scale-105">${i18n.t('chat.send')}</button>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
+				<!-- Interface de chat principal -->
+				<main class="w-full flex flex-col items-center">
+					<div class="flex w-full h-96">
+						
+						<!-- Panneau des utilisateurs en ligne -->
+						<div class="w-1/4 border-r-2 border-cyan-400/30 flex flex-col ${classes.retroPanel} rounded-l-xl">
+							<div class="p-4 border-b-2 border-cyan-400/30">
+								<h3 class="font-semibold text-cyan-400 ${classes.neonText}">
+									${i18n.t('chat.online_users')}
+								</h3>
+							</div>
+							<div class="flex-1 overflow-y-auto" id="online-users-list">
+								<div class="p-4 text-cyan-400 text-center">
+									<div class="inline-block w-4 h-4 border-2 border-cyan-400 border-t-green-400 rounded-full retro-spinner mb-2"></div>
+									<div class="text-sm font-medium">${i18n.t('chat.connecting')}</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Panneau des conversations -->
+						<div class="w-1/3 border-r-2 border-cyan-400/30 flex flex-col ${classes.retroPanel}">
+							<div class="p-4 border-b-2 border-cyan-400/30">
+								<h3 class="font-semibold text-cyan-400 ${classes.neonText}">
+									${i18n.t('chat.conversations')}
+								</h3>
+							</div>
+							<div class="flex-1 overflow-y-auto" id="conversations-list">
+								<!-- Les conversations apparaîtront ici -->
+							</div>
+						</div>
+
+						<!-- Zone de chat -->
+						<div class="flex-1 flex flex-col ${classes.retroPanel} rounded-r-xl">
+							<div class="p-4 border-b-2 border-cyan-400/30" id="chat-header">
+								<h3 class="font-semibold text-cyan-400 ${classes.neonText}">
+									${i18n.t('chat.select_conversation')}
+								</h3>
+							</div>
+							<div class="flex-1 p-4 overflow-y-auto" id="chat-messages">
+								<!-- Les messages apparaîtront ici -->
+							</div>
+							<div class="bg-gray-800/50 border-t-2 border-cyan-400/30 p-4 flex gap-2">
+								<input 
+									type="text" 
+									placeholder="${i18n.t('chat.type_message')}" 
+									id="message-input" 
+									class="${classes.retroInput} flex-1 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400/50"
+								>
+								<button id="send-message" class="${classes.actionButton}">
+									<span class="relative z-10 text-cyan-400 drop-shadow-[0_0_5px_rgb(34,211,238)]">
+										${i18n.t('chat.send')}
+									</span>
+								</button>
+							</div>
+						</div>
+					</div>
+				</main>
+			</div>
 		</div>
 		`;
 
@@ -161,11 +139,20 @@ export function createChatPage(): HTMLElement {
 
 	if (!username) {
 		page.innerHTML = `
-			<div class="min-h-screen flex items-center justify-center p-4 scan-lines relative">
-				<div class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-8 border border-red-400 border-opacity-30 neon-border max-w-md w-full text-center">
-					<h2 class="text-xl font-bold text-red-400 neon-text mb-4">Erreur</h2>
-					<p class="text-gray-300">Vous devez être connecté pour accéder au chat.</p>
-					<button class="bg-gradient-to-r from-red-400 from-opacity-30 to-orange-400 to-opacity-30 hover:from-red-400 hover:from-opacity-50 hover:to-orange-400 hover:to-opacity-50 text-white font-bold py-2 px-4 rounded-lg border border-red-400 border-opacity-50 transition-all duration-300 transform hover:scale-105 mt-4" data-route="/login">Se connecter</button>
+			<style>
+				@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+				* { font-family: 'Orbitron', monospace; }
+			</style>
+			<div class="${classes.starfield}"></div>
+			<div class="min-h-screen flex items-center justify-center p-4 ${classes.scanLinesContainer} relative">
+				<div class="${classes.retroPanel} rounded-2xl p-8 max-w-md w-full text-center">
+					<h2 class="text-xl font-bold text-red-400 ${classes.neonText} mb-4">Erreur</h2>
+					<p class="text-gray-300 mb-6">Vous devez être connecté pour accéder au chat.</p>
+					<button class="${classes.gameModeButton} w-full" data-route="/login">
+						<span class="relative z-10 text-red-400 drop-shadow-[0_0_5px_rgb(239,68,68)]">
+							Se connecter
+						</span>
+					</button>
 				</div>
 			</div>
 		`;
@@ -214,11 +201,20 @@ export function createChatPage(): HTMLElement {
 			.catch((error) => {
 				console.error("❌ Failed to get user info:", error);
 				page.innerHTML = `
-					<div class="min-h-screen flex items-center justify-center p-4 scan-lines relative">
-						<div class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-8 border border-red-400 border-opacity-30 neon-border max-w-md w-full text-center">
-							<h2 class="text-xl font-bold text-red-400 neon-text mb-4">Erreur</h2>
-							<p class="text-gray-300">Impossible de récupérer les informations utilisateur.</p>
-							<button class="bg-gradient-to-r from-red-400 from-opacity-30 to-orange-400 to-opacity-30 hover:from-red-400 hover:from-opacity-50 hover:to-orange-400 hover:to-opacity-50 text-white font-bold py-2 px-4 rounded-lg border border-red-400 border-opacity-50 transition-all duration-300 transform hover:scale-105 mt-4" data-route="/login">Se reconnecter</button>
+					<style>
+						@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+						* { font-family: 'Orbitron', monospace; }
+					</style>
+					<div class="${classes.starfield}"></div>
+					<div class="min-h-screen flex items-center justify-center p-4 ${classes.scanLinesContainer} relative">
+						<div class="${classes.retroPanel} rounded-2xl p-8 max-w-md w-full text-center">
+							<h2 class="text-xl font-bold text-red-400 ${classes.neonText} mb-4">Erreur</h2>
+							<p class="text-gray-300 mb-6">Impossible de récupérer les informations utilisateur.</p>
+							<button class="${classes.gameModeButton} w-full" data-route="/login">
+								<span class="relative z-10 text-red-400 drop-shadow-[0_0_5px_rgb(239,68,68)]">
+									Se reconnecter
+								</span>
+							</button>
 						</div>
 					</div>
 				`;
@@ -383,11 +379,13 @@ function initializeChat(page: HTMLElement, userData: any) {
 
 		ws.onclose = () => {
 			console.log("🔌 WebSocket disconnected");
-			// Afficher un message à l'utilisateur
+			// Afficher un message à l'utilisateur avec styles rétro
 			onlineUsersList.innerHTML = `
-				<div class="p-4 text-red-500 text-center">
-					<div class="mb-2">Connexion perdue</div>
-					<button class="btn btn-sm" onclick="location.reload()">Reconnecter</button>
+				<div class="p-4 text-red-400 text-center">
+					<div class="mb-2 ${classes.neonText}">Connexion perdue</div>
+					<button class="${classes.actionButton} text-xs" onclick="location.reload()">
+						<span class="relative z-10">Reconnecter</span>
+					</button>
 				</div>
 			`;
 		};
@@ -395,7 +393,7 @@ function initializeChat(page: HTMLElement, userData: any) {
 		ws.onerror = (error) => {
 			console.error("❌ WebSocket error:", error);
 			onlineUsersList.innerHTML = `
-				<div class="p-4 text-red-500 text-center">
+				<div class="p-4 text-red-400 text-center ${classes.neonText}">
 					Erreur de connexion
 				</div>
 			`;
@@ -415,9 +413,9 @@ function initializeChat(page: HTMLElement, userData: any) {
 				onlineUsersList.querySelector(".text-gray-500")
 			) {
 				onlineUsersList.innerHTML = `
-					<div class="p-4 text-gray-500 text-center">
-						<div class="animate-spin inline-block w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full"></div>
-						<div class="mt-2">Récupération des utilisateurs...</div>
+					<div class="p-4 text-cyan-400 text-center">
+						<div class="inline-block w-4 h-4 border-2 border-cyan-400 border-t-green-400 rounded-full retro-spinner mb-2"></div>
+						<div class="mt-2 text-sm">Récupération des utilisateurs...</div>
 					</div>
 				`;
 			}
@@ -432,12 +430,14 @@ function initializeChat(page: HTMLElement, userData: any) {
 
 				// Réduire le timeout à 3 secondes au lieu de 5
 				setTimeout(() => {
-					if (onlineUsersList.querySelector(".animate-spin")) {
+					if (onlineUsersList.querySelector(".retro-spinner")) {
 						console.log("🔧 Timeout reached for get_online_users");
 						onlineUsersList.innerHTML = `
-							<div class="p-4 text-red-500 text-center">
+							<div class="p-4 text-red-400 text-center ${classes.neonText}">
 								Timeout - Impossible de récupérer les utilisateurs
-								<button class="btn btn-sm mt-2" onclick="location.reload()">Recharger</button>
+								<button class="${classes.actionButton} text-xs mt-2" onclick="location.reload()">
+									<span class="relative z-10">Recharger</span>
+								</button>
 							</div>
 						`;
 					}
@@ -446,9 +446,11 @@ function initializeChat(page: HTMLElement, userData: any) {
 				console.log("🔧 WebSocket not connected");
 				// Si WebSocket n'est pas connecté, afficher un message d'erreur immédiatement
 				onlineUsersList.innerHTML = `
-					<div class="p-4 text-red-500 text-center">
+					<div class="p-4 text-red-400 text-center ${classes.neonText}">
 						Erreur de connexion
-						<button class="btn btn-sm mt-2" onclick="location.reload()">Reconnecter</button>
+						<button class="${classes.actionButton} text-xs mt-2" onclick="location.reload()">
+							<span class="relative z-10">Reconnecter</span>
+						</button>
 					</div>
 				`;
 			}
@@ -461,7 +463,7 @@ function initializeChat(page: HTMLElement, userData: any) {
 
 		if (users.length === 0) {
 			onlineUsersList.innerHTML = `
-				<div class="p-4 text-cyan-400 text-center">
+				<div class="p-4 text-cyan-400 text-center ${classes.neonText}">
 					Aucun utilisateur en ligne
 				</div>
 			`;
@@ -478,18 +480,17 @@ function initializeChat(page: HTMLElement, userData: any) {
 			}
 
 			const userDiv = document.createElement("div");
-			userDiv.className =
-				"p-3 border-b border-cyan-400 border-opacity-20 hover:bg-gray-700 hover:bg-opacity-30 cursor-pointer transition-all duration-300";
+			userDiv.className = `${classes.friendItem} hover:bg-gray-700/40 cursor-pointer transition-all duration-300`;
 			userDiv.setAttribute("data-username", user.username);
 			userDiv.innerHTML = `
 				<div class="flex items-center gap-3">
 					<img src="${user.avatarUrl || "/public/default-avatar.png"}"
 						 alt="${user.username}"
-						 class="w-8 h-8 rounded-full border border-cyan-400 border-opacity-30">
+						 class="w-8 h-8 rounded-full border-2 border-cyan-400/30 ${classes.neonBorder}">
 					<div class="flex-1">
-						<h4 class="font-medium text-cyan-400 text-sm">${user.username}</h4>
+						<h4 class="font-medium text-cyan-400 text-sm ${classes.neonText}">${user.username}</h4>
 						<div class="flex items-center gap-1">
-							<div class="w-2 h-2 bg-green-400 rounded-full shadow-sm" style="box-shadow: 0 0 10px #00ff41;"></div>
+							<div class="${classes.statusOnline}"></div>
 							<span class="text-xs text-green-400">En ligne</span>
 						</div>
 					</div>
@@ -523,26 +524,25 @@ function initializeChat(page: HTMLElement, userData: any) {
 		}
 
 		const userDiv = document.createElement("div");
-		userDiv.className =
-			"p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer";
+		userDiv.className = `${classes.friendItem} hover:bg-gray-700/40 cursor-pointer transition-all duration-300`;
 		userDiv.setAttribute("data-username", user.username);
 		userDiv.innerHTML = `
 			<div class="flex items-center gap-3">
 				<img src="${user.avatarUrl || "/public/default-avatar.png"}"
 					 alt="${user.username}"
-					 class="w-8 h-8 rounded-full">
+					 class="w-8 h-8 rounded-full border-2 border-cyan-400/30">
 				<div class="flex-1">
-					<h4 class="font-medium text-gray-900 text-sm">${user.username}</h4>
+					<h4 class="font-medium text-cyan-400 text-sm ${classes.neonText}">${user.username}</h4>
 					<div class="flex items-center gap-1">
-						<div class="w-2 h-2 bg-green-500 rounded-full"></div>
-						<span class="text-xs text-green-600">En ligne</span>
+						<div class="${classes.statusOnline}"></div>
+						<span class="text-xs text-green-400">En ligne</span>
 					</div>
 				</div>
 				<div class="flex flex-col gap-1">
-					<button class="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600" data-action="chat">
+					<button class="${classes.actionButton} text-xs px-2 py-1" data-action="chat">
 						💬
 					</button>
-					<button class="text-xs bg-gray-500 text-white px-2 py-1 rounded hover:bg-gray-600" data-action="profile">
+					<button class="${classes.actionButton} text-xs px-2 py-1" data-action="profile">
 						👤
 					</button>
 				</div>
@@ -610,7 +610,7 @@ function initializeChat(page: HTMLElement, userData: any) {
 
 		if (conversations.length === 0) {
 			conversationsList.innerHTML = `
-				<div class="p-4 text-gray-500 text-center">
+				<div class="p-4 text-cyan-400 text-center ${classes.neonText}">
 					Aucune conversation
 				</div>
 			`;
@@ -619,22 +619,22 @@ function initializeChat(page: HTMLElement, userData: any) {
 
 		conversations.forEach((conv) => {
 			const convDiv = document.createElement("div");
-			convDiv.className = `p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${
-				conv.unreadCount > 0 ? "bg-blue-50" : ""
+			convDiv.className = `${classes.friendItem} hover:bg-gray-700/40 cursor-pointer transition-all duration-300 ${
+				conv.unreadCount > 0 ? "bg-blue-900/30 border-blue-400/50" : ""
 			}`;
 			convDiv.setAttribute('data-username', conv.partner.username);
 			convDiv.innerHTML = `
 				<div class="flex items-center gap-3">
 					<img src="${conv.partner.avatarUrl || "/public/default-avatar.png"}"
 						 alt="${conv.partner.username}"
-						 class="w-10 h-10 rounded-full">
+						 class="w-10 h-10 rounded-full border-2 border-cyan-400/30">
 					<div class="flex-1">
 						<div class="flex justify-between items-center">
-							<h4 class="font-medium text-gray-900">${conv.partner.username}</h4>
-							${conv.unreadCount > 0 ? `<span class="bg-red-500 text-white text-xs rounded-full px-2 py-1">${conv.unreadCount}</span>` : ""}
+							<h4 class="font-medium text-cyan-400 ${classes.neonText}">${conv.partner.username}</h4>
+							${conv.unreadCount > 0 ? `<span class="bg-red-500 text-white text-xs rounded-full px-2 py-1 ${classes.neonBorder}">${conv.unreadCount}</span>` : ""}
 						</div>
-						<p class="text-sm text-gray-600 truncate">${conv.lastMessage}</p>
-						<p class="text-xs text-gray-400">${new Date(conv.timestamp).toLocaleString()}</p>
+						<p class="text-sm text-gray-300 truncate">${conv.lastMessage}</p>
+						<p class="text-xs text-gray-500">${new Date(conv.timestamp).toLocaleString()}</p>
 					</div>
 				</div>
 			`;
@@ -657,14 +657,14 @@ function initializeChat(page: HTMLElement, userData: any) {
 		chatHeader.innerHTML = `
 			<div class="flex items-center justify-between">
 				<div class="flex items-center gap-3">
-					<h3 class="font-semibold text-gray-700">${username}</h3>
-					<button class="text-blue-600 text-sm hover:underline" id="view-profile-btn">
-						Voir profil
+					<h3 class="font-semibold text-cyan-400 ${classes.neonText}">${username}</h3>
+					<button class="${classes.actionButton} text-xs" id="view-profile-btn">
+						<span class="relative z-10">Voir profil</span>
 					</button>
 				</div>
 				<div class="flex gap-2">
-					<button class="text-red-600 text-sm hover:underline" id="block-user-btn">
-						Bloquer
+					<button class="${classes.actionButton} text-xs text-red-400" id="block-user-btn">
+						<span class="relative z-10">Bloquer</span>
 					</button>
 				</div>
 			</div>
@@ -705,7 +705,7 @@ function initializeChat(page: HTMLElement, userData: any) {
 		const conversationElement = conversationsList.querySelector(`[data-username="${username}"]`);
 		if (conversationElement) {
 			// Remove the blue background indicating unread messages
-			conversationElement.classList.remove('bg-blue-50');
+			conversationElement.classList.remove('bg-blue-900/30', 'border-blue-400/50');
 			// Remove the red notification badge
 			const badge = conversationElement.querySelector('.bg-red-500');
 			if (badge) {
@@ -729,7 +729,7 @@ function initializeChat(page: HTMLElement, userData: any) {
 
 		if (messages.length === 0) {
 			messagesContainer.innerHTML = `
-				<div class="text-center text-gray-500 py-8">
+				<div class="text-center text-cyan-400 py-8 ${classes.neonText}">
 					Aucun message dans cette conversation
 				</div>
 			`;
@@ -742,13 +742,11 @@ function initializeChat(page: HTMLElement, userData: any) {
 
 		if (isBlocked) {
 			messagesContainer.innerHTML = `
-				<div class="text-center text-gray-500 py-8">
+				<div class="text-center text-red-400 py-8">
 					<div class="mb-4">
-						<svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"></path>
-						</svg>
-						<h3 class="text-lg font-semibold text-gray-700 mb-2">Utilisateur bloqué</h3>
-						<p class="text-gray-600">Vous avez bloqué cet utilisateur. Vous ne pouvez plus voir ses messages.</p>
+						<div class="w-12 h-12 mx-auto text-red-400 mb-4 ${classes.neonText}">🚫</div>
+						<h3 class="text-lg font-semibold text-red-400 mb-2 ${classes.neonText}">Utilisateur bloqué</h3>
+						<p class="text-gray-300">Vous avez bloqué cet utilisateur. Vous ne pouvez plus voir ses messages.</p>
 					</div>
 				</div>
 			`;
@@ -757,13 +755,11 @@ function initializeChat(page: HTMLElement, userData: any) {
 
 		if (isBlockedByMe) {
 			messagesContainer.innerHTML = `
-				<div class="text-center text-gray-500 py-8">
+				<div class="text-center text-red-400 py-8">
 					<div class="mb-4">
-						<svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"></path>
-						</svg>
-						<h3 class="text-lg font-semibold text-gray-700 mb-2">Cet utilisateur vous a bloqué</h3>
-						<p class="text-gray-600">Vous ne pouvez plus envoyer de messages à cet utilisateur.</p>
+						<div class="w-12 h-12 mx-auto text-red-400 mb-4 ${classes.neonText}">🚫</div>
+						<h3 class="text-lg font-semibold text-red-400 mb-2 ${classes.neonText}">Cet utilisateur vous a bloqué</h3>
+						<p class="text-gray-300">Vous ne pouvez plus envoyer de messages à cet utilisateur.</p>
 					</div>
 				</div>
 			`;
@@ -791,8 +787,8 @@ function initializeChat(page: HTMLElement, userData: any) {
 			messageDiv.innerHTML = `
 				<div class="max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
 					msg.sender === "me"
-						? "bg-blue-500 text-white"
-						: "bg-gray-200 text-gray-800"
+						? `${classes.retroPanel} bg-blue-900/50 text-cyan-400 border-blue-400/30`
+						: `${classes.retroPanel} bg-gray-800/50 text-gray-300 border-gray-400/30`
 				}">
 					<p class="text-sm">${msg.content}</p>
 					<p class="text-xs opacity-75 mt-1">${new Date(msg.timestamp).toLocaleString()}</p>
@@ -837,8 +833,8 @@ function initializeChat(page: HTMLElement, userData: any) {
 			messageDiv.innerHTML = `
 				<div class="max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
 					data.sender === "me" || data.sender === userData.username
-						? "bg-blue-500 text-white"
-						: "bg-gray-200 text-gray-800"
+						? `${classes.retroPanel} bg-blue-900/50 text-cyan-400 border-blue-400/30`
+						: `${classes.retroPanel} bg-gray-800/50 text-gray-300 border-gray-400/30`
 				}">
 					<p class="text-sm">${data.content}</p>
 					<p class="text-xs opacity-75 mt-1">${new Date(data.timestamp).toLocaleString()}</p>
@@ -923,8 +919,7 @@ function initializeChat(page: HTMLElement, userData: any) {
 
 	function showError(message: string) {
 		const errorDiv = document.createElement("div");
-		errorDiv.className =
-			"fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg";
+		errorDiv.className = `fixed top-4 right-4 ${classes.retroPanel} text-red-400 px-4 py-2 rounded shadow-lg ${classes.neonText}`;
 		errorDiv.textContent = message;
 		document.body.appendChild(errorDiv);
 
@@ -973,9 +968,8 @@ function addRefreshButton() {
 		const header = onlineUsersSection.querySelector(".p-4") as HTMLElement;
 		if (header) {
 			const refreshButton = document.createElement("button");
-			refreshButton.className =
-				"ml-2 text-blue-600 hover:text-blue-800 text-sm";
-			refreshButton.innerHTML = "Rafraîchir la liste";
+			refreshButton.className = `ml-2 ${classes.actionButton} text-xs`;
+			refreshButton.innerHTML = '<span class="relative z-10">🔄</span>';
 			refreshButton.title = "Rafraîchir la liste";
 			refreshButton.addEventListener("click", refreshOnlineUsersList);
 			header.appendChild(refreshButton);
