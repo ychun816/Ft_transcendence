@@ -256,6 +256,7 @@ function initializeChat(page: HTMLElement, userData: any) {
 	// Add these variables at the top of initializeChat function
 	let blockedUsers: Set<string> = new Set();
 	let usersWhoBlockedMe: Set<string> = new Set();
+	let pendingInvitations: Set<string> = new Set(); // Track pending invitations
 
 	// Add this variable to store received messages
 	let receivedMessages: Map<string, any[]> = new Map();
@@ -314,22 +315,36 @@ function initializeChat(page: HTMLElement, userData: any) {
 						showError(data.message);
 						break;
 					case "user_blocked":
-						console.log("🚫 User blocked:", data.username);
 						blockedUsers.add(data.username);
 						showBlockedMessage(data.username, true);
 						break;
 					case "user_unblocked":
-						console.log("✅ User unblocked:", data.username);
 						blockedUsers.delete(data.username);
 						break;
 					case "user_blocked_you":
-						console.log("🚫 User blocked you:", data.username);
 						usersWhoBlockedMe.add(data.username);
 						showBlockedMessage(data.username, false);
 						break;
 					case "user_unblocked_you":
-						console.log("✅ User unblocked you:", data.username);
 						usersWhoBlockedMe.delete(data.username);
+						break;
+					case "game_invite_received":
+						handleGameInviteReceived(data);
+						break;
+					case "game_invite_sent":
+						handleGameInviteSent(data);
+						break;
+					case "game_invite_accepted":
+						handleGameInviteAccepted(data);
+						break;
+					case "game_invite_declined":
+						handleGameInviteDeclined(data);
+						break;
+					case "game_invite_response":
+						handleGameInviteResponse(data);
+						break;
+					case "tournament_notification":
+						handleTournamentNotification(data);
 						break;
 					default:
 						console.log("📨 Unknown message type:", data.type);
@@ -597,6 +612,13 @@ function initializeChat(page: HTMLElement, userData: any) {
 		// Clear notification badge immediately for this conversation
 		clearNotificationBadge(username);
 
+		// Check if there's a pending invitation for this user
+		const hasPendingInvite = pendingInvitations.has(username);
+		const inviteButtonClass = hasPendingInvite 
+			? "text-gray-400 text-sm cursor-not-allowed opacity-50" 
+			: "text-green-400 text-sm hover:text-green-300 transition-colors duration-300 drop-shadow-[0_0_3px_rgb(34,197,94)]";
+		const inviteButtonText = hasPendingInvite ? "🎮 Invitation Sent" : "🎮 Invite to Game";
+
 		// Update header
 		chatHeader.innerHTML = `
 			<div class="flex items-center justify-between">
@@ -607,6 +629,9 @@ function initializeChat(page: HTMLElement, userData: any) {
 					</button>
 				</div>
 				<div class="flex gap-2">
+					<button class="${inviteButtonClass}" id="invite-game-btn" ${hasPendingInvite ? 'disabled' : ''}>
+						${inviteButtonText}
+					</button>
 					<button class="text-red-400 text-sm hover:text-red-300 transition-colors duration-300 drop-shadow-[0_0_3px_rgb(252,165,165)]" id="block-user-btn">
 						🚫 ${i18n.t("chat.block_user")}
 					</button>
@@ -618,6 +643,9 @@ function initializeChat(page: HTMLElement, userData: any) {
 		const viewProfileBtn = chatHeader.querySelector(
 			"#view-profile-btn"
 		) as HTMLButtonElement;
+		const inviteGameBtn = chatHeader.querySelector(
+			"#invite-game-btn"
+		) as HTMLButtonElement;
 		const blockUserBtn = chatHeader.querySelector(
 			"#block-user-btn"
 		) as HTMLButtonElement;
@@ -627,6 +655,10 @@ function initializeChat(page: HTMLElement, userData: any) {
 			import("../router/router.js").then(({ router }) => {
 				router.navigate(`/profile/${username}`);
 			});
+		});
+
+		inviteGameBtn.addEventListener("click", () => {
+			sendGameInvite(username);
 		});
 
 		blockUserBtn.addEventListener("click", () => {
@@ -890,6 +922,173 @@ function initializeChat(page: HTMLElement, userData: any) {
 
 		showError(message);
 	}
+
+	function sendGameInvite(username: string) {
+		if (!ws || ws.readyState !== WebSocket.OPEN) {
+			showError("Not connected to chat server");
+			return;
+		}
+
+		// Check if there's already a pending invitation
+		if (pendingInvitations.has(username)) {
+			showError("You already have a pending invitation to this user");
+			return;
+		}
+
+		ws.send(JSON.stringify({
+			type: "send_game_invite",
+			receiverUsername: username
+		}));
+	}
+
+	function handleGameInviteReceived(data: any) {
+		showGameInviteNotification(data.senderUsername, data.inviteId);
+	}
+
+	function handleGameInviteSent(data: any) {
+		// Add to pending invitations
+		pendingInvitations.add(data.receiverUsername);
+		showSuccessMessage(`Game invitation sent to ${data.receiverUsername}`);
+		
+		// Update the UI if we're currently chatting with this user
+		if (currentConversation === data.receiverUsername) {
+			selectConversation(data.receiverUsername);
+		}
+	}
+
+	function handleGameInviteAccepted(data: any) {
+		// Remove from pending invitations
+		pendingInvitations.delete(data.receiverUsername);
+		showSuccessMessage(`${data.receiverUsername} accepted your game invitation! ${data.message || ''}`);
+		
+		// Update the UI if we're currently chatting with this user
+		if (currentConversation === data.receiverUsername) {
+			selectConversation(data.receiverUsername);
+		}
+	}
+
+	function handleGameInviteDeclined(data: any) {
+		// Remove from pending invitations
+		pendingInvitations.delete(data.receiverUsername);
+		showError(`${data.receiverUsername} declined your game invitation`);
+		
+		// Update the UI if we're currently chatting with this user
+		if (currentConversation === data.receiverUsername) {
+			selectConversation(data.receiverUsername);
+		}
+	}
+
+	function handleGameInviteResponse(data: any) {
+		const message = data.status === "accepted" 
+			? `Game invitation ${data.status}! ${data.message || ''}`
+			: `Game invitation ${data.status}`;
+		
+		if (data.status === "accepted") {
+			showSuccessMessage(message);
+		} else {
+			showError(message);
+		}
+	}
+
+	function handleTournamentNotification(data: any) {
+		showTournamentNotification(data.message);
+	}
+
+	function showGameInviteNotification(senderUsername: string, inviteId: number) {
+		const notificationDiv = document.createElement("div");
+		notificationDiv.className = "fixed top-4 right-4 bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-4 rounded-lg shadow-[0_0_15px_rgb(34,197,94)] border border-green-400/50 backdrop-blur-sm z-50 max-w-sm";
+		notificationDiv.innerHTML = `
+			<div class="flex flex-col gap-3">
+				<div class="flex items-center gap-3">
+					<div class="text-green-200">🎮</div>
+					<div>
+						<div class="font-medium">Game Invitation</div>
+						<div class="text-sm text-green-200">${senderUsername} wants to play Pong!</div>
+					</div>
+				</div>
+				<div class="flex gap-2">
+					<button class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm transition-colors" onclick="acceptGameInvite(${inviteId})">
+						Accept
+					</button>
+					<button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors" onclick="declineGameInvite(${inviteId})">
+						Decline
+					</button>
+				</div>
+			</div>
+		`;
+		document.body.appendChild(notificationDiv);
+
+		// Auto-remove after 30 seconds
+		setTimeout(() => {
+			if (notificationDiv.parentNode) {
+				notificationDiv.remove();
+			}
+		}, 30000);
+	}
+
+	function showSuccessMessage(message: string) {
+		const successDiv = document.createElement("div");
+		successDiv.className = "fixed top-4 right-4 bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg shadow-[0_0_15px_rgb(34,197,94)] border border-green-400/50 backdrop-blur-sm z-50";
+		successDiv.innerHTML = `
+			<div class="flex items-center gap-3">
+				<div class="text-green-200">✅</div>
+				<div class="font-medium">${message}</div>
+			</div>
+		`;
+		document.body.appendChild(successDiv);
+
+		setTimeout(() => {
+			successDiv.remove();
+		}, 5000);
+	}
+
+	function showTournamentNotification(message: string) {
+		const notificationDiv = document.createElement("div");
+		notificationDiv.className = "fixed top-4 left-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 py-4 rounded-lg shadow-[0_0_15px_rgb(147,51,234)] border border-purple-400/50 backdrop-blur-sm z-50 max-w-sm";
+		notificationDiv.innerHTML = `
+			<div class="flex items-center gap-3">
+				<div class="text-purple-200">🏆</div>
+				<div>
+					<div class="font-medium">Tournament Notification</div>
+					<div class="text-sm text-purple-200">${message}</div>
+				</div>
+			</div>
+		`;
+		document.body.appendChild(notificationDiv);
+
+		setTimeout(() => {
+			notificationDiv.remove();
+		}, 8000);
+	}
+
+	// Make functions globally available for onclick handlers
+	(window as any).acceptGameInvite = (inviteId: number) => {
+		if (ws && ws.readyState === WebSocket.OPEN) {
+			ws.send(JSON.stringify({
+				type: "accept_game_invite",
+				inviteId: inviteId
+			}));
+		}
+		// Remove the notification
+		const notification = document.querySelector('.fixed.top-4.right-4');
+		if (notification) {
+			notification.remove();
+		}
+	};
+
+	(window as any).declineGameInvite = (inviteId: number) => {
+		if (ws && ws.readyState === WebSocket.OPEN) {
+			ws.send(JSON.stringify({
+				type: "decline_game_invite",
+				inviteId: inviteId
+			}));
+		}
+		// Remove the notification
+		const notification = document.querySelector('.fixed.top-4.right-4');
+		if (notification) {
+			notification.remove();
+		}
+	};
 
 	// Event listeners
 	sendButton.addEventListener("click", sendMessage);
