@@ -35,6 +35,10 @@ const translations: Record<Language, Translations> = {
 			or: "OU",
 			google_signin: "Se connecter avec Google",
 			google_signin_error: "Erreur lors de la connexion Google",
+			twofa_title: "Identification 2 facteurs",
+			twofa_code: "code à 6 chiffres",
+			verify_and_login: "Verifier et se connecter",
+			twofa_instruction: "Entrer les 6 chiffres depuis votre application"
 		},
 		home: {
 			welcome: "Bienvenue sur Transcendence",
@@ -194,6 +198,7 @@ const translations: Record<Language, Translations> = {
 			deco: "DECONNEXION",
 			profile: "PROFILE",
 			connexion: "CONNEXION",
+			server_side : "🖥️ JOUER COTE SERVEUR"
 		},
 		not_found: {
 			title: "404",
@@ -250,6 +255,10 @@ const translations: Record<Language, Translations> = {
 			or: "OR",
 			google_signin: "Sign in with Google",
 			google_signin_error: "Google Sign-In error",
+			twofa_title: "Two-Factor Verification",
+			twofa_code: "6-digit code",
+			verify_and_login: "Verify & Login",
+			twofa_instruction: "Enter the 6-digit code from your authenticator app"
 		},
 		home: {
 			welcome: "Welcome to Transcendence",
@@ -406,6 +415,7 @@ const translations: Record<Language, Translations> = {
 			deco: "LOG-OUT",
 			profile: "PROFIL",
 			connexion: "LOG-IN",
+			server_side : "🖥️ SERVER SIDE"
 		},
 		not_found: {
 			title: "404",
@@ -462,6 +472,10 @@ const translations: Record<Language, Translations> = {
 			or: "O",
 			google_signin: "Iniciar sesión con Google",
 			google_signin_error: "Error al iniciar sesión con Google",
+			twofa_title: "Identificación de dos factores",
+			twofa_code: "Código de 6 dígitos",
+			verify_and_login: "Verificar y conectarse",
+			twofa_instruction: "Ingresa los 6 dígitos de tu solicitud"
 		},
 		home: {
 			welcome: "Bienvenido a Transcendence",
@@ -576,6 +590,7 @@ const translations: Record<Language, Translations> = {
 		signup: {
 			title: "Crea tu cuenta",
 			back_to_login: "← Volver al inicio de sesión",
+			email: "Email",
 			username: "Nombre de usuario",
 			password: "Contraseña",
 			avatar_label: "Elige una foto de perfil:",
@@ -616,6 +631,8 @@ const translations: Record<Language, Translations> = {
 			deco: "DESCONEXION",
 			profile: "PERFIL",
 			connexion: "CONEXION",
+			server_side: "🖥️ JUGAR DEL LADO DEL SERVIDOR"
+
 		},
 		not_found: {
 			title: "404",

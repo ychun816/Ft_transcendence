@@ -207,7 +207,6 @@ export function createProfilePage(): HTMLElement {
 			</div>
 
 			<div class="absolute top-4 right-4" id="language-switcher-container"></div>
-			<div class="absolute top-4 left-4" id="logout-container"></div>
 
 		`;
 
@@ -219,11 +218,11 @@ export function createProfilePage(): HTMLElement {
 			languageSwitcherContainer.appendChild(createLanguageSwitcher());
 		}
 
-		const logoutContainer = page.querySelector("#logout-container");
-		if (logoutContainer) {
-			logoutContainer.innerHTML = "";
-			logoutContainer.appendChild(createLogoutSwitcher());
-		}
+		// const logoutContainer = page.querySelector("#logout-container");
+		// if (logoutContainer) {
+		// 	logoutContainer.innerHTML = "";
+		// 	logoutContainer.appendChild(createLogoutSwitcher());
+		// }
 
 		editAvatar(page);
 		editUsername(page);
