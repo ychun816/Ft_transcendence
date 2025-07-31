@@ -3,10 +3,9 @@ services:
 
 
 #  Test alerte prometheus
-# ip
-
+# push .pem ? .env ?
 # MAJ pour connected user
-# logger a check
+# logger a check apres avoir enlever les consoles logs
 
 
   dev:
