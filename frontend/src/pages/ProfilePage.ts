@@ -166,16 +166,14 @@ export function createProfilePage(): HTMLElement {
 						</div>
 
 						<!-- Bloc Friends List -->
-						<div id="friends-block" class="${classes.retroPanel} rounded-2xl p-6 w-full flex flex-col flex-1">
+						<div id="friends-block" class="${classes.retroPanel} rounded-2xl p-6 w-full flex flex-col flex-1 min-h-0">
 							<header class="w-full flex-shrink-0 mb-4 flex items-center justify-between">
 								<h2 class="text-2xl font-bold text-green-400 drop-shadow-sm animate-pulse">
 									${i18n.t('profile.friends_list')}
 								</h2>
-								<!-- Le bouton (+) sera ajouté ici par JS -->
 							</header>
 
-							<main class="w-full flex-1 overflow-y-auto">
-								<!-- Le contenu de la liste d'amis sera ajouté ici -->
+							<main class="w-full flex-1 overflow-hidden min-h-0">
 							</main>
 						</div>
 					</div>
@@ -184,24 +182,24 @@ export function createProfilePage(): HTMLElement {
 					<div class="flex flex-col gap-6 h-full" style="width: 1000px;">
 
 						<!-- Match History -->
-						<div id="match-block" class="${classes.retroPanel} rounded-2xl p-6 w-full flex flex-col" style="height: 50%;">
-							<header class="w-full mb-4">
+						<div id="match-block" class="${classes.retroPanel} rounded-2xl p-6 w-full flex flex-col min-h-0" style="height: 50%;">
+							<header class="w-full mb-4 flex-shrink-0">
 								<h2 class="text-2xl font-bold text-purple-400 ${classes.neonText}">
 									${i18n.t('profile.match_history')}
 								</h2>
 							</header>
-							<main class="w-full flex-1 overflow-y-auto">
+							<main class="w-full flex-1 overflow-hidden min-h-0">
 							</main>
 						</div>
 
 						<!-- Dashboard -->
-						<div id="dashboard" class="${classes.retroPanel} rounded-2xl p-6 w-full flex flex-col" style="height: 50%;">
-							<header class="w-full mb-4">
+						<div id="dashboard" class="${classes.retroPanel} rounded-2xl p-6 w-full flex flex-col min-h-0" style="height: 50%;">
+							<header class="w-full mb-4 flex-shrink-0">
 								<h2 class="text-2xl font-bold text-purple-400 ${classes.neonText}">
 									${i18n.t('profile.dashboard')}
 								</h2>
 							</header>
-							<main class="w-full flex-1 overflow-y-auto">
+							<main class="w-full flex-1 overflow-hidden min-h-0">
 							</main>
 						</div>
 					</div>
@@ -515,21 +513,17 @@ function enableInlineEdit({
 	const input = document.createElement("input");
 	input.type = inputType;
 	input.value = initialValue;
-	input.className = "input";
-	input.style.marginRight = "8px";
-	input.style.width = "auto";
-	input.style.display = "inline-block";
+	input.className = "bg-gray-700 text-white border border-purple-400 rounded px-2 py-1 text-sm mr-2 w-auto inline-block focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200";
 
 	const validateBtn = document.createElement("button");
 	validateBtn.textContent = i18n.t("profile.validate");
-	validateBtn.className = "btn";
+	validateBtn.className = "bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors duration-200 mr-2";
 	validateBtn.type = "button";
 
 	const cancelBtn = document.createElement("button");
 	cancelBtn.textContent = i18n.t("profile.cancel");
-	cancelBtn.className = "btn";
+	cancelBtn.className = "bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors duration-200";
 	cancelBtn.type = "button";
-	cancelBtn.style.marginLeft = "8px";
 
 	const parent = element.parentElement;
 	const oldContent = element.cloneNode(true);
@@ -669,15 +663,17 @@ async function displayMatchHistory(page: HTMLDivElement) {
 	if (!histDiv) return;
 
 	let html = `
-		<table class="data-table">
-			<thead>
-				<tr>
-					<th>${i18n.t("profile.date")}</th>
-					<th>${i18n.t("profile.opponent")}</th>
-					<th>${i18n.t("profile.result")}</th>
-				</tr>
-			</thead>
-			<tbody>
+		<div class="h-full flex flex-col">
+			<div class="flex-1 overflow-y-auto min-h-0">
+				<table class="w-full border-collapse">
+					<thead class="sticky top-0 bg-gray-800 z-10">
+						<tr class="border-b border-gray-600">
+							<th class="p-2 text-left text-sm font-semibold text-gray-300">${i18n.t("profile.date")}</th>
+							<th class="p-2 text-left text-sm font-semibold text-gray-300">${i18n.t("profile.opponent")}</th>
+							<th class="p-2 text-left text-sm font-semibold text-gray-300">${i18n.t("profile.result")}</th>
+						</tr>
+					</thead>
+					<tbody>
 	`;
 
 	for (const match of history) {
@@ -699,14 +695,21 @@ async function displayMatchHistory(page: HTMLDivElement) {
 				: "status-defeat";
 
 		html += `
-			<tr>
-				<td>${date}</td>
-				<td>${opponent}</td>
-				<td><span class="${statusClass}">${result}</span></td>
+			<tr class="border-b border-gray-700 hover:bg-gray-800 transition-colors">
+				<td class="p-2 text-gray-300 text-sm">${date}</td>
+				<td class="p-2 text-gray-200 text-sm">${opponent}</td>
+				<td class="p-2 text-sm">
+					<span class="${statusClass} font-semibold">${result}</span>
+				</td>
 			</tr>
 		`;
 	}
-	html += `</tbody></table>`;
+	html += `
+					</tbody>
+				</table>
+			</div>
+		</div>
+	`;
 	histDiv.innerHTML = html;
 }
 
@@ -771,16 +774,17 @@ async function displayFriendsList(page: HTMLDivElement) {
 	}
 
 	let html = `
-		<div class="friends-table-scroll">
-			<table class="data-table">
-				<thead>
-					<tr>
-						<th>${i18n.t("profile.status")}</th>
-						<th>${i18n.t("profile.avatar")}</th>
-						<th>${i18n.t("profile.name")}</th>
-						<th>${i18n.t("profile.Games_played")}</th>
-					</tr>
-				</thead>
+		<div class="h-full flex flex-col">
+			<div class="flex-1 overflow-y-auto min-h-0">
+				<table class="w-full border-collapse">
+					<thead class="sticky top-0 bg-gray-800 z-10">
+						<tr class="border-b border-gray-600">
+							<th class="p-2 text-left text-sm font-semibold text-gray-300">${i18n.t("profile.status")}</th>
+							<th class="p-2 text-left text-sm font-semibold text-gray-300">${i18n.t("profile.avatar")}</th>
+							<th class="p-2 text-left text-sm font-semibold text-gray-300">${i18n.t("profile.name")}</th>
+							<th class="p-2 text-left text-sm font-semibold text-gray-300">${i18n.t("profile.Games_played")}</th>
+						</tr>
+					</thead>
 				<tbody>
 	`;
 
@@ -790,23 +794,29 @@ async function displayFriendsList(page: HTMLDivElement) {
 		const name = friend.username;
 		const played = friend.gamesPlayed;
 
+		const statusColor = status ? "bg-green-500" : "bg-gray-500";
+
 		html += `
-			<tr>
-				<td>
-					<div style="width:10px; height:10px; border-radius:50%; overflow:hidden; background:${status ? "green" : "gray"}; display:flex; align-items:center; justify-content:center;">
+			<tr class="border-b border-gray-700 hover:bg-gray-800 transition-colors">
+				<td class="p-2">
+					<div class="w-3 h-3 rounded-full ${statusColor}"></div>
+				</td>
+				<td class="p-2">
+					<div class="w-10 h-10 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center">
+						<img src="${avatar || "/default-avatar.png"}" alt="avatar" class="w-full h-full object-cover">
 					</div>
 				</td>
-				<td>
-					<div style="width:40px; height:40px; border-radius:50%; overflow:hidden; background:#222; display:flex; align-items:center; justify-content:center;">
-						<img src="${avatar || "/default-avatar.png"}" alt="avatar" style="width:100%; height:100%; object-fit:cover;">
-					</div>
-				</td>
-				<td>${name}</td>
-				<td>${played}</td>
+				<td class="p-2 text-gray-200 text-sm">${name}</td>
+				<td class="p-2 text-gray-300 text-sm">${played}</td>
 			</tr>
 		`;
 	}
-	html += `</tbody></table></div>`;
+	html += `
+					</tbody>
+				</table>
+			</div>
+		</div>
+	`;
 	friendsMain.innerHTML = html;
 	setupAddFriendFeature(page);
 }
@@ -984,38 +994,45 @@ async function displayDashboard(page: HTMLDivElement)
 		}
 
 		statDiv.innerHTML = `
-		<div class="dashboard-container" style="display: flex; flex-direction: column; gap: 20px; height: 100%;">
-			<div class="dashboard-data" style="display: flex; flex-direction: row; gap: 20px; height: 100%;">
-				<div class="time-section" style="flex: 1; min-height: 200px;">
-					<h3 style="color: #a855f7; font-size: 16px; margin-bottom: 10px; text-align: center;">
-						${i18n.t('profile.total_game_time')}
-					</h3>
-					<div id="gameTime" style="max-height: 180px;"></div>
+			<div class="h-full flex flex-col gap-4">
+				<!-- Section du temps et points -->
+				<div class="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
+					<div class="flex-1 min-h-0">
+						<h3 class="text-purple-400 text-sm font-semibold mb-2 text-center">
+							${i18n.t('profile.total_game_time')}
+						</h3>
+						<div id="gameTime" class="h-full overflow-y-auto"></div>
+					</div>
+
+					<div class="flex-1 min-h-0">
+						<h3 class="text-purple-400 text-sm font-semibold mb-2 text-center">
+							${i18n.t('profile.side_point')}
+						</h3>
+						<div id="gameSide" class="h-full overflow-y-auto"></div>
+					</div>
 				</div>
 
-				<div class="side-section" style="flex: 1; min-height: 200px;">
-					<h3 style="color: #a855f7; font-size: 16px; margin-bottom: 10px; text-align: center;">
-						${i18n.t('profile.side_point')}
-					</h3>
-					<div id="gameSide" style="max-height: 180px;"></div>
-				</div>
-			</div>
-			<div class="dashboard-graph" style="display: flex; flex-direction: row; gap: 20px; height: 100%;">
-				<div class="chart-section" style="flex: 1; min-height: 200px;">
-					<h3 style="color: #a855f7; font-size: 16px; margin-bottom: 10px; text-align: center;">
-						${i18n.t('profile.game_types_distribution')}
-					</h3>
-					<canvas id="gameTypesChart" style="max-height: 180px;"></canvas>
-				</div>
+				<!-- Section des graphiques -->
+				<div class="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
+					<div class="flex-1 min-h-0 flex flex-col">
+						<h3 class="text-purple-400 text-sm font-semibold mb-2 text-center">
+							${i18n.t('profile.game_types_distribution')}
+						</h3>
+						<div class="flex-1 flex items-center justify-center min-h-0">
+							<canvas id="gameTypesChart" class="max-w-full max-h-full"></canvas>
+						</div>
+					</div>
 
-				<div class="chart-section" style="flex: 1; min-height: 200px;">
-					<h3 style="color: #a855f7; font-size: 16px; margin-bottom: 10px; text-align: center;">
-						${i18n.t('profile.winrate_by_type')}
-					</h3>
-					<canvas id="performanceChart" style="max-height: 180px;"></canvas>
+					<div class="flex-1 min-h-0 flex flex-col">
+						<h3 class="text-purple-400 text-sm font-semibold mb-2 text-center">
+							${i18n.t('profile.winrate_by_type')}
+						</h3>
+						<div class="flex-1 flex items-center justify-center min-h-0">
+							<canvas id="performanceChart" class="max-w-full max-h-full"></canvas>
+						</div>
+					</div>
 				</div>
 			</div>
-		</div>
 		`;
 
 		await createGameTypesChart(stats);
@@ -1029,7 +1046,7 @@ async function displayDashboard(page: HTMLDivElement)
 		if (dashboardMain) {
 			dashboardMain.innerHTML = `
 				<div style="text-align: center; color: #ef4444; padding: 20px;">
-					<p>Error while loading user stats</p>
+					<p>${i18n.t("profile.errorUser")}</p>
 					<button onclick="location.reload()" style="margin-top: 10px; padding: 8px 16px; background: #a855f7; color: white; border: none; border-radius: 4px; cursor: pointer;">
 						Reload
 					</button>
@@ -1052,27 +1069,26 @@ async function displaySidePoint(stats: any)
 	if (totalPoints === 0) {
 		container.innerHTML = `
 			<div style="text-align: center; color: #9ca3af; padding: 40px;">
-				<p>No games played at the moment</p>
+				<p>${i18n.t("profile.errorGame")}</p>
 			</div>
 		`;
 		return;
 	} else {
 		container.innerHTML = `
-			<div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center;">
-				<div style="display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin-top: 20px; margin-left: 20px;">
-
-					<div style="display: flex; flex-direction: row; align-items: center;">
-						<div style="height: 70px; width: 20px; background-color: #ef4444; border-radius: 4px; margin-right: 8px;"></div>
-						<div style="font-size: 12px; color: #e5e7eb;">
+			<div class="h-full flex flex-col items-center justify-center p-4">
+				<div class="flex flex-col items-center space-y-4">
+					<div class="flex items-center space-x-3">
+						<div class="w-5 h-16 bg-red-400 rounded"></div>
+						<div class="text-xs text-gray-200">
 							${i18n.t('profile.top_points')}: ${topPoints}
 						</div>
 					</div>
 
-					<div style="height: 2px; width: 100%; background-color: #a855f7; margin-left: 2px;"></div>
+					<div class="w-24 h-0.5 bg-purple-400"></div>
 
-					<div style="display: flex; flex-direction: row; align-items: center;">
-						<div style="height: 70px; width: 20px; background-color: #10b981; border-radius: 4px; margin-right: 8px;"></div>
-						<div style="font-size: 12px; color: #e5e7eb;">
+					<div class="flex items-center space-x-3">
+						<div class="w-5 h-16 bg-green-400 rounded"></div>
+						<div class="text-xs text-gray-200">
 							${i18n.t('profile.bottom_points')}: ${bottomPoints}
 						</div>
 					</div>
@@ -1096,7 +1112,7 @@ async function 	displayGameTime(stats: any)
 	if (totalTime === 0) {
 		container.innerHTML = `
 			<div style="text-align: center; color: #9ca3af; padding: 40px;">
-				<p>No games played at the moment</p>
+				<p>${i18n.t("profile.errorGame")}</p>
 			</div>
 		`;
 		return;
@@ -1112,31 +1128,31 @@ async function 	displayGameTime(stats: any)
 		const multiPercent = totalMin ? (multiMin / totalMin) * 100 : 0;
 
 		container.innerHTML = `
-			<div style="display: flex; flex-direction: column; align-items: center; width: 100%; padding-top: 10px;">
-				<div style="font-size: 28px; color: #a855f7; font-weight: bold; margin-bottom: 16px;">
+			<div class="h-full flex flex-col items-center justify-center p-2">
+				<div class="text-2xl text-purple-400 font-bold mb-4">
 					${totalMin} min
 				</div>
 
-				<div style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 400px;">
+				<div class="w-full max-w-xs space-y-3">
 					<div>
-						<div style="font-size: 12px; color: #ef4444; margin-bottom: 2px;">
+						<div class="text-xs text-red-400 mb-1">
 							${i18n.t('profile.ia_games')}: ${iaMin} min
 						</div>
-						<div style="height: 10px; background: #ef4444; width: ${iaPercent}%; border-radius: 4px;"></div>
+						<div class="h-2 bg-red-400 rounded" style="width: ${iaPercent}%"></div>
 					</div>
 
 					<div>
-						<div style="font-size: 12px; color: #f59e0b; margin-bottom: 2px;">
+						<div class="text-xs text-yellow-400 mb-1">
 							${i18n.t('profile.tournament_games')}: ${tournamentMin} min
 						</div>
-						<div style="height: 10px; background: #f59e0b; width: ${tournamentPercent}%; border-radius: 4px;"></div>
+						<div class="h-2 bg-yellow-400 rounded" style="width: ${tournamentPercent}%"></div>
 					</div>
 
 					<div>
-						<div style="font-size: 12px; color: #10b981; margin-bottom: 2px;">
+						<div class="text-xs text-green-400 mb-1">
 							${i18n.t('profile.multiplayer_games')}: ${multiMin} min
 						</div>
-						<div style="height: 10px; background: #10b981; width: ${multiPercent}%; border-radius: 4px;"></div>
+						<div class="h-2 bg-green-400 rounded" style="width: ${multiPercent}%"></div>
 					</div>
 				</div>
 			</div>
@@ -1160,7 +1176,7 @@ async function createGameTypesChart(stats: any) {
 		if (container) {
 			container.innerHTML = `
 				<div style="text-align: center; color: #9ca3af; padding: 40px;">
-					<p>No games played at the moment</p>
+					<p>${i18n.t("profile.errorGame")}</p>
 				</div>
 			`;
 		}
