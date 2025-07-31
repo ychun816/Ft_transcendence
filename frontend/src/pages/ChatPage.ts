@@ -26,7 +26,7 @@ export function createChatPage(): HTMLElement {
 			<!-- Main Chat Container -->
 			<div class="${classes.retroPanel} rounded-2xl p-8 max-w-7xl w-full h-[80vh] flex flex-col fade-in slide-up">
 				<header class="w-full flex items-center gap-4 mb-6">
-					<button class="${classes.backButton}" data-route="/home">
+					<button class="${classes.backButton}" data-route="/game">
 						← ${i18n.t("chat.back")}
 					</button>
 					<h2 class="${classes.retroTitle} text-3xl">

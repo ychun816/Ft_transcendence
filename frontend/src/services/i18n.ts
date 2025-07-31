@@ -184,6 +184,7 @@ const translations: Record<Language, Translations> = {
 			deco: "DECONNEXION",
 			profile: "PROFILE",
 			connexion: "CONNEXION",
+			server_side : "🖥️ JOUER COTE SERVEUR"
 		},
 		not_found: {
 			title: "404",
@@ -386,6 +387,7 @@ const translations: Record<Language, Translations> = {
 			deco: "LOG-OUT",
 			profile: "PROFIL",
 			connexion: "LOG-IN",
+			server_side : "🖥️ SERVER SIDE"
 		},
 		not_found: {
 			title: "404",
@@ -535,6 +537,7 @@ const translations: Record<Language, Translations> = {
 		signup: {
 			title: "Crea tu cuenta",
 			back_to_login: "← Volver al inicio de sesión",
+			email: "Email",
 			username: "Nombre de usuario",
 			password: "Contraseña",
 			avatar_label: "Elige una foto de perfil:",
@@ -575,6 +578,8 @@ const translations: Record<Language, Translations> = {
 			deco: "DESCONEXION",
 			profile: "PERFIL",
 			connexion: "CONEXION",
+			server_side: "🖥️ JUGAR DEL LADO DEL SERVIDOR"
+
 		},
 		not_found: {
 			title: "404",

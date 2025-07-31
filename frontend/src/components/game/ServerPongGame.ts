@@ -383,25 +383,25 @@ export class ServerPongClient {
         }
 
         // === 4. BALLE PULSANTE ET CLIGNOTANTE ===
-        const pulse = 10 + Math.sin(Date.now() / 100) * 2;
+        //const pulse = 10 + Math.sin(Date.now() / 100) * 2;
         const blink = Math.floor(Date.now() / 200) % 2 === 0;
         this.ctx.shadowColor = blink ? "#ffff00" : "#ff00ff";
         this.ctx.shadowBlur = 25;
         this.ctx.fillStyle = blink ? "#ffff00" : "#ff00ff";
         this.ctx.beginPath();
-        this.ctx.arc(ball.ball_x, ball.ball_y, pulse, 0, Math.PI * 2);
+        this.ctx.arc(ball.ball_x, ball.ball_y, 10, 0, Math.PI * 2);
         this.ctx.fill();
 
         // === 5. HUD (score, vitesse) ===
-        this.ctx.shadowBlur = 0;
-        this.ctx.fillStyle = "#00ffcc";
-        this.ctx.font = "bold 18px 'Courier New', monospace";
-        const currentSpeed = Math.sqrt(ball.ball_dir_x * ball.ball_dir_x + ball.ball_dir_y * ball.ball_dir_y);
-        this.ctx.fillText(`🎯 Vitesse: ${currentSpeed.toFixed(2)}`, 20, 30);
+        // this.ctx.shadowBlur = 0;
+        // this.ctx.fillStyle = "#00ffcc";
+        // this.ctx.font = "bold 18px 'Courier New', monospace";
+        // const currentSpeed = Math.sqrt(ball.ball_dir_x * ball.ball_dir_x + ball.ball_dir_y * ball.ball_dir_y);
+        // this.ctx.fillText(`🎯 Vitesse: ${currentSpeed.toFixed(2)}`, 20, 30);
 
-        this.ctx.fillStyle = "#ff66cc";
-        this.ctx.font = "14px 'Courier New', monospace";
-        this.ctx.fillText(`⏱️ Latence: ${Date.now() - this.gameState.timestamp} ms`, 20, 55);
+        // this.ctx.fillStyle = "#ff66cc";
+        // this.ctx.font = "14px 'Courier New', monospace";
+        // this.ctx.fillText(`⏱️ Latence: ${Date.now() - this.gameState.timestamp} ms`, 20, 55);
 
         // === 6. SCORE ===
         this.updateScoreDisplay(state.left_score, state.right_score);

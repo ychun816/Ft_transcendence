@@ -207,8 +207,8 @@ class Pong
         {
             ball_x: this.config.canvas_width / 2,
             ball_y: this.config.canvas_height / 2,
-            prev_x: 0,
-            prev_y: 0,
+            prev_x: this.config.canvas_width / 2,
+            prev_y: this.config.canvas_height / 2,
             ball_dir_x: 0,
             ball_dir_y: 0,
             angle: 0,
@@ -256,12 +256,12 @@ class Pong
 
     handle_keydown = (e: KeyboardEvent) =>
     {
-        if (e.code === "Space")
-            this.state.is_paused = !this.state.is_paused;
-        else if (e.key === "b")
-            console.log("Ball_dir_x = ", this.ball.ball_dir_x, ", Ball_dir_y = ", this.ball.ball_dir_y)
-        else
-            this.keys_pressed[e.key] = true;
+        // if (e.code === "Space")
+        //     this.state.is_paused = !this.state.is_paused;
+        // else if (e.key === "b")
+        //     console.log("Ball_dir_x = ", this.ball.ball_dir_x, ", Ball_dir_y = ", this.ball.ball_dir_y)
+        // else
+        this.keys_pressed[e.key] = true;
     };
 
     handle_keyup = (e: KeyboardEvent) =>
@@ -425,16 +425,18 @@ class Pong
         {
             if (this.state.left_score == this.config.score_to_win)
             {
-                if (this.final == 0)
-                {
-                    if (i18n.getCurrentLanguage() == "en")
-                        message = `${this.player_a} win the game !`;
-                    else if (i18n.getCurrentLanguage() == "fr")
-                        message = `${this.player_a} gagne la partie !`;
-                    else
-                        message = `${this.player_a} gana el partido !`;
-                }
-                else
+                // if (this.final == 0)
+                // {
+                //     if (i18n.getCurrentLanguage() == "en")
+                //         message = `${this.player_a} win the game !`;
+                //     else if (i18n.getCurrentLanguage() == "fr")
+                //         message = `${this.player_a} gagne la partie !`;
+                //     else
+                //         message = `${this.player_a} gana el partido !`;
+                // }
+                // else
+                // {
+                if (this.final != 0)
                 {
                     if (i18n.getCurrentLanguage() == "en")
                         message = `🏆 ${this.player_a} win the tournament !`;
@@ -447,16 +449,18 @@ class Pong
             }
             else
             {
-                if (this.final == 0)
-                {
-                    if (i18n.getCurrentLanguage() == "en")
-                        message = `${this.player_b} win the game !`;
-                    else if (i18n.getCurrentLanguage() == "fr")
-                        message = `${this.player_b} gagne la partie !`;
-                    else
-                        message = `${this.player_b} gana el partido !`;
-                }
-                else
+                // if (this.final == 0)
+                // {
+                //     if (i18n.getCurrentLanguage() == "en")
+                //         message = `${this.player_b} win the game !`;
+                //     else if (i18n.getCurrentLanguage() == "fr")
+                //         message = `${this.player_b} gagne la partie !`;
+                //     else
+                //         message = `${this.player_b} gana el partido !`;
+                // }
+                // else
+                // {
+                if (this.final != 0)
                 {
                     if (i18n.getCurrentLanguage() == "en")
                         message = `🏆 ${this.player_b} win the tournament !`;
@@ -530,6 +534,8 @@ class Pong
         
         this.ball.ball_x = this.config.canvas_width / 2;
         this.ball.ball_y = this.config.canvas_height / 2;
+        this.ball.prev_x = this.ball.ball_x;
+        this.ball.prev_y = this.ball.ball_y;
         this.ball.ball_dir_x = 0;
         this.ball.ball_dir_y = 0;
         
@@ -620,6 +626,8 @@ class Pong
             this.last_frame_time = performance.now();
             this.ball.ball_x = this.config.canvas_width / 2;
             this.ball.ball_y = this.config.canvas_height / 2;
+            this.ball.prev_x = this.ball.ball_x;
+            this.ball.prev_y = this.ball.ball_y;
             this.paddle.left_paddle_y = (this.config.canvas_height - this.config.paddle_height) / 2;
             this.paddle.right_paddle_y = (this.config.canvas_height - this.config.paddle_height) / 2;
             this.draw(1);
@@ -971,6 +979,8 @@ class Pong
         {
             this.ball.ball_x = this.config.canvas_width / 2;
             this.ball.ball_y = this.config.canvas_height / 2;
+            this.ball.prev_x = this.ball.ball_x;
+            this.ball.prev_y = this.ball.ball_y;
             this.paddle.left_paddle_y = (this.config.canvas_height - this.config.paddle_height) / 2;
             this.paddle.right_paddle_y = (this.config.canvas_height - this.config.paddle_height) / 2;
             this.draw(1);
@@ -1084,6 +1094,8 @@ class Pong
         this.ball.angle = get_random_playable_angle();
         this.ball.ball_dir_x = this.config.ball_speed * Math.cos(this.ball.angle);
         this.ball.ball_dir_y = this.config.ball_speed * Math.sin(this.ball.angle);
+        this.ball.prev_x = this.ball.ball_x;
+        this.ball.prev_y = this.ball.ball_y;
     }
 
     normalize_ball_speed(): void

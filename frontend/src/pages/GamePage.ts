@@ -70,9 +70,14 @@ export function createGamePage(): HTMLElement {
 						${i18n.t('game.local_mode')}
 						</span>
 					</button>
-					<button id="ligneBtn" class="${classes.gameModeButton}">
+					<button id="ligneBtn" class="hidden ${classes.gameModeButton}">
 						<span class="relative z-10">
 						${i18n.t('game.line_mode')}
+						</span>
+					</button>
+					<button id="serverBtn" class="${classes.gameModeButton}">
+						<span class="relative z-10">
+						${i18n.t('game.server_side')}
 						</span>
 					</button>
 				</div>
@@ -134,17 +139,13 @@ export function createGamePage(): HTMLElement {
 					${i18n.t('game.tournament')}
 				</h2>
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-					${[1, 2, 3, 4]
-						.map(
-							(i) => `
-					<div class="flex flex-col items-center retro-panel rounded-xl p-6">
-						<div class="w-16 h-16 rounded-full retro-panel mb-4 flex items-center justify-center text-2xl neon-text">
+					${[1,2,3,4].map(i => `
+					<div class="${classes.playerPanel}">
+						<div class="${classes.playerAvatar} text-2xl ${classes.neonText}">
 							P${i}
 						</div>
-						<input type="text" placeholder="NOM JOUEUR ${i}" class="retro-input px-4 py-2 rounded-lg w-full text-center font-bold">
-					</div>`
-						)
-						.join("")}
+						<input type="text" placeholder="${i}" class="${classes.tournamentInput}">
+					</div>`).join("")}
 				</div>
 				<div class="mt-8 text-center">
 					<button id="startTournoiMatchmaking" class="hidden ${classes.actionButton}">
@@ -340,7 +341,7 @@ export function createGamePage(): HTMLElement {
 				<div id="countdowndisplay" class="text-6xl font-bold ${classes.neonText} mt-8 text-center"></div>
 
 				<!-- Message de fin de partie -->
-				<div id="endMessage" class="text-3xl font-bold ${classes.neonText} mt-8 text-center">
+				<div id="endMessage" class="text-2xl font-bold ${classes.neonText} mt-8 text-center">
 				</div>
 				<button id="nextMatchBtn" class="hidden m-6 mx-auto ${classes.actionButton}">
 					${i18n.t('game.next_game')}
@@ -466,6 +467,7 @@ export function createGamePage(): HTMLElement {
 		const menu = page.querySelector("#menu") as HTMLElement;
 		const menuLocal = page.querySelector("#menu_local") as HTMLElement;
 		const menuLigne = page.querySelector("#menu_ligne") as HTMLElement;
+		const serverBtn = page.querySelector("#serverBtn") as HTMLButtonElement;
 		const menuTournoi = page.querySelector("#menu_tournoi") as HTMLElement;
 		const game = page.querySelector("#game") as HTMLElement;
 		const restart = page.querySelector("#restartBtn") as HTMLButtonElement;
@@ -490,6 +492,9 @@ export function createGamePage(): HTMLElement {
 		const chatBtn = page.querySelector("#chatBtn") as HTMLButtonElement;
 		const profilBtn = page.querySelector("#profilBtn") as HTMLButtonElement;
 		const nameId = page.querySelector("#nameId") as HTMLElement;
+
+		const languageSwitcherContainer = page.querySelector('#language-switcher-container');
+		languageSwitcherContainer?.classList.remove("hidden");
 
 		// reinitialiser page 1v1
 		//reset1v1RemoteInterface();
@@ -575,6 +580,7 @@ export function createGamePage(): HTMLElement {
 		const menu = page.querySelector("#menu") as HTMLElement;
 		const localBtn = page.querySelector("#localBtn") as HTMLButtonElement;
 		const ligneBtn = page.querySelector("#ligneBtn") as HTMLButtonElement;
+		const serverBtn = page.querySelector("#serverBtn") as HTMLButtonElement;
 
 		const menuLocal = page.querySelector("#menu_local") as HTMLElement;
 		const soloBtn = page.querySelector("#soloBtn") as HTMLButtonElement;
@@ -694,6 +700,8 @@ export function createGamePage(): HTMLElement {
 		function startTournoi() {
 			cleanupCurrentGame();
 
+			const languageSwitcherContainer = page.querySelector('#language-switcher-container');
+			languageSwitcherContainer?.classList.add("hidden");
 			menuLocal.style.display = "none";
 			menuLigne.style.display = "none";
 			menuTournoi.style.display = "block";
@@ -758,6 +766,7 @@ export function createGamePage(): HTMLElement {
 			let finaliste_1: string;
 			let finaliste_2: string;
 			const tournoiMess = page.querySelector('#tournoimess') as HTMLElement;
+			const endMessage = page.querySelector('#endMessage') as HTMLElement;
 
 			if (i18n.getCurrentLanguage() == "en")
 				tournoiMess.innerText = `The first match between ${player_a} and ${player_b} is going to start !`;
@@ -791,8 +800,29 @@ export function createGamePage(): HTMLElement {
 
 				currentGame.start_game_loop();
 
-				waitForMatchEnd((winner) => {
+				waitForMatchEnd((winner) =>
+				{
 					finaliste_1 = winner;
+					
+					if (winner == player_a)
+					{
+						if (i18n.getCurrentLanguage() == "en")
+							endMessage.innerText = `${player_a} win the game ! The next match between ${player_c} and ${player_d} is going to start !`;
+						else if (i18n.getCurrentLanguage() == "fr")
+							endMessage.innerText = `${player_a} gagne le match ! Le prochain match entre ${player_c} et ${player_d} va commencer !`;
+						else
+							endMessage.innerText = `${player_a} gana el partido ! El proximo partido entre ${player_c} y ${player_d} va a comenzar !`;
+					}					
+					else
+					{
+						if (i18n.getCurrentLanguage() == "en")
+							endMessage.innerText = `${player_b} win the game ! The next match between ${player_c} and ${player_d} is going to start !`;
+						else if (i18n.getCurrentLanguage() == "fr")
+							endMessage.innerText = `${player_b} gagne le match ! Le prochain match entre ${player_c} et ${player_d} va commencer !`;
+						else
+							endMessage.innerText = `${player_b} gana el partido ! El proximo partido entre ${player_c} y ${player_d} va a comenzar !`;
+					}	
+					endMessage.classList.remove("hidden");
 					showNextMatchButton(() => startMatch2());
 				});
 			}
@@ -809,6 +839,25 @@ export function createGamePage(): HTMLElement {
 
 				waitForMatchEnd((winner) => {
 					finaliste_2 = winner;
+					if (winner == player_c)
+					{
+						if (i18n.getCurrentLanguage() == "en")
+							endMessage.innerText = `${player_c} win the game ! The final between ${finaliste_1} and ${finaliste_2} is going to start !`;
+						else if (i18n.getCurrentLanguage() == "fr")
+							endMessage.innerText = `${player_c} gagne le match ! La finale entre ${finaliste_1} et ${finaliste_2} va commencer !`;
+						else
+							endMessage.innerText = `${player_c} gana el partido ! La final entre ${finaliste_1} y ${finaliste_2} va a comenzar !`;
+					}					
+					else
+					{
+						if (i18n.getCurrentLanguage() == "en")
+							endMessage.innerText = `${player_d} win the game ! The final between ${finaliste_1} and ${finaliste_2} is going to start !`;
+						else if (i18n.getCurrentLanguage() == "fr")
+							endMessage.innerText = `${player_d} gagne le match ! La finale entre ${finaliste_1} et ${finaliste_2} va commencer !`;
+						else
+							endMessage.innerText = `${player_d} gana el partido ! La final entre ${finaliste_1} y ${finaliste_2} va a comenzar !`;
+					}	
+					endMessage.classList.remove("hidden");
 					showFinalMatchButton(() => startFinal());
 				});
 			}
@@ -903,6 +952,8 @@ export function createGamePage(): HTMLElement {
 
 		function startGameSolo(mode: "solo" | "versus"): void {
 			cleanupCurrentGame();
+			const languageSwitcherContainer = page.querySelector('#language-switcher-container');
+			languageSwitcherContainer?.classList.add("hidden");
 			currentGame = new Game_solo(mode);
 
 			menuLocal.style.display = "none";
@@ -1047,6 +1098,8 @@ export function createGamePage(): HTMLElement {
 		// 2v2 EN LOCAL
 		function startGame2v2Local(): void {
 			cleanupCurrentGame();
+			const languageSwitcherContainer = page.querySelector('#language-switcher-container');
+			languageSwitcherContainer?.classList.add("hidden");
 
 			if(i18n.getCurrentLanguage() == "en")
 			{
@@ -1093,7 +1146,22 @@ export function createGamePage(): HTMLElement {
 			//currentGame.start_game_loop();
 		}
 
-		function login() {
+		function startGameRemote()
+		{
+			import("../router/router.js").then(({ router }) => {
+				router.navigate("/remote");
+			});
+		}		
+		
+		function go_server_side()
+		{
+			import("../router/router.js").then(({ router }) => {
+				router.navigate("/server-game");
+			});
+		}
+
+		function login()
+		{
 			import("../router/router.js").then(({ router }) => {
 				router.navigate("/login");
 			});
@@ -1123,8 +1191,9 @@ export function createGamePage(): HTMLElement {
 
 		soloBtn.addEventListener('click', () => startGameSolo('solo'));
 		versusBtn.addEventListener('click', () => startGameSolo('versus'));
-
-		soloLigneBtn.addEventListener('click', () => startGameLigneSolo());
+		
+		//soloLigneBtn.addEventListener('click', () => startGameLigneSolo());
+		soloLigneBtn.addEventListener('click', () => startGameRemote());
 		multiBtn.addEventListener('click', () => startGame2v2Local());
 
 		// ✅ PROTECTION CONTRE LES CLICS MULTIPLES
@@ -1234,6 +1303,7 @@ export function createGamePage(): HTMLElement {
 
 		profilBtn.addEventListener("click", () => go_profil());
 		chatBtn.addEventListener("click", () => go_chat());
+		serverBtn.addEventListener("click", () => go_server_side());
 	}
 
 	window.addEventListener("beforeunload", () => {
