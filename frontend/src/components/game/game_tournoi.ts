@@ -256,12 +256,12 @@ class Pong
 
     handle_keydown = (e: KeyboardEvent) =>
     {
-        if (e.code === "Space")
-            this.state.is_paused = !this.state.is_paused;
-        else if (e.key === "b")
-            console.log("Ball_dir_x = ", this.ball.ball_dir_x, ", Ball_dir_y = ", this.ball.ball_dir_y)
-        else
-            this.keys_pressed[e.key] = true;
+        // if (e.code === "Space")
+        //     this.state.is_paused = !this.state.is_paused;
+        // else if (e.key === "b")
+        //     console.log("Ball_dir_x = ", this.ball.ball_dir_x, ", Ball_dir_y = ", this.ball.ball_dir_y)
+        // else
+        this.keys_pressed[e.key] = true;
     };
 
     handle_keyup = (e: KeyboardEvent) =>

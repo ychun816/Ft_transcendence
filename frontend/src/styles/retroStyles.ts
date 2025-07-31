@@ -36,7 +36,7 @@ export const retroStyles = {
     
     // Panneaux rétro avec bordures néon
     retroPanel: `
-        bg-black/95 
+        bg-black/95
         border-2 border-purple-400 
         shadow-[0_0_15px_rgb(157,78,221,0.4),inset_0_0_15px_rgb(157,78,221,0.2)] 
         backdrop-blur-sm

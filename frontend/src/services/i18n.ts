@@ -449,6 +449,7 @@ const translations: Record<Language, Translations> = {
     "signup": {
       "title": "Crea tu cuenta",
       "back_to_login": "← Volver al inicio de sesión",
+      "email": "Email",
       "username": "Nombre de usuario",
       "password": "Contraseña",
       "avatar_label": "Elige una foto de perfil:",

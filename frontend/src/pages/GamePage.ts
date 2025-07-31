@@ -766,6 +766,7 @@ export function createGamePage(): HTMLElement {
 			let finaliste_1: string;
 			let finaliste_2: string;
 			const tournoiMess = page.querySelector('#tournoimess') as HTMLElement;
+			const endMessage = page.querySelector('#endMessage') as HTMLElement;
 
 			if (i18n.getCurrentLanguage() == "en")
 				tournoiMess.innerText = `The first match between ${player_a} and ${player_b} is going to start !`;
@@ -801,6 +802,7 @@ export function createGamePage(): HTMLElement {
 
 				waitForMatchEnd((winner) => {
 					finaliste_1 = winner;
+					endMessage.classList.remove("hidden");
 					showNextMatchButton(() => startMatch2());
 				});
 			}
