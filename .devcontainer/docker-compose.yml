@@ -1,9 +1,13 @@
+# version fusionne
 services:
 
 
 #  Test alerte prometheus
+# ip
 
 # MAJ pour connected user
+# logger a check
+
 
   dev:
     user: "0:0"
@@ -16,8 +20,8 @@ services:
       - ..:/app
       - /app/node_modules
     ports:
-      - "5173:5173"
-      - "${MAIN_PORT}:3000"
+      # - "5173:5173"
+      - "${MAIN_PORT}:3002"
       - "${METRICS_PORT}:3001"
       - "${HTTP_REDIRECT_PORT}:8080"
     environment:
@@ -52,17 +56,32 @@ services:
   #   #   - ..:/app
   #   # - /app/node_modules
   #   ports:
-  #     - "3000:3000"
+  #     - "${MAIN_PORT}:3000"
+    #   - "${METRICS_PORT}:3001"
+    #   - "${HTTP_REDIRECT_PORT}:8080"
   #   command: ["npm", "start"]
     # environment:
     #   - NODE_ENV=production
+    #   - NODE_ENV=development
+    #   - DEBUG=true
     #   - LOGSTASH_HOST=${LOGSTASH_HOST}
     #   - LOGSTASH_PORT=${LOGSTASH_PORT}
+    #   - ELASTIC_URL=${ELASTIC_URL}
+    #   - ELASTIC_USER=${ELASTIC_USER}
+    #   - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    #   - DATABASE_URL=${DATABASE_URL}
+    #   - MAIN_PORT=${MAIN_PORT}
+    #   - METRICS_PORT=${METRICS_PORT}
+    #   - HTTP_REDIRECT_PORT=${HTTP_REDIRECT_PORT}
+    #   - PUBLIC_IP=${PUBLIC_IP}
+    #   - COOKIE_SECRET=${COOKIE_SECRET}
+    #   - SECURITY_KEY=${SECURITY_KEY}
   #   depends_on:
   #     - logstash
   #   networks:
   #     - app-network
   #   restart: unless-stopped
+
 
   elasticsearch:
     # user: "0:0"

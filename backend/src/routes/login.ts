@@ -2,16 +2,12 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { PrismaClient } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { randomBytes } from "crypto";
+import { sessionManager } from "../services/sessionManager.js";
 import {
 	generateEmailCode,
 	send2FACodeEmail,
 } from "../services/TwoFactorService.js";
-
-export const activeSessions = new Map<
-	string,
-	{ userId: number; username: string; expiresAt: Date }
->();
+import { extractTokenFromRequest } from "./profile.js";
 
 const secretKey = process.env.COOKIE_SECRET;
 
@@ -25,6 +21,53 @@ export async function handleLogIn(
 	// 	parseOptions: {},
 	// } as FastifyCookieOptions);
 	// console.log("DEBUG LOGIN MANAGEMENT 2");
+
+	// app.get("/ws/login", { websocket: true }, async (connection, req) => {
+	// 	console.log("🔧 New WebSocket connection from:", req.ip);
+
+	// 	// Extract user info from query parameters or headers
+	// 	const query = req.query as { username?: string; userId?: string };
+	// 	const username = query.username;
+	// 	const userId = query.userId;
+
+	// 	if (!username || !userId) {
+	// 		connection.send(
+	// 			JSON.stringify({
+	// 				type: "error",
+	// 				message: "Missing user information",
+	// 			})
+	// 		);
+	// 		connection.close();
+	// 		return;
+	// 	}
+
+	// 	// Get the actual user ID from database
+	// 	const user = await prisma.user.findUnique({
+	// 		where: { username: username },
+	// 	});
+
+	// 	if (!user) {
+	// 		connection.send(
+	// 			JSON.stringify({
+	// 				type: "error",
+	// 				message: "User not found in database",
+	// 			})
+	// 		);
+	// 		connection.close();
+	// 		return;
+	// 	}
+
+	// 	// Store connection with actual user info from database
+	// 	activeSessions.set(username, {
+	// 		connection,
+	// 		userId: user.id,
+	// 		username,
+	// 	});
+
+	// 	console.log("activeSessions: ", activeSessions);
+
+	// 	console.log(`🔗 User ${username} connected`);
+	// });
 
 	app.post(
 		"/api/login",
@@ -160,6 +203,9 @@ export async function handleLogIn(
 					}
 				);
 
+				const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+				sessionManager.addSession(user.username, user.id, expiresAt);
+
 				console.log("🔑 Generated token:", token);
 
 				return reply.send({
@@ -200,6 +246,8 @@ export async function handleLogIn(
 				secretKey || "fallback-secret-key"
 			) as any;
 
+			sessionManager.updateActivity(decoded.username);
+
 			// Get the user from the DB
 			const user = await prisma.user.findUnique({
 				where: { id: decoded.id },
@@ -213,6 +261,9 @@ export async function handleLogIn(
 					losses: true,
 				},
 			});
+
+			//ADD active session save
+
 
 			if (!user) {
 				return reply.status(401).send({ error: "User not found" });
@@ -240,6 +291,9 @@ export async function handleLogIn(
 					token,
 					secretKey || "fallback-secret-key"
 				) as any;
+
+				sessionManager.removeSession(decoded.username);
+
 				await prisma.user.update({
 					where: { id: decoded.id },
 					data: { connected: false },
@@ -252,6 +306,20 @@ export async function handleLogIn(
 			}
 		}
 	);
+
+	app.get("/api/sessions/online", async (request: FastifyRequest, reply: FastifyReply) => {
+		const auth = extractTokenFromRequest(request);
+		if (!auth) {
+			return reply.status(401).send({ error: "Unauthorized" });
+		}
+
+		const onlineUsers = sessionManager.getOnlineUsers();
+		reply.send({
+			success: true,
+			onlineUsers,
+			count: onlineUsers.length
+		});
+	});
 }
 
 export function requireAuth() {
