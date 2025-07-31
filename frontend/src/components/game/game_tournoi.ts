@@ -279,7 +279,7 @@ class Pong
         }
 
         this.draw(1);
-        let countdown = 3;
+        let countdown = 5;
 
         if (i18n.getCurrentLanguage() == "en")
             this.count_down.innerText = `The game will start in`;
