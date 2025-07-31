@@ -2,6 +2,7 @@ import { AuthService } from "../middleware/auth.js";
 import { i18n } from "../services/i18n.js";
 import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
 import { classes } from "../styles/retroStyles.js";
+import { getUserInfo } from "./ChatPage.js";
 
 // Créer une instance locale (pas de singleton)
 const authService = new AuthService();
@@ -15,12 +16,12 @@ export function createLoginPage(): HTMLElement {
 		<style>
 			/* Import de la police Orbitron pour le thème rétro */
 			@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-			
+
 			* {
 				font-family: 'Orbitron', monospace;
 			}
 		</style>
-		
+
 		<!-- Champ d'étoiles -->
 		<div class="${classes.starfield}"></div>
 		<div class="absolute top-4 left-4 z-50">
@@ -32,30 +33,30 @@ export function createLoginPage(): HTMLElement {
 		</div>
 		<!-- Conteneur principal avec effet scan -->
 		<div class="min-h-screen flex flex-col items-center justify-center p-4 ${classes.scanLinesContainer}">
-			
+
 			<!-- Titre principal avec effet néon -->
 			<h1 class="${classes.retroTitle} mb-12">
 				🔐 ${i18n.t('auth.login_title')}
 			</h1>
-			
+
 			<!-- Panneau de connexion -->
 			<div class="${classes.retroPanel} rounded-2xl p-8 max-w-md w-full">
 				<form class="space-y-6">
 					<div>
-						<input 
-							type="text" 
-							placeholder="${i18n.t('auth.username')}" 
-							id="username" 
-							required 
+						<input
+							type="text"
+							placeholder="${i18n.t('auth.username')}"
+							id="username"
+							required
 							class="${classes.tournamentInput}"
 						>
 					</div>
 					<div>
-						<input 
-							type="password" 
-							placeholder="${i18n.t('auth.password')}" 
-							id="password" 
-							required 
+						<input
+							type="password"
+							placeholder="${i18n.t('auth.password')}"
+							id="password"
+							required
 							class="${classes.tournamentInput}"
 						>
 					</div>
@@ -63,7 +64,7 @@ export function createLoginPage(): HTMLElement {
 						<span class="relative z-10">✨ ${i18n.t('common.login')}</span>
 					</button>
 				</form>
-				
+
 				<div class="mt-6 space-y-4">
 					<div class="relative">
 						<div class="absolute inset-0 flex items-center">
@@ -73,7 +74,7 @@ export function createLoginPage(): HTMLElement {
 							<span class="px-2 bg-gray-900 text-cyan-400">${i18n.t('auth.or')}</span>
 						</div>
 					</div>
-					
+
 					<button type="button" id="google-signin-btn" class="${classes.gameModeButton} w-full flex items-center justify-center gap-3">
 						<svg class="w-5 h-5" viewBox="0 0 24 24">
 							<path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -84,28 +85,28 @@ export function createLoginPage(): HTMLElement {
 						<span class="relative z-10">${i18n.t('auth.google_signin')}</span>
 					</button>
 				</div>
-				
+
 				<button type="button" id="register-btn" class="${classes.gameModeButton} w-full mt-6">
 					<span class="relative z-10">📝 ${i18n.t('common.register')}</span>
 				</button>
 			</div>
 		</div>
-		
+
 		<div class="absolute top-4 right-4" id="language-switcher-container"></div>
 		`;
-		
+
 		//page.innerHTML = createNeonContainer(content);
-		
+
 		// Add language switcher
 		const languageSwitcherContainer = page.querySelector('#language-switcher-container');
 		if (languageSwitcherContainer) {
 			languageSwitcherContainer.appendChild(createLanguageSwitcher());
 		}
-		
+
 		// Re-attach event listeners after re-render
 		attachEventListeners();
 	};
-	
+
 	const attachEventListeners = () => {
 		const form = page.querySelector('form') as HTMLFormElement;
 		const signupBtn = page.querySelector('#register-btn') as HTMLButtonElement;
@@ -125,7 +126,7 @@ export function createLoginPage(): HTMLElement {
 				sendLogInInfo(page);
 			});
 		}
-		
+
 		if (signupBtn) {
 			signupBtn.addEventListener("click", () => {
 				import("../router/router.js").then(({ router }) => {
@@ -133,18 +134,19 @@ export function createLoginPage(): HTMLElement {
 				});
 			});
 		}
-		
+
 		if (googleSigninBtn) {
 			googleSigninBtn.addEventListener("click", () => {
 				handleGoogleSignIn();
 			});
 		}
 	};
-	
+
 	renderContent();
-	
+
 	// Re-render when language changes
 	window.addEventListener('languageChanged', renderContent);
+
 	return page;
 }
 
@@ -169,6 +171,71 @@ async function handleGoogleSignIn(): Promise<void> {
     }
 }
 
+async function registerActiveSessions()
+{
+	const currentUser = sessionStorage.getItem("currentUser");
+	let username = null;
+
+	if (currentUser) {
+		try {
+			const user = JSON.parse(currentUser);
+			username = user.username;
+		} catch (e) {
+			console.error("Error parsing user data:", e);
+		}
+	}
+
+	const userId = sessionStorage.getItem("userId");
+	if (userId) {
+		// Si on a déjà l'userId en cache, on peut démarrer plus vite
+		const userData = {
+			id: parseInt(userId),
+			username: username,
+		};
+		addActiveSessions(userData);
+	} else {
+		// Sinon, on récupère les données avec un timeout
+		const userInfoPromise = getUserInfo();
+		const timeoutPromise = new Promise((_, reject) => {
+			setTimeout(() => reject(new Error("User info timeout")), 3000);
+		});
+
+		Promise.race([userInfoPromise, timeoutPromise])
+			.then((userData) => {
+				if (userData && userData.id) {
+					console.log("✅ User info retrieved:", userData);
+					sessionStorage.setItem("userId", userData.id.toString());
+					addActiveSessions(userData);
+				} else {
+					throw new Error("Invalid user data");
+				}
+			})
+	}
+}
+
+async function addActiveSessions(userData: any)
+{
+	let ws: WebSocket | null = null;
+	function connectWebSocket() {
+		ws = new WebSocket(
+			`wss://localhost:3002/ws/login?username=${encodeURIComponent(userData.username)}&userId=${userData.id}`
+		);
+
+		ws.onopen = () => {
+			console.log("🔗 WebSocket connected");
+		};
+
+		ws.onclose = () => {
+			console.log("🔌 WebSocket disconnected");
+		};
+
+		ws.onerror = (error) => {
+			console.error("❌ WebSocket error:", error);
+		};
+	}
+	connectWebSocket();
+}
+
 async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
     const usernameInput = page.querySelector("#username") as HTMLInputElement;
     const passwordInput = page.querySelector("#password") as HTMLInputElement;
@@ -182,7 +249,7 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
 
     try {
         console.log("🔍 Sending login request with:", UserInfo);
-        
+
         const response = await fetch("/api/login", {
             method: "POST",
             credentials: 'include',
@@ -191,7 +258,7 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
             },
             body: JSON.stringify(UserInfo),
         });
-        
+
         console.log("🔍 Login response status:", response.status);
         console.log("🔍 Login response headers:", response.headers);
 
@@ -199,22 +266,23 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
             const errorText = await response.text();
             throw new Error(`HTTP ${response.status}: ${errorText}`);
         }
-        
+
         const data = await response.json();
         console.log("🔍 Login response data:", data);
-        
+
         if (data.success) {
             // Store the JWT token in sessionStorage
             sessionStorage.setItem('authToken', data.token);
             // Store username for convenience
             sessionStorage.setItem('username', data.user.username);
-            
+
             console.log("🔑 Login success - Stored token:", data.token);
             console.log("🔑 Login success - Stored username:", data.user.username);
-            
+
             await authService.getCurrentUser();
             import("../router/router.js").then(({ router }) => {
                 router.navigate('/game');
+				registerActiveSessions()
             });
         } else if (data.requires2FA) {
             // Save username for 2FA verification step
@@ -222,6 +290,7 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
             // Redirect to 2FA verification page
             import("../router/router.js").then(({ router }) => {
                 router.navigate('/2fa-verify');
+				registerActiveSessions()
             // // Show 2FA input
             // show2FAInput(page);
             // alert(data.message || i18n.t('auth.2fa_required'));
@@ -234,6 +303,7 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
         alert(i18n.t('auth.login_error') + ": " + (error || "Please try again."));
     }
 }
+
 function show2FAInput(page: HTMLDivElement): void {
     const form = page.querySelector('.space-y-4') as HTMLFormElement;
 
@@ -291,20 +361,20 @@ function show2FAInput(page: HTMLDivElement): void {
     // twoFactorInput.required = true;
 
     // Format input (digits only)
-    twoFactorInput.addEventListener('input', (e) => {
-        const target = e.target as HTMLInputElement;
-        target.value = target.value.replace(/\D/g, '').slice(0, 6);
-    });
+//     twoFactorInput.addEventListener('input', (e) => {
+//         const target = e.target as HTMLInputElement;
+//         target.value = target.value.replace(/\D/g, '').slice(0, 6);
+//     });
 
-    // Insert before the submit button
-    const submitButton = form.querySelector('#login-btn');
-    if (submitButton) {
-        form.insertBefore(twoFactorInput, submitButton);
-        
-        // Update button text
-        submitButton.textContent = i18n.t('auth.verify_and_login') || 'Verify & Login';
-    }
+//     // Insert before the submit button
+//     const submitButton = form.querySelector('#login-btn');
+//     if (submitButton) {
+//         form.insertBefore(twoFactorInput, submitButton);
 
-    // Focus on the 2FA input
-    twoFactorInput.focus();
+//         // Update button text
+//         submitButton.textContent = i18n.t('auth.verify_and_login') || 'Verify & Login';
+//     }
+
+//     // Focus on the 2FA input
+//     twoFactorInput.focus();
 }

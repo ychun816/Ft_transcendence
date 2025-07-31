@@ -8,7 +8,8 @@ import { PROJECT_ROOT } from "../server.js";
 import { createHash } from "crypto";
 import jwt from "jsonwebtoken";
 import { request } from "http";
-import { activeConnections } from "./chat.js";
+import { sessionManager } from "../services/sessionManager.js"
+
 /*
 TO DO:
 - Ajuster la regle de mot de passe
@@ -145,12 +146,12 @@ export async function registerProfileRoute(
 			}
 
 			const { username } = request.params as { username: string };
-			const isOnline = activeConnections.has(username);
+			const isOnline = sessionManager.isUserOnline(username);
 
 			reply.send({
-			success: true,
-			username: username,
-			isOnline: isOnline
+				success: true,
+				username: username,
+				isOnline: isOnline
 			});
 		} catch (error) {
 			console.error('Error checking user online status:', error);

@@ -12,7 +12,7 @@ export function createChatPage(): HTMLElement {
 			<style>
 				/* Import Orbitron font for retro theme */
 				@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-				
+
 				* {
 					font-family: 'Orbitron', monospace;
 				}
@@ -20,9 +20,9 @@ export function createChatPage(): HTMLElement {
 
 			<!-- Champ d'étoiles -->
 			<div class="${classes.starfield}"></div>
-			
+
 			<div class="absolute top-4 right-4 z-50" id="language-switcher-container"></div>
-			
+
 			<!-- Main Chat Container -->
 			<div class="${classes.retroPanel} rounded-2xl p-8 max-w-7xl w-full h-[80vh] flex flex-col fade-in slide-up">
 				<header class="w-full flex items-center gap-4 mb-6">
@@ -33,7 +33,7 @@ export function createChatPage(): HTMLElement {
 						💬 ${i18n.t("chat.title")}
 					</h2>
 				</header>
-				
+
 				<main class="flex-1 flex gap-4 min-h-0">
 					<!-- Online Users Panel -->
 					<div class="w-1/4 ${classes.retroPanel} rounded-xl flex flex-col min-h-0">
@@ -73,10 +73,10 @@ export function createChatPage(): HTMLElement {
 							<!-- Messages will appear here -->
 						</div>
 						<div class="${classes.retroPanel} border-t-2 border-purple-400/30 p-4 flex gap-2">
-							<input 
-								type="text" 
-								placeholder="${i18n.t("chat.type_message")}" 
-								id="message-input" 
+							<input
+								type="text"
+								placeholder="${i18n.t("chat.type_message")}"
+								id="message-input"
 								class="${classes.tournamentInput} flex-1"
 							>
 							<button id="send-message" class="${classes.actionButton}">
@@ -200,7 +200,7 @@ export function createChatPage(): HTMLElement {
 /**
  * Get user info from server with timeout
  */
-async function getUserInfo() {
+export async function getUserInfo() {
 	try {
 		const token = sessionStorage.getItem("authToken");
 		if (!token) {
@@ -614,8 +614,8 @@ function initializeChat(page: HTMLElement, userData: any) {
 
 		// Check if there's a pending invitation for this user
 		const hasPendingInvite = pendingInvitations.has(username);
-		const inviteButtonClass = hasPendingInvite 
-			? "text-gray-400 text-sm cursor-not-allowed opacity-50" 
+		const inviteButtonClass = hasPendingInvite
+			? "text-gray-400 text-sm cursor-not-allowed opacity-50"
 			: "text-green-400 text-sm hover:text-green-300 transition-colors duration-300 drop-shadow-[0_0_3px_rgb(34,197,94)]";
 		const inviteButtonText = hasPendingInvite ? "🎮 Invitation Sent" : "🎮 Invite to Game";
 
@@ -949,7 +949,7 @@ function initializeChat(page: HTMLElement, userData: any) {
 		// Add to pending invitations
 		pendingInvitations.add(data.receiverUsername);
 		showSuccessMessage(`Game invitation sent to ${data.receiverUsername}`);
-		
+
 		// Update the UI if we're currently chatting with this user
 		if (currentConversation === data.receiverUsername) {
 			selectConversation(data.receiverUsername);
@@ -960,7 +960,7 @@ function initializeChat(page: HTMLElement, userData: any) {
 		// Remove from pending invitations
 		pendingInvitations.delete(data.receiverUsername);
 		showSuccessMessage(`${data.receiverUsername} accepted your game invitation! ${data.message || ''}`);
-		
+
 		// Update the UI if we're currently chatting with this user
 		if (currentConversation === data.receiverUsername) {
 			selectConversation(data.receiverUsername);
@@ -971,7 +971,7 @@ function initializeChat(page: HTMLElement, userData: any) {
 		// Remove from pending invitations
 		pendingInvitations.delete(data.receiverUsername);
 		showError(`${data.receiverUsername} declined your game invitation`);
-		
+
 		// Update the UI if we're currently chatting with this user
 		if (currentConversation === data.receiverUsername) {
 			selectConversation(data.receiverUsername);
@@ -979,10 +979,10 @@ function initializeChat(page: HTMLElement, userData: any) {
 	}
 
 	function handleGameInviteResponse(data: any) {
-		const message = data.status === "accepted" 
+		const message = data.status === "accepted"
 			? `Game invitation ${data.status}! ${data.message || ''}`
 			: `Game invitation ${data.status}`;
-		
+
 		if (data.status === "accepted") {
 			showSuccessMessage(message);
 		} else {

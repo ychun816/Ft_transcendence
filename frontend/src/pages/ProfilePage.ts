@@ -3,7 +3,7 @@ import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
 import { createTwoFactorSetup } from "../components/TwoFactorSetup.js"; //FOR 2FA
 import { createLogoutSwitcher } from "../components/logoutSwitcher.js";
 import { classes } from "../styles/retroStyles.js";
-import { Chart, registerables } from "chart.js"
+import { Chart, registerables } from "chart.js";
 
 // Déplacer la fonction manage2FA ici, avant son utilisation
 async function manage2FA(page: HTMLDivElement) {
@@ -333,6 +333,7 @@ export function createProfilePage(): HTMLElement {
 
 		displayMatchHistory(page);
 		displayFriendsList(page);
+		startFriendsStatusUpdater(page);
 		displayDashboard(page);
 	};
 
@@ -808,6 +809,26 @@ async function displayFriendsList(page: HTMLDivElement) {
 	html += `</tbody></table></div>`;
 	friendsMain.innerHTML = html;
 	setupAddFriendFeature(page);
+}
+
+function startFriendsStatusUpdater(page: HTMLDivElement) {
+	const interval = setInterval(async () => {
+		try {
+			await displayFriendsList(page);
+		} catch (error) {
+			console.error('Error updating friends status:', error);
+		}
+	}, 10000);
+
+	const cleanup = () => {
+		clearInterval(interval);
+		window.removeEventListener('beforeunload', cleanup);
+		window.removeEventListener('popstate', cleanup);
+	};
+
+	window.addEventListener('beforeunload', cleanup);
+	window.addEventListener('popstate', cleanup);
+	return cleanup;
 }
 
 async function isUserOnline(username: string): Promise<boolean> {
