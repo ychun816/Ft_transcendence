@@ -676,17 +676,26 @@ async function displayMatchHistory(page: HTMLDivElement) {
 					<tbody>
 	`;
 
-	for (const match of history) {
+	for (let i = 0; i < history.length; i++) {
+		const match = history[i];
 		const isPlayer1 = match.player1.username === username;
 		let opponent;
-		if (match.player2){
+		if (match.player2) {
 			opponent = match.player2.username;
-		} else if (match.iaMode){
+		} else if (match.iaMode) {
 			opponent = "IA";
 		} else {
 			opponent = "Local";
 		}
-		//const opponent = match.player2.username : match.player1.username;
+
+		const minutes = Math.floor(match.lasted / 60);
+		const seconds = match.lasted % 60;
+		const gameTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+		// Déterminer les scores selon la position du joueur
+		const playerScore = isPlayer1 ? match.score1 : match.score2;
+		const opponentScore = isPlayer1 ? match.score2 : match.score1;
+
 		const result = match.winnerId === (isPlayer1 ? match.player1Id : match.player2Id) ? i18n.t('profile.victory') : i18n.t('profile.defeat');
 		const date = new Date(match.playedAt).toLocaleDateString();
 		const statusClass =
@@ -695,11 +704,95 @@ async function displayMatchHistory(page: HTMLDivElement) {
 				: "status-defeat";
 
 		html += `
-			<tr class="border-b border-gray-700 hover:bg-gray-800 transition-colors">
-				<td class="p-2 text-gray-300 text-sm">${date}</td>
-				<td class="p-2 text-gray-200 text-sm">${opponent}</td>
-				<td class="p-2 text-sm">
-					<span class="${statusClass} font-semibold">${result}</span>
+			<tr class="match-row">
+				<td>${date}</td>
+				<td>${opponent}</td>
+				<td><span class="${statusClass}">${result}</span></td>
+				<td>
+					<button
+						class="expand-btn bg-purple-400 bg-opacity-20 hover:bg-opacity-40 text-purple-400
+						       rounded px-2 py-1 text-xs border border-purple-400 border-opacity-50
+						       transition-all duration-300 transform hover:scale-105"
+						data-match-index="${i}"
+						onclick="toggleMatchDetails(${i})"
+					>
+						<svg class="w-4 h-4 transform transition-transform duration-200"
+						     id="arrow-${i}" fill="currentColor" viewBox="0 0 20 20">
+							<path fill-rule="evenodd"
+							      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+							      clip-rule="evenodd"/>
+						</svg>
+					</button>
+				</td>
+			</tr>
+			<tr class="match-details-row hidden" id="details-${i}">
+				<td colspan="4">
+					<div class="bg-gray-800 bg-opacity-50 p-4 rounded-lg border border-purple-400 border-opacity-30">
+						<div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+
+							<!-- Temps de jeu -->
+							<div class="flex flex-col items-center p-3 bg-purple-400 bg-opacity-10 rounded-lg border border-purple-400 border-opacity-20">
+								<div class="text-purple-300 font-semibold mb-1">
+									${i18n.t("profile.game_duration") || "Game Duration"}
+								</div>
+								<div class="text-white text-lg font-bold">${gameTime}</div>
+							</div>
+
+							<!-- Score du joueur -->
+							<div class="flex flex-col items-center p-3 bg-green-400 bg-opacity-10 rounded-lg border border-green-400 border-opacity-20">
+								<div class="text-green-300 font-semibold mb-1">
+									${i18n.t("profile.your_score") || "Your Score"}
+								</div>
+								<div class="text-white text-lg font-bold">${playerScore}</div>
+							</div>
+
+							<!-- Score de l'adversaire -->
+							<div class="flex flex-col items-center p-3 bg-red-400 bg-opacity-10 rounded-lg border border-red-400 border-opacity-20">
+								<div class="text-red-300 font-semibold mb-1">
+									${i18n.t("profile.opponent_score") || "Opponent Score"}
+								</div>
+								<div class="text-white text-lg font-bold">${opponentScore}</div>
+							</div>
+
+							<!-- Points section haute vs basse -->
+							<div class="flex flex-col items-center p-3 bg-blue-400 bg-opacity-10 rounded-lg border border-blue-400 border-opacity-20">
+								<div class="text-blue-300 font-semibold mb-1">
+									${i18n.t("profile.section_points") || "Section Points"}
+								</div>
+								<div class="text-white text-sm">
+									<div class="flex justify-between items-center mb-1">
+										<span class="text-red-300">${i18n.t("profile.top") || "Top"}:</span>
+										<span class="font-bold">${match.pointsUp}</span>
+									</div>
+									<div class="flex justify-between items-center">
+										<span class="text-green-300">${i18n.t("profile.bottom") || "Bottom"}:</span>
+										<span class="font-bold">${match.pointsDown}</span>
+									</div>
+								</div>
+							</div>
+
+						</div>
+
+						<!-- Mode de jeu -->
+						<div class="mt-3 pt-3 border-t border-purple-400 border-opacity-20">
+							<div class="flex items-center justify-center">
+								<span class="text-purple-300 text-xs font-semibold mr-2">
+									${i18n.t("profile.game_mode") || "Game Mode"}:
+								</span>
+								<span class="px-2 py-1 rounded-full text-xs font-bold
+									${match.iaMode ? 'bg-red-400 bg-opacity-20 text-red-300 border border-red-400 border-opacity-50' : ''}
+									${match.tournamentMode ? 'bg-yellow-400 bg-opacity-20 text-yellow-300 border border-yellow-400 border-opacity-50' : ''}
+									${match.multiMode ? 'bg-green-400 bg-opacity-20 text-green-300 border border-green-400 border-opacity-50' : ''}
+									${!match.iaMode && !match.tournamentMode && !match.multiMode ? 'bg-gray-400 bg-opacity-20 text-gray-300 border border-gray-400 border-opacity-50' : ''}
+								">
+									${match.iaMode ? (i18n.t("profile.ia_mode") || "IA Mode") : ''}
+									${match.tournamentMode ? (i18n.t("profile.tournament_mode") || "Tournament") : ''}
+									${match.multiMode ? (i18n.t("profile.multiplayer_mode") || "Multiplayer") : ''}
+									${!match.iaMode && !match.tournamentMode && !match.multiMode ? (i18n.t("profile.local_mode") || "Local") : ''}
+								</span>
+							</div>
+						</div>
+					</div>
 				</td>
 			</tr>
 		`;
@@ -711,6 +804,21 @@ async function displayMatchHistory(page: HTMLDivElement) {
 		</div>
 	`;
 	histDiv.innerHTML = html;
+
+	(window as any).toggleMatchDetails = function(index: number) {
+	const detailsRow = document.getElementById(`details-${index}`);
+	const arrow = document.getElementById(`arrow-${index}`);
+
+		if (detailsRow && arrow) {
+			if (detailsRow.classList.contains('hidden')) {
+				detailsRow.classList.remove('hidden');
+				arrow.classList.add('rotate-180');
+			} else {
+				detailsRow.classList.add('hidden');
+				arrow.classList.remove('rotate-180');
+			}
+		}
+	}
 }
 
 async function getFriendsList() {
