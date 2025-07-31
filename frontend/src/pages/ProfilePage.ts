@@ -761,11 +761,11 @@ async function displayMatchHistory(page: HTMLDivElement) {
 								</div>
 								<div class="text-white text-sm">
 									<div class="flex justify-between items-center mb-1">
-										<span class="text-red-300">${i18n.t("profile.top") || "Top"}:</span>
+										<span class="text-red-300">${i18n.t("profile.top_points") || "Top"}:</span>
 										<span class="font-bold">${match.pointsUp}</span>
 									</div>
 									<div class="flex justify-between items-center">
-										<span class="text-green-300">${i18n.t("profile.bottom") || "Bottom"}:</span>
+										<span class="text-green-300">${i18n.t("profile.bottom_points") || "Bottom"}:</span>
 										<span class="font-bold">${match.pointsDown}</span>
 									</div>
 								</div>
