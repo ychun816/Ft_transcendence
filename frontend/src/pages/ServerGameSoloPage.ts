@@ -8,6 +8,9 @@ export function createServerGameSoloPage(): HTMLElement {
 	const container = document.createElement("div");
 	container.innerHTML = serverGameSoloPage.render();
 
+	// Attach page instance for cleanup
+	(container as any).__pageInstance = serverGameSoloPage;
+
 	// Appeler onMount après que le DOM soit créé
 	requestAnimationFrame(() => {
 		serverGameSoloPage.onMount();

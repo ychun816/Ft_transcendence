@@ -8,6 +8,9 @@ export function createServerGameMultiPage(): HTMLElement {
 	const container = document.createElement("div");
 	container.innerHTML = serverGameMultiPage.render();
 
+	// Attach page instance for cleanup
+	(container as any).__pageInstance = serverGameMultiPage;
+
 	requestAnimationFrame(() => {
 		serverGameMultiPage.onMount();
 	});

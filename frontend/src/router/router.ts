@@ -8,6 +8,7 @@ class Router {
     private dynamicRoutes: Array<{pattern: string, handler: () => HTMLElement}> = [];
     private protectedRoutes: Set<string> = new Set();
     private currentRoute: string = '/';
+    private currentPageInstance: any = null;
 
     constructor() {
         //this.setupRoutes();
@@ -75,7 +76,7 @@ class Router {
       This function is called when the app starts.
       It handles the initial route.
       */
-      this.handleRoute();
+      this.renderRoute(window.location.pathname);
     }
 
 //   navigate(path: string) {
@@ -162,10 +163,26 @@ class Router {
         const app = document.getElementById('app');
         if (app) {
             console.log("🎨 Rendering route:", route);
+            
+            // Cleanup previous page if it has onUnmount method
+            if (this.currentPageInstance && typeof this.currentPageInstance.onUnmount === 'function') {
+                console.log("🧹 Cleaning up previous page");
+                this.currentPageInstance.onUnmount();
+            }
+            
             app.innerHTML = '';
             // Store route params globally so components can access them
             (window as any).routeParams = routeParams;
             const element = routeHandler();
+            
+            // Try to store reference to page instance for cleanup
+            // Look for a data attribute or attached instance
+            if ((element as any).__pageInstance) {
+                this.currentPageInstance = (element as any).__pageInstance;
+            } else {
+                this.currentPageInstance = null;
+            }
+            
             app.appendChild(element);
             console.log("✅ Route rendered successfully:", route);
         } else {

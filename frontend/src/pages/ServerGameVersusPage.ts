@@ -8,6 +8,9 @@ export function createServerGameVersusPage(): HTMLElement {
 	const container = document.createElement("div");
 	container.innerHTML = serverGameVersusPage.render();
 
+	// Attach page instance for cleanup
+	(container as any).__pageInstance = serverGameVersusPage;
+
 	requestAnimationFrame(() => {
 		serverGameVersusPage.onMount();
 	});
@@ -208,86 +211,37 @@ export class ServerGameVersusPage implements Page {
                             </div>
                         </div>
 
-			* {
-				font-family: 'Orbitron', monospace;
-			}
-		</style>
-
-		<!-- Conteneur principal avec effet scan -->
-		<div class="min-h-screen bg-gray-900 text-white font-mono overflow-hidden ${classes.scanLinesContainer}">
-			<div class="min-h-screen flex flex-col items-center justify-center p-4">
-
-				<!-- Titre principal avec effet néon -->
-				<h1 class="${classes.retroTitle} mb-12">
-					🏓 RETRO PONG SERVER
-				</h1>
-
-				<!-- Zone de jeu -->
-				<div id="game" class="w-full max-w-6xl">
-					<!-- Bouton retour -->
-					<button id="backToMenuBtn" class="mb-6 ${classes.backButton}" data-route="/server-game">
-						${i18n.t('chat.back')}
-					</button>
-
-					<!-- Statut de connexion -->
-					<div class="${classes.retroPanel} rounded-xl p-4 mb-6">
-						<div class="text-center">
-							<p id="connectionStatus" class="${classes.neonText}">🟡 Initialisation...</p>
-							<p id="gameId" class="text-purple-300 text-sm mt-2">ID: -</p>
-						</div>
-					</div>
-
-					<!-- Bouton restart -->
-					<button id="restartBtn" class="mb-6 mx-auto ${classes.actionButton} block">
-						${i18n.t('game.new_game')}
-					</button>
-
-					<!-- Tableau de score -->
-					<div id="scoreboard" class="${classes.scoreboardPanel} rounded-2xl p-6 mb-6">
-						<div class="grid grid-cols-2 gap-8 text-center">
-							<div class="${classes.retroPanel} rounded-xl p-4">
-								<p id="scoreP1" class="text-2xl font-bold text-purple-300">
-									${i18n.t('game.player_1')} : 0
-								</p>
-							</div>
-							<div class="${classes.retroPanel} rounded-xl p-4">
-								<p id="scoreP2" class="text-2xl font-bold text-purple-300">
-									${i18n.t('game.player_2')} : 0
-								</p>
-							</div>
-						</div>
-					</div>
-
-					<!-- Canvas avec cadre futuriste -->
-					<div class="relative ${classes.gameCanvasFrame} rounded-2xl mx-auto" style="width: 800px; height: 600px;">
-						<canvas id="gameCanvas" width="800" height="600" class="rounded-xl bg-black w-full h-full"></canvas>
-					</div>
-
-					<!-- Compte à rebours -->
-					<div id="countdowndisplay" class="text-6xl font-bold ${classes.neonText} mt-8 text-center"></div>
-
-					<!-- Message de fin de partie -->
-					<div id="endMessage" class="text-3xl font-bold ${classes.neonText} mt-8 text-center"></div>
-
-					<!-- Contrôles -->
-					<div class="${classes.controlPanel} mt-8">
-						<h3 class="text-xl font-bold text-purple-300 mb-4 text-center">
-							${i18n.t('game.control')}
-						</h3>
-						<div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
-							<div class="${classes.controlItem}">
-								<p class="text-purple-300 font-semibold">${i18n.t('game.p1')}</p>
-								<p class="text-sm text-gray-300">W / S</p>
-							</div>
-							<div class="${classes.controlItem}">
-								<p class="text-purple-300 font-semibold">${i18n.t('game.p2')}</p>
-								<p class="text-sm text-gray-300">↑ / ↓</p>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+                        
+                        <!-- Canvas avec cadre futuriste -->
+                        <div class="relative game-canvas-frame rounded-2xl mx-auto" style="width: 800px; height: 600px;">
+                            <canvas id="gameCanvas" width="800" height="600" class="rounded-xl bg-black w-full h-full"></canvas>
+                        </div>
+                        
+                        <!-- Compte à rebours -->
+                        <div id="countdowndisplay" class="text-6xl font-bold neon-text mt-8 text-center"></div>
+                        
+                        <!-- Message de fin de partie -->
+                        <div id="endMessage" class="text-3xl font-bold neon-text mt-8 text-center"></div>
+                        
+                        <!-- Contrôles -->
+                        <div class="retro-panel rounded-lg p-4 mt-8">
+                            <h3 class="text-xl font-bold text-purple-300 mb-4 text-center">
+                                ${i18n.t('game.control')}
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
+                                <div>
+                                    <p class="text-purple-300 font-semibold">${i18n.t('game.p1')}</p>
+                                    <p class="text-sm text-gray-300">W / S</p>
+                                </div>
+                                <div>
+                                    <p class="text-purple-300 font-semibold">${i18n.t('game.p2')}</p>
+                                    <p class="text-sm text-gray-300">↑ / ↓</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 		`;
 	}
 
