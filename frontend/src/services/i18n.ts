@@ -17,6 +17,7 @@ const translations: Record<Language, Translations> = {
 			loading: "Chargement...",
 			error: "Erreur",
 			success: "Succès",
+			back: "← Retour",
 		},
 		navigation: {
 			home: "Accueil",
@@ -27,6 +28,9 @@ const translations: Record<Language, Translations> = {
 		},
 		auth: {
 			username: "Nom d'utilisateur",
+			two_factor_code: "Code 2FA",
+			verify_and_login: "Vérifier et se connecter",
+			two_factor_title: "Vérification 2FA",
 			password: "Mot de passe",
 			login_title: "Connexion",
 			create_account: "Créer un compte",
@@ -44,6 +48,7 @@ const translations: Record<Language, Translations> = {
 		profile: {
 			title: "Profil",
 			my_profile: "Mon profil",
+			manage_2fa: "Gérer le 2FA",
 			back: "← Retour",
 			stats: "Statistiques",
 			matches: "Matchs",
@@ -184,6 +189,7 @@ const translations: Record<Language, Translations> = {
 			deco: "DECONNEXION",
 			profile: "PROFILE",
 			connexion: "CONNEXION",
+			server_side_pong: "🖥️ PONG CÔTÉ SERVEUR",
 		},
 		not_found: {
 			title: "404",
@@ -222,6 +228,7 @@ const translations: Record<Language, Translations> = {
 			loading: "Loading...",
 			error: "Error",
 			success: "Success",
+			back: "← Back",
 		},
 		navigation: {
 			home: "Home",
@@ -240,6 +247,9 @@ const translations: Record<Language, Translations> = {
 			or: "OR",
 			google_signin: "Sign in with Google",
 			google_signin_error: "Google Sign-In error",
+			two_factor_code: "2FA Code",
+			verify_and_login: "Verify and Login",
+			two_factor_title: "2FA Verification",
 		},
 		home: {
 			welcome: "Welcome to Transcendence",
@@ -249,6 +259,7 @@ const translations: Record<Language, Translations> = {
 		profile: {
 			title: "Profile",
 			my_profile: "My profile",
+			manage_2fa: "Manage 2FA",
 			back: "← Back",
 			stats: "Statistics",
 			matches: "Matches",
@@ -386,6 +397,7 @@ const translations: Record<Language, Translations> = {
 			deco: "LOG-OUT",
 			profile: "PROFIL",
 			connexion: "LOG-IN",
+			server_side_pong: "🖥️ SERVER-SIDE PONG",
 		},
 		not_found: {
 			title: "404",
@@ -442,6 +454,9 @@ const translations: Record<Language, Translations> = {
 			or: "O",
 			google_signin: "Iniciar sesión con Google",
 			google_signin_error: "Error al iniciar sesión con Google",
+			two_factor_code: "Código 2FA",
+			verify_and_login: "Verificar y Conectar",
+			two_factor_title: "Verificación 2FA",
 		},
 		home: {
 			welcome: "Bienvenido a Transcendence",
@@ -451,6 +466,7 @@ const translations: Record<Language, Translations> = {
 		profile: {
 			title: "Perfil",
 			my_profile: "Mi perfil",
+			manage_2fa: "Gestionar 2FA",
 			back: "← Volver",
 			stats: "Estadísticas",
 			matches: "Partidas",
@@ -575,6 +591,7 @@ const translations: Record<Language, Translations> = {
 			deco: "DESCONEXION",
 			profile: "PERFIL",
 			connexion: "CONEXION",
+			server_side_pong: "🖥️ PONG DEL SERVIDOR",
 		},
 		not_found: {
 			title: "404",

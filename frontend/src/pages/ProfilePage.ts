@@ -5,7 +5,6 @@ import { createLogoutSwitcher } from "../components/logoutSwitcher.js";
 import { classes } from "../styles/retroStyles.js";
 import { Chart, registerables } from "chart.js"
 
-// Déplacer la fonction manage2FA ici, avant son utilisation
 async function manage2FA(page: HTMLDivElement) {
 	const manage2FABtn = page.querySelector("#manage-2fa") as HTMLButtonElement;
 	if (manage2FABtn) {
@@ -230,11 +229,10 @@ export function createProfilePage(): HTMLElement {
 		editAvatar(page);
 		editUsername(page);
 		editPassword(page);
-		manage2FA(page); // <-- ADD to enable the 2FA button
+		manage2FA(page);
 
 		getUserInfo().then((data) => {
 			if (data) {
-				console.log("🔍 User data received:", data);
 				const usernameElem = page.querySelector(
 					"#username"
 				) as HTMLElement;
@@ -243,8 +241,6 @@ export function createProfilePage(): HTMLElement {
 					"#user-avatar"
 				) as HTMLImageElement;
 				if (avatarElem && data.avatarUrl) {
-					console.log("🖼️ Setting avatar URL:", data.avatarUrl);
-
 					const isDevMode = window.location.port === "5173"; // Vite dev server
 					const serverUrl = isDevMode
 						? `https://${window.location.hostname}:3443`
@@ -258,21 +254,14 @@ export function createProfilePage(): HTMLElement {
 						? `${fullAvatarUrl}&cb=${Date.now()}`
 						: `${fullAvatarUrl}?cb=${Date.now()}`;
 
-					console.log("🌐 Full avatar URL:", avatarUrl);
-
 					// Try to load image normally first
 					const testImage = new Image();
 
 					testImage.onload = function () {
-						console.log("✅ Normal image loaded successfully!");
 						avatarElem.src = avatarUrl;
 					};
 
 					testImage.onerror = async function (e) {
-						console.error(
-							"❌ Normal image failed, trying base64 fallback..."
-						);
-
 						try {
 							// Fetch as base64 from our API
 							const response = await fetch(avatarUrl, {
@@ -287,9 +276,6 @@ export function createProfilePage(): HTMLElement {
 									data.data &&
 									data.data.startsWith("data:image")
 								) {
-									console.log(
-										"✅ Base64 fallback successful!"
-									);
 									avatarElem.src = data.data;
 								} else {
 									throw new Error("Invalid base64 response");
@@ -298,16 +284,11 @@ export function createProfilePage(): HTMLElement {
 								throw new Error("Base64 fetch failed");
 							}
 						} catch (error) {
-							console.error(
-								"❌ Base64 fallback also failed:",
-								error
-							);
 							avatarElem.src = "/default-avatar.png";
 						}
 					};
 
 					testImage.src = avatarUrl;
-					console.log("🔄 Testing normal image load first");
 				}
 
 				const statElem = page.querySelector(
@@ -391,7 +372,6 @@ async function getUserInfo() {
 
 		if (response.ok) {
 			const userData = await response.json();
-			console.log("User data retrieved:", userData);
 			return userData;
 		} else {
 			console.error("Failed to get user info");
@@ -484,7 +464,6 @@ async function editPassword(page: HTMLDivElement) {
 					});
 					const data = await response.json();
 					if (data.ok || data.success) {
-						console.log("Password succesfully edited!");
 					} else {
 						alert(i18n.t("profile.password_error"));
 					}
@@ -575,13 +554,11 @@ async function editAvatar(page: HTMLDivElement) {
 		});
 		fileInput.addEventListener("change", (e) => {
 			const file = fileInput.files?.[0];
-			console.log("file: ", file);
 			if (file) {
 				const reader = new FileReader();
 				reader.onload = async function (evt) {
 					if (evt.target && typeof evt.target.result === "string") {
 						const avatarUrl = await updateDbAvatar(file);
-						console.log("avatarUrl: ", avatarUrl);
 						if (avatarUrl) avatarImg.src = avatarUrl;
 					}
 				};

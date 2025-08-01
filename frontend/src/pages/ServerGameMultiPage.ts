@@ -176,7 +176,7 @@ export class ServerGameMultiPage implements Page {
                     
                     <!-- Bouton retour -->
                     <div class="absolute top-4 left-4">
-                        <button class="retro-button text-white font-bold py-2 px-6 rounded-lg transition-all duration-300" data-route="/server-game">
+                        <button class="retro-button text-white font-bold py-2 px-6 rounded-lg transition-all duration-300" data-route="/game">
                             ← RETOUR
                         </button>
                     </div>

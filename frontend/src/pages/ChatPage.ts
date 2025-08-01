@@ -26,7 +26,7 @@ export function createChatPage(): HTMLElement {
 			<!-- Main Chat Container -->
 			<div class="${classes.retroPanel} rounded-2xl p-8 max-w-7xl w-full h-[80vh] flex flex-col fade-in slide-up">
 				<header class="w-full flex items-center gap-4 mb-6">
-					<button class="${classes.backButton}" data-route="/home">
+					<button class="${classes.backButton}" data-route="/game">
 						← ${i18n.t("chat.back")}
 					</button>
 					<h2 class="${classes.retroTitle} text-3xl">
@@ -193,13 +193,9 @@ export function createChatPage(): HTMLElement {
 			});
 		}
 	});
-
 	return page;
 }
 
-/**
- * Get user info from server with timeout
- */
 async function getUserInfo() {
 	try {
 		const token = sessionStorage.getItem("authToken");
@@ -228,9 +224,6 @@ async function getUserInfo() {
 	}
 }
 
-/**
- * Initialize chat functionality with user data
- */
 function initializeChat(page: HTMLElement, userData: any) {
 	// WebSocket connection
 	let ws: WebSocket | null = null;
@@ -277,7 +270,6 @@ function initializeChat(page: HTMLElement, userData: any) {
 		ws.onmessage = (event) => {
 			try {
 				const data = JSON.parse(event.data);
-				console.log("📨 Received:", data);
 
 				switch (data.type) {
 					case "connection_established":
@@ -290,8 +282,6 @@ function initializeChat(page: HTMLElement, userData: any) {
 						displayMessages(data.messages);
 						break;
 					case "message_sent":
-						// Handle message sent confirmation (optional)
-						console.log("✅ Message sent successfully");
 						break;
 					case "direct_message":
 						handleNewMessage(data);
@@ -300,15 +290,12 @@ function initializeChat(page: HTMLElement, userData: any) {
 						displayUserProfile(data.profile);
 						break;
 					case "online_users":
-						console.log("👥 Online users:", data.users);
 						displayOnlineUsers(data.users);
 						break;
 					case "user_offline":
-						console.log("👤 User offline:", data.username);
 						removeUserFromOnlineList(data.username);
 						break;
 					case "user_online":
-						console.log("👤 User online:", data.user);
 						addUserToOnlineList(data.user);
 						break;
 					case "error":

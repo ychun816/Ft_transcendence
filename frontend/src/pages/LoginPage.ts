@@ -161,13 +161,14 @@ export async function requireAuth(): Promise<boolean> {
 
 async function handleGoogleSignIn(): Promise<void> {
     try {
-        // Redirect to Google OAuth
+        // Redirect directly to Google OAuth (no popup)
         window.location.href = '/api/auth/google';
     } catch (error) {
         console.error('Google Sign-In error:', error);
         alert(i18n.t('auth.google_signin_error') || 'Google Sign-In failed');
     }
 }
+
 
 async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
     const usernameInput = page.querySelector("#username") as HTMLInputElement;
@@ -251,7 +252,7 @@ function show2FAInput(page: HTMLDivElement): void {
     const twoFactorInput = document.createElement('input');
     twoFactorInput.type = 'text';
     twoFactorInput.id = 'two-factor-token';
-    twoFactorInput.placeholder = i18n.t('auth.2fa_code') || '6-digit code';
+    twoFactorInput.placeholder = i18n.t('auth.two_factor_code') || '6-digit code';
     twoFactorInput.maxLength = 6;
     twoFactorInput.className = 'neon-input text-center font-mono';
     twoFactorInput.required = true;

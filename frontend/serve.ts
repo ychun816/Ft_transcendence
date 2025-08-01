@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import https from 'https';
+import { RequestListener } from 'http';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -49,7 +50,8 @@ const httpsOptions = {
   cert: fs.readFileSync(path.join(__dirname, '../backend/ssl/cert.pem')),
 };
 
-const server = https.createServer(httpsOptions, app);
+const server = https.createServer(httpsOptions, app as RequestListener);
+console.log("server", server);
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Development server running at https://localhost:${PORT}`);

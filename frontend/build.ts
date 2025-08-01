@@ -11,7 +11,6 @@ const isDev = process.argv.includes('--dev');
 
 async function buildCSS() {
   try {
-    // Utiliser PostCSS CLI directement
     const command = 'npx postcss src/style.css -o dist/style.css --config ./postcss.config.js';
     execSync(command, { cwd: __dirname, stdio: 'inherit' });
     console.log('✓ CSS compiled with Tailwind');
@@ -116,7 +115,9 @@ async function buildWatch() {
 }
 
 if (isDev) {
+  console.log('DEV MODE');
   buildWatch();
 } else {
+  console.log('PROD MODE');
   buildOnce();
 }

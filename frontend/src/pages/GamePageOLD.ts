@@ -217,7 +217,7 @@ export function createGamePage(): HTMLElement {
 			
 			<!-- Menu principal -->
 			<div id="menu" class="retro-panel rounded-2xl p-8">
-				<button class="mb-6 retro-button text-white font-bold py-2 px-6 rounded-lg transition-all duration-300" data-route="/home">
+				<button class="mb-6 retro-button text-white font-bold py-2 px-6 rounded-lg transition-all duration-300" data-route="/game">
 					← RETOUR ACCUEIL
 				</button>
 				<h2 class="text-3xl font-bold text-purple-300 mb-8 text-center">MODE DE JEU</h2>

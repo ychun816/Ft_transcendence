@@ -1,40 +1,66 @@
 import { i18n } from "../services/i18n.js";
-import { createNeonContainer } from "../styles/neonTheme.js";
 import { AuthService } from "../middleware/auth.js";
 import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
+import { classes } from "../styles/retroStyles.js";
 
 const authService = new AuthService();
 
 export function createTwoFactorVerifyPage(): HTMLElement {
 	const page = document.createElement("div");
-	page.className = "fade-in";
+	page.className = "min-h-screen bg-gray-900 text-white font-mono overflow-hidden";
 
 	const renderContent = () => {
-		const content = `
-            <div class="neon-card max-w-md w-full p-8 slide-up">
-                <h1 class="neon-title text-center mb-8">${i18n.t("auth.2fa_title") || "Two-Factor Verification"}</h1>
-                <form class="space-y-6">
-                    <div>
-                        <input 
-                            type="text" 
-                            placeholder="${i18n.t("auth.2fa_code") || "6-digit code"}" 
-                            id="two-factor-token" 
-                            maxlength="6"
-                            required 
-                            class="neon-input text-center font-mono"
-                            autocomplete="one-time-code"
-                        >
-                    </div>
-                    <button type="submit" id="verify-btn" class="neon-btn neon-btn-primary w-full">
-                        ${i18n.t("auth.verify_and_login") || "Verify & Login"}
-                    </button>
-                </form>
-                <div id="twofa-error" class="text-error mt-2" style="display:none"></div>
-            </div>
-            <div class="absolute top-4 right-4" id="language-switcher-container"></div>
-        `;
-
-		page.innerHTML = createNeonContainer(content);
+		page.innerHTML = `
+		<style>
+			/* Import de la police Orbitron pour le thème rétro */
+			@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+			
+			* {
+				font-family: 'Orbitron', monospace;
+			}
+		</style>
+		
+		<!-- Champ d'étoiles -->
+		<div class="${classes.starfield}"></div>
+		<div class="absolute top-4 left-4 z-50">
+			<div class="login-dropdown">
+				<button class="${classes.backButton}" id="backToLogin" data-route="/login">
+					← ${i18n.t('common.back')}
+				</button>
+			</div>
+		</div>
+		<!-- Conteneur principal avec effet scan -->
+		<div class="min-h-screen flex flex-col items-center justify-center p-4 ${classes.scanLinesContainer}">
+			
+			<!-- Titre principal avec effet néon -->
+			<h1 class="${classes.retroTitle} mb-12">
+				🔐 ${i18n.t('auth.two_factor_title') || 'Two-Factor Verification'}
+			</h1>
+			
+			<!-- Panneau de vérification 2FA -->
+			<div class="${classes.retroPanel} rounded-2xl p-8 max-w-md w-full">
+				<form class="space-y-6">
+					<div>
+						<input 
+							type="text" 
+							placeholder="${i18n.t('auth.two_factor_code') || '6-digit code'}" 
+							id="two-factor-token" 
+							maxlength="6"
+							required 
+							class="${classes.tournamentInput} text-center font-mono"
+							autocomplete="one-time-code"
+						>
+					</div>
+					<button type="submit" id="verify-btn" class="${classes.actionButton} w-full text-xl py-4">
+						<span class="relative z-10">✨ ${i18n.t('auth.verify_and_login') || 'Verify & Login'}</span>
+					</button>
+				</form>
+				<div id="twofa-error" class="text-red-400 mt-4 text-center" style="display:none"></div>
+			</div>
+		</div>
+		
+		<div class="absolute top-4 right-4" id="language-switcher-container"></div>
+		`;
 
 		// Add language switcher
 		const languageSwitcherContainer = page.querySelector(
@@ -48,15 +74,19 @@ export function createTwoFactorVerifyPage(): HTMLElement {
 	};
 
 	const attachEventListeners = () => {
-		console.log("🔧 2FA DEBUG - Attaching event listeners");
-
 		const form = page.querySelector("form") as HTMLFormElement;
 		const codeInput = page.querySelector(
 			"#two-factor-token"
 		) as HTMLInputElement;
+		const backToLogin = page.querySelector('#backToLogin');
 
-		console.log("🔧 2FA DEBUG - Form found:", !!form);
-		console.log("🔧 2FA DEBUG - Code input found:", !!codeInput);
+		if (backToLogin) {
+			backToLogin.addEventListener("click", () => {
+				import("../router/router.js").then(({ router }) => {
+					router.navigate("/login");
+				});
+			});
+		}
 
 		if (codeInput) {
 			codeInput.addEventListener("input", (e) => {
@@ -91,10 +121,12 @@ async function send2FACode(page: HTMLDivElement): Promise<void> {
 	) as HTMLInputElement;
 	const errorDiv = page.querySelector("#twofa-error") as HTMLDivElement;
 	const username = sessionStorage.getItem("pending2FAUser");
+	const isGoogleAuth = sessionStorage.getItem("pending2FAGoogle") === "true";
+	const tempToken = sessionStorage.getItem("googleAuthTempToken");
 
 	const code = codeInput.value.trim();
 
-	console.log(`🔍 2FA FRONTEND - Username: ${username}, Code: ${code}`);
+	console.log(`🔍 2FA FRONTEND - Username: ${username}, Code: ${code}, Google: ${isGoogleAuth}`);
 
 	if (!code || code.length !== 6) {
 		console.log(`❌ 2FA FRONTEND - Invalid code length: ${code.length}`);
@@ -106,6 +138,53 @@ async function send2FACode(page: HTMLDivElement): Promise<void> {
 		return;
 	}
 
+	// Handle Google OAuth 2FA
+	if (isGoogleAuth && tempToken) {
+		try {
+			console.log(`📤 2FA FRONTEND - Sending Google 2FA request`);
+			const response = await fetch("/api/auth/google/verify-2fa", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ 
+					tempToken: tempToken,
+					twoFactorToken: code 
+				}),
+			});
+
+			const data = await response.json();
+
+			if (data.success && data.token) {
+				sessionStorage.setItem("authToken", data.token);
+				sessionStorage.setItem("username", data.user.username || "");
+				sessionStorage.removeItem("pending2FAGoogle");
+				sessionStorage.removeItem("googleAuthTempToken");
+				await authService.getCurrentUser();
+				import("../router/router.js").then(({ router }) => {
+					router.navigate("/game");
+				});
+			} else {
+				if (errorDiv) {
+					errorDiv.textContent =
+						data.message ||
+						i18n.t("auth.invalid_2fa_code") ||
+						"Invalid code";
+					errorDiv.style.display = "block";
+				}
+			}
+		} catch (error) {
+			console.error("Google 2FA verify error:", error);
+			if (errorDiv) {
+				errorDiv.textContent =
+					i18n.t("auth.login_error") +
+					": " +
+					(error || "Please try again.");
+				errorDiv.style.display = "block";
+			}
+		}
+		return;
+	}
+
+	// Handle regular login 2FA
 	if (!username) {
 		console.log(`❌ 2FA FRONTEND - No username found in pending2FAUser`);
 		if (errorDiv) {
@@ -124,9 +203,7 @@ async function send2FACode(page: HTMLDivElement): Promise<void> {
 			credentials: "include",
 		});
 
-		console.log(`📥 2FA FRONTEND - Response status: ${response.status}`);
 		const data = await response.json();
-		console.log(`📥 2FA FRONTEND - Response data:`, data);
 
 		if (data.success && data.token) {
 			sessionStorage.setItem("authToken", data.token);

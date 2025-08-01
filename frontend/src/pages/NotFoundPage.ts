@@ -118,7 +118,7 @@ export function createNotFoundPage(): HTMLElement {
 		const btn = page.querySelector("#back-home") as HTMLButtonElement;
 		btn.addEventListener("click", () => {
 			import("../router/router.js").then(({ router }) => {
-				router.navigate("/home");
+				router.navigate("/game");
 			});
 		});
 	};
