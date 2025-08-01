@@ -16,6 +16,7 @@ generated/
 backend/.env
 *.env
 *.nfs*
+backend/ssl
 
 # Editor directories and files
 .vscode/*
@@ -27,4 +28,3 @@ backend/.env
 *.njsproj
 *.sln
 *.sw?
-backend/ssl
