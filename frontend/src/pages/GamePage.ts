@@ -75,9 +75,9 @@ export function createGamePage(): HTMLElement {
 						${i18n.t('game.line_mode')}
 						</span>
 					</button>
-					<button id="serverBtn" class="${classes.gameModeButton}">
+					<button id="serverGameBtn" class="${classes.gameModeButton}" data-route="/server-game">
 						<span class="relative z-10">
-						${i18n.t('game.server_side')}
+						${i18n.t('game.server_side_pong')}
 						</span>
 					</button>
 				</div>

@@ -6,10 +6,7 @@ import fs from 'fs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const envPath = path.join(__dirname, '../../.devcontainer/.env');
-console.log('🔍 Chemin du fichier .env:', envPath);
-console.log('🔍 Fichier .env existe:', fs.existsSync(envPath));
 const result = config({ path: envPath });
-console.log('🔍 Résultat chargement .env:', result.error ? result.error.message : 'Succès');
 import { logger } from "./utils/logger.js";
 import { metricsPlugin } from "./utils/metricsPlugin.js";
 import fastify from "fastify";
@@ -26,6 +23,7 @@ import { registerNotificationRoutes } from "./routes/notifications.js";
 import { registerGameRoute } from "./routes/game.js";
 import { GameManager } from "./game/GameManager.js";
 import { twoFactorRoutes } from "./routes/two-factor.js";
+import googleAuthRoutes from "./routes/google-auth.js";
 // Configuration des chemins
 export const PROJECT_ROOT = path.resolve(__dirname, "../../");
 // Configuration des ports adaptée à votre .env
@@ -56,15 +54,12 @@ const loadSSLCertificates = () => {
         const sslPath = path.join(__dirname, "../ssl");
         const keyPath = path.join(sslPath, "key.pem");
         const certPath = path.join(sslPath, "cert.pem");
-        console.log(`🔍 Chemin SSL: ${sslPath}`);
-        console.log(`🔍 Dossier SSL existe: ${fs.existsSync(sslPath)}`);
-        console.log(`🔍 Fichier key.pem: ${keyPath}`);
-        console.log(`🔍 key.pem existe: ${fs.existsSync(keyPath)}`);
-        console.log(`🔍 Fichier cert.pem: ${certPath}`);
-        console.log(`🔍 cert.pem existe: ${fs.existsSync(certPath)}`);
-        // Vérifier si nous sommes dans un conteneur
-        const isInContainer = fs.existsSync('/.dockerenv');
-        console.log(`🔍 Dans un conteneur: ${isInContainer}`);
+        // console.log(`🔍 Chemin SSL: ${sslPath}`);
+        // console.log(`🔍 Dossier SSL existe: ${fs.existsSync(sslPath)}`);
+        // console.log(`🔍 Fichier key.pem: ${keyPath}`);
+        // console.log(`🔍 key.pem existe: ${fs.existsSync(keyPath)}`);
+        // console.log(`🔍 Fichier cert.pem: ${certPath}`);
+        // console.log(`🔍 cert.pem existe: ${fs.existsSync(certPath)}`);
         if (!fs.existsSync(keyPath) || !fs.existsSync(certPath)) {
             console.log("⚠️ Certificats SSL manquants - FORCER LE MODE HTTP");
             console.log("ℹ️ Le serveur démarrera en HTTP uniquement");
@@ -267,6 +262,8 @@ const setupMainServer = async () => {
     }
     // 2FA routes
     await twoFactorRoutes(app, prisma);
+    // Google Auth routes
+    await app.register(googleAuthRoutes, { prefix: '/api' });
     // Route de santé pour le monitoring
     app.get("/health", async (request, reply) => {
         return {

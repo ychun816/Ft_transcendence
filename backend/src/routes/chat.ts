@@ -12,12 +12,6 @@ export const activeConnections = new Map<
 	}
 >();
 
-/**
- * Enhanced chat WebSocket routes with direct messaging, blocking, and notifications
- *
- * @param fastify - Fastify instance
- * @param prisma - Prisma client instance
- */
 export default async function chatWebSocketRoutes(
 	fastify: FastifyInstance<any, any, any, any>,
 	prisma: PrismaClient
@@ -27,7 +21,6 @@ export default async function chatWebSocketRoutes(
 	fastify.get("/ws/chat", { websocket: true }, async (connection, req) => {
 		console.log("🔧 New WebSocket connection from:", req.ip);
 
-		// Extract user info from query parameters or headers
 		const query = req.query as { username?: string; userId?: string };
 		const username = query.username;
 		const userId = query.userId;
@@ -43,7 +36,6 @@ export default async function chatWebSocketRoutes(
 			return;
 		}
 
-		// Get the actual user ID from database
 		const user = await prisma.user.findUnique({
 			where: { username: username },
 		});
@@ -59,16 +51,12 @@ export default async function chatWebSocketRoutes(
 			return;
 		}
 
-		// Store connection with actual user info from database
 		activeConnections.set(username, {
 			connection,
 			userId: user.id,
 			username,
 		});
 
-		console.log(`🔗 User ${username} connected`);
-
-		// Send welcome message
 		connection.send(
 			JSON.stringify({
 				type: "connection_established",
@@ -77,7 +65,6 @@ export default async function chatWebSocketRoutes(
 			})
 		);
 
-		// Envoyer immédiatement les utilisateurs en ligne (pas de setTimeout)
 		const onlineUsersData = await getOnlineUsersData(prisma, username);
 		connection.send(
 			JSON.stringify({
@@ -86,7 +73,6 @@ export default async function chatWebSocketRoutes(
 			})
 		);
 
-		// Get user data for broadcast
 		const userData = await prisma.user.findUnique({
 			where: { username: username },
 			select: {
@@ -95,7 +81,6 @@ export default async function chatWebSocketRoutes(
 			},
 		});
 
-		// Notify other users that a new user is online
 		if (userData) {
 			broadcastToAll(
 				{
@@ -109,7 +94,6 @@ export default async function chatWebSocketRoutes(
 		connection.on("message", async (message: Buffer) => {
 			try {
 				const data = JSON.parse(message.toString());
-				console.log("🔧 Received message:", data);
 
 				switch (data.type) {
 					case "direct_message":
@@ -137,10 +121,6 @@ export default async function chatWebSocketRoutes(
 						);
 						break;
 					case "get_messages":
-						console.log(
-							"🔧 Processing get_messages with data:",
-							data
-						);
 						await handleGetMessages(
 							data,
 							user.id,
@@ -200,10 +180,8 @@ export default async function chatWebSocketRoutes(
 		});
 
 		connection.on("close", (code: number, reason: string) => {
-			console.log(`🔌 User ${username} disconnected:`, code, reason);
 			activeConnections.delete(username);
 
-			// Notify other users
 			broadcastToAll(
 				{
 					type: "user_offline",
@@ -221,14 +199,6 @@ export default async function chatWebSocketRoutes(
 	console.log("✅ WebSocket route registered successfully");
 }
 
-/**
- * Handle direct message sending with blocking check
- *
- * @param data - Message data
- * @param senderUsername - Username of the sender
- * @param senderId - ID of the sender
- * @param prisma - Prisma client
- */
 async function handleDirectMessage(
 	data: any,
 	senderUsername: string,
@@ -264,19 +234,13 @@ async function handleDirectMessage(
 		});
 
 		if (isBlocked) {
-			console.log(
-				"🔧 Sender is blocked by receiver ",
-				senderUsername,
-				"by",
-				receiverUsername
-			);
 			sendToUser(senderUsername, {
 				type: "error",
 				message:
 					"You cannot send messages to the user " +
 					receiverUsername +
-					" because you are " +
-					senderUsername,
+					" because you are blocked by " +
+					receiverUsername,
 			});
 			return;
 		}
@@ -300,15 +264,14 @@ async function handleDirectMessage(
 			isRead: false,
 		};
 
-		// Send message to sender (so they see it in their conversation)
 		sendToUser(senderUsername, {
 			type: "direct_message",
 			id: savedMessage.id,
-			sender: "me", // Show as "me" for the sender
+			sender: "me",
 			receiver: receiverUsername,
 			content: content,
 			timestamp: savedMessage.createdAt.toISOString(),
-			isRead: true, // Mark as read for sender since they sent it
+			isRead: true,
 		});
 
 		// Send to receiver if online
@@ -324,13 +287,6 @@ async function handleDirectMessage(
 	}
 }
 
-/**
- * Handle user blocking
- *
- * @param data - Block data
- * @param blockerId - ID of the user doing the blocking
- * @param prisma - Prisma client
- */
 async function handleBlockUser(
 	data: any,
 	blockerId: number,
@@ -351,7 +307,6 @@ async function handleBlockUser(
 			return;
 		}
 
-		// Create block relationship
 		await prisma.block.create({
 			data: {
 				blockerId: blockerId,
@@ -359,13 +314,11 @@ async function handleBlockUser(
 			},
 		});
 
-		// Notify the blocker
 		sendToUserById(blockerId, {
 			type: "user_blocked",
 			username: usernameToBlock,
 		});
 
-		// Notify the blocked user (if online)
 		if (activeConnections.has(usernameToBlock)) {
 			sendToUser(usernameToBlock, {
 				type: "user_blocked_you",
@@ -374,7 +327,6 @@ async function handleBlockUser(
 			});
 		}
 	} catch (error) {
-		console.error("❌ Error blocking user:", error);
 		sendToUserById(blockerId, {
 			type: "error",
 			message: "Failed to block user",
@@ -382,13 +334,6 @@ async function handleBlockUser(
 	}
 }
 
-/**
- * Handle user unblocking
- *
- * @param data - Unblock data
- * @param unblockerId - ID of the user doing the unblocking
- * @param prisma - Prisma client
- */
 async function handleUnblockUser(
 	data: any,
 	unblockerId: number,
@@ -409,7 +354,6 @@ async function handleUnblockUser(
 			return;
 		}
 
-		// Remove block relationship
 		await prisma.block.deleteMany({
 			where: {
 				blockerId: unblockerId,
@@ -417,13 +361,11 @@ async function handleUnblockUser(
 			},
 		});
 
-		// Notify the unblocker
 		sendToUserById(unblockerId, {
 			type: "user_unblocked",
 			username: usernameToUnblock,
 		});
 
-		// Notify the unblocked user (if online)
 		if (activeConnections.has(usernameToUnblock)) {
 			sendToUser(usernameToUnblock, {
 				type: "user_unblocked_you",
@@ -432,7 +374,6 @@ async function handleUnblockUser(
 			});
 		}
 	} catch (error) {
-		console.error("❌ Error unblocking user:", error);
 		sendToUserById(unblockerId, {
 			type: "error",
 			message: "Failed to unblock user",
@@ -440,13 +381,6 @@ async function handleUnblockUser(
 	}
 }
 
-/**
- * Handle getting user profile
- *
- * @param data - Request data
- * @param connection - WebSocket connection
- * @param prisma - Prisma client
- */
 async function handleGetUserProfile(
 	data: any,
 	connection: any,
@@ -494,20 +428,12 @@ async function handleGetUserProfile(
 	}
 }
 
-/**
- * Handle getting user conversations
- *
- * @param userId - ID of the user
- * @param connection - WebSocket connection
- * @param prisma - Prisma client
- */
 async function handleGetConversations(
 	userId: number,
 	connection: any,
 	prisma: PrismaClient
 ) {
 	try {
-		// Get all users the current user has messaged with
 		const conversations = await prisma.message.findMany({
 			where: {
 				OR: [{ senderId: userId }, { receiverId: userId }],
@@ -523,7 +449,6 @@ async function handleGetConversations(
 			orderBy: { createdAt: "desc" },
 		});
 
-		// Group by conversation partner
 		const conversationMap = new Map();
 		conversations.forEach((msg: any) => {
 			const partnerId =
@@ -540,7 +465,6 @@ async function handleGetConversations(
 			}
 		});
 
-		// Count unread messages
 		const unreadMessages = await prisma.message.findMany({
 			where: {
 				receiverId: userId,
@@ -572,14 +496,6 @@ async function handleGetConversations(
 	}
 }
 
-/**
- * Handle getting messages between two users
- *
- * @param data - Request data
- * @param userId - ID of the current user
- * @param connection - WebSocket connection
- * @param prisma - Prisma client
- */
 async function handleGetMessages(
 	data: any,
 	userId: number,
@@ -587,11 +503,6 @@ async function handleGetMessages(
 	prisma: PrismaClient
 ) {
 	const { otherUsername } = data;
-
-	// Add debug logging
-	console.log("🔧 handleGetMessages called with data:", data);
-	console.log("🔧 otherUsername:", otherUsername);
-	console.log("🔧 userId:", userId);
 
 	if (!otherUsername) {
 		console.error("❌ otherUsername is undefined or null");
@@ -619,7 +530,6 @@ async function handleGetMessages(
 			return;
 		}
 
-		// Get messages between the two users
 		const messages = await prisma.message.findMany({
 			where: {
 				OR: [
@@ -636,7 +546,6 @@ async function handleGetMessages(
 			orderBy: { createdAt: "asc" },
 		});
 
-		// Mark messages as read
 		await prisma.message.updateMany({
 			where: {
 				senderId: otherUser.id,
@@ -669,12 +578,6 @@ async function handleGetMessages(
 	}
 }
 
-/**
- * Send message to specific user by username
- *
- * @param username - Username of the target user
- * @param data - Data to send
- */
 function sendToUser(username: string, data: any) {
 	const connection = activeConnections.get(username);
 	if (connection) {
@@ -682,12 +585,6 @@ function sendToUser(username: string, data: any) {
 	}
 }
 
-/**
- * Send message to specific user by ID
- *
- * @param userId - ID of the target user
- * @param data - Data to send
- */
 function sendToUserById(userId: number, data: any) {
 	for (const [username, conn] of activeConnections) {
 		if (conn.userId === userId) {
@@ -697,12 +594,6 @@ function sendToUserById(userId: number, data: any) {
 	}
 }
 
-/**
- * Broadcast message to all connected users except sender
- *
- * @param data - Data to broadcast
- * @param excludeUsername - Username to exclude from broadcast
- */
 function broadcastToAll(data: any, excludeUsername?: string) {
 	for (const [username, conn] of activeConnections) {
 		if (username !== excludeUsername) {
@@ -711,12 +602,6 @@ function broadcastToAll(data: any, excludeUsername?: string) {
 	}
 }
 
-/**
- * Send tournament notification to specific user
- *
- * @param username - Username of the target user
- * @param message - Notification message
- */
 export function sendTournamentNotification(username: string, message: string) {
 	sendToUser(username, {
 		type: "tournament_notification",
@@ -725,14 +610,6 @@ export function sendTournamentNotification(username: string, message: string) {
 	});
 }
 
-/**
- * Handle sending game invitation
- *
- * @param data - Invitation data
- * @param senderId - ID of the sender
- * @param senderUsername - Username of the sender
- * @param prisma - Prisma client
- */
 async function handleSendGameInvite(
 	data: any,
 	senderId: number,
@@ -746,7 +623,6 @@ async function handleSendGameInvite(
 	}
 
 	try {
-		// Get receiver user
 		const receiver = await prisma.user.findUnique({
 			where: { username: receiverUsername },
 		});
@@ -759,7 +635,6 @@ async function handleSendGameInvite(
 			return;
 		}
 
-		// Check if sender is blocked by receiver
 		const isBlocked = await prisma.block.findFirst({
 			where: {
 				blockerId: receiver.id,
@@ -775,7 +650,6 @@ async function handleSendGameInvite(
 			return;
 		}
 
-		// Check if there's already a pending invitation from this sender to this receiver
 		const existingInvite = await prisma.gameInvite.findFirst({
 			where: {
 				inviterId: senderId,
@@ -787,12 +661,12 @@ async function handleSendGameInvite(
 		if (existingInvite) {
 			sendToUser(senderUsername, {
 				type: "error",
-				message: "You already have a pending game invitation to this user",
+				message:
+					"You already have a pending game invitation to this user",
 			});
 			return;
 		}
 
-		// Create game invite in database
 		const gameInvite = await prisma.gameInvite.create({
 			data: {
 				inviterId: senderId,
@@ -801,7 +675,6 @@ async function handleSendGameInvite(
 			},
 		});
 
-		// Send invitation to receiver if online
 		if (activeConnections.has(receiverUsername)) {
 			sendToUser(receiverUsername, {
 				type: "game_invite_received",
@@ -811,7 +684,6 @@ async function handleSendGameInvite(
 			});
 		}
 
-		// Confirm to sender
 		sendToUser(senderUsername, {
 			type: "game_invite_sent",
 			receiverUsername: receiverUsername,
@@ -826,14 +698,6 @@ async function handleSendGameInvite(
 	}
 }
 
-/**
- * Handle accepting game invitation
- *
- * @param data - Accept data
- * @param userId - ID of the user accepting
- * @param username - Username of the user accepting
- * @param prisma - Prisma client
- */
 async function handleAcceptGameInvite(
 	data: any,
 	userId: number,
@@ -847,7 +711,6 @@ async function handleAcceptGameInvite(
 	}
 
 	try {
-		// Find the invitation
 		const invite = await prisma.gameInvite.findUnique({
 			where: { id: inviteId },
 			include: {
@@ -872,28 +735,27 @@ async function handleAcceptGameInvite(
 			return;
 		}
 
-		// Update invitation status
 		await prisma.gameInvite.update({
 			where: { id: inviteId },
 			data: { status: "accepted" },
 		});
 
-		// Notify sender
 		if (activeConnections.has(invite.inviter.username)) {
 			sendToUser(invite.inviter.username, {
 				type: "game_invite_accepted",
 				receiverUsername: username,
 				inviteId: inviteId,
-				message: "Game invitation accepted! Note: Multiplayer functionality is not yet implemented.",
+				message:
+					"Game invitation accepted! Note: Multiplayer functionality is not yet implemented.",
 			});
 		}
 
-		// Confirm to receiver
 		sendToUser(username, {
 			type: "game_invite_response",
 			status: "accepted",
 			senderUsername: invite.inviter.username,
-			message: "Game invitation accepted! Note: Multiplayer functionality is not yet implemented.",
+			message:
+				"Game invitation accepted! Note: Multiplayer functionality is not yet implemented.",
 		});
 	} catch (error) {
 		console.error("❌ Error accepting game invite:", error);
@@ -904,14 +766,6 @@ async function handleAcceptGameInvite(
 	}
 }
 
-/**
- * Handle declining game invitation
- *
- * @param data - Decline data
- * @param userId - ID of the user declining
- * @param username - Username of the user declining
- * @param prisma - Prisma client
- */
 async function handleDeclineGameInvite(
 	data: any,
 	userId: number,
@@ -980,13 +834,6 @@ async function handleDeclineGameInvite(
 	}
 }
 
-/**
- * Get online users data with caching and race condition protection
- *
- * @param prisma - Prisma client
- * @param excludeUsername - Username to exclude from the list
- * @returns Array of user objects with username and avatarUrl
- */
 async function getOnlineUsersData(
 	prisma: PrismaClient,
 	excludeUsername: string
@@ -996,14 +843,10 @@ async function getOnlineUsersData(
 			(u) => u !== excludeUsername
 		);
 
-		console.log("🔧 Online usernames:", onlineUsernames);
-
 		if (onlineUsernames.length === 0) {
-			console.log("🔧 No online users found");
 			return [];
 		}
 
-		// Réduire le timeout à 1 seconde pour être plus rapide
 		const timeoutPromise = new Promise((_, reject) => {
 			setTimeout(() => reject(new Error("Database timeout")), 1000);
 		});
@@ -1021,7 +864,6 @@ async function getOnlineUsersData(
 		});
 
 		const users = await Promise.race([usersPromise, timeoutPromise]);
-		console.log("🔧 Retrieved users from database:", users);
 		return users;
 	} catch (error) {
 		console.error("❌ Error getting online users data:", error);
@@ -1029,13 +871,6 @@ async function getOnlineUsersData(
 	}
 }
 
-/**
- * Handle getting online users request with debouncing
- *
- * @param connection - WebSocket connection
- * @param prisma - Prisma client
- * @param currentUsername - Current user's username
- */
 async function handleGetOnlineUsers(
 	connection: any,
 	prisma: PrismaClient,

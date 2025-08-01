@@ -193,7 +193,6 @@ export function createChatPage(): HTMLElement {
 			});
 		}
 	});
-
 	return page;
 }
 
@@ -228,9 +227,6 @@ export async function getUserInfo() {
 	}
 }
 
-/**
- * Initialize chat functionality with user data
- */
 function initializeChat(page: HTMLElement, userData: any) {
 	// WebSocket connection
 	let ws: WebSocket | null = null;
@@ -277,7 +273,6 @@ function initializeChat(page: HTMLElement, userData: any) {
 		ws.onmessage = (event) => {
 			try {
 				const data = JSON.parse(event.data);
-				console.log("📨 Received:", data);
 
 				switch (data.type) {
 					case "connection_established":
@@ -290,8 +285,6 @@ function initializeChat(page: HTMLElement, userData: any) {
 						displayMessages(data.messages);
 						break;
 					case "message_sent":
-						// Handle message sent confirmation (optional)
-						console.log("✅ Message sent successfully");
 						break;
 					case "direct_message":
 						handleNewMessage(data);
@@ -300,15 +293,12 @@ function initializeChat(page: HTMLElement, userData: any) {
 						displayUserProfile(data.profile);
 						break;
 					case "online_users":
-						console.log("👥 Online users:", data.users);
 						displayOnlineUsers(data.users);
 						break;
 					case "user_offline":
-						console.log("👤 User offline:", data.username);
 						removeUserFromOnlineList(data.username);
 						break;
 					case "user_online":
-						console.log("👤 User online:", data.user);
 						addUserToOnlineList(data.user);
 						break;
 					case "error":
