@@ -53,7 +53,7 @@ export function createSignUpPage(): HTMLElement {
 							placeholder="${i18n.t('signup.email')}" 
 							id="email" 
 							required 
-							class="neon-input"
+							class="${classes.tournamentInput}"
 						>
 					</div>
 					<div>

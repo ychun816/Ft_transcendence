@@ -188,7 +188,7 @@ class Pong
             ball_speed: 4.5 * (3/2),
             ball_max_speed: 12 * (3/2),
             paddle_speed: 5.25 * (3/2),
-            score_to_win: 5,
+            score_to_win: 3,
             increase_vitesse: 250,
             time_before_new_ball: 3000
         }
@@ -207,8 +207,8 @@ class Pong
         {
             ball_x: this.config.canvas_width / 2,
             ball_y: this.config.canvas_height / 2,
-            prev_x: 0,
-            prev_y: 0,
+            prev_x: this.config.canvas_width / 2,
+            prev_y: this.config.canvas_height / 2,
             ball_dir_x: 0,
             ball_dir_y: 0,
             angle: 0,
@@ -258,12 +258,12 @@ class Pong
 
     handle_keydown = (e: KeyboardEvent) =>
     {
-        if (e.code === "Space")
-            this.state.is_paused = !this.state.is_paused;
-        else if (e.key === "b")
-            console.log("Ball_dir_x = ", this.ball.ball_dir_x, ", Ball_dir_y = ", this.ball.ball_dir_y)
-        else
-            this.keys_pressed[e.key] = true;
+        // if (e.code === "Space")
+        //     this.state.is_paused = !this.state.is_paused;
+        // else if (e.key === "b")
+        //     console.log("Ball_dir_x = ", this.ball.ball_dir_x, ", Ball_dir_y = ", this.ball.ball_dir_y)
+        // else
+        this.keys_pressed[e.key] = true;
     };
 
     handle_keyup = (e: KeyboardEvent) =>
@@ -443,7 +443,7 @@ class Pong
             {
                 this.end_message.textContent = message;
                 this.end_message.style.display = 'block';
-                this.restart_btn.style.display = 'block';
+                //this.restart_btn.style.display = 'block';
             }
         }, 1000);
         this.state.game_running = false;
@@ -498,6 +498,8 @@ class Pong
         
         this.ball.ball_x = this.config.canvas_width / 2;
         this.ball.ball_y = this.config.canvas_height / 2;
+        this.ball.prev_x = this.ball.ball_x;
+        this.ball.prev_y = this.ball.ball_y;
         this.ball.ball_dir_x = 0;
         this.ball.ball_dir_y = 0;
 
@@ -599,6 +601,8 @@ class Pong
             
             this.ball.ball_x = this.config.canvas_width / 2;
             this.ball.ball_y = this.config.canvas_height / 2;
+            this.ball.prev_x = this.ball.ball_x;
+            this.ball.prev_y = this.ball.ball_y;
             this.paddle.paddles.p1_y = (this.config.canvas_height - this.config.paddle_height) / 4,
             this.paddle.paddles.p2_y = 3 * (this.config.canvas_height - this.config.paddle_height) / 4,
             this.paddle.paddles.p3_y = (this.config.canvas_height - this.config.paddle_height) / 4,
@@ -998,6 +1002,8 @@ class Pong
         {
             this.ball.ball_x = this.config.canvas_width / 2;
             this.ball.ball_y = this.config.canvas_height / 2;
+            this.ball.prev_x = this.ball.ball_x;
+            this.ball.prev_y = this.ball.ball_y;
             this.paddle.paddles.p1_y = (this.config.canvas_height - this.config.paddle_height) / 4,
             this.paddle.paddles.p2_y = 3 * (this.config.canvas_height - this.config.paddle_height) / 4,
             this.paddle.paddles.p3_y = (this.config.canvas_height - this.config.paddle_height) / 4,
@@ -1067,7 +1073,7 @@ class Pong
             else if (i18n.getCurrentLanguage() == "fr")
                 score_P2.textContent = `Equipe 2 : ${this.state.right_score}`;
             else
-                score_P1.textContent = `Equipo 2 : ${this.state.left_score}`;    
+                score_P2.textContent = `Equipo 2 : ${this.state.left_score}`;    
         }
     }
 
@@ -1139,6 +1145,8 @@ class Pong
         this.ball.angle = get_random_playable_angle();
         this.ball.ball_dir_x = this.config.ball_speed * Math.cos(this.ball.angle);
         this.ball.ball_dir_y = this.config.ball_speed * Math.sin(this.ball.angle);
+        this.ball.prev_x = this.ball.ball_x;
+        this.ball.prev_y = this.ball.ball_y;
     }
 
 
