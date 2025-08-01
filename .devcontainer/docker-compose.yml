@@ -1,11 +1,7 @@
 # version fusionne
 services:
 
-# connected user a verifier, pb parfois
-# Test alerte prometheus, email ?
-# push .pem ? .env ?
 # logger a check apres avoir enlever les consoles logs
-
 
   dev:
     user: "0:0"
