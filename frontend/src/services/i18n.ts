@@ -99,7 +99,7 @@ const translations: Record<Language, Translations> = {
 			top_points: "Partie haute",
 			bottom_points: "Partie basse",
 			errorUser: "Erreur lors du chargement des statistiques utilisateur",
-			errorGame: "No hay partidas jugadas por el momento",
+			errorGame: "Pas de parties jouées pour le moment",
 			game_duration: "Durée",
 			your_score: "Votre score",
 			opponent_score: "Score adverse",

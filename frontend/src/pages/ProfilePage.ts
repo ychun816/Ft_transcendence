@@ -8,7 +8,7 @@ import { Chart, registerables } from "chart.js";
 async function disable2FA(userId: number) {
 	try {
 		const code = prompt(i18n.t("profile.enter_2fa_code") || "Please enter your current 2FA code to disable Two-Factor Authentication:");
-		
+
 		if (!code) {
 			return;
 		}
@@ -114,134 +114,147 @@ export function createProfilePage(): HTMLElement {
 	page.className = "min-h-screen bg-gray-900 text-white font-mono overflow-hidden";
 
 	const render = () => {
-		page.innerHTML = `
-			<style>
-				@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+	page.innerHTML = `
+		<style>
+			/* Import de la police Orbitron pour le thème rétro */
+			@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 
-				* {
-					font-family: 'Orbitron', monospace;
-				}
-			</style>
+			* {
+				font-family: 'Orbitron', monospace;
+			}
+		</style>
 
-			<!-- Conteneur principal avec effet scan -->
-			<div class="min-h-screen flex items-center justify-center p-4 ${classes.scanLinesContainer}">
+		<!-- Conteneur principal avec effet scan -->
+		<div class="min-h-screen flex items-center justify-center p-2 sm:p-4 ${classes.scanLinesContainer}">
 
-				<!-- Conteneur principal avec disposition côte à côte - centré -->
-				<div class="${classes.retroPanel} rounded-2xl p-8 flex gap-10 items-start" style="height: 90vh; max-width: 2000px; width: 95%;">
+			<!-- Conteneur principal responsive -->
+			<div class="${classes.retroPanel} rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto
+				flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-10
+				min-h-[95vh] lg:h-[90vh]">
 
-					<!-- Colonne de gauche : Profile + Friends -->
-					<div class="flex flex-col gap-6 h-full" style="width: 1000px;">
+				<!-- Colonne de gauche : Profile + Friends -->
+				<div class="flex flex-col gap-4 sm:gap-6 w-full lg:w-1/2 min-h-0">
 
-						<!-- Bloc Profile Principal -->
-						<div class="${classes.retroPanel} rounded-2xl p-6 w-full flex flex-col items-center flex-shrink-0">
-							<header class="w-full mb-6">
-								<button class="${classes.backButton}" data-route="/game">
-									${i18n.t('profile.back')}
-								</button>
-								<h2 class="${classes.sectionTitle} mt-4">
-									${i18n.t('profile.my_profile')}
-								</h2>
-							</header>
+					<!-- Bloc Profile Principal -->
+					<div class="${classes.retroPanel} rounded-xl sm:rounded-2xl p-4 sm:p-6 w-full flex flex-col items-center flex-shrink-0">
+						<header class="w-full mb-4 sm:mb-6">
+							<button class="${classes.backButton} text-sm sm:text-base" data-route="/game">
+								${i18n.t('profile.back')}
+							</button>
+							<h2 class="${classes.sectionTitle} mt-2 sm:mt-4 text-lg sm:text-xl lg:text-2xl">
+								${i18n.t('profile.my_profile')}
+							</h2>
+						</header>
 
-							<main class="w-full flex flex-col items-center">
-								<div class="flex items-center gap-8 mb-8">
-									<!-- Avatar avec bordure néon -->
-									<div class="relative w-32 h-32 rounded-full ${classes.neonBorder} overflow-hidden">
-										<img src="/default-avatar.png" id="user-avatar" class="w-full h-full object-cover">
-										<button id="edit-avatar" title="${i18n.t('profile.edit_avatar')}"
-											class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
-											bg-purple-400 bg-opacity-20 hover:bg-opacity-40 text-purple-400 rounded-full p-2
-											transition-all duration-300 border border-purple-400 border-opacity-50">
-											<img src="../assets/edit.svg" alt="Edit" class="w-5 h-5">
+						<main class="w-full flex flex-col items-center">
+							<!-- Layout responsive pour avatar et infos -->
+							<div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 mb-6 sm:mb-8 w-full">
+								<!-- Avatar avec bordure néon -->
+								<div class="relative w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-full ${classes.neonBorder} overflow-hidden flex-shrink-0">
+									<img src="/default-avatar.png" id="user-avatar" class="w-full h-full object-cover">
+									<button id="edit-avatar" title="${i18n.t('profile.edit_avatar')}"
+										class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
+										bg-purple-400 bg-opacity-20 hover:bg-opacity-40 text-purple-400 rounded-full p-1.5 sm:p-2
+										transition-all duration-300 border border-purple-400 border-opacity-50">
+										<svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
+											<path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.828-2.828z"></path>
+										</svg>
+									</button>
+									<input type="file" id="avatar-file-input" accept="image/png, image/jpeg" class="hidden" />
+								</div>
+
+								<!-- Informations utilisateur -->
+								<div class="flex-1 w-full text-center sm:text-left">
+									<div class="flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3 mb-3">
+										<h3 id="username" class="text-xl sm:text-2xl font-bold ${classes.neonText} break-all">Username</h3>
+										<button id="edit-username" title="${i18n.t('profile.edit_username')}"
+											class="bg-purple-400 bg-opacity-20 hover:bg-opacity-40 text-purple-400 font-bold
+											py-1 px-2 rounded-lg border border-purple-400 border-opacity-50 transition-all duration-300
+											transform hover:scale-105 flex-shrink-0">
+											<svg class="w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 20 20">
+												<path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.828-2.828z"></path>
+											</svg>
 										</button>
-										<input type="file" id="avatar-file-input" accept="image/png, image/jpeg" class="hidden" />
 									</div>
 
-									<!-- Informations utilisateur -->
-									<div class="flex-1">
-										<div class="flex items-center gap-3 mb-3">
-											<h3 id="username" class="text-2xl font-bold ${classes.neonText}">Username</h3>
-											<button id="edit-username" title="${i18n.t('profile.edit_username')}"
-												class="bg-purple-400 bg-opacity-20 hover:bg-opacity-40 text-purple-400 font-bold
-												py-1 px-2 rounded-lg border border-purple-400 border-opacity-50 transition-all duration-300
-												transform hover:scale-105">
-												<img src="../assets/edit.svg" alt="Edit" class="w-4 h-4">
-											</button>
-										</div>
+									<div class="flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3 mb-3">
+										<span id="password" class="text-gray-300 text-sm sm:text-base">${i18n.t('profile.password_display')}</span>
+										<button id="edit-password" title="${i18n.t('profile.edit_password')}"
+											class="bg-purple-400 bg-opacity-20 hover:bg-opacity-40 text-purple-400 font-bold
+											py-1 px-2 rounded-lg border border-purple-400 border-opacity-50 transition-all duration-300
+											transform hover:scale-105 flex-shrink-0">
+											<svg class="w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 20 20">
+												<path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.828-2.828z"></path>
+											</svg>
+										</button>
+									</div>
 
-										<div class="flex items-center gap-3 mb-3">
-											<span id="password" class="text-gray-300">${i18n.t('profile.password_display')}</span>
-											<button id="edit-password" title="${i18n.t('profile.edit_password')}"
-												class="bg-purple-400 bg-opacity-20 hover:bg-opacity-40 text-purple-400 font-bold
-												py-1 px-2 rounded-lg border border-purple-400 border-opacity-50 transition-all duration-300
-												transform hover:scale-105">
-												<img src="../assets/edit.svg" alt="Edit" class="w-4 h-4">
-											</button>
-										</div>
+									<!-- Stats avec panneau rétro -->
+									<div class="${classes.retroPanel} rounded-lg sm:rounded-xl p-3 sm:p-4 mb-3">
+										<p id="user-stats" class="text-purple-300 text-xs sm:text-sm font-bold">
+											${i18n.t('profile.games_played_stats', {games: '0', wins: '0', losses: '0'})}
+										</p>
+									</div>
 
-										<!-- Stats avec panneau rétro -->
-										<div class="${classes.retroPanel} rounded-xl p-4">
-											<p id="user-stats" class="text-purple-300 text-sm font-bold">
-												${i18n.t('profile.games_played_stats', {games: '0', wins: '0', losses: '0'})}
-											</p>
-										</div>
-										<!-- Security Section -->
-										<div class="w-full mb-4">
-											<div class="space-y-2">
-												<button id="manage-2fa" class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 text-sm">
-													🔐 ${i18n.t("profile.manage_2fa") || "Manage Two-Factor Authentication"}
-												</button>
-											</div>
-										</div>
+									<!-- Security Section -->
+									<div class="w-full">
+										<button id="manage-2fa" class="w-full bg-blue-600 text-white py-2 px-3 sm:px-4 rounded hover:bg-blue-700 text-xs sm:text-sm">
+											🔐 ${i18n.t("profile.manage_2fa") || "Manage Two-Factor Authentication"}
+										</button>
 									</div>
 								</div>
-							</main>
-						</div>
-
-						<!-- Bloc Friends List -->
-						<div id="friends-block" class="${classes.retroPanel} rounded-2xl p-6 w-full flex flex-col flex-1 min-h-0">
-							<header class="w-full flex-shrink-0 mb-4 flex items-center justify-between">
-								<h2 class="text-2xl font-bold text-green-400 drop-shadow-sm animate-pulse">
-									${i18n.t('profile.friends_list')}
-								</h2>
-							</header>
-
-							<main class="w-full flex-1 overflow-hidden min-h-0">
-							</main>
-						</div>
+							</div>
+						</main>
 					</div>
 
-					<!-- Colonne de droite : Match History + Dashboard -->
-					<div class="flex flex-col gap-6 h-full" style="width: 1000px;">
+					<!-- Bloc Friends List -->
+					<div id="friends-block" class="${classes.retroPanel} rounded-xl sm:rounded-2xl p-4 sm:p-6 w-full flex flex-col flex-1 min-h-0">
+						<header class="w-full flex-shrink-0 mb-3 sm:mb-4 flex items-center justify-between">
+							<h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-green-400 drop-shadow-sm animate-pulse">
+								${i18n.t('profile.friends_list')}
+							</h2>
+							<!-- Le bouton (+) sera ajouté ici par JS -->
+						</header>
 
-						<!-- Match History -->
-						<div id="match-block" class="${classes.retroPanel} rounded-2xl p-6 w-full flex flex-col min-h-0" style="height: 50%;">
-							<header class="w-full mb-4 flex-shrink-0">
-								<h2 class="text-2xl font-bold text-purple-400 ${classes.neonText}">
-									${i18n.t('profile.match_history')}
-								</h2>
-							</header>
-							<main class="w-full flex-1 overflow-hidden min-h-0">
-							</main>
-						</div>
+						<main class="w-full flex-1 overflow-hidden min-h-0">
+							<!-- Le contenu de la liste d'amis sera ajouté ici -->
+						</main>
+					</div>
+				</div>
 
-						<!-- Dashboard -->
-						<div id="dashboard" class="${classes.retroPanel} rounded-2xl p-6 w-full flex flex-col min-h-0" style="height: 50%;">
-							<header class="w-full mb-4 flex-shrink-0">
-								<h2 class="text-2xl font-bold text-purple-400 ${classes.neonText}">
-									${i18n.t('profile.dashboard')}
-								</h2>
-							</header>
-							<main class="w-full flex-1 overflow-hidden min-h-0">
-							</main>
-						</div>
+				<!-- Colonne de droite : Match History + Dashboard -->
+				<div class="flex flex-col gap-4 sm:gap-6 w-full lg:w-1/2 min-h-0">
+
+					<!-- Match History -->
+					<div id="match-block" class="${classes.retroPanel} rounded-xl sm:rounded-2xl p-4 sm:p-6 w-full flex flex-col flex-1 lg:h-1/2 min-h-0">
+						<header class="w-full mb-3 sm:mb-4 flex-shrink-0">
+							<h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-purple-400 ${classes.neonText}">
+								${i18n.t('profile.match_history')}
+							</h2>
+						</header>
+						<main class="w-full flex-1 overflow-hidden min-h-0">
+						</main>
+					</div>
+
+					<!-- Dashboard -->
+					<div id="dashboard" class="${classes.retroPanel} rounded-xl sm:rounded-2xl p-4 sm:p-6 w-full flex flex-col flex-1 lg:h-1/2 min-h-0">
+						<header class="w-full mb-3 sm:mb-4 flex-shrink-0">
+							<h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-purple-400 ${classes.neonText}">
+								${i18n.t('profile.dashboard')}
+							</h2>
+						</header>
+						<main class="w-full flex-1 overflow-hidden min-h-0">
+						</main>
 					</div>
 				</div>
 			</div>
+		</div>
 
-			<div class="absolute top-4 right-4" id="language-switcher-container"></div>
+		<!-- Positionnement responsive des switchers -->
+		<div class="absolute top-2 right-2 sm:top-4 sm:right-4" id="language-switcher-container"></div>
+		<div class="absolute top-2 left-2 sm:top-4 sm:left-4" id="logout-container"></div>
+	`;
 
-		`;
 
 		const languageSwitcherContainer = page.querySelector(
 			"#language-switcher-container"
@@ -675,19 +688,12 @@ async function displayMatchHistory(page: HTMLDivElement) {
 	let html = `
 		<div class="h-full flex flex-col">
 			<div class="flex-1 overflow-y-auto min-h-0">
-				<table class="w-full border-collapse">
-					<thead class="sticky top-0 bg-gray-800 z-10">
-						<tr class="border-b border-gray-600">
-							<th class="p-2 text-left text-sm font-semibold text-gray-300">${i18n.t("profile.date")}</th>
-							<th class="p-2 text-left text-sm font-semibold text-gray-300">${i18n.t("profile.opponent")}</th>
-							<th class="p-2 text-left text-sm font-semibold text-gray-300">${i18n.t("profile.result")}</th>
-						</tr>
-					</thead>
-					<tbody>
+				<div class="block sm:hidden space-y-2">
+					<!-- Version mobile : cartes empilées -->
 	`;
 
-	for (let i = 0; i < history.length; i++) {
-		const match = history[i];
+	// Version mobile (cartes)
+	for (const match of history) {
 		const isPlayer1 = match.player1.username === username;
 		let opponent;
 		if (match.player2) {
@@ -698,121 +704,72 @@ async function displayMatchHistory(page: HTMLDivElement) {
 			opponent = "Local";
 		}
 
-		const minutes = Math.floor(match.lasted / 60);
-		const seconds = match.lasted % 60;
-		const gameTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-
-		// Déterminer les scores selon la position du joueur
-		const playerScore = isPlayer1 ? match.score1 : match.score2;
-		const opponentScore = isPlayer1 ? match.score2 : match.score1;
-
-		const result = match.winnerId === (isPlayer1 ? match.player1Id : match.player2Id) ? i18n.t('profile.victory') : i18n.t('profile.defeat');
+		const result = match.winnerId === (isPlayer1 ? match.player1Id : match.player2Id)
+			? i18n.t('profile.victory') : i18n.t('profile.defeat');
 		const date = new Date(match.playedAt).toLocaleDateString();
-		const statusClass =
-			result === i18n.t("profile.victory")
-				? "status-victory"
-				: "status-defeat";
+		const statusColor = result === i18n.t("profile.victory") ? "text-green-400" : "text-red-400";
 
 		html += `
-			<tr class="match-row">
-				<td>${date}</td>
-				<td>${opponent}</td>
-				<td><span class="${statusClass}">${result}</span></td>
-				<td>
-					<button
-						class="expand-btn bg-purple-400 bg-opacity-20 hover:bg-opacity-40 text-purple-400
-						       rounded px-2 py-1 text-xs border border-purple-400 border-opacity-50
-						       transition-all duration-300 transform hover:scale-105"
-						data-match-index="${i}"
-						onclick="toggleMatchDetails(${i})"
-					>
-						<svg class="w-4 h-4 transform transition-transform duration-200"
-						     id="arrow-${i}" fill="currentColor" viewBox="0 0 20 20">
-							<path fill-rule="evenodd"
-							      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-							      clip-rule="evenodd"/>
-						</svg>
-					</button>
-				</td>
-			</tr>
-			<tr class="match-details-row hidden" id="details-${i}">
-				<td colspan="4">
-					<div class="bg-gray-800 bg-opacity-50 p-4 rounded-lg border border-purple-400 border-opacity-30">
-						<div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+			<div class="bg-gray-800 rounded-lg p-3">
+				<div class="flex justify-between items-center mb-1">
+					<span class="text-gray-400 text-xs">${date}</span>
+					<span class="${statusColor} font-semibold text-sm">${result}</span>
+				</div>
+				<div class="text-gray-200 text-sm">vs ${opponent}</div>
+			</div>
+		`;
+	}
 
-							<!-- Temps de jeu -->
-							<div class="flex flex-col items-center p-3 bg-purple-400 bg-opacity-10 rounded-lg border border-purple-400 border-opacity-20">
-								<div class="text-purple-300 font-semibold mb-1">
-									${i18n.t("profile.game_duration") || "Game Duration"}
-								</div>
-								<div class="text-white text-lg font-bold">${gameTime}</div>
-							</div>
+	html += `
+				</div>
 
-							<!-- Score du joueur -->
-							<div class="flex flex-col items-center p-3 bg-green-400 bg-opacity-10 rounded-lg border border-green-400 border-opacity-20">
-								<div class="text-green-300 font-semibold mb-1">
-									${i18n.t("profile.your_score") || "Your Score"}
-								</div>
-								<div class="text-white text-lg font-bold">${playerScore}</div>
-							</div>
+				<!-- Version desktop : tableau -->
+				<table class="hidden sm:table w-full border-collapse">
+					<thead class="sticky top-0 bg-gray-800 z-10">
+						<tr class="border-b border-gray-600">
+							<th class="p-2 text-left text-sm font-semibold text-gray-300">${i18n.t("profile.date")}</th>
+							<th class="p-2 text-left text-sm font-semibold text-gray-300">${i18n.t("profile.opponent")}</th>
+							<th class="p-2 text-left text-sm font-semibold text-gray-300">${i18n.t("profile.result")}</th>
+						</tr>
+					</thead>
+					<tbody>
+	`;
 
-							<!-- Score de l'adversaire -->
-							<div class="flex flex-col items-center p-3 bg-red-400 bg-opacity-10 rounded-lg border border-red-400 border-opacity-20">
-								<div class="text-red-300 font-semibold mb-1">
-									${i18n.t("profile.opponent_score") || "Opponent Score"}
-								</div>
-								<div class="text-white text-lg font-bold">${opponentScore}</div>
-							</div>
+	// Version desktop (tableau)
+	for (const match of history) {
+		const isPlayer1 = match.player1.username === username;
+		let opponent;
+		if (match.player2) {
+			opponent = match.player2.username;
+		} else if (match.iaMode) {
+			opponent = "IA";
+		} else {
+			opponent = "Local";
+		}
 
-							<!-- Points section haute vs basse -->
-							<div class="flex flex-col items-center p-3 bg-blue-400 bg-opacity-10 rounded-lg border border-blue-400 border-opacity-20">
-								<div class="text-blue-300 font-semibold mb-1">
-									${i18n.t("profile.section_points") || "Section Points"}
-								</div>
-								<div class="text-white text-sm">
-									<div class="flex justify-between items-center mb-1">
-										<span class="text-red-300">${i18n.t("profile.top_points") || "Top"}:</span>
-										<span class="font-bold">${match.pointsUp}</span>
-									</div>
-									<div class="flex justify-between items-center">
-										<span class="text-green-300">${i18n.t("profile.bottom_points") || "Bottom"}:</span>
-										<span class="font-bold">${match.pointsDown}</span>
-									</div>
-								</div>
-							</div>
+		const result = match.winnerId === (isPlayer1 ? match.player1Id : match.player2Id)
+			? i18n.t('profile.victory') : i18n.t('profile.defeat');
+		const date = new Date(match.playedAt).toLocaleDateString();
+		const statusColor = result === i18n.t("profile.victory") ? "text-green-400" : "text-red-400";
 
-						</div>
-
-						<!-- Mode de jeu -->
-						<div class="mt-3 pt-3 border-t border-purple-400 border-opacity-20">
-							<div class="flex items-center justify-center">
-								<span class="text-purple-300 text-xs font-semibold mr-2">
-									${i18n.t("profile.game_mode") || "Game Mode"}:
-								</span>
-								<span class="px-2 py-1 rounded-full text-xs font-bold
-									${match.iaMode ? 'bg-red-400 bg-opacity-20 text-red-300 border border-red-400 border-opacity-50' : ''}
-									${match.tournamentMode ? 'bg-yellow-400 bg-opacity-20 text-yellow-300 border border-yellow-400 border-opacity-50' : ''}
-									${match.multiMode ? 'bg-green-400 bg-opacity-20 text-green-300 border border-green-400 border-opacity-50' : ''}
-									${!match.iaMode && !match.tournamentMode && !match.multiMode ? 'bg-gray-400 bg-opacity-20 text-gray-300 border border-gray-400 border-opacity-50' : ''}
-								">
-									${match.iaMode ? (i18n.t("profile.ia_mode") || "IA Mode") : ''}
-									${match.tournamentMode ? (i18n.t("profile.tournament_mode") || "Tournament") : ''}
-									${match.multiMode ? (i18n.t("profile.multiplayer_mode") || "Multiplayer") : ''}
-									${!match.iaMode && !match.tournamentMode && !match.multiMode ? (i18n.t("profile.local_mode") || "Local") : ''}
-								</span>
-							</div>
-						</div>
-					</div>
+		html += `
+			<tr class="border-b border-gray-700 hover:bg-gray-800 transition-colors">
+				<td class="p-2 text-gray-300 text-sm">${date}</td>
+				<td class="p-2 text-gray-200 text-sm">${opponent}</td>
+				<td class="p-2 text-sm">
+					<span class="${statusColor} font-semibold">${result}</span>
 				</td>
 			</tr>
 		`;
 	}
+
 	html += `
 					</tbody>
 				</table>
 			</div>
 		</div>
 	`;
+
 	histDiv.innerHTML = html;
 
 	(window as any).toggleMatchDetails = function(index: number) {
@@ -876,25 +833,48 @@ async function displayFriendsList(page: HTMLDivElement) {
 
 	function fixAvatarUrl(avatarUrl: string | null): string {
 		if (!avatarUrl) return "/default-avatar.png";
+		if (avatarUrl.startsWith("http")) return avatarUrl;
 
-		if (avatarUrl.startsWith("http")) {
-			return avatarUrl;
-		}
-
-		// Déterminer l'URL du serveur correct
 		const isDevMode = window.location.port === "5173";
 		const serverUrl = isDevMode
 			? `https://${window.location.hostname}:3445`
 			: window.location.origin;
 
-		// Construire l'URL complète
 		return `${serverUrl}${avatarUrl}`;
 	}
 
 	let html = `
 		<div class="h-full flex flex-col">
 			<div class="flex-1 overflow-y-auto min-h-0">
-				<table class="w-full border-collapse">
+				<div class="block sm:hidden space-y-2">
+					<!-- Version mobile : cartes empilées -->
+	`;
+
+	// Version mobile (cartes)
+	for (const friend of friendsList) {
+		const status = await isUserOnline(friend.username);
+		const avatar = fixAvatarUrl(friend.avatarUrl);
+		const statusColor = status ? "bg-green-500" : "bg-gray-500";
+
+		html += `
+			<div class="bg-gray-800 rounded-lg p-3 flex items-center gap-3">
+				<div class="w-2 h-2 rounded-full ${statusColor} flex-shrink-0"></div>
+				<div class="w-8 h-8 rounded-full overflow-hidden bg-gray-700 flex-shrink-0">
+					<img src="${avatar}" alt="avatar" class="w-full h-full object-cover">
+				</div>
+				<div class="flex-1 min-w-0">
+					<div class="text-gray-200 text-sm font-medium truncate">${friend.username}</div>
+					<div class="text-gray-400 text-xs">${friend.gamesPlayed} parties</div>
+				</div>
+			</div>
+		`;
+	}
+
+	html += `
+				</div>
+
+				<!-- Version desktop : tableau -->
+				<table class="hidden sm:table w-full border-collapse">
 					<thead class="sticky top-0 bg-gray-800 z-10">
 						<tr class="border-b border-gray-600">
 							<th class="p-2 text-left text-sm font-semibold text-gray-300">${i18n.t("profile.status")}</th>
@@ -903,15 +883,13 @@ async function displayFriendsList(page: HTMLDivElement) {
 							<th class="p-2 text-left text-sm font-semibold text-gray-300">${i18n.t("profile.Games_played")}</th>
 						</tr>
 					</thead>
-				<tbody>
+					<tbody>
 	`;
 
+	// Version desktop (tableau)
 	for (const friend of friendsList) {
 		const status = await isUserOnline(friend.username);
 		const avatar = fixAvatarUrl(friend.avatarUrl);
-		const name = friend.username;
-		const played = friend.gamesPlayed;
-
 		const statusColor = status ? "bg-green-500" : "bg-gray-500";
 
 		html += `
@@ -920,21 +898,23 @@ async function displayFriendsList(page: HTMLDivElement) {
 					<div class="w-3 h-3 rounded-full ${statusColor}"></div>
 				</td>
 				<td class="p-2">
-					<div class="w-10 h-10 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center">
-						<img src="${avatar || "/default-avatar.png"}" alt="avatar" class="w-full h-full object-cover">
+					<div class="w-10 h-10 rounded-full overflow-hidden bg-gray-700">
+						<img src="${avatar}" alt="avatar" class="w-full h-full object-cover">
 					</div>
 				</td>
-				<td class="p-2 text-gray-200 text-sm">${name}</td>
-				<td class="p-2 text-gray-300 text-sm">${played}</td>
+				<td class="p-2 text-gray-200 text-sm">${friend.username}</td>
+				<td class="p-2 text-gray-300 text-sm">${friend.gamesPlayed}</td>
 			</tr>
 		`;
 	}
+
 	html += `
 					</tbody>
 				</table>
 			</div>
 		</div>
 	`;
+
 	friendsMain.innerHTML = html;
 	setupAddFriendFeature(page);
 }
@@ -1099,31 +1079,26 @@ async function getDashboardStats(page: HTMLDivElement) {
 	}
 }
 
-async function displayDashboard(page: HTMLDivElement)
-{
-	try{
+async function displayDashboard(page: HTMLDivElement) {
+	try {
 		Chart.register(...registerables);
 		const stats = await getDashboardStats(page);
-		console.log("STATS: ", stats);
 		const statDiv = page.querySelector("#dashboard main");
-		if (!statDiv){
-			console.error('Dashboard container not found');
-			return;
-		}
+		if (!statDiv) return;
 
 		statDiv.innerHTML = `
-			<div class="h-full flex flex-col gap-4">
+			<div class="h-full flex flex-col gap-3 sm:gap-4">
 				<!-- Section du temps et points -->
-				<div class="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
+				<div class="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-1 min-h-0">
 					<div class="flex-1 min-h-0">
-						<h3 class="text-purple-400 text-sm font-semibold mb-2 text-center">
+						<h3 class="text-purple-400 text-xs sm:text-sm font-semibold mb-2 text-center">
 							${i18n.t('profile.total_game_time')}
 						</h3>
 						<div id="gameTime" class="h-full overflow-y-auto"></div>
 					</div>
 
 					<div class="flex-1 min-h-0">
-						<h3 class="text-purple-400 text-sm font-semibold mb-2 text-center">
+						<h3 class="text-purple-400 text-xs sm:text-sm font-semibold mb-2 text-center">
 							${i18n.t('profile.side_point')}
 						</h3>
 						<div id="gameSide" class="h-full overflow-y-auto"></div>
@@ -1131,9 +1106,9 @@ async function displayDashboard(page: HTMLDivElement)
 				</div>
 
 				<!-- Section des graphiques -->
-				<div class="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
+				<div class="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-1 min-h-0">
 					<div class="flex-1 min-h-0 flex flex-col">
-						<h3 class="text-purple-400 text-sm font-semibold mb-2 text-center">
+						<h3 class="text-purple-400 text-xs sm:text-sm font-semibold mb-2 text-center">
 							${i18n.t('profile.game_types_distribution')}
 						</h3>
 						<div class="flex-1 flex items-center justify-center min-h-0">
@@ -1142,7 +1117,7 @@ async function displayDashboard(page: HTMLDivElement)
 					</div>
 
 					<div class="flex-1 min-h-0 flex flex-col">
-						<h3 class="text-purple-400 text-sm font-semibold mb-2 text-center">
+						<h3 class="text-purple-400 text-xs sm:text-sm font-semibold mb-2 text-center">
 							${i18n.t('profile.winrate_by_type')}
 						</h3>
 						<div class="flex-1 flex items-center justify-center min-h-0">
@@ -1158,16 +1133,18 @@ async function displayDashboard(page: HTMLDivElement)
 		await displayGameTime(stats);
 		await displaySidePoint(stats);
 
-	} catch (error){
+	} catch (error) {
 		console.error('Error with dashboard display:', error);
 		const dashboardMain = page.querySelector("#dashboard main");
 		if (dashboardMain) {
 			dashboardMain.innerHTML = `
-				<div style="text-align: center; color: #ef4444; padding: 20px;">
-					<p>${i18n.t("profile.errorUser")}</p>
-					<button onclick="location.reload()" style="margin-top: 10px; padding: 8px 16px; background: #a855f7; color: white; border: none; border-radius: 4px; cursor: pointer;">
-						Reload
-					</button>
+				<div class="h-full flex items-center justify-center">
+					<div class="text-center text-red-400 p-4">
+						<p class="mb-4 text-sm">${i18n.t('profile.stats_loading_error') || 'Error while loading user stats'}</p>
+						<button onclick="location.reload()" class="px-3 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors text-sm">
+							Reload
+						</button>
+					</div>
 				</div>
 			`;
 		}
