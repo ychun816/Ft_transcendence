@@ -171,21 +171,21 @@ export async function sendSignUpInfo(page: HTMLDivElement): Promise<void> {
 	const user = UserInfo;
 	const formData = new FormData();
 
-	// PRINT DEBUG SIGNUP FORM
-	console.log(`USERNAME: ${user.username}`);
-	console.log(`PASSWORD: ${user.password}`);
-	console.log(`EMAIL: ${user.email}`);
-	// END PRINT DEBUG SIGNUP FORM
+	// // PRINT DEBUG SIGNUP FORM
+	// console.log(`USERNAME: ${user.username}`);
+	// console.log(`PASSWORD: ${user.password}`);
+	// console.log(`EMAIL: ${user.email}`);
+	// // END PRINT DEBUG SIGNUP FORM
 
 	formData.append("username", user.username);
 	formData.append("password", user.password);
 	formData.append("email", user.email);
 	if (user.avatar) formData.append("avatar", user.avatar);
 
-	for (const [key, value] of formData.entries()){
-		console.log(key, value);
-	}
-	console.log("About to send response");
+	// for (const [key, value] of formData.entries()){
+	// 	console.log(key, value);
+	// }
+	//console.log("About to send response");
 
     try {
         const response = await fetch("/api/signup", {
@@ -208,7 +208,7 @@ export async function sendSignUpInfo(page: HTMLDivElement): Promise<void> {
                     if (errorData.error?.includes('Username')) {
                         errorNotif.showFieldError('username', 'username_taken');
                         errorNotif.showErrorBanner('username_taken_banner');
-                    } else if (errorData.error?.includes('email')) {
+                    } else if (errorData.error?.includes('Email')) {
                         errorNotif.showFieldError('email', 'email_taken');
                         errorNotif.showErrorBanner('email_taken_banner');
                     }
