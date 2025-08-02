@@ -742,7 +742,8 @@ async function displayMatchHistory(page: HTMLDivElement) {
 	`;
 
 	// Version desktop
-    for (const match of history) {
+ 	for (let index = 0; index < history.length; index++) {
+		const match = history[index];
         const isPlayer1 = match.player1.username === username;
         let opponent;
         let gameType;
@@ -775,6 +776,13 @@ async function displayMatchHistory(page: HTMLDivElement) {
             gameTypeColor = "text-green-400";
         }
 
+		const minutes = Math.floor(match.lasted / 60);
+		const seconds = match.lasted % 60;
+		const gameTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+		const playerScore = isPlayer1 ? match.score1 : match.score2;
+		const opponentScore = isPlayer1 ? match.score2 : match.score1;
+
         const result = match.winnerId === (isPlayer1 ? match.player1Id : match.player2Id)
             ? i18n.t('profile.victory') : i18n.t('profile.defeat');
         const date = new Date(match.playedAt).toLocaleDateString();
@@ -782,19 +790,92 @@ async function displayMatchHistory(page: HTMLDivElement) {
 
         const score = `${match.score1} - ${match.score2}`;
 
-        html += `
-            <tr class="border-b border-gray-700 hover:bg-gray-800 transition-colors">
-                <td class="p-2 text-gray-300 text-sm">${date}</td>
-                <td class="p-2 text-gray-200 text-sm">${opponent}</td>
-                <td class="p-2 text-sm">
-                    <span class="${gameTypeColor} font-medium">${gameType}</span>
-                </td>
-                <td class="p-2 text-gray-300 text-sm">${score}</td>
-                <td class="p-2 text-sm">
-                    <span class="${statusColor} font-semibold">${result}</span>
-                </td>
-            </tr>
-        `;
+		html += `
+			<tr class="border-b border-gray-700 hover:bg-gray-800 transition-colors">
+				<td class="p-2 text-gray-300 text-sm">${date}</td>
+				<td class="p-2 text-gray-200 text-sm">${opponent}</td>
+				<td class="p-2 text-sm">
+					<span class="${gameTypeColor} font-medium">${gameType}</span>
+				</td>
+				<td class="p-2 text-gray-300 text-sm">${score}</td>
+				<td class="p-2 text-sm">
+					<span class="${statusColor} font-semibold">${result}</span>
+				</td>
+				<td class="p-2">
+					<button onclick="toggleMatchDetails(${index})" class="text-gray-400 hover:text-white">
+						<svg id="arrow-${index}" class="w-4 h-4 transform transition-transform" fill="currentColor" viewBox="0 0 20 20">
+							<path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+						</svg>
+					</button>
+				</td>
+			</tr>
+			<tr id="details-${index}" class="hidden">
+				<td colspan="6" class="p-4 bg-gray-750">
+					<div class="bg-gray-800 bg-opacity-50 p-4 rounded-lg border border-purple-400 border-opacity-30">
+						<div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+
+							<div class="flex flex-col items-center p-3 bg-purple-400 bg-opacity-10 rounded-lg border border-purple-400 border-opacity-20">
+								<div class="text-purple-300 font-semibold mb-1">
+									${i18n.t("profile.game_duration") || "Game Duration"}
+								</div>
+								<div class="text-white text-lg font-bold">${gameTime}</div>
+							</div>
+
+							<div class="flex flex-col items-center p-3 bg-green-400 bg-opacity-10 rounded-lg border border-green-400 border-opacity-20">
+								<div class="text-green-300 font-semibold mb-1">
+									${i18n.t("profile.your_score") || "Your Score"}
+								</div>
+								<div class="text-white text-lg font-bold">${playerScore}</div>
+							</div>
+
+							<div class="flex flex-col items-center p-3 bg-red-400 bg-opacity-10 rounded-lg border border-red-400 border-opacity-20">
+								<div class="text-red-300 font-semibold mb-1">
+									${i18n.t("profile.opponent_score") || "Opponent Score"}
+								</div>
+								<div class="text-white text-lg font-bold">${opponentScore}</div>
+							</div>
+
+							<div class="flex flex-col items-center p-3 bg-blue-400 bg-opacity-10 rounded-lg border border-blue-400 border-opacity-20">
+								<div class="text-blue-300 font-semibold mb-1">
+									${i18n.t("profile.section_points") || "Section Points"}
+								</div>
+								<div class="text-white text-sm">
+									<div class="flex justify-between items-center mb-1">
+										<span class="text-red-300">${i18n.t("profile.top_points") || "Top"}:</span>
+										<span class="font-bold">${match.pointsUp}</span>
+									</div>
+									<div class="flex justify-between items-center">
+										<span class="text-green-300">${i18n.t("profile.bottom_points") || "Bottom"}:</span>
+										<span class="font-bold">${match.pointsDown}</span>
+									</div>
+								</div>
+							</div>
+
+						</div>
+
+						<div class="mt-3 pt-3 border-t border-purple-400 border-opacity-20">
+							<div class="flex items-center justify-center">
+								<span class="text-purple-300 text-xs font-semibold mr-2">
+									${i18n.t("profile.game_mode") || "Game Mode"}:
+								</span>
+								<span class="px-2 py-1 rounded-full text-xs font-bold
+									${match.iaMode ? 'bg-red-400 bg-opacity-20 text-red-300 border border-red-400 border-opacity-50' : ''}
+									${match.tournamentMode ? 'bg-yellow-400 bg-opacity-20 text-yellow-300 border border-yellow-400 border-opacity-50' : ''}
+									${match.multiMode ? 'bg-green-400 bg-opacity-20 text-green-300 border border-green-400 border-opacity-50' : ''}
+									${!match.iaMode && !match.tournamentMode && !match.multiMode ? 'bg-gray-400 bg-opacity-20 text-gray-300 border border-gray-400 border-opacity-50' : ''}
+								">
+									${match.iaMode ? (i18n.t("profile.ia_mode") || "IA Mode") : ''}
+									${match.tournamentMode ? (i18n.t("profile.tournament_mode") || "Tournament") : ''}
+									${match.multiMode ? (i18n.t("profile.multiplayer_mode") || "Multiplayer") : ''}
+									${!match.iaMode && !match.tournamentMode && !match.multiMode ? (i18n.t("profile.local_mode") || "Local") : ''}
+								</span>
+							</div>
+						</div>
+					</div>
+					</div>
+				</td>
+			</tr>
+		`;
     }
 
 	html += `

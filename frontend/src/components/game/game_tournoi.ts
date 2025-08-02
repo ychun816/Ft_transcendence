@@ -190,7 +190,7 @@ class Pong
             ball_speed: 4.5 * (3/2),
             ball_max_speed: 12 * (3/2),
             paddle_speed: 7.5 * (3/2),
-            score_to_win: 1,
+            score_to_win: 2,
             increase_vitesse: 175, //250,
             time_before_new_ball: 3000
         }
@@ -259,16 +259,27 @@ class Pong
 
     handle_keydown = (e: KeyboardEvent) =>
     {
-        // if (e.code === "Space")
-        //     this.state.is_paused = !this.state.is_paused;
-        // else if (e.key === "b")
-        //     console.log("Ball_dir_x = ", this.ball.ball_dir_x, ", Ball_dir_y = ", this.ball.ball_dir_y)
-        // else
+        if (e.key === "ArrowUp" || e.key === "ArrowDown" || 
+            e.key === "ArrowLeft" || e.key === "ArrowRight" ||
+            e.key === "w" || e.key === "W" ||
+            e.key === "s" || e.key === "S" ||
+            e.code === "Space") {
+            e.preventDefault();
+        }
+        
         this.keys_pressed[e.key] = true;
     };
 
     handle_keyup = (e: KeyboardEvent) =>
     {
+        if (e.key === "ArrowUp" || e.key === "ArrowDown" || 
+            e.key === "ArrowLeft" || e.key === "ArrowRight" ||
+            e.key === "w" || e.key === "W" ||
+            e.key === "s" || e.key === "S" ||
+            e.code === "Space") {
+            e.preventDefault();
+        }
+        
         this.keys_pressed[e.key] = false;
     };
 
@@ -384,7 +395,7 @@ class Pong
         let delta_time;
         if (raw_delta_time > 1000)
         {
-            console.log("Très long délai détecté, réinitialisation du timing");
+            //console.log("Très long délai détecté, réinitialisation du timing");
             delta_time = this.fixed_timestep; // Traiter comme un frame normal
         }
         else
@@ -585,7 +596,7 @@ class Pong
 
     cleanup(): void
     {
-        console.log("🧹 Nettoyage des ressources du jeu...");
+        //console.log("🧹 Nettoyage des ressources du jeu...");
         this.clear_all_timers();
 
         this.state.game_running = false;
@@ -612,13 +623,13 @@ class Pong
             this.end_message.textContent = '';
         }
         this.ctx.clearRect(0, 0, this.config.canvas_width, this.config.canvas_height);
-
-        console.log("✅ Nettoyage terminé");
+        
+        //console.log("✅ Nettoyage terminé");
     }
 
     back_to_menu(): void
     {
-        console.log("🏠 Retour au menu principal...");
+        //console.log("🏠 Retour au menu principal...");
         this.cleanup();
         this.state.restart_active = false;
 
@@ -639,13 +650,13 @@ class Pong
 
         this.config.ball_speed = 4.5 * (3/2);
         this.config.paddle_speed = 7.5 * (3/2);
-
-        console.log("✅ Retour au menu préparé");
+        
+        //console.log("✅ Retour au menu préparé");
     }
 
     destroy(): void
     {
-        console.log("💥 Destruction de l'instance de jeu...");
+        //console.log("💥 Destruction de l'instance de jeu...");
         this.cleanup();
         document.removeEventListener("keydown", this.handle_keydown);
         document.removeEventListener("keyup", this.handle_keyup);
@@ -654,13 +665,13 @@ class Pong
         this.end_message = null;
         this.keys_pressed = {};
         this.state.game_running = false;
-        console.log("✅ Instance détruite");
+        //console.log("✅ Instance détruite");
     }
 
     restart(): void
     {
-        console.log("🔄 RESTART demandé");
-
+        //console.log("🔄 RESTART demandé");
+        
         this.clear_all_timers();
 
         this.state.restart_active = true;
@@ -682,7 +693,7 @@ class Pong
 
         this.restart_timeout = setTimeout(() =>
         {
-            console.log("🚀 Nouvelle partie");
+            //console.log("🚀 Nouvelle partie");
             this.last_frame_time = performance.now();
             this.ball.ball_x = this.config.canvas_width / 2;
             this.ball.ball_y = this.config.canvas_height / 2;
@@ -782,9 +793,9 @@ class Pong
     {
         if (this.state.count_down_active)
             return ;
-        if (this.keys_pressed["w"] && this.paddle.left_paddle_y > 0)
+        if ((this.keys_pressed["w"] || this.keys_pressed["W"]) && this.paddle.left_paddle_y > 0)
             this.paddle.left_paddle_y -= this.config.paddle_speed;
-        if (this.keys_pressed["s"] && this.paddle.left_paddle_y < this.config.canvas_height - this.config.paddle_height - 0)
+        if ((this.keys_pressed["s"] || this.keys_pressed["S"])  && this.paddle.left_paddle_y < this.config.canvas_height - this.config.paddle_height - 0)
             this.paddle.left_paddle_y += this.config.paddle_speed;
 
         if (this.keys_pressed["ArrowUp"] && this.paddle.right_paddle_y > 0)
@@ -898,8 +909,8 @@ class Pong
 
             if (leftCollision.collision)
             {
-                console.log(`🏓 Rebond raquette gauche détecté par collision continue`);
-
+                //console.log(`🏓 Rebond raquette gauche détecté par collision continue`);
+                
                 // Positionner la balle au point d'intersection pour éviter qu'elle reste dans le paddle
                 if (leftCollision.intersectionPoint)
                 {
@@ -938,8 +949,8 @@ class Pong
 
             if (rightCollision.collision)
             {
-                console.log(`🏓 Rebond raquette droite détecté par collision continue`);
-
+                //console.log(`🏓 Rebond raquette droite détecté par collision continue`);
+                
                 // Positionner la balle au point d'intersection
                 if (rightCollision.intersectionPoint)
                 {
@@ -966,7 +977,7 @@ class Pong
         if (this.ball.ball_x < 0 || this.ball.ball_x > this.config.canvas_width)
         {
             this.state.is_paused = true;
-            // console.log(`🎯 BUT ! ball_x = ${this.ball.ball_x} et ballspeed = ${this.config.ball_speed} et rebond = ${this.ball.current_rebond}`);
+            // //console.log(`🎯 BUT ! ball_x = ${this.ball.ball_x} et ballspeed = ${this.config.ball_speed} et rebond = ${this.ball.current_rebond}`);
             this.handle_goal();
             return;
         }
@@ -978,7 +989,7 @@ class Pong
         // Rebonds sur les murs haut et bas
         if (this.ball.ball_y <= 5 || this.ball.ball_y >= this.config.canvas_height - 5)
         {
-            console.log(`AVANT rebond avec ball_x = ${this.ball.ball_x} et ball_y = ${this.ball.ball_y}`);
+            // console.log(`AVANT rebond avec ball_x = ${this.ball.ball_x} et ball_y = ${this.ball.ball_y}`);
 
             if (this.ball.ball_x <= 70 )
             {
@@ -986,7 +997,7 @@ class Pong
                     this.ball.ball_y = 6;
                 else
                     this.ball.ball_y = this.config.canvas_height - 6;
-                console.log("ca passe ici zeubi")
+                //console.log("ca passe ici zeubi")
             }
             if (this.ball.ball_x >= this.config.canvas_width - 70)
             {
@@ -994,11 +1005,11 @@ class Pong
                     this.ball.ball_y = 6;
                 else
                     this.ball.ball_y = this.config.canvas_height - 6;
-                console.log("ca passe ici woula")
+                //console.log("ca passe ici woula")
             }
 
-            console.log(`APRES rebond avec ball_x = ${this.ball.ball_x} et ball_y = ${this.ball.ball_y}`);
-
+            //console.log(`APRES rebond avec ball_x = ${this.ball.ball_x} et ball_y = ${this.ball.ball_y}`);
+            
             this.ball.ball_dir_y *= -1;
             this.ball.current_rebond++;
             this.normalize_ball_speed();

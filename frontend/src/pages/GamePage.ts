@@ -498,7 +498,7 @@ export function createGamePage(): HTMLElement {
 
 	function cleanupCurrentGame(): void {
 		if (currentGame) {
-			console.log("Nettoyage du jeu en cours...");
+			//console.log("Nettoyage du jeu en cours...");
 
 			if (typeof currentGame.cleanup === "function") {
 				currentGame.cleanup();

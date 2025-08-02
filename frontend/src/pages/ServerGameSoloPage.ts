@@ -8,9 +8,6 @@ export function createServerGameSoloPage(): HTMLElement {
 	const container = document.createElement("div");
 	container.innerHTML = serverGameSoloPage.render();
 
-	// Attach page instance for cleanup
-	(container as any).__pageInstance = serverGameSoloPage;
-
 	// Appeler onMount après que le DOM soit créé
 	requestAnimationFrame(() => {
 		serverGameSoloPage.onMount();
@@ -23,7 +20,7 @@ export class ServerGameSoloPage implements Page {
 	private currentGame: ServerGame_solo | null = null;
 	private static isInstanceActive: boolean = false;
 	private navigationListener: ((e: Event) => void) | null = null;
-	private restartListener: (() => void) | null = null;
+	//private restartListener: (() => void) | null = null;
 
 	render(): string {
 		return `
@@ -60,11 +57,6 @@ export class ServerGameSoloPage implements Page {
 						</div>
 					</div>
 
-					<!-- Bouton restart -->
-					<button id="restartBtn" class="mb-6 mx-auto ${classes.actionButton} block">
-						${i18n.t('game.new_game')}
-					</button>
-
 					<!-- Tableau de score -->
 					<div id="scoreboard" class="${classes.scoreboardPanel} rounded-2xl p-6 mb-6">
 						<div class="grid grid-cols-2 gap-8 text-center">
@@ -92,139 +84,31 @@ export class ServerGameSoloPage implements Page {
 					<!-- Message de fin de partie -->
 					<div id="endMessage" class="text-3xl font-bold ${classes.neonText} mt-8 text-center"></div>
 
-                .scan-lines::before {
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: linear-gradient(
-                        transparent 0%,
-                        #9d4edd10 50%,
-                        transparent 100%
-                    );
-                    background-size: 100% 4px;
-                    animation: scan 0.1s linear infinite;
-                    pointer-events: none;
-                }
-
-                @keyframes scan {
-                    0% { background-position: 0 0; }
-                    100% { background-position: 0 4px; }
-                }
-
-                .scoreboard-panel {
-                    background: linear-gradient(135deg, #0a0a0a 0%, #1a0d1a 50%, #0a0a0a 100%);
-                    border: 2px solid #9d4edd;
-                    box-shadow:
-                        0 0 20px #9d4edd60,
-                        inset 0 0 20px #9d4edd30;
-                }
-
-                .game-canvas-frame {
-                    background: #050505;
-                    border: 3px solid #9d4edd;
-                    box-shadow:
-                        0 0 30px #9d4edd80,
-                        inset 0 0 30px #9d4edd40;
-                }
-
-                .corner-indicator {
-                    width: 20px;
-                    height: 20px;
-                    border: 3px solid #9d4edd;
-                    box-shadow: 0 0 10px #9d4edd;
-                }
-            </style>
-
-            <!-- Champ d'étoiles -->
-            <div class="starfield"></div>
-
-            <div class="min-h-screen bg-gray-900 text-white font-mono overflow-hidden scan-lines relative">
-                <div class="min-h-screen flex flex-col items-center justify-center p-4">
-
-                    <!-- Bouton retour -->
-                    <div class="absolute top-4 left-4">
-                        <button class="retro-button text-white font-bold py-2 px-6 rounded-lg transition-all duration-300" data-route="/game">
-                            ← RETOUR
-                        </button>
-                    </div>
-
-                    <!-- Titre du mode -->
-                    <h1 class="text-4xl font-bold neon-text mb-8 text-center">
-                        🤖 SERVER-SIDE SOLO (VS IA)
-                    </h1>
-
-                    <!-- Zone de jeu principale -->
-                    <div class="retro-panel rounded-lg p-6 shadow-2xl w-full max-w-4xl">
-                        <!-- Scores -->
-                        <div class="scoreboard-panel rounded-xl p-4 mb-4">
-                            <div class="flex justify-between items-center">
-                                <div id="scoreP1" class="text-2xl font-bold neon-text">Joueur 1 : 0</div>
-                                <div id="gameInfo" class="text-center">
-                                    <div id="countdowndisplay" class="text-3xl font-bold text-yellow-400 mb-2"></div>
-                                    <div class="text-sm text-purple-300">
-                                        <span id="connectionStatus">🔴 Déconnecté</span>
-                                        <span id="gameId" class="ml-4"></span>
-                                    </div>
-                                </div>
-                                <div id="scoreP2" class="text-2xl font-bold neon-text">IA : 0</div>
-                            </div>
-                        </div>
-
-                        <!-- Canvas de jeu -->
-                        <div class="flex justify-center">
-                            <div class="game-canvas-frame rounded-lg p-2 relative">
-                                <!-- Indicateurs de coin -->
-                                <div class="corner-indicator absolute top-0 left-0"></div>
-                                <div class="corner-indicator absolute top-0 right-0"></div>
-                                <div class="corner-indicator absolute bottom-0 left-0"></div>
-                                <div class="corner-indicator absolute bottom-0 right-0"></div>
-
-                                <canvas
-                                    id="gameCanvas"
-                                    width="800"
-                                    height="600"
-                                    class="rounded-lg bg-black"
-                                ></canvas>
-                            </div>
-                        </div>
-
-                        <!-- Contrôles -->
-                        <div class="mt-6 text-center">
-                            <div class="retro-panel rounded-lg p-4 inline-block">
-                                <h4 class="text-lg font-semibold neon-text mb-2">🎮 Contrôles</h4>
-                                <div class="text-sm text-purple-300">
-                                    <strong class="text-cyan-400">Joueur 1:</strong><br>
-                                    W = Haut | S = Bas
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Boutons de contrôle -->
-                        <div class="mt-6 text-center">
-                            <button id="restartBtn" class="retro-button text-yellow-300 font-bold py-3 px-6 rounded-lg transition-all duration-300 mr-4">
-                                <span class="relative z-10">🔄 REDÉMARRER</span>
-                            </button>
-                        </div>
-
-                        <!-- Message de fin -->
-                        <div id="endMessage" class="text-center text-3xl font-bold text-yellow-400 mt-6 hidden"></div>
-                    </div>
-                </div>
-            </div>
-        `;
+					<!-- Contrôles -->
+					<div class="${classes.controlPanel} mt-8">
+						<h3 class="text-xl font-bold text-purple-300 mb-4 text-center">
+							${i18n.t('game.control')}
+						</h3>
+						<div class="grid grid-cols-1 gap-4 text-center">
+							<div class="${classes.controlItem}">
+								<p class="text-purple-300 font-semibold">${i18n.t('game.p1')}</p>
+								<p class="text-sm text-gray-300">W / S</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		`;
 	}
 
 	async onMount(): Promise<void> {
-		console.log("🤖 Server Game Solo Page mounted");
+		////console.log("🤖 Server Game Solo Page mounted");
 
 		// ✅ PROTECTION CONTRE LES INSTANCES MULTIPLES
-		if (ServerGameSoloPage.isInstanceActive) {
-			console.log(
-				"⚠️ Instance already active, preventing duplicate creation"
-			);
+		if (ServerGameSoloPage.isInstanceActive)
+		{
+			////console.log("⚠️ Instance already active, preventing duplicate creation");
 			return; // Sortir immédiatement si une instance est déjà active
 		}
 
@@ -232,7 +116,7 @@ export class ServerGameSoloPage implements Page {
 
 		// ✅ PROTECTION CONTRE LES APPELS MULTIPLES
 		if (this.currentGame) {
-			console.log("⚠️ Game already exists, cleaning up first");
+			//console.log("⚠️ Game already exists, cleaning up first");
 			this.currentGame.disconnect();
 			this.currentGame = null;
 		}
@@ -270,12 +154,12 @@ export class ServerGameSoloPage implements Page {
 	private async startSoloGame(): Promise<void> {
 		// ✅ VÉRIFICATION SUPPLÉMENTAIRE
 		if (this.currentGame) {
-			console.log("⚠️ Game already running, skipping creation");
+			//console.log("⚠️ Game already running, skipping creation");
 			return;
 		}
 
 		try {
-			console.log("🚀 Auto-starting server-side SOLO game...");
+			//console.log("🚀 Auto-starting server-side SOLO game...");
 
 			const connectionStatus =
 				document.getElementById("connectionStatus");
@@ -297,7 +181,7 @@ export class ServerGameSoloPage implements Page {
 				gameIdElement.textContent = `ID: ${this.currentGame.currentGameId}`;
 			}
 
-			console.log("✅ SERVER-SIDE SOLO GAME LAUNCHED!");
+			//console.log("✅ SERVER-SIDE SOLO GAME LAUNCHED!");
 		} catch (error) {
 			console.error("❌ Failed to start server-side solo game:", error);
 
@@ -320,16 +204,16 @@ export class ServerGameSoloPage implements Page {
 
 	private restartGame(): void {
 		if (this.currentGame) {
-			console.log("🔄 Restarting server-side solo game...");
+			//console.log("🔄 Restarting server-side solo game...");
 			this.currentGame.restart();
 		} else {
-			console.log("⚠️ No active game to restart, creating new one...");
+			//console.log("⚠️ No active game to restart, creating new one...");
 			this.startSoloGame();
 		}
 	}
 
 	onUnmount(): void {
-		console.log("🤖 Server Game Solo Page unmounting");
+		//console.log("🤖 Server Game Solo Page unmounting");
 
 		// Supprimer les event listeners
 		if (this.navigationListener) {
@@ -337,13 +221,13 @@ export class ServerGameSoloPage implements Page {
 			this.navigationListener = null;
 		}
 
-		if (this.restartListener) {
-			const restartBtn = document.getElementById("restartBtn");
-			if (restartBtn) {
-				restartBtn.removeEventListener("click", this.restartListener);
-			}
-			this.restartListener = null;
-		}
+		// if (this.restartListener) {
+		// 	const restartBtn = document.getElementById("restartBtn");
+		// 	if (restartBtn) {
+		// 		restartBtn.removeEventListener("click", this.restartListener);
+		// 	}
+		// 	this.restartListener = null;
+		// }
 
 		if (this.currentGame) {
 			this.currentGame.disconnect();
