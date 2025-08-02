@@ -1,4 +1,4 @@
-import { Page } from "../router/router.js";
+//import { Page } from "../router/router.js";
 import { ServerGame_solo } from "../components/game/ServerPongGame.js";
 import { classes } from "../styles/retroStyles.js";
 import { i18n } from "../services/i18n.js";

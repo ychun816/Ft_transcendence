@@ -240,5 +240,5 @@ export async function sendSignUpInfo(page: HTMLDivElement): Promise<void> {
     } catch (error) {
         console.error("Signup error:", error);
         errorNotif.showErrorBanner('network_error');
-    }alert("❌ " + i18n.t('signup.signup_error'));
+    }
 }

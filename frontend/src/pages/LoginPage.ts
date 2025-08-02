@@ -332,7 +332,7 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
 				const twoFAHTML = `
 					<div class="mt-4 p-4 bg-blue-900 bg-opacity-30 border border-blue-500 rounded-lg">
 						<label class="block text-blue-300 text-sm mb-2">
-							🔐 ${i18n.t('auth.2fa_code') || 'Code de vérification (6 chiffres)'}
+							🔐 ${i18n.t('auth.twofa_code') || 'Code de vérification (6 chiffres)'}
 						</label>
 						<input
 							type="text"

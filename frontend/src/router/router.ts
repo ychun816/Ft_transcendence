@@ -19,7 +19,7 @@ class Router {
     private setupProtectedRoutes() {
         this.protectedRoutes.add('/home');
         this.protectedRoutes.add('/profile');
-        this.protectedRoutes.add('/game');
+        //this.protectedRoutes.add('/game');
         this.protectedRoutes.add('/chat');
     }
 
@@ -69,12 +69,14 @@ class Router {
       }
     }
 
-    start() {
+    start()
+    {
       /*
       This function is called when the app starts.
       It handles the initial route.
       */
-      this.renderRoute(window.location.pathname);
+        //this.renderRoute(window.location.pathname);
+        this.navigate('/game');
     }
 
 //   navigate(path: string) {

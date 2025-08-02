@@ -187,9 +187,9 @@ class Pong
             canvas_height: 600,
             paddle_width: 10,
             paddle_height: 78,
-            ball_real_speed: 8 * (3/2),
+            ball_real_speed: 6 * (3/2),
             ball_speed: 4.5 * (3/2),
-            ball_max_speed: 12 * (3/2),
+            ball_max_speed: 9.5 * (3/2),
             paddle_speed: 5.25 * (3/2),
             score_to_win: 3,
             increase_vitesse: 175,
@@ -931,12 +931,19 @@ class Pong
                     }
                     
                     // Appliquer la logique de rebond spécifique au paddle touché
-                    if (paddle.id === 1) {
-                        if (this.config.ball_speed < this.config.ball_real_speed) {
+                    if (paddle.id === 1)
+					{
+                        if (this.config.ball_speed < this.config.ball_real_speed)
+						{
                             this.config.ball_speed = this.config.ball_real_speed;
                         }
                         this.update_ball_dir(1);
-                    } else {
+                    }
+					else {
+                        if (this.config.ball_speed < this.config.ball_real_speed)
+						{
+                            this.config.ball_speed = this.config.ball_real_speed;
+                        }
                         this.update_ball_dir(2);
                     }
                     
@@ -947,7 +954,8 @@ class Pong
         }
 
 		// Collision avec le paddle droit
-		if (this.ball.ball_dir_x > 0) {
+		if (this.ball.ball_dir_x > 0)
+		{
 			// Créer les rectangles pour les deux paddles de droite (P3 et P4)
 			const rightPaddles = [
 				{
@@ -988,6 +996,10 @@ class Pong
                     }
                     
                     // Appliquer la logique de rebond spécifique au paddle touché
+					if (this.config.ball_speed < this.config.ball_real_speed)
+					{
+						this.config.ball_speed = this.config.ball_real_speed;
+					}
                     this.update_ball_dir(paddle.id);
                     this.normalize_ball_speed();
                     return;

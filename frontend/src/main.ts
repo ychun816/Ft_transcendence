@@ -15,6 +15,7 @@ import { createTwoFactorVerifyPage } from "./pages/TwoFactorVerifyPage";
 import { i18n } from "./services/i18n";
 import globalNotificationService from "./services/GlobalNotificationService";
 
+
 async function initApp() {
   await i18n.init();
 
