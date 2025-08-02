@@ -1,5 +1,6 @@
 import { AuthService } from "../middleware/auth.js";
 import { i18n } from "../services/i18n.js";
+import { errorNotif } from "../services/errorNotification.js";
 import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
 import { classes } from "../styles/retroStyles.js";
 import { getUserInfo } from "./ChatPage.js";
@@ -129,24 +130,24 @@ const renderContent = () => {
 }
 
 export async function requireAuth(): Promise<boolean> {
-    const user = await authService.getCurrentUser();
-    if (!user) {
-        import("../router/router.js").then(({ router }) => {
-            router.navigate('/login');
-        });
-        return false;
-    }
-    return true;
+	const user = await authService.getCurrentUser();
+	if (!user) {
+		import("../router/router.js").then(({ router }) => {
+			router.navigate('/login');
+		});
+		return false;
+	}
+	return true;
 }
 
 async function handleGoogleSignIn(): Promise<void> {
-    try {
-        // Redirect directly to Google OAuth (no popup)
-        window.location.href = '/api/auth/google';
-    } catch (error) {
-        console.error('Google Sign-In error:', error);
-        alert(i18n.t('auth.google_signin_error') || 'Google Sign-In failed');
-    }
+	try {
+		// Redirect directly to Google OAuth (no popup)
+		window.location.href = '/api/auth/google';
+	} catch (error) {
+		console.error('Google Sign-In error:', error);
+		alert(i18n.t('auth.google_signin_error') || 'Google Sign-In failed');
+	}
 }
 
 async function registerActiveSessions()
@@ -214,138 +215,204 @@ async function addActiveSessions(userData: any)
 }
 
 async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
-    const usernameInput = page.querySelector("#username") as HTMLInputElement;
-    const passwordInput = page.querySelector("#password") as HTMLInputElement;
-    const twoFactorInput = page.querySelector("#two-factor-token") as HTMLInputElement;
+	const usernameInput = page.querySelector("#username") as HTMLInputElement;
+	const passwordInput = page.querySelector("#password") as HTMLInputElement;
+	const twoFactorInput = page.querySelector("#two-factor-token") as HTMLInputElement;
 
-    const UserInfo = {
-        username: usernameInput.value,
-        password: passwordInput.value,
-        twoFactorToken: twoFactorInput?.value || undefined,
-    };
+	const UserInfo = {
+		username: usernameInput.value,
+		password: passwordInput.value,
+		twoFactorToken: twoFactorInput?.value || undefined,
+	};
 
-    try {
-        console.log("🔍 Sending login request with:", UserInfo);
+	try {
+		const response = await fetch("/api/login", {
+			method: "POST",
+			credentials: 'include',
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(UserInfo),
+		});
 
-        const response = await fetch("/api/login", {
-            method: "POST",
-            credentials: 'include',
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(UserInfo),
-        });
+		if (!response.ok) {
+			const errorText = await response.text();
+			let errorData;
 
-        console.log("🔍 Login response status:", response.status);
-        console.log("🔍 Login response headers:", response.headers);
+			try {
+				errorData = JSON.parse(errorText);
+			} catch {
+				errorData = { message: errorText };
+			}
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`HTTP ${response.status}: ${errorText}`);
-        }
+			// Gérer différents types d'erreurs avec traductions
+			switch (response.status) {
+				case 400:
+					if (errorData.message?.includes('username')) {
+						errorNotif.showFieldError('username', 'username_required');
+					} else if (errorData.message?.includes('password')) {
+						errorNotif.showFieldError('password', 'password_required');
+					} else {
+						errorNotif.showErrorBanner('check_information', 'warning');
+					}
+					break;
 
-        const data = await response.json();
-        console.log("🔍 Login response data:", data);
+				case 401:
+					if (errorData.message?.includes('User not found')) {
+						errorNotif.showFieldError('username', 'user_not_found');
+						errorNotif.showErrorBanner('user_not_found_banner');
+					} else if (errorData.message?.includes('Wrong password')) {
+						errorNotif.showFieldError('password', 'wrong_password');
+						errorNotif.showErrorBanner('wrong_password_banner');
+					} else if (errorData.message?.includes('Invalid 2FA')) {
+						errorNotif.showFieldError('two-factor-token', 'invalid_2fa');
+						errorNotif.showErrorBanner('invalid_2fa_banner');
+					} else {
+						errorNotif.showErrorBanner('invalid_credentials');
+					}
+					break;
 
-        if (data.success) {
-            // Store the JWT token in sessionStorage
-            sessionStorage.setItem('authToken', data.token);
-            // Store username for convenience
-            sessionStorage.setItem('username', data.user.username);
+				case 429:
+					errorNotif.showErrorBanner('too_many_attempts', 'warning');
+					break;
 
-            console.log("🔑 Login success - Stored token:", data.token);
-            console.log("🔑 Login success - Stored username:", data.user.username);
+				case 500:
+					errorNotif.showErrorBanner('server_error');
+					break;
 
-            await authService.getCurrentUser();
+				default:
+					errorNotif.showErrorBanner('connection_error', 'error', { status: response.status.toString() });
+			}
+			return;
+		}
 
-            // Initialize global notification service
-            import("../services/GlobalNotificationService.js").then(({ default: globalNotificationService }) => {
-                setTimeout(() => {
-                    globalNotificationService.connect();
-                }, 1000);
-            });
+		// Succès
+		const data = await response.json();
 
-            import("../router/router.js").then(({ router }) => {
-                router.navigate('/game');
-				registerActiveSessions()
-            });
-        } else if (data.requires2FA) {
-            // Save username for 2FA verification step
-            sessionStorage.setItem('pending2FAUser', UserInfo.username);
-            // Redirect to 2FA verification page
-            import("../router/router.js").then(({ router }) => {
-                router.navigate('/2fa-verify');
-				registerActiveSessions()
-            // // Show 2FA input
-            // show2FAInput(page);
-            // alert(data.message || i18n.t('auth.2fa_required'));
-            });
-        } else {
-            alert(i18n.t('auth.login_error') + ": " + (data.message || i18n.t('auth.invalid_credentials')));
-        }
-    } catch (error) {
-        console.error("Login error:", error);
-        alert(i18n.t('auth.login_error') + ": " + (error || "Please try again."));
-    }
+		if (data.success) {
+			sessionStorage.setItem('authToken', data.token);
+			sessionStorage.setItem('username', data.user.username);
+
+			errorNotif.showSuccessMessage('welcome_message', { username: data.user.username });
+
+			setTimeout(() => {
+				import("../router/router.js").then(({ router }) => {
+					router.navigate('/game');
+				});
+			}, 1500);
+
+		} else if (data.requires2FA) {
+			sessionStorage.setItem('pending2FAUser', UserInfo.username);
+
+			// Injecter le champ 2FA avec traductions
+			const form = page.querySelector('form');
+			const submitButton = form?.querySelector('#login-btn');
+
+			if (form && submitButton && !form.querySelector('#two-factor-token')) {
+				const twoFAHTML = `
+					<div class="mt-4 p-4 bg-blue-900 bg-opacity-30 border border-blue-500 rounded-lg">
+						<label class="block text-blue-300 text-sm mb-2">
+							🔐 ${i18n.t('auth.2fa_code') || 'Code de vérification (6 chiffres)'}
+						</label>
+						<input
+							type="text"
+							id="two-factor-token"
+							maxlength="6"
+							placeholder="000000"
+							class="w-full p-3 bg-gray-800 border border-blue-500 rounded text-center text-lg font-mono text-white focus:ring-2 focus:ring-blue-400"
+						/>
+						<p class="text-xs text-blue-300 mt-1 text-center">
+							${i18n.t('errors.2fa_code_sent')}
+						</p>
+					</div>
+				`;
+
+				form.insertBefore(
+					document.createRange().createContextualFragment(twoFAHTML),
+					submitButton
+				);
+
+				// Formatter automatiquement le code
+				const newTwoFAInput = form.querySelector('#two-factor-token') as HTMLInputElement;
+				newTwoFAInput?.addEventListener('input', (e) => {
+					const target = e.target as HTMLInputElement;
+					target.value = target.value.replace(/\D/g, '').slice(0, 6);
+				});
+
+				newTwoFAInput?.focus();
+			}
+
+			errorNotif.showErrorBanner('2fa_info', 'info');
+		}
+
+	} catch (error) {
+		console.error("Login error:", error);
+
+		if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+			errorNotif.showErrorBanner('network_error');
+		} else {
+			errorNotif.showErrorBanner('technical_error');
+		}
+	}
 }
 
 function show2FAInput(page: HTMLDivElement): void {
-    const form = page.querySelector('.space-y-4') as HTMLFormElement;
+	const form = page.querySelector('.space-y-4') as HTMLFormElement;
 
-    function show2FAInput(page: HTMLDivElement): void {
-    // Find the login form
-    const form = page.querySelector('form.space-y-6') as HTMLFormElement;
-    if (!form) return;
+	function show2FAInput(page: HTMLDivElement): void {
+	// Find the login form
+	const form = page.querySelector('form.space-y-6') as HTMLFormElement;
+	if (!form) return;
 
-    // Prevent duplicate 2FA input
-    if (form.querySelector('#two-factor-token')) return;
+	// Prevent duplicate 2FA input
+	if (form.querySelector('#two-factor-token')) return;
 
-    // Create 2FA input field
-    const twoFactorDiv = document.createElement('div');
-    twoFactorDiv.className = "mt-2";
-    const twoFactorInput = document.createElement('input');
-    twoFactorInput.type = 'text';
-    twoFactorInput.id = 'two-factor-token';
-    twoFactorInput.placeholder = i18n.t('auth.two_factor_code') || '6-digit code';
-    twoFactorInput.maxLength = 6;
-    twoFactorInput.className = 'neon-input text-center font-mono';
-    twoFactorInput.required = true;
+	// Create 2FA input field
+	const twoFactorDiv = document.createElement('div');
+	twoFactorDiv.className = "mt-2";
+	const twoFactorInput = document.createElement('input');
+	twoFactorInput.type = 'text';
+	twoFactorInput.id = 'two-factor-token';
+	twoFactorInput.placeholder = i18n.t('auth.two_factor_code') || '6-digit code';
+	twoFactorInput.maxLength = 6;
+	twoFactorInput.className = 'neon-input text-center font-mono';
+	twoFactorInput.required = true;
 
-    // Only allow digits
-    twoFactorInput.addEventListener('input', (e) => {
-        const target = e.target as HTMLInputElement;
-        target.value = target.value.replace(/\D/g, '').slice(0, 6);
-    });
+	// Only allow digits
+	twoFactorInput.addEventListener('input', (e) => {
+		const target = e.target as HTMLInputElement;
+		target.value = target.value.replace(/\D/g, '').slice(0, 6);
+	});
 
-    twoFactorDiv.appendChild(twoFactorInput);
+	twoFactorDiv.appendChild(twoFactorInput);
 
-    // Insert 2FA input before the submit button
-    const submitButton = form.querySelector('#login-btn');
-    if (submitButton) {
-        form.insertBefore(twoFactorDiv, submitButton);
+	// Insert 2FA input before the submit button
+	const submitButton = form.querySelector('#login-btn');
+	if (submitButton) {
+		form.insertBefore(twoFactorDiv, submitButton);
 
-        // Change button text for clarity
-        submitButton.textContent = i18n.t('auth.verify_and_login') || 'Verify & Login';
-    }
+		// Change button text for clarity
+		submitButton.textContent = i18n.t('auth.verify_and_login') || 'Verify & Login';
+	}
 
-    // Focus on the 2FA input
-    twoFactorInput.focus();
+	// Focus on the 2FA input
+	twoFactorInput.focus();
 }
-    // Check if 2FA input already exists
-    // if (form.querySelector('#two-factor-token')) {
-    //     return;
-    // }
+	// Check if 2FA input already exists
+	// if (form.querySelector('#two-factor-token')) {
+	//     return;
+	// }
 
-    // // Create 2FA input field
-    // const twoFactorInput = document.createElement('input');
-    // twoFactorInput.type = 'text';
-    // twoFactorInput.id = 'two-factor-token';
-    // twoFactorInput.placeholder = i18n.t('auth.2fa_code') || '6-digit code';
-    // twoFactorInput.maxLength = 6;
-    // twoFactorInput.className = 'input text-center font-mono';
-    // twoFactorInput.required = true;
+	// // Create 2FA input field
+	// const twoFactorInput = document.createElement('input');
+	// twoFactorInput.type = 'text';
+	// twoFactorInput.id = 'two-factor-token';
+	// twoFactorInput.placeholder = i18n.t('auth.2fa_code') || '6-digit code';
+	// twoFactorInput.maxLength = 6;
+	// twoFactorInput.className = 'input text-center font-mono';
+	// twoFactorInput.required = true;
 
-    // Format input (digits only)
+	// Format input (digits only)
 //     twoFactorInput.addEventListener('input', (e) => {
 //         const target = e.target as HTMLInputElement;
 //         target.value = target.value.replace(/\D/g, '').slice(0, 6);

@@ -23,17 +23,13 @@ export async function handleLogIn(
 	app.post(
 		"/api/login",
 		async (request: FastifyRequest, reply: FastifyReply) => {
-			console.log("in /api/login");
 			const { username, password, twoFactorToken } = request.body as {
 				username: string;
 				password: string;
 				twoFactorToken?: string;
 			};
 
-			console.log(username);
-			console.log(password);
 			try {
-				console.log("before prisma");
 				const user = await prisma.user.findUnique({
 					where: { username },
 				});
