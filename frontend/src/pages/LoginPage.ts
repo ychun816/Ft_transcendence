@@ -203,7 +203,6 @@ async function registerActiveSessions()
 		Promise.race([userInfoPromise, timeoutPromise])
 			.then((userData) => {
 				if (userData && userData.id) {
-					console.log("✅ User info retrieved:", userData);
 					sessionStorage.setItem("userId", userData.id.toString());
 					addActiveSessions(userData);
 				} else {
@@ -280,6 +279,14 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
             console.log("🔑 Login success - Stored username:", data.user.username);
 
             await authService.getCurrentUser();
+            
+            // Initialize global notification service
+            import("../services/GlobalNotificationService.js").then(({ default: globalNotificationService }) => {
+                setTimeout(() => {
+                    globalNotificationService.connect();
+                }, 1000);
+            });
+            
             import("../router/router.js").then(({ router }) => {
                 router.navigate('/game');
 				registerActiveSessions()

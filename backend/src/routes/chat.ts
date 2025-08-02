@@ -16,11 +16,7 @@ export default async function chatWebSocketRoutes(
 	fastify: FastifyInstance<any, any, any, any>,
 	prisma: PrismaClient
 ) {
-	console.log("🔧 Registering WebSocket route: /ws/chat");
-
 	fastify.get("/ws/chat", { websocket: true }, async (connection, req) => {
-		console.log("🔧 New WebSocket connection from:", req.ip);
-
 		const query = req.query as { username?: string; userId?: string };
 		const username = query.username;
 		const userId = query.userId;
@@ -160,7 +156,6 @@ export default async function chatWebSocketRoutes(
 						);
 						break;
 					default:
-						console.log("🔧 Unknown message type:", data.type);
 						connection.send(
 							JSON.stringify({
 								type: "error",
@@ -650,6 +645,27 @@ async function handleSendGameInvite(
 			return;
 		}
 
+		// Clean up old processed invitations between these users (older than 1 hour)
+		const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+		await prisma.gameInvite.deleteMany({
+			where: {
+				OR: [
+					{
+						inviterId: senderId,
+						inviteeId: receiver.id,
+						status: { in: ["accepted", "declined"] },
+						createdAt: { lt: oneHourAgo }
+					},
+					{
+						inviterId: receiver.id,
+						inviteeId: senderId,
+						status: { in: ["accepted", "declined"] },
+						createdAt: { lt: oneHourAgo }
+					}
+				]
+			}
+		});
+
 		const existingInvite = await prisma.gameInvite.findFirst({
 			where: {
 				inviterId: senderId,
@@ -735,27 +751,33 @@ async function handleAcceptGameInvite(
 			return;
 		}
 
+		// Generate a unique game room ID
+		const gameRoomId = `game_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+		// Update the invitation with the game room ID
 		await prisma.gameInvite.update({
 			where: { id: inviteId },
-			data: { status: "accepted" },
+			data: { 
+				status: "accepted",
+				gameRoomId: gameRoomId
+			},
 		});
 
+		// Send redirect message to both players
 		if (activeConnections.has(invite.inviter.username)) {
 			sendToUser(invite.inviter.username, {
-				type: "game_invite_accepted",
-				receiverUsername: username,
-				inviteId: inviteId,
-				message:
-					"Game invitation accepted! Note: Multiplayer functionality is not yet implemented.",
+				type: "redirect_to_game",
+				gameRoomId: gameRoomId,
+				opponent: username,
+				message: "Game invitation accepted! Redirecting to game...",
 			});
 		}
 
 		sendToUser(username, {
-			type: "game_invite_response",
-			status: "accepted",
-			senderUsername: invite.inviter.username,
-			message:
-				"Game invitation accepted! Note: Multiplayer functionality is not yet implemented.",
+			type: "redirect_to_game",
+			gameRoomId: gameRoomId,
+			opponent: invite.inviter.username,
+			message: "Game invitation accepted! Redirecting to game...",
 		});
 	} catch (error) {
 		console.error("❌ Error accepting game invite:", error);
@@ -825,6 +847,17 @@ async function handleDeclineGameInvite(
 			status: "declined",
 			senderUsername: invite.inviter.username,
 		});
+
+		// Clean up the declined invitation after a short delay to allow immediate re-invitation
+		setTimeout(async () => {
+			try {
+				await prisma.gameInvite.delete({
+					where: { id: inviteId }
+				});
+			} catch (error) {
+				console.error("Error cleaning up declined invitation:", error);
+			}
+		}, 5000); // 5 seconds delay
 	} catch (error) {
 		console.error("❌ Error declining game invite:", error);
 		sendToUser(username, {
@@ -881,6 +914,7 @@ async function handleGetOnlineUsers(
 			prisma,
 			currentUsername
 		);
+		
 		connection.send(
 			JSON.stringify({
 				type: "online_users",

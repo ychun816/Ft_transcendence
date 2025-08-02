@@ -656,7 +656,7 @@ export class ServerPong {
         // Vérifier les buts
         if (this.ball.ball_x < 0 || this.ball.ball_x > this.config.canvas_width) {
             this.state.is_paused = true;
-            console.log(`🎯 BUT ! ball_x = ${this.ball.ball_x}`);
+            // console.log(`🎯 BUT ! ball_x = ${this.ball.ball_x}`);
             this.handle_goal();
             
             // ✅ IA COMPLEXE - Reset après but

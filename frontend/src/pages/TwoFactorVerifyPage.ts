@@ -76,7 +76,7 @@ export function createTwoFactorVerifyPage(): HTMLElement {
 			"#two-factor-token"
 		) as HTMLInputElement;
 		const backToLogin = page.querySelector('#backToLogin');
-
+		
 		if (backToLogin) {
 			backToLogin.addEventListener("click", () => {
 				import("../router/router.js").then(({ router }) => {
@@ -109,7 +109,6 @@ export function createTwoFactorVerifyPage(): HTMLElement {
 }
 
 async function send2FACode(page: HTMLDivElement): Promise<void> {
-	console.log("🔧 2FA DEBUG - send2FACode function called!");
 
 	const codeInput = page.querySelector("#two-factor-token") as HTMLInputElement;
 	const errorDiv = page.querySelector("#twofa-error") as HTMLDivElement;
@@ -119,7 +118,6 @@ async function send2FACode(page: HTMLDivElement): Promise<void> {
 
 	const code = codeInput.value.trim();
 
-	console.log(`🔍 2FA FRONTEND - Username: ${username}, Code: ${code}, Google: ${isGoogleAuth}`);
 
 	if (!code || code.length !== 6) {
 		console.log(`❌ 2FA FRONTEND - Invalid code length: ${code.length}`);
@@ -133,7 +131,6 @@ async function send2FACode(page: HTMLDivElement): Promise<void> {
 	// Handle Google OAuth 2FA
 	if (isGoogleAuth && tempToken) {
 		try {
-			console.log(`📤 2FA FRONTEND - Sending Google 2FA request`);
 			const response = await fetch("/api/auth/google/verify-2fa", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -150,7 +147,15 @@ async function send2FACode(page: HTMLDivElement): Promise<void> {
 				sessionStorage.setItem("username", data.user.username || "");
 				sessionStorage.removeItem("pending2FAGoogle");
 				sessionStorage.removeItem("googleAuthTempToken");
+				
 				await authService.getCurrentUser();
+				
+				import("../services/GlobalNotificationService.js").then(({ default: globalNotificationService }) => {
+	                setTimeout(() => {
+	                    globalNotificationService.connect();
+	                }, 1000);
+	            });
+				
 				import("../router/router.js").then(({ router }) => {
 					router.navigate("/game");
 				});
@@ -187,7 +192,6 @@ async function send2FACode(page: HTMLDivElement): Promise<void> {
 	}
 
 	try {
-		// Désactiver le bouton pendant la vérification
 		verifyBtn.disabled = true;
 		verifyBtn.innerHTML = `
 			<span class="relative z-10 ${classes.neonText}">
@@ -206,18 +210,21 @@ async function send2FACode(page: HTMLDivElement): Promise<void> {
 		const data = await response.json();
 
 		if (data.success && data.token) {
-			// Succès - stockage des données d'authentification
 			sessionStorage.setItem("authToken", data.token);
 			sessionStorage.setItem("username", username || "");
 			sessionStorage.removeItem("pending2FAUser");
 			await authService.getCurrentUser();
 			
-			// Redirection vers la page d'accueil
+			import("../services/GlobalNotificationService.js").then(({ default: globalNotificationService }) => {
+                setTimeout(() => {
+                    globalNotificationService.connect();
+                }, 1000);
+            });
+			
 			import("../router/router.js").then(({ router }) => {
 				router.navigate("/home");
 			});
 		} else {
-			// Erreur de vérification
 			if (errorDiv) {
 				errorDiv.textContent = data.message || i18n.t("auth.invalid_2fa_code") || "Invalid code";
 				errorDiv.style.display = "block";
@@ -230,7 +237,6 @@ async function send2FACode(page: HTMLDivElement): Promise<void> {
 			errorDiv.style.display = "block";
 		}
 	} finally {
-		// Réactiver le bouton
 		verifyBtn.disabled = false;
 		verifyBtn.innerHTML = `
 			<span class="relative z-10 ${classes.neonText}">

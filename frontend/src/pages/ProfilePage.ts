@@ -5,6 +5,45 @@ import { createLogoutSwitcher } from "../components/logoutSwitcher.js";
 import { classes } from "../styles/retroStyles.js";
 import { Chart, registerables } from "chart.js";
 
+async function disable2FA(userId: number) {
+	try {
+		const code = prompt(i18n.t("profile.enter_2fa_code") || "Please enter your current 2FA code to disable Two-Factor Authentication:");
+		
+		if (!code) {
+			return;
+		}
+
+		const token = sessionStorage.getItem("authToken");
+		if (!token) {
+			throw new Error("No auth token found");
+		}
+
+		const response = await fetch(`/api/user/${userId}/2fa/disable`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${token}`,
+			},
+			body: JSON.stringify({ code: code.trim() }),
+		});
+
+		if (response.ok) {
+			const result = await response.json();
+			if (result.success) {
+				alert(i18n.t("profile.disable_2fa_success") || "Two-Factor Authentication has been successfully disabled.");
+			} else {
+				throw new Error(result.error || "Failed to disable 2FA");
+			}
+		} else {
+			const errorData = await response.json();
+			throw new Error(errorData.error || "Server error");
+		}
+	} catch (error) {
+		console.error("Error disabling 2FA:", error);
+		alert(i18n.t("profile.disable_2fa_error") || "Error disabling Two-Factor Authentication. Please try again.");
+	}
+}
+
 async function manage2FA(page: HTMLDivElement) {
 	const manage2FABtn = page.querySelector("#manage-2fa") as HTMLButtonElement;
 	if (manage2FABtn) {
@@ -37,23 +76,19 @@ async function manage2FA(page: HTMLDivElement) {
 					const statusData = await response.json();
 
 					if (statusData.enabled) {
-						// 2FA is enabled - show disable option
 						if (
 							confirm(
-								"Two-Factor Authentication is currently enabled. Would you like to disable it?"
+								i18n.t("profile.confirm_disable_2fa") || "Two-Factor Authentication is currently enabled. Would you like to disable it?"
 							)
 						) {
-							// TODO: Implement disable 2FA functionality
-							alert("Disable 2FA functionality coming soon!");
+							await disable2FA(userInfo.id);
 						}
 					} else {
-						// 2FA is disabled - show setup option
 						if (
 							confirm(
 								"Would you like to enable Two-Factor Authentication?"
 							)
 						) {
-							// Redirect to 2FA setup page or show setup modal
 							window.open(
 								`/api/2fa/setup-totp-temp/${userInfo.username}`,
 								"_blank"
@@ -81,7 +116,6 @@ export function createProfilePage(): HTMLElement {
 	const render = () => {
 		page.innerHTML = `
 			<style>
-				/* Import de la police Orbitron pour le thème rétro */
 				@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 
 				* {

@@ -5,6 +5,60 @@ import { Game_ligne } from "../components/game/game_ligne.js";
 import { Game_tournoi } from "../components/game/game_tournoi.js";
 import { classes } from "../styles/retroStyles.js";
 
+// Function to notify all users about tournament match start
+async function notifyAllUsersAboutTournamentMatch(player1: string, player2: string, matchType: "first" | "second" | "final") {
+	try {
+		let message = "";
+		const currentLanguage = i18n.getCurrentLanguage();
+		
+		switch (matchType) {
+			case "first":
+				if (currentLanguage === "en") {
+					message = `🏆 Tournament Match Starting! ${player1} vs ${player2} - First Match`;
+				} else if (currentLanguage === "fr") {
+					message = `🏆 Match de Tournoi ! ${player1} vs ${player2} - Premier Match`;
+				} else {
+					message = `🏆 ¡Partido de Torneo! ${player1} vs ${player2} - Primer Partido`;
+				}
+				break;
+			case "second":
+				if (currentLanguage === "en") {
+					message = `🏆 Tournament Match Starting! ${player1} vs ${player2} - Semi-Final`;
+				} else if (currentLanguage === "fr") {
+					message = `🏆 Match de Tournoi ! ${player1} vs ${player2} - Demi-Finale`;
+				} else {
+					message = `🏆 ¡Partido de Torneo! ${player1} vs ${player2} - Semi-Final`;
+				}
+				break;
+			case "final":
+				if (currentLanguage === "en") {
+					message = `🎯 TOURNAMENT FINAL! ${player1} vs ${player2} - The Ultimate Match!`;
+				} else if (currentLanguage === "fr") {
+					message = `🎯 FINALE DU TOURNOI ! ${player1} vs ${player2} - Le Match Ultime !`;
+				} else {
+					message = `🎯 ¡FINAL DEL TORNEO! ${player1} vs ${player2} - ¡El Partido Definitivo!`;
+				}
+				break;
+		}
+
+		const response = await fetch('/api/notifications/tournament', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ message })
+		});
+
+		if (!response.ok) {
+			console.error('Failed to send tournament notification:', response.statusText);
+		} else {
+			// console.log('Tournament notification sent successfully');
+		}
+	} catch (error) {
+		console.error('Error sending tournament notification:', error);
+	}
+}
+
 export function createGamePage(): HTMLElement {
 	const page = document.createElement("div");
 	page.className =
@@ -792,6 +846,9 @@ export function createGamePage(): HTMLElement {
 			});
 
 			function startMatch1() {
+				// Notify all connected users about tournament match start
+				notifyAllUsersAboutTournamentMatch(player_a, player_b, "first");
+				
 				cleanupCurrentGame();
 				currentGame = new Game_tournoi(player_a, player_b, 0);
 
@@ -828,6 +885,9 @@ export function createGamePage(): HTMLElement {
 			}
 
 			function startMatch2() {
+				// Notify all connected users about tournament match start
+				notifyAllUsersAboutTournamentMatch(player_c, player_d, "second");
+				
 				hideButton(nextMatchBtn);
 				cleanupCurrentGame();
 				currentGame = new Game_tournoi(player_c, player_d, 0);
@@ -863,6 +923,9 @@ export function createGamePage(): HTMLElement {
 			}
 
 			function startFinal() {
+				// Notify all connected users about tournament final start
+				notifyAllUsersAboutTournamentMatch(finaliste_1, finaliste_2, "final");
+				
 				console.log("la FINAAALE");
 				hideButton(finalMatchBtn);
 				cleanupCurrentGame();

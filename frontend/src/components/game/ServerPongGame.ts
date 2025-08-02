@@ -525,9 +525,11 @@ export class ServerGame_solo {
     private mode: 'solo' | 'versus' | 'multi';
     private isStarting: boolean = false;
     private isDisconnected: boolean = false;
+    private gameRoomId?: string;
 
-    constructor(mode: 'solo' | 'versus' | 'multi') {
+    constructor(mode: 'solo' | 'versus' | 'multi', gameRoomId?: string) {
         this.mode = mode;
+        this.gameRoomId = gameRoomId;
         this.canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
         this.restart_btn = document.getElementById("restartBtn") as HTMLButtonElement;
         
@@ -564,7 +566,7 @@ export class ServerGame_solo {
             console.log(`🎮 Starting ${this.mode} game with server-side logic...`);
             
             // Se connecter au serveur et créer une partie
-            await this.client.connectToGame(undefined, this.mode);
+            await this.client.connectToGame(this.gameRoomId, this.mode);
             
             // Démarrer le rendu
             this.client.start();

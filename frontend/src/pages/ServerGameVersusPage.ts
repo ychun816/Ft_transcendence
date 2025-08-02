@@ -318,9 +318,22 @@ export class ServerGameVersusPage implements Page {
 				connectionStatus.textContent = "🟡 Connexion au serveur...";
 			}
 
+			// Check if we have a game room ID from an invitation
+			const gameRoomId = sessionStorage.getItem('gameRoomId');
+			const opponent = sessionStorage.getItem('gameOpponent');
+			
+			if (gameRoomId) {
+				console.log("🎮 Joining game room from invitation:", gameRoomId);
+				console.log("👥 Playing against:", opponent);
+				
+				// Clear the session storage after use
+				sessionStorage.removeItem('gameRoomId');
+				sessionStorage.removeItem('gameOpponent');
+			}
+
 			// Créer et démarrer le jeu SERVER-SIDE VERSUS
 			console.log("🎮 Creating new versus game...");
-			this.currentGame = new ServerGame_solo("versus");
+			this.currentGame = new ServerGame_solo("versus", gameRoomId || undefined);
 
 			console.log("🔌 Connecting to game server...");
 			await this.currentGame.start_game_loop();

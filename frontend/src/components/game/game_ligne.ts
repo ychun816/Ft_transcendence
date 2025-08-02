@@ -930,7 +930,7 @@ class Pong
         if (this.ball.ball_x < 0 || this.ball.ball_x > this.config.canvas_width)
         {
             this.state.is_paused = true;
-            console.log(`🎯 BUT ! ball_x = ${this.ball.ball_x} et ballspeed = ${this.config.ball_speed}`);
+            // console.log(`🎯 BUT ! ball_x = ${this.ball.ball_x} et ballspeed = ${this.config.ball_speed}`);
             this.handle_goal();
             return;
         }

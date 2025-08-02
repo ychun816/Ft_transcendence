@@ -16,6 +16,66 @@ export async function twoFactorRoutes(
 	prisma: PrismaClient
 ) {
 	// ===============================
+	// Disable 2FA for a user (by userId with 2FA code verification)
+	// ===============================
+	fastify.post("/api/user/:userId/2fa/disable", async (request, reply) => {
+		try {
+			const { userId } = request.params as { userId: string };
+			const { code } = request.body as { code: string };
+			
+			const user = await prisma.user.findUnique({
+				where: { id: parseInt(userId) },
+			});
+
+			if (!user) {
+				return reply.status(404).send({ error: "User not found" });
+			}
+
+			if (!user.isTwoFactorEnabled) {
+				return reply.status(400).send({ error: "2FA is not enabled" });
+			}
+
+			// Verify the provided 2FA code
+			let isValidCode = false;
+			
+			if (user.twoFactorType === "totp" && user.twoFactorSecret) {
+				isValidCode = verifyTOTPCode(user.twoFactorSecret, code);
+			} else if (user.twoFactorType === "email") {
+				// For email 2FA, we could send a code first, but for security
+				// we'll require the current TOTP code if available, or implement email verification
+				return reply.status(400).send({ 
+					error: "Email 2FA disable requires contacting administrator" 
+				});
+			}
+
+			if (!isValidCode) {
+				return reply.status(400).send({ error: "Invalid 2FA code" });
+			}
+
+			// Disable 2FA
+			await prisma.user.update({
+				where: { id: parseInt(userId) },
+				data: {
+					isTwoFactorEnabled: false,
+					twoFactorCode: null,
+					twoFactorCodeExpires: null,
+					twoFactorSecret: null,
+					twoFactorEnabledAt: null,
+					twoFactorType: null,
+				},
+			});
+
+			return reply.send({ 
+				success: true, 
+				message: "2FA successfully disabled" 
+			});
+		} catch (error) {
+			console.error("2FA disable error:", error);
+			return reply.status(500).send({ error: "Internal server error" });
+		}
+	});
+
+	// ===============================
 	// Get 2FA status for a user
 	// ===============================
 	fastify.get("/api/user/:userId/2fa/status", async (request, reply) => {
