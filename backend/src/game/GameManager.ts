@@ -36,8 +36,9 @@ export class GameManager {
 		this.fastify.get(
 			"/ws/game/:gameId",
 			{ websocket: true },
-			(connection, req: FastifyRequest) => {
-				console.log("🔌 WebSocket connection attempt...");
+			(connection, req: FastifyRequest) =>
+			{
+				////console.log("🔌 WebSocket connection attempt...");
 
 				const params = req.params as { gameId: string };
 				const query = req.query as {
@@ -49,10 +50,8 @@ export class GameManager {
 				const playerId = query.playerId || `player_${Date.now()}`;
 				const clientIP = req.ip;
 
-				console.log(
-					`🎮 Player ${playerId} connecting to game ${gameId} from IP ${clientIP}`
-				);
-				console.log(`🔍 Query params:`, query);
+				//console.log(`🎮 Player ${playerId} connecting to game ${gameId} from IP ${clientIP}`);
+				//console.log(`🔍 Query params:`, query);
 
 				// Check the rate limiting
 				if (!this.checkRateLimit(clientIP)) {
@@ -68,15 +67,13 @@ export class GameManager {
 				// Create a new game if it doesn't exist
 				if (!gameRoom) {
 					const mode = query.mode || "versus";
-					console.log(
-						`🆕 Creating new game room: ${gameId} (${mode})`
-					);
+					//console.log(`🆕 Creating new game room: ${gameId} (${mode})`);
 					gameRoom = this.createGameRoom(gameId, mode);
-					console.log(
-						`✅ New game room created: ${gameId} (${mode})`
-					);
-				} else {
-					console.log(`🔄 Using existing game room: ${gameId}`);
+					//console.log(`✅ New game room created: ${gameId} (${mode})`);
+				}
+				else
+				{
+					//console.log(`🔄 Using existing game room: ${gameId}`);
 				}
 
 				// Add the player to the game
@@ -159,10 +156,9 @@ export class GameManager {
 					console.error(`❌ WebSocket error for ${playerId}:`, error);
 				});
 
-				connection.on("close", (code: number, reason: Buffer) => {
-					console.log(
-						`👋 Player ${playerId} disconnected from game ${gameId} (code: ${code}, reason: ${reason.toString()})`
-					);
+				connection.on("close", (code: number, reason: Buffer) =>
+				{
+					//console.log(`👋 Player ${playerId} disconnected from game ${gameId} (code: ${code}, reason: ${reason.toString()})`);
 					this.handlePlayerDisconnect(gameId, playerId);
 				});
 				
@@ -205,17 +201,16 @@ export class GameManager {
 			const isOld = now - gameRoom.createdAt > maxAge;
 			const isEmpty = gameRoom.players.size === 0;
 
-			if (isOld || isEmpty) {
-				console.log(
-					`🧹 Cleaning up old/empty game: ${gameId} (age: ${Math.round((now - gameRoom.createdAt) / 1000)}s, players: ${gameRoom.players.size})`
-				);
+			if (isOld || isEmpty)
+			{
+				//console.log(`🧹 Cleaning up old/empty game: ${gameId} (age: ${Math.round((now - gameRoom.createdAt) / 1000)}s, players: ${gameRoom.players.size})`);
 				this.removeGameRoom(gameId);
 			}
 		}
 
 		this.cleanupRateLimit();
 
-		console.log(`📊 Active games after cleanup: ${this.games.size}`);
+		//console.log(`📊 Active games after cleanup: ${this.games.size}`);
 	}
 
 	private checkRateLimit(ip: string): boolean {
@@ -260,15 +255,12 @@ export class GameManager {
 			for (const [playerId, playerData] of gameRoom.players) {
 				const timeSinceLastPing = now - playerData.lastPing;
 
-				if (timeSinceLastPing > HEARTBEAT_TIMEOUT) {
-					console.log(
-						`💀 Player ${playerId} seems dead (no activity for ${Math.round(timeSinceLastPing / 1000)}s), removing...`
-					);
+				if (timeSinceLastPing > HEARTBEAT_TIMEOUT)
+				{
+					//console.log(`💀 Player ${playerId} seems dead (no activity for ${Math.round(timeSinceLastPing / 1000)}s), removing...`);
 					playersToRemove.push(playerId);
 				} else if (playerData.connection.readyState !== 1) {
-					console.log(
-						`🔌 Player ${playerId} connection not open (state: ${playerData.connection.readyState}), removing...`
-					);
+					//console.log(`🔌 Player ${playerId} connection not open (state: ${playerData.connection.readyState}), removing...`);
 					playersToRemove.push(playerId);
 				}
 			}
@@ -338,7 +330,7 @@ export class GameManager {
 				break;
 
 			default:
-				console.log(`Unknown message type: ${data.type}`);
+				//console.log(`Unknown message type: ${data.type}`);
 		}
 	}
 
@@ -490,7 +482,7 @@ export class GameManager {
 	}
 
 	public shutdown() {
-		console.log("🛑 Shutting down GameManager...");
+		//console.log("🛑 Shutting down GameManager...");
 
 		if (this.cleanupInterval) {
 			clearInterval(this.cleanupInterval);
@@ -501,6 +493,6 @@ export class GameManager {
 			this.removeGameRoom(gameId);
 		}
 
-		console.log("✅ GameManager shutdown complete");
+		//console.log("✅ GameManager shutdown complete");
 	}
 }

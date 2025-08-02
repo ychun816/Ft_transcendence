@@ -189,7 +189,7 @@ class Pong
             ball_max_speed: 12 * (3/2),
             paddle_speed: 5.25 * (3/2),
             score_to_win: 3,
-            increase_vitesse: 250,
+            increase_vitesse: 175,
             time_before_new_ball: 3000
         }
 
@@ -258,16 +258,33 @@ class Pong
 
     handle_keydown = (e: KeyboardEvent) =>
     {
-        // if (e.code === "Space")
-        //     this.state.is_paused = !this.state.is_paused;
-        // else if (e.key === "b")
-        //     console.log("Ball_dir_x = ", this.ball.ball_dir_x, ", Ball_dir_y = ", this.ball.ball_dir_y)
-        // else
+        if (e.key === "ArrowUp" || e.key === "ArrowDown" || 
+            e.key === "ArrowLeft" || e.key === "ArrowRight" ||
+            e.key === "w" || e.key === "W" ||
+            e.key === "s" || e.key === "S" ||
+            e.key === "j" || e.key === "J" ||
+            e.key === "m" || e.key === "M" ||
+            e.key === "9" || e.key === "6" ||
+            e.code === "Space") {
+            e.preventDefault();
+        }
+        
         this.keys_pressed[e.key] = true;
     };
 
     handle_keyup = (e: KeyboardEvent) =>
     {
+        if (e.key === "ArrowUp" || e.key === "ArrowDown" || 
+            e.key === "ArrowLeft" || e.key === "ArrowRight" ||
+            e.key === "w" || e.key === "W" ||
+            e.key === "s" || e.key === "S" ||
+            e.key === "j" || e.key === "J" ||
+            e.key === "m" || e.key === "M" ||
+            e.key === "9" || e.key === "6" ||
+            e.code === "Space") {
+            e.preventDefault();
+        }
+        
         this.keys_pressed[e.key] = false;
     };
 
@@ -281,7 +298,7 @@ class Pong
         }
 
         this.draw(1);
-        let countdown = 3;
+        let countdown = 10;
 
         if (i18n.getCurrentLanguage() == "en")
             this.count_down.innerText = `The game will start in`;
@@ -381,7 +398,7 @@ class Pong
         let delta_time;
         if (raw_delta_time > 1000)
         {
-            console.log("Très long délai détecté, réinitialisation du timing");
+            //console.log("Très long délai détecté, réinitialisation du timing");
             delta_time = this.fixed_timestep; // Traiter comme un frame normal
         }
         else
@@ -488,7 +505,7 @@ class Pong
 
     cleanup(): void
     {
-        console.log("🧹 Nettoyage des ressources du jeu...");
+        //console.log("🧹 Nettoyage des ressources du jeu...");
         
         this.clear_all_timers();
         
@@ -521,12 +538,12 @@ class Pong
 
         this.ctx.clearRect(0, 0, this.config.canvas_width, this.config.canvas_height);
         
-        console.log("✅ Nettoyage terminé");
+        //console.log("✅ Nettoyage terminé");
     }
 
     back_to_menu(): void
     {
-        console.log("🏠 Retour au menu principal...");
+        //console.log("🏠 Retour au menu principal...");
         
         this.cleanup();
         
@@ -550,12 +567,12 @@ class Pong
         this.data.lose_point_down = 0;
         this.data.lose_point_up = 0;
         
-        console.log("✅ Retour au menu préparé");
+        //console.log("✅ Retour au menu préparé");
     }
 
     destroy(): void
     {
-        console.log("💥 Destruction de l'instance de jeu...");
+        //console.log("💥 Destruction de l'instance de jeu...");
         
         this.cleanup();
         
@@ -569,12 +586,12 @@ class Pong
         this.keys_pressed = {};
         this.state.game_running = false;
         
-        console.log("✅ Instance détruite");
+        //console.log("✅ Instance détruite");
     }
 
     restart(): void
     {
-        console.log("🔄 RESTART demandé");
+        //console.log("🔄 RESTART demandé");
         
         this.clear_all_timers();
         this.restart_btn.style.display = 'none';
@@ -597,7 +614,7 @@ class Pong
         
         this.restart_timeout = setTimeout(() =>
         {
-            console.log("🚀 Nouvelle partie");
+            //console.log("🚀 Nouvelle partie");
             
             this.ball.ball_x = this.config.canvas_width / 2;
             this.ball.ball_y = this.config.canvas_height / 2;
@@ -708,15 +725,15 @@ class Pong
             return ;
 
         // p1 move
-        if (this.keys_pressed["w"] && this.paddle.paddles.p1_y > 0)
+        if ((this.keys_pressed["w"] || this.keys_pressed["W"]) && this.paddle.paddles.p1_y > 0)
             this.paddle.paddles.p1_y  -= this.config.paddle_speed;
-        if (this.keys_pressed["s"] && this.paddle.paddles.p1_y  <= (this.config.canvas_height / 2) - this.config.paddle_height)
+        if ((this.keys_pressed["s"] || this.keys_pressed["S"]) && this.paddle.paddles.p1_y  <= (this.config.canvas_height / 2) - this.config.paddle_height)
             this.paddle.paddles.p1_y  += this.config.paddle_speed;
 
         // p2 move
-        if (this.keys_pressed["j"] && this.paddle.paddles.p2_y > (this.config.canvas_height / 2))
+        if ((this.keys_pressed["j"] || this.keys_pressed["J"]) && this.paddle.paddles.p2_y > (this.config.canvas_height / 2))
             this.paddle.paddles.p2_y  -= this.config.paddle_speed;
-        if (this.keys_pressed["m"] && this.paddle.paddles.p2_y  < this.config.canvas_height - this.config.paddle_height)
+        if ((this.keys_pressed["m"] || this.keys_pressed["M"]) && this.paddle.paddles.p2_y  < this.config.canvas_height - this.config.paddle_height)
             this.paddle.paddles.p2_y  += this.config.paddle_speed;
 
         // p3 move
@@ -847,7 +864,7 @@ class Pong
                 );
                 
                 if (collision.collision) {
-                    console.log(`🏓 Rebond raquette P${paddle.id} détecté par collision continue`);
+                    //console.log(`🏓 Rebond raquette P${paddle.id} détecté par collision continue`);
                     
                     // Positionner la balle au point d'intersection exact
                     // Cela évite que la balle reste "coincée" dans le paddle
@@ -905,7 +922,7 @@ class Pong
                 );
                 
                 if (collision.collision) {
-                    console.log(`🏓 Rebond raquette P${paddle.id} détecté par collision continue`);
+                    //console.log(`🏓 Rebond raquette P${paddle.id} détecté par collision continue`);
                     
                     // Positionner la balle au point d'intersection exact
                     if (collision.intersectionPoint) {
@@ -930,7 +947,7 @@ class Pong
         if (this.ball.ball_x < 0 || this.ball.ball_x > this.config.canvas_width)
         {
             this.state.is_paused = true;
-            // console.log(`🎯 BUT ! ball_x = ${this.ball.ball_x} et ballspeed = ${this.config.ball_speed}`);
+            // //console.log(`🎯 BUT ! ball_x = ${this.ball.ball_x} et ballspeed = ${this.config.ball_speed}`);
             this.handle_goal();
             return;
         }
@@ -943,7 +960,7 @@ class Pong
         // Rebonds sur les murs haut et bas
         if (this.ball.ball_y <= 5 || this.ball.ball_y >= this.config.canvas_height - 5)
         {
-            console.log(`AVANT rebond avec ball_x = ${this.ball.ball_x} et ball_y = ${this.ball.ball_y}`);
+            //console.log(`AVANT rebond avec ball_x = ${this.ball.ball_x} et ball_y = ${this.ball.ball_y}`);
 
             if (this.ball.ball_x <= 70 )
             {
@@ -951,7 +968,7 @@ class Pong
                     this.ball.ball_y = 6;
                 else
                     this.ball.ball_y = this.config.canvas_height - 6;
-                console.log("ca passe ici zeubi")
+                //console.log("ca passe ici zeubi")
             }
             if (this.ball.ball_x >= this.config.canvas_width - 70)
             {
@@ -959,10 +976,10 @@ class Pong
                     this.ball.ball_y = 6;
                 else
                     this.ball.ball_y = this.config.canvas_height - 6;
-                console.log("ca passe ici woula")
+                //console.log("ca passe ici woula")
             }
 
-            console.log(`APRES rebond avec ball_x = ${this.ball.ball_x} et ball_y = ${this.ball.ball_y}`);
+            //console.log(`APRES rebond avec ball_x = ${this.ball.ball_x} et ball_y = ${this.ball.ball_y}`);
             
             this.ball.ball_dir_y *= -1;
             this.ball.current_rebond++;

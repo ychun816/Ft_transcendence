@@ -98,14 +98,14 @@ class Router {
     }
 
     private async renderRoute(route: string): Promise<void> {
-        console.log("🎯 renderRoute called with route:", route);
+        //console.log("🎯 renderRoute called with route:", route);
         
         // Check if route requires authentication
         if (this.isProtectedRoute(route)) {
-            console.log("🔐 Protected route detected, checking authentication...");
+            //console.log("🔐 Protected route detected, checking authentication...");
             const authToken = sessionStorage.getItem('authToken');
             if (!authToken) {
-                console.log("❌ No auth token found, redirecting to login");
+                //console.log("❌ No auth token found, redirecting to login");
                 this.navigate('/login');
                 return;
             }
@@ -119,14 +119,14 @@ class Router {
                 });
                 
                 if (!response.ok) {
-                    console.log("❌ Auth verification failed, redirecting to login");
+                    //console.log("❌ Auth verification failed, redirecting to login");
                     sessionStorage.removeItem('authToken');
                     this.navigate('/login');
                     return;
                 }
-                console.log("✅ Authentication verified");
+                //console.log("✅ Authentication verified");
             } catch (error) {
-                console.log("❌ Auth check error, redirecting to login");
+                //console.log("❌ Auth check error, redirecting to login");
                 sessionStorage.removeItem('authToken');
                 this.navigate('/login');
                 return;
@@ -137,18 +137,18 @@ class Router {
         let routeHandler = this.routes.get(route);
         let routeParams: any = {};
 
-        console.log("🔍 Available routes:", Array.from(this.routes.keys()));
-        console.log("🎮 Route handler found:", !!routeHandler);
+        //console.log("🔍 Available routes:", Array.from(this.routes.keys()));
+        //console.log("🎮 Route handler found:", !!routeHandler);
 
         // If no exact match, check dynamic routes
         if (!routeHandler) {
-            console.log("🔍 Checking dynamic routes...");
+            //console.log("🔍 Checking dynamic routes...");
             for (const dynamicRoute of this.dynamicRoutes) {
                 const params = this.extractParams(route, dynamicRoute.pattern);
                 if (params) {
                     routeHandler = dynamicRoute.handler;
                     routeParams = params;
-                    console.log("✅ Dynamic route matched:", dynamicRoute.pattern);
+                    //console.log("✅ Dynamic route matched:", dynamicRoute.pattern);
                     break;
                 }
             }
@@ -162,11 +162,11 @@ class Router {
 
         const app = document.getElementById('app');
         if (app) {
-            console.log("🎨 Rendering route:", route);
+            //console.log("🎨 Rendering route:", route);
             
             // Cleanup previous page if it has onUnmount method
             if (this.currentPageInstance && typeof this.currentPageInstance.onUnmount === 'function') {
-                console.log("🧹 Cleaning up previous page");
+                //console.log("🧹 Cleaning up previous page");
                 this.currentPageInstance.onUnmount();
             }
             
@@ -184,8 +184,10 @@ class Router {
             }
             
             app.appendChild(element);
-            console.log("✅ Route rendered successfully:", route);
-        } else {
+            //console.log("✅ Route rendered successfully:", route);
+        }
+        else
+        {
             console.error("❌ App element not found");
         }
     }
