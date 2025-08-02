@@ -17,12 +17,10 @@ class Router {
     }
 
     private setupProtectedRoutes() {
-        // Définir les routes qui nécessitent une authentification
         this.protectedRoutes.add('/home');
         this.protectedRoutes.add('/profile');
-        //this.protectedRoutes.add('/game');
+        this.protectedRoutes.add('/game');
         this.protectedRoutes.add('/chat');
-        this.protectedRoutes.add('/leaderboard');
     }
 
     private isProtectedRoute(route: string): boolean {
@@ -109,7 +107,7 @@ class Router {
                 this.navigate('/login');
                 return;
             }
-            
+
             // Verify token by calling /api/me
             try {
                 const response = await fetch('/api/me', {
@@ -117,7 +115,7 @@ class Router {
                         'Authorization': `Bearer ${authToken}`
                     }
                 });
-                
+
                 if (!response.ok) {
                     //console.log("❌ Auth verification failed, redirecting to login");
                     sessionStorage.removeItem('authToken');
@@ -132,8 +130,7 @@ class Router {
                 return;
             }
         }
-        
-        // Check exact routes first
+
         let routeHandler = this.routes.get(route);
         let routeParams: any = {};
 
@@ -155,7 +152,6 @@ class Router {
         }
 
         if (!routeHandler) {
-            console.error("❌ No route handler found for:", route);
             this.navigate('/404');
             return;
         }
@@ -169,20 +165,17 @@ class Router {
                 //console.log("🧹 Cleaning up previous page");
                 this.currentPageInstance.onUnmount();
             }
-            
+
             app.innerHTML = '';
-            // Store route params globally so components can access them
             (window as any).routeParams = routeParams;
             const element = routeHandler();
-            
-            // Try to store reference to page instance for cleanup
-            // Look for a data attribute or attached instance
+
             if ((element as any).__pageInstance) {
                 this.currentPageInstance = (element as any).__pageInstance;
             } else {
                 this.currentPageInstance = null;
             }
-            
+
             app.appendChild(element);
             //console.log("✅ Route rendered successfully:", route);
         }
@@ -235,7 +228,7 @@ class Router {
 		});
 	}
 
-    
+
 }
 
 // Add this helper function after your Router class (before export):

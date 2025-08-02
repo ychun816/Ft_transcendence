@@ -1,5 +1,6 @@
 import { AuthService } from "../middleware/auth.js";
 import { i18n } from "../services/i18n.js";
+import { errorNotif } from "../services/errorNotification.js";
 import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
 import { classes } from "../styles/retroStyles.js";
 import { getUserInfo } from "./ChatPage.js";
@@ -22,7 +23,6 @@ const renderContent = () => {
 			}
 		</style>
 
-		<!-- Champ d'étoiles -->
 		<div class="${classes.starfield}"></div>
 		<div class="absolute top-4 left-4 z-50">
 			<div class="login-dropdown">
@@ -31,15 +31,12 @@ const renderContent = () => {
 				</button>
 			</div>
 		</div>
-		<!-- Conteneur principal avec effet scan -->
 		<div class="min-h-screen flex flex-col items-center justify-center p-4 ${classes.scanLinesContainer}">
 
-			<!-- Titre principal avec effet néon -->
 			<h1 class="${classes.retroTitle} mb-12">
 				🔐 ${i18n.t('auth.login_title')}
 			</h1>
 
-			<!-- Panneau de connexion -->
 			<div class="${classes.retroPanel} rounded-2xl p-8 max-w-md w-full">
 				<form class="space-y-6">
 					<div>
@@ -64,6 +61,26 @@ const renderContent = () => {
 						<span class="relative z-10">✨ ${i18n.t('common.login')}</span>
 					</button>
 				</form>
+				<div class="mt-6 space-y-4">
+					<div class="relative">
+						<div class="absolute inset-0 flex items-center">
+							<div class="w-full border-t border-cyan-600"></div>
+						</div>
+						<div class="relative flex justify-center text-sm">
+							<span class="px-2 bg-gray-900 text-cyan-400">${i18n.t('auth.or')}</span>
+						</div>
+					</div>
+
+					<button type="button" id="google-signin-btn" class="${classes.gameModeButton} w-full flex items-center justify-center gap-3">
+						<svg class="w-5 h-5" viewBox="0 0 24 24">
+							<path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+							<path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+							<path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+							<path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+						</svg>
+						<span class="relative z-10">${i18n.t('auth.google_signin')}</span>
+					</button>
+				</div>
 				<button type="button" id="register-btn" class="${classes.gameModeButton} w-full mt-6">
 					<span class="relative z-10">📝 ${i18n.t('common.register')}</span>
 				</button>
@@ -129,24 +146,24 @@ const renderContent = () => {
 }
 
 export async function requireAuth(): Promise<boolean> {
-    const user = await authService.getCurrentUser();
-    if (!user) {
-        import("../router/router.js").then(({ router }) => {
-            router.navigate('/login');
-        });
-        return false;
-    }
-    return true;
+	const user = await authService.getCurrentUser();
+	if (!user) {
+		import("../router/router.js").then(({ router }) => {
+			router.navigate('/login');
+		});
+		return false;
+	}
+	return true;
 }
 
 async function handleGoogleSignIn(): Promise<void> {
-    try {
-        // Redirect directly to Google OAuth (no popup)
-        window.location.href = '/api/auth/google';
-    } catch (error) {
-        console.error('Google Sign-In error:', error);
-        alert(i18n.t('auth.google_signin_error') || 'Google Sign-In failed');
-    }
+	try {
+		// Redirect directly to Google OAuth (no popup)
+		window.location.href = '/api/auth/google';
+	} catch (error) {
+		console.error('Google Sign-In error:', error);
+		alert(i18n.t('auth.google_signin_error') || 'Google Sign-In failed');
+	}
 }
 
 async function registerActiveSessions()
@@ -214,51 +231,85 @@ async function addActiveSessions(userData: any)
 }
 
 async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
-    const usernameInput = page.querySelector("#username") as HTMLInputElement;
-    const passwordInput = page.querySelector("#password") as HTMLInputElement;
-    const twoFactorInput = page.querySelector("#two-factor-token") as HTMLInputElement;
+	const usernameInput = page.querySelector("#username") as HTMLInputElement;
+	const passwordInput = page.querySelector("#password") as HTMLInputElement;
+	const twoFactorInput = page.querySelector("#two-factor-token") as HTMLInputElement;
 
-    const UserInfo = {
-        username: usernameInput.value,
-        password: passwordInput.value,
-        twoFactorToken: twoFactorInput?.value || undefined,
-    };
+	const UserInfo = {
+		username: usernameInput.value,
+		password: passwordInput.value,
+		twoFactorToken: twoFactorInput?.value || undefined,
+	};
 
-    try {
-        console.log("🔍 Sending login request with:", UserInfo);
+	try {
+		const response = await fetch("/api/login", {
+			method: "POST",
+			credentials: 'include',
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(UserInfo),
+		});
 
-        const response = await fetch("/api/login", {
-            method: "POST",
-            credentials: 'include',
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(UserInfo),
-        });
+		if (!response.ok) {
+			const errorText = await response.text();
+			let errorData;
+			try {
+				errorData = JSON.parse(errorText);
+			} catch {
+				errorData = { message: errorText };
+			}
 
-        console.log("🔍 Login response status:", response.status);
-        console.log("🔍 Login response headers:", response.headers);
+			switch (response.status) {
+				case 400:
+					if (errorData.message?.includes('username')) {
+						errorNotif.showFieldError('username', 'username_required');
+					} else if (errorData.message?.includes('password')) {
+						errorNotif.showFieldError('password', 'password_required');
+					} else {
+						errorNotif.showErrorBanner('check_information', 'warning');
+					}
+					break;
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`HTTP ${response.status}: ${errorText}`);
-        }
+				case 401:
+					if (errorData.message?.includes('User not found')) {
+						errorNotif.showFieldError('username', 'user_not_found');
+						errorNotif.showErrorBanner('user_not_found_banner');
+					} else if (errorData.message?.includes('Wrong password')) {
+						errorNotif.showFieldError('password', 'wrong_password');
+						errorNotif.showErrorBanner('wrong_password_banner');
+					} else if (errorData.message?.includes('Invalid 2FA')) {
+						errorNotif.showFieldError('two-factor-token', 'invalid_2fa');
+						errorNotif.showErrorBanner('invalid_2fa_banner');
+					} else {
+						errorNotif.showErrorBanner('invalid_credentials');
+					}
+					break;
 
-        const data = await response.json();
-        console.log("🔍 Login response data:", data);
+				case 429:
+					errorNotif.showErrorBanner('too_many_attempts', 'warning');
+					break;
 
-        if (data.success) {
-            // Store the JWT token in sessionStorage
-            sessionStorage.setItem('authToken', data.token);
-            // Store username for convenience
-            sessionStorage.setItem('username', data.user.username);
+				case 500:
+					errorNotif.showErrorBanner('server_error');
+					break;
 
-            console.log("🔑 Login success - Stored token:", data.token);
-            console.log("🔑 Login success - Stored username:", data.user.username);
+				default:
+					errorNotif.showErrorBanner('connection_error', 'error', { status: response.status.toString() });
+			}
+			return;
+		}
 
-            await authService.getCurrentUser();
+		const data = await response.json();
 
-            // Initialize global notification service
+		if (data.success) {
+			sessionStorage.setItem('authToken', data.token);
+			sessionStorage.setItem('username', data.user.username);
+
+			errorNotif.showSuccessMessage('welcome_message', { username: data.user.username });
+
+			 await authService.getCurrentUser();
+
             import("../services/GlobalNotificationService.js").then(({ default: globalNotificationService }) => {
                 setTimeout(() => {
                     globalNotificationService.connect();
@@ -269,83 +320,119 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
                 router.navigate('/game');
 				registerActiveSessions()
             });
-        } else if (data.requires2FA) {
-            // Save username for 2FA verification step
-            sessionStorage.setItem('pending2FAUser', UserInfo.username);
-            // Redirect to 2FA verification page
-            import("../router/router.js").then(({ router }) => {
-                router.navigate('/2fa-verify');
-				registerActiveSessions()
-            // // Show 2FA input
-            // show2FAInput(page);
-            // alert(data.message || i18n.t('auth.2fa_required'));
-            });
-        } else {
-            alert(i18n.t('auth.login_error') + ": " + (data.message || i18n.t('auth.invalid_credentials')));
-        }
-    } catch (error) {
-        console.error("Login error:", error);
-        alert(i18n.t('auth.login_error') + ": " + (error || "Please try again."));
-    }
+
+		} else if (data.requires2FA) {
+			sessionStorage.setItem('pending2FAUser', UserInfo.username);
+
+			// Injecter le champ 2FA avec traductions
+			const form = page.querySelector('form');
+			const submitButton = form?.querySelector('#login-btn');
+
+			if (form && submitButton && !form.querySelector('#two-factor-token')) {
+				const twoFAHTML = `
+					<div class="mt-4 p-4 bg-blue-900 bg-opacity-30 border border-blue-500 rounded-lg">
+						<label class="block text-blue-300 text-sm mb-2">
+							🔐 ${i18n.t('auth.2fa_code') || 'Code de vérification (6 chiffres)'}
+						</label>
+						<input
+							type="text"
+							id="two-factor-token"
+							maxlength="6"
+							placeholder="000000"
+							class="w-full p-3 bg-gray-800 border border-blue-500 rounded text-center text-lg font-mono text-white focus:ring-2 focus:ring-blue-400"
+						/>
+						<p class="text-xs text-blue-300 mt-1 text-center">
+							${i18n.t('errors.2fa_code_sent')}
+						</p>
+					</div>
+				`;
+
+				form.insertBefore(
+					document.createRange().createContextualFragment(twoFAHTML),
+					submitButton
+				);
+
+				// Formatter automatiquement le code
+				const newTwoFAInput = form.querySelector('#two-factor-token') as HTMLInputElement;
+				newTwoFAInput?.addEventListener('input', (e) => {
+					const target = e.target as HTMLInputElement;
+					target.value = target.value.replace(/\D/g, '').slice(0, 6);
+				});
+
+				newTwoFAInput?.focus();
+			}
+
+			errorNotif.showErrorBanner('_2fa_info', 'info');
+		}
+
+	} catch (error) {
+		console.error("Login error:", error);
+
+		if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+			errorNotif.showErrorBanner('network_error');
+		} else {
+			errorNotif.showErrorBanner('technical_error');
+		}
+	}
 }
 
 function show2FAInput(page: HTMLDivElement): void {
-    const form = page.querySelector('.space-y-4') as HTMLFormElement;
+	const form = page.querySelector('.space-y-4') as HTMLFormElement;
 
-    function show2FAInput(page: HTMLDivElement): void {
-    // Find the login form
-    const form = page.querySelector('form.space-y-6') as HTMLFormElement;
-    if (!form) return;
+	function show2FAInput(page: HTMLDivElement): void {
+	// Find the login form
+	const form = page.querySelector('form.space-y-6') as HTMLFormElement;
+	if (!form) return;
 
-    // Prevent duplicate 2FA input
-    if (form.querySelector('#two-factor-token')) return;
+	// Prevent duplicate 2FA input
+	if (form.querySelector('#two-factor-token')) return;
 
-    // Create 2FA input field
-    const twoFactorDiv = document.createElement('div');
-    twoFactorDiv.className = "mt-2";
-    const twoFactorInput = document.createElement('input');
-    twoFactorInput.type = 'text';
-    twoFactorInput.id = 'two-factor-token';
-    twoFactorInput.placeholder = i18n.t('auth.two_factor_code') || '6-digit code';
-    twoFactorInput.maxLength = 6;
-    twoFactorInput.className = 'neon-input text-center font-mono';
-    twoFactorInput.required = true;
+	// Create 2FA input field
+	const twoFactorDiv = document.createElement('div');
+	twoFactorDiv.className = "mt-2";
+	const twoFactorInput = document.createElement('input');
+	twoFactorInput.type = 'text';
+	twoFactorInput.id = 'two-factor-token';
+	twoFactorInput.placeholder = i18n.t('auth.two_factor_code') || '6-digit code';
+	twoFactorInput.maxLength = 6;
+	twoFactorInput.className = 'neon-input text-center font-mono';
+	twoFactorInput.required = true;
 
-    // Only allow digits
-    twoFactorInput.addEventListener('input', (e) => {
-        const target = e.target as HTMLInputElement;
-        target.value = target.value.replace(/\D/g, '').slice(0, 6);
-    });
+	// Only allow digits
+	twoFactorInput.addEventListener('input', (e) => {
+		const target = e.target as HTMLInputElement;
+		target.value = target.value.replace(/\D/g, '').slice(0, 6);
+	});
 
-    twoFactorDiv.appendChild(twoFactorInput);
+	twoFactorDiv.appendChild(twoFactorInput);
 
-    // Insert 2FA input before the submit button
-    const submitButton = form.querySelector('#login-btn');
-    if (submitButton) {
-        form.insertBefore(twoFactorDiv, submitButton);
+	// Insert 2FA input before the submit button
+	const submitButton = form.querySelector('#login-btn');
+	if (submitButton) {
+		form.insertBefore(twoFactorDiv, submitButton);
 
-        // Change button text for clarity
-        submitButton.textContent = i18n.t('auth.verify_and_login') || 'Verify & Login';
-    }
+		// Change button text for clarity
+		submitButton.textContent = i18n.t('auth.verify_and_login') || 'Verify & Login';
+	}
 
-    // Focus on the 2FA input
-    twoFactorInput.focus();
+	// Focus on the 2FA input
+	twoFactorInput.focus();
 }
-    // Check if 2FA input already exists
-    // if (form.querySelector('#two-factor-token')) {
-    //     return;
-    // }
+	// Check if 2FA input already exists
+	// if (form.querySelector('#two-factor-token')) {
+	//     return;
+	// }
 
-    // // Create 2FA input field
-    // const twoFactorInput = document.createElement('input');
-    // twoFactorInput.type = 'text';
-    // twoFactorInput.id = 'two-factor-token';
-    // twoFactorInput.placeholder = i18n.t('auth.2fa_code') || '6-digit code';
-    // twoFactorInput.maxLength = 6;
-    // twoFactorInput.className = 'input text-center font-mono';
-    // twoFactorInput.required = true;
+	// // Create 2FA input field
+	// const twoFactorInput = document.createElement('input');
+	// twoFactorInput.type = 'text';
+	// twoFactorInput.id = 'two-factor-token';
+	// twoFactorInput.placeholder = i18n.t('auth.2fa_code') || '6-digit code';
+	// twoFactorInput.maxLength = 6;
+	// twoFactorInput.className = 'input text-center font-mono';
+	// twoFactorInput.required = true;
 
-    // Format input (digits only)
+	// Format input (digits only)
 //     twoFactorInput.addEventListener('input', (e) => {
 //         const target = e.target as HTMLInputElement;
 //         target.value = target.value.replace(/\D/g, '').slice(0, 6);
