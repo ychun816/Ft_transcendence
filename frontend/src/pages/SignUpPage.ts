@@ -19,7 +19,6 @@ export function createSignUpPage(): HTMLElement {
 			}
 		</style>
 
-		<!-- Champ d'étoiles -->
 		<div class="${classes.starfield}"></div>
 		<div class="absolute top-4 left-4 z-50">
 			<div class="login-dropdown">

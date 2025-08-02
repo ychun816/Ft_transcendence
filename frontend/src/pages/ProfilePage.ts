@@ -124,18 +124,13 @@ export function createProfilePage(): HTMLElement {
 			}
 		</style>
 
-		<!-- Conteneur principal avec effet scan -->
 		<div class="min-h-screen flex items-center justify-center p-2 sm:p-4 ${classes.scanLinesContainer}">
 
-			<!-- Conteneur principal responsive -->
 			<div class="${classes.retroPanel} rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto
 				flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-10
 				min-h-[95vh] lg:h-[90vh]">
 
-				<!-- Colonne de gauche : Profile + Friends -->
 				<div class="flex flex-col gap-4 sm:gap-6 w-full lg:w-1/2 min-h-0">
-
-					<!-- Bloc Profile Principal -->
 					<div class="${classes.retroPanel} rounded-xl sm:rounded-2xl p-4 sm:p-6 w-full flex flex-col items-center flex-shrink-0">
 						<header class="w-full mb-4 sm:mb-6">
 							<button class="${classes.backButton} text-sm sm:text-base" data-route="/game">
@@ -147,7 +142,6 @@ export function createProfilePage(): HTMLElement {
 						</header>
 
 						<main class="w-full flex flex-col items-center">
-							<!-- Layout responsive pour avatar et infos -->
 							<div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 mb-6 sm:mb-8 w-full">
 								<!-- Avatar avec bordure néon -->
 								<div class="relative w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-full ${classes.neonBorder} overflow-hidden flex-shrink-0">
@@ -163,7 +157,6 @@ export function createProfilePage(): HTMLElement {
 									<input type="file" id="avatar-file-input" accept="image/png, image/jpeg" class="hidden" />
 								</div>
 
-								<!-- Informations utilisateur -->
 								<div class="flex-1 w-full text-center sm:text-left">
 									<div class="flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3 mb-3">
 										<h3 id="username" class="text-xl sm:text-2xl font-bold ${classes.neonText} break-all">Username</h3>
@@ -189,14 +182,12 @@ export function createProfilePage(): HTMLElement {
 										</button>
 									</div>
 
-									<!-- Stats avec panneau rétro -->
 									<div class="${classes.retroPanel} rounded-lg sm:rounded-xl p-3 sm:p-4 mb-3">
 										<p id="user-stats" class="text-purple-300 text-xs sm:text-sm font-bold">
 											${i18n.t('profile.games_played_stats', {games: '0', wins: '0', losses: '0'})}
 										</p>
 									</div>
 
-									<!-- Security Section -->
 									<div class="w-full">
 										<button id="manage-2fa" class="w-full bg-blue-600 text-white py-2 px-3 sm:px-4 rounded hover:bg-blue-700 text-xs sm:text-sm">
 											🔐 ${i18n.t("profile.manage_2fa") || "Manage Two-Factor Authentication"}
@@ -207,25 +198,19 @@ export function createProfilePage(): HTMLElement {
 						</main>
 					</div>
 
-					<!-- Bloc Friends List -->
 					<div id="friends-block" class="${classes.retroPanel} rounded-xl sm:rounded-2xl p-4 sm:p-6 w-full flex flex-col flex-1 min-h-0">
 						<header class="w-full flex-shrink-0 mb-3 sm:mb-4 flex items-center justify-between">
 							<h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-green-400 drop-shadow-sm animate-pulse">
 								${i18n.t('profile.friends_list')}
 							</h2>
-							<!-- Le bouton (+) sera ajouté ici par JS -->
 						</header>
 
 						<main class="w-full flex-1 overflow-hidden min-h-0">
-							<!-- Le contenu de la liste d'amis sera ajouté ici -->
 						</main>
 					</div>
 				</div>
 
-				<!-- Colonne de droite : Match History + Dashboard -->
 				<div class="flex flex-col gap-4 sm:gap-6 w-full lg:w-1/2 min-h-0">
-
-					<!-- Match History -->
 					<div id="match-block" class="${classes.retroPanel} rounded-xl sm:rounded-2xl p-4 sm:p-6 w-full flex flex-col flex-1 lg:h-1/2 min-h-0">
 						<header class="w-full mb-3 sm:mb-4 flex-shrink-0">
 							<h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-purple-400 ${classes.neonText}">
@@ -236,7 +221,6 @@ export function createProfilePage(): HTMLElement {
 						</main>
 					</div>
 
-					<!-- Dashboard -->
 					<div id="dashboard" class="${classes.retroPanel} rounded-xl sm:rounded-2xl p-4 sm:p-6 w-full flex flex-col flex-1 lg:h-1/2 min-h-0">
 						<header class="w-full mb-3 sm:mb-4 flex-shrink-0">
 							<h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-purple-400 ${classes.neonText}">
@@ -250,7 +234,6 @@ export function createProfilePage(): HTMLElement {
 			</div>
 		</div>
 
-		<!-- Positionnement responsive des switchers -->
 		<div class="absolute top-2 right-2 sm:top-4 sm:right-4" id="language-switcher-container"></div>
 		<div class="absolute top-2 left-2 sm:top-4 sm:left-4" id="logout-container"></div>
 	`;
@@ -628,10 +611,10 @@ async function updateDbAvatar(file: File) {
 	});
 	if (response.ok) {
 		const data = await response.json();
-		console.log("Avatar updated!", data);
+		//console.log("Avatar updated!", data);
 		if (data.avatarPath && typeof data.avatarPath === "string") {
 			const timestampedUrl = `${data.avatarPath}?cb=${Date.now()}`;
-			console.log("URL with cache busting:", timestampedUrl);
+			//console.log("URL with cache busting:", timestampedUrl);
 			return timestampedUrl;
 		} else {
 			console.error("Failed to update avatar");
@@ -665,7 +648,7 @@ async function getMatchHistory() {
 
 		if (response.ok) {
 			const matches = await response.json();
-			console.log("Match history retrieved!", matches);
+			//console.log("Match history retrieved!", matches);
 			return matches;
 		} else {
 			console.error("Failed to retrieve match history");
@@ -692,16 +675,15 @@ async function displayMatchHistory(page: HTMLDivElement) {
 					<!-- Version mobile : cartes empilées -->
 	`;
 
-	// Version mobile (cartes)
+	// Version mobile
    for (const match of history) {
         const isPlayer1 = match.player1.username === username;
         let opponent;
         let gameType;
-        let gameTypeColor = "text-gray-400"; // Couleur par défaut
+        let gameTypeColor = "text-gray-400";
 
         if (match.player2) {
             opponent = match.player2.username;
-            // Déterminer le type de jeu avec couleurs
             if (match.remoteMode) {
                 gameType = i18n.t('profile.remote_game') || "Remote";
                 gameTypeColor = "text-blue-400";
@@ -759,7 +741,7 @@ async function displayMatchHistory(page: HTMLDivElement) {
 					<tbody>
 	`;
 
-	// Version desktop (tableau)
+	// Version desktop
     for (const match of history) {
         const isPlayer1 = match.player1.username === username;
         let opponent;
@@ -798,7 +780,6 @@ async function displayMatchHistory(page: HTMLDivElement) {
         const date = new Date(match.playedAt).toLocaleDateString();
         const statusColor = result === i18n.t("profile.victory") ? "text-green-400" : "text-red-400";
 
-        // Affichage du score
         const score = `${match.score1} - ${match.score2}`;
 
         html += `
@@ -864,7 +845,6 @@ async function getFriendsList() {
 
 		if (response.ok) {
 			const friends = await response.json();
-			console.log("Friends list retrieved!", friends);
 			return friends;
 		} else {
 			console.error("Failed to retrieve friends list");
@@ -877,7 +857,6 @@ async function getFriendsList() {
 }
 
 async function displayFriendsList(page: HTMLDivElement) {
-	const username = sessionStorage.getItem("username");
 	const friendsList = await getFriendsList();
 	if (!friendsList) return;
 
@@ -939,7 +918,7 @@ async function displayFriendsList(page: HTMLDivElement) {
 					<tbody>
 	`;
 
-	// Version desktop (tableau)
+	// Version desktop
 	for (const friend of friendsList) {
 		const status = await isUserOnline(friend.username);
 		const avatar = fixAvatarUrl(friend.avatarUrl);
@@ -1115,7 +1094,7 @@ async function getDashboardStats(page: HTMLDivElement) {
 		});
 		if (response.ok) {
 			const stats = await response.json();
-			console.log('Game stats retrieved!', stats);
+			//console.log('Game stats retrieved!', stats);
 			if (stats.success && stats.iaStats && stats.tournamentStats && stats.multiStats) {
 				return stats;
 			} else {

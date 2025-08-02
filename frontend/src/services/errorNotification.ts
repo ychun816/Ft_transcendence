@@ -3,7 +3,6 @@ import { i18n } from "./i18n.js";
 export class errorMsg
 {
 	showErrorBanner(messageKey: string, type: 'error' | 'warning' | 'info' = 'error', params?: Record<string, string>): void {
-		// Supprimer les erreurs précédentes
 		const existingError = document.querySelector('.error-banner');
 		if (existingError) {
 			existingError.remove();
@@ -21,7 +20,6 @@ export class errorMsg
 			info: 'ℹ️'
 		};
 
-		// Récupérer le message traduit
 		const message = messageKey.startsWith('errors.') ?
 			i18n.t(messageKey, params) :
 			i18n.t(`errors.${messageKey}`, params);
@@ -43,18 +41,14 @@ export class errorMsg
 				</div>
 			</div>
 		`;
-
-		// Injecter dans le DOM
 		document.body.insertAdjacentHTML('afterbegin', errorHTML);
 
-		// Ajouter le gestionnaire de fermeture
 		const closeBtn = document.querySelector('.error-close');
 		closeBtn?.addEventListener('click', () => {
 			const banner = document.querySelector('.error-banner');
 			banner?.remove();
 		});
 
-		// Auto-suppression après 5 secondes
 		setTimeout(() => {
 			const banner = document.querySelector('.error-banner');
 			banner?.remove();
@@ -65,21 +59,17 @@ export class errorMsg
 		const field = document.querySelector(`#${fieldId}`) as HTMLInputElement;
 		if (!field) return;
 
-		// Supprimer l'erreur existante
 		const existingError = field.parentElement?.querySelector('.field-error-message');
 		if (existingError) {
 			existingError.remove();
 		}
 
-		// Ajouter la classe d'erreur au champ
 		field.classList.add('border-red-500', 'bg-red-900', 'bg-opacity-20');
 
-		// Récupérer le message traduit
 		const message = messageKey.startsWith('errors.') ?
 			i18n.t(messageKey) :
 			i18n.t(`errors.${messageKey}`);
 
-		// Créer le message d'erreur
 		const errorHTML = `
 			<div class="field-error-message mt-1 text-red-400 text-sm flex items-center animate-pulse">
 				<svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -88,11 +78,8 @@ export class errorMsg
 				${message}
 			</div>
 		`;
-
-		// Injecter après le champ
 		field.insertAdjacentHTML('afterend', errorHTML);
 
-		// Supprimer l'erreur quand l'utilisateur tape
 		const clearError = () => {
 			field.classList.remove('border-red-500', 'bg-red-900', 'bg-opacity-20');
 			const errorMsg = field.parentElement?.querySelector('.field-error-message');
@@ -121,7 +108,6 @@ export class errorMsg
 
 		document.body.insertAdjacentHTML('afterbegin', successHTML);
 
-		// Auto-suppression après 3 secondes
 		setTimeout(() => {
 			const banner = document.querySelector('.success-banner');
 			banner?.remove();
@@ -129,17 +115,14 @@ export class errorMsg
 	}
 
 	clearAllErrors(): void {
-		// Supprimer les bannières
 		const errorBanner = document.querySelector('.error-banner');
 		const successBanner = document.querySelector('.success-banner');
 		errorBanner?.remove();
 		successBanner?.remove();
 
-		// Supprimer les erreurs de champs
 		const fieldErrors = document.querySelectorAll('.field-error-message');
 		fieldErrors.forEach(error => error.remove());
 
-		// Supprimer les classes d'erreur des champs
 		const errorFields = document.querySelectorAll('.border-red-500');
 		errorFields.forEach(field => {
 			field.classList.remove('border-red-500', 'bg-red-900', 'bg-opacity-20');
@@ -149,7 +132,6 @@ export class errorMsg
 
 export const errorNotif = new errorMsg();
 
-// Écouter les changements de langue pour nettoyer les erreurs
 window.addEventListener('languageChanged', () => {
 	errorNotif.clearAllErrors();
 });

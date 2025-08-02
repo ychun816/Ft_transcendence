@@ -23,7 +23,6 @@ const renderContent = () => {
 			}
 		</style>
 
-		<!-- Champ d'étoiles -->
 		<div class="${classes.starfield}"></div>
 		<div class="absolute top-4 left-4 z-50">
 			<div class="login-dropdown">
@@ -32,15 +31,12 @@ const renderContent = () => {
 				</button>
 			</div>
 		</div>
-		<!-- Conteneur principal avec effet scan -->
 		<div class="min-h-screen flex flex-col items-center justify-center p-4 ${classes.scanLinesContainer}">
 
-			<!-- Titre principal avec effet néon -->
 			<h1 class="${classes.retroTitle} mb-12">
 				🔐 ${i18n.t('auth.login_title')}
 			</h1>
 
-			<!-- Panneau de connexion -->
 			<div class="${classes.retroPanel} rounded-2xl p-8 max-w-md w-full">
 				<form class="space-y-6">
 					<div>
@@ -264,7 +260,6 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
 				errorData = { message: errorText };
 			}
 
-			// Gérer différents types d'erreurs avec traductions
 			switch (response.status) {
 				case 400:
 					if (errorData.message?.includes('username')) {
@@ -305,7 +300,6 @@ async function sendLogInInfo(page: HTMLDivElement): Promise<void> {
 			return;
 		}
 
-		// Succès
 		const data = await response.json();
 
 		if (data.success) {
