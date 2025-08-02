@@ -62,6 +62,7 @@ interface data_score
 	iaMode: boolean;
 	tournamentMode: boolean;
 	multiMode: boolean;
+	remoteMode: boolean;
 	played_at: Date;
 	game_time: number;
 	win_point_up: number;
@@ -137,6 +138,7 @@ function random_bool(): boolean
 {
 	return Math.random() < 0.5;
 }
+
 
 
 // --------------------------- CLASSES -----------------------------
@@ -236,6 +238,7 @@ class Pong
 			iaMode: false,
 			tournamentMode: false,
 			multiMode: false,
+			remoteMode: false, // Ajouter cette ligne
 			winnerId: null,
 			score1: 0,
 			score2: 0,
@@ -271,6 +274,16 @@ class Pong
 	{
 		this.keys_pressed[e.key] = false;
 	};
+
+	public configureRemoteMatch(player1Id: number, player2Id: number): void {
+		this.data.player1Id = player1Id;
+		this.data.player2Id = player2Id;
+		this.data.iaMode = false;
+		this.data.tournamentMode = false;
+		this.data.multiMode = false;
+		this.data.remoteMode = true;
+		console.log(`🌐 Mode remote configuré: P1=${player1Id}, P2=${player2Id}`);
+	}
 
 	start(): void {
 		// Vérifier et récupérer l'élément countdown au moment où on en a besoin
@@ -466,11 +479,16 @@ class Pong
 		this.data.player1Id = userId;
 		this.data.id = create_ID();
 
-		// Configuration pour le mode 4 joueurs
-		this.data.iaMode = false;
-		this.data.multiMode = true; // C'est du multijoueur local
-		this.data.tournamentMode = false;
-		this.data.player2Id = null; // Pas de second joueur spécifique
+		if (this.data.remoteMode) {
+			this.data.iaMode = false;
+			this.data.multiMode = false;
+			this.data.tournamentMode = false;
+		} else {
+			this.data.iaMode = false;
+			this.data.multiMode = true;
+			this.data.tournamentMode = false;
+			this.data.player2Id = null;
+		}
 
 		this.data.score1 = this.state.left_score;
 		this.data.score2 = this.state.right_score;
@@ -478,17 +496,14 @@ class Pong
 		if (this.data.score1 > this.data.score2) {
 			this.data.winnerId = this.data.player1Id;
 		} else {
-			this.data.winnerId = null; // Équipe 2 gagne ou égalité
+			this.data.winnerId = this.data.player2Id;
 		}
 
 		this.data.played_at = new Date();
 
-		// Mesure de la durée
 		let t0 = this.data.game_time;
 		let t1 = performance.now();
 		this.data.game_time = t1 - t0;
-
-		console.log("DATA ENVOYÉE AU BACKEND !");
 
 		try {
 			const response = await fetch("/api/game/add", {
@@ -498,7 +513,7 @@ class Pong
 					"Authorization": `Bearer ${token}`
 				},
 				body: JSON.stringify({
-					players: 4, // 4 joueurs pour ce mode
+					players: this.data.remoteMode ? 2 : 4,
 					player1Id: this.data.player1Id,
 					player2Id: this.data.player2Id,
 					score1: this.data.score1,
@@ -510,13 +525,12 @@ class Pong
 					pointsDown: this.data.win_point_down,
 					iaMode: this.data.iaMode,
 					tournamentMode: this.data.tournamentMode,
-					multiMode: this.data.multiMode
+					multiMode: this.data.multiMode,
+					remoteMode: this.data.remoteMode,
 				}),
 			});
 
 			if (response.ok) {
-				console.log('Game Stats sent!');
-				// Récupérer les stats mises à jour
 				const stats = await fetch(`/api/game/stats?username=${currentUser.username}`, {
 					method: "GET",
 					headers: {
@@ -592,6 +606,7 @@ class Pong
 		this.data.iaMode = false;
 		this.data.tournamentMode = false;
 		this.data.multiMode = false;
+		this.data.remoteMode = false; // Ajouter cette ligne
 		this.data.winnerId = null;
 		this.data.score1 = 0;
 		this.data.score2 = 0;

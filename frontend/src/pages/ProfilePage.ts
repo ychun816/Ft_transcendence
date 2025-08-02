@@ -693,32 +693,56 @@ async function displayMatchHistory(page: HTMLDivElement) {
 	`;
 
 	// Version mobile (cartes)
-	for (const match of history) {
-		const isPlayer1 = match.player1.username === username;
-		let opponent;
-		if (match.player2) {
-			opponent = match.player2.username;
-		} else if (match.iaMode) {
-			opponent = "IA";
-		} else {
-			opponent = "Local";
-		}
+   for (const match of history) {
+        const isPlayer1 = match.player1.username === username;
+        let opponent;
+        let gameType;
+        let gameTypeColor = "text-gray-400"; // Couleur par défaut
 
-		const result = match.winnerId === (isPlayer1 ? match.player1Id : match.player2Id)
-			? i18n.t('profile.victory') : i18n.t('profile.defeat');
-		const date = new Date(match.playedAt).toLocaleDateString();
-		const statusColor = result === i18n.t("profile.victory") ? "text-green-400" : "text-red-400";
+        if (match.player2) {
+            opponent = match.player2.username;
+            // Déterminer le type de jeu avec couleurs
+            if (match.remoteMode) {
+                gameType = i18n.t('profile.remote_game') || "Remote";
+                gameTypeColor = "text-blue-400";
+            } else if (match.iaMode) {
+                gameType = i18n.t('profile.ia_games') || "IA";
+                gameTypeColor = "text-red-400";
+            } else if (match.tournamentMode) {
+                gameType = i18n.t('profile.tournament_games') || "Tournament";
+                gameTypeColor = "text-yellow-400";
+            } else if (match.multiMode) {
+                gameType = i18n.t('profile.multiplayer_games') || "Local";
+                gameTypeColor = "text-green-400";
+            } else {
+                gameType = "Unknown";
+            }
+        } else if (match.iaMode) {
+            opponent = "IA";
+            gameType = i18n.t('profile.ia_games') || "IA";
+            gameTypeColor = "text-red-400";
+        } else {
+            opponent = "Local";
+            gameType = i18n.t('profile.multiplayer_games') || "Local";
+            gameTypeColor = "text-green-400";
+        }
 
-		html += `
-			<div class="bg-gray-800 rounded-lg p-3">
-				<div class="flex justify-between items-center mb-1">
-					<span class="text-gray-400 text-xs">${date}</span>
-					<span class="${statusColor} font-semibold text-sm">${result}</span>
-				</div>
-				<div class="text-gray-200 text-sm">vs ${opponent}</div>
-			</div>
-		`;
-	}
+        const result = match.winnerId === (isPlayer1 ? match.player1Id : match.player2Id)
+            ? i18n.t('profile.victory') : i18n.t('profile.defeat');
+        const date = new Date(match.playedAt).toLocaleDateString();
+        const statusColor = result === i18n.t("profile.victory") ? "text-green-400" : "text-red-400";
+
+        html += `
+            <div class="bg-gray-800 rounded-lg p-3">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-gray-400 text-xs">${date}</span>
+                    <span class="${statusColor} font-semibold text-sm">${result}</span>
+                </div>
+                <div class="text-gray-200 text-sm">vs ${opponent}</div>
+                <div class="${gameTypeColor} text-xs font-medium">${gameType}</div>
+            </div>
+        `;
+    }
 
 	html += `
 				</div>
@@ -736,32 +760,61 @@ async function displayMatchHistory(page: HTMLDivElement) {
 	`;
 
 	// Version desktop (tableau)
-	for (const match of history) {
-		const isPlayer1 = match.player1.username === username;
-		let opponent;
-		if (match.player2) {
-			opponent = match.player2.username;
-		} else if (match.iaMode) {
-			opponent = "IA";
-		} else {
-			opponent = "Local";
-		}
+    for (const match of history) {
+        const isPlayer1 = match.player1.username === username;
+        let opponent;
+        let gameType;
+        let gameTypeColor = "text-gray-400";
 
-		const result = match.winnerId === (isPlayer1 ? match.player1Id : match.player2Id)
-			? i18n.t('profile.victory') : i18n.t('profile.defeat');
-		const date = new Date(match.playedAt).toLocaleDateString();
-		const statusColor = result === i18n.t("profile.victory") ? "text-green-400" : "text-red-400";
+        if (match.player2) {
+            opponent = match.player2.username;
+            if (match.remoteMode) {
+                gameType = i18n.t('profile.remote_game') || "Remote";
+                gameTypeColor = "text-blue-400";
+            } else if (match.iaMode) {
+                gameType = i18n.t('profile.ia_games') || "IA";
+                gameTypeColor = "text-red-400";
+            } else if (match.tournamentMode) {
+                gameType = i18n.t('profile.tournament_games') || "Tournament";
+                gameTypeColor = "text-yellow-400";
+            } else if (match.multiMode) {
+                gameType = i18n.t('profile.multiplayer_games') || "Local";
+                gameTypeColor = "text-green-400";
+            } else {
+                gameType = "Unknown";
+            }
+        } else if (match.iaMode) {
+            opponent = "IA";
+            gameType = i18n.t('profile.ia_games') || "IA";
+            gameTypeColor = "text-red-400";
+        } else {
+            opponent = "Local";
+            gameType = i18n.t('profile.multiplayer_games') || "Local";
+            gameTypeColor = "text-green-400";
+        }
 
-		html += `
-			<tr class="border-b border-gray-700 hover:bg-gray-800 transition-colors">
-				<td class="p-2 text-gray-300 text-sm">${date}</td>
-				<td class="p-2 text-gray-200 text-sm">${opponent}</td>
-				<td class="p-2 text-sm">
-					<span class="${statusColor} font-semibold">${result}</span>
-				</td>
-			</tr>
-		`;
-	}
+        const result = match.winnerId === (isPlayer1 ? match.player1Id : match.player2Id)
+            ? i18n.t('profile.victory') : i18n.t('profile.defeat');
+        const date = new Date(match.playedAt).toLocaleDateString();
+        const statusColor = result === i18n.t("profile.victory") ? "text-green-400" : "text-red-400";
+
+        // Affichage du score
+        const score = `${match.score1} - ${match.score2}`;
+
+        html += `
+            <tr class="border-b border-gray-700 hover:bg-gray-800 transition-colors">
+                <td class="p-2 text-gray-300 text-sm">${date}</td>
+                <td class="p-2 text-gray-200 text-sm">${opponent}</td>
+                <td class="p-2 text-sm">
+                    <span class="${gameTypeColor} font-medium">${gameType}</span>
+                </td>
+                <td class="p-2 text-gray-300 text-sm">${score}</td>
+                <td class="p-2 text-sm">
+                    <span class="${statusColor} font-semibold">${result}</span>
+                </td>
+            </tr>
+        `;
+    }
 
 	html += `
 					</tbody>
