@@ -478,7 +478,6 @@ function initializeChat(page: HTMLElement, userData: any) {
 			return;
 		}
 
-		console.log(`👤 Adding user ${user.username} to online list`);
 
 		const existingUser = onlineUsersList.querySelector(
 			`[data-username="${user.username}"]`

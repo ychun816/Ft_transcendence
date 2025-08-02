@@ -17,6 +17,8 @@ backend/.env
 *.env
 *.nfs*
 backend/ssl
+script.sh
+.devcontainer/start.sh
 
 # Editor directories and files
 .vscode/*

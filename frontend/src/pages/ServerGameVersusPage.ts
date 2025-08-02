@@ -108,20 +108,14 @@ export class ServerGameVersusPage implements Page {
 	}
 
 	async onMount(): Promise<void> {
-		////console.log("👥 Server Game Versus Page mounted");
-
-		// ✅ PROTECTION CONTRE LES INSTANCES MULTIPLES
 		if (ServerGameVersusPage.isInstanceActive)
 		{
-			//console.log("⚠️ Instance already active, preventing duplicate creation");
-			return; // Sortir immédiatement si une instance est déjà active
+			return;
 		}
 
 		ServerGameVersusPage.isInstanceActive = true;
 
-		// ✅ PROTECTION CONTRE LES APPELS MULTIPLES
 		if (this.currentGame) {
-			//console.log("⚠️ Game already exists, cleaning up first");
 			this.currentGame.disconnect();
 			this.currentGame = null;
 		}
@@ -131,7 +125,6 @@ export class ServerGameVersusPage implements Page {
 			const target = e.target as HTMLElement;
 			const route = target.getAttribute("data-route");
 			if (route) {
-				// Nettoyer avant de naviguer
 				this.onUnmount();
 				import("../router/router.js").then(({ router }) => {
 					router.navigate(route);
@@ -140,7 +133,6 @@ export class ServerGameVersusPage implements Page {
 		};
 		document.addEventListener("click", this.navigationListener);
 
-		// ✅ DÉMARRAGE SÉCURISÉ
 		try {
 			await this.startVersusGame();
 		} catch (error) {
@@ -148,30 +140,21 @@ export class ServerGameVersusPage implements Page {
 			ServerGameVersusPage.isInstanceActive = false; // Libérer le verrou en cas d'erreur
 		}
 
-		// Event listener pour le bouton restart
-		// const restartBtn = document.getElementById("restartBtn");
-		// if (restartBtn) {
-		// 	this.restartListener = () => this.restartGame();
-		// 	restartBtn.addEventListener("click", this.restartListener);
-		// }
+
 	}
 
 	private async startVersusGame(): Promise<void> {
-		// ✅ VÉRIFICATION SUPPLÉMENTAIRE
 		if (this.currentGame) {
-			//console.log("⚠️ Game already running, skipping creation");
 			return;
 		}
 
 		if (this.isGameStarting) {
-			//console.log("⚠️ Game already starting, ignoring...");
 			return;
 		}
 
 		this.isGameStarting = true;
 
 		try {
-			//console.log("🚀 Auto-starting server-side VERSUS game...");
 
 			const connectionStatus =
 				document.getElementById("connectionStatus");
@@ -179,14 +162,12 @@ export class ServerGameVersusPage implements Page {
 				connectionStatus.textContent = "🟡 Connexion au serveur...";
 			}
 
-			// Créer et démarrer le jeu SERVER-SIDE VERSUS
-			//console.log("🎮 Creating new versus game...");
-			this.currentGame = new ServerGame_solo("versus");
 
-			//console.log("🔌 Connecting to game server...");
+			const gameRoomId = sessionStorage.getItem('gameRoomId') || undefined;
+			this.currentGame = new ServerGame_solo("versus", gameRoomId);
+
 			await this.currentGame.start_game_loop();
 
-			// ✅ SUCCÈS
 			if (connectionStatus) {
 				connectionStatus.textContent = "🟢 Connecté au serveur";
 			}
@@ -196,7 +177,6 @@ export class ServerGameVersusPage implements Page {
 				gameIdElement.textContent = `ID: ${this.currentGame.currentGameId}`;
 			}
 
-			//console.log("✅ SERVER-SIDE VERSUS GAME LAUNCHED!");
 		} catch (error) {
 			console.error("❌ Failed to start server-side versus game:", error);
 

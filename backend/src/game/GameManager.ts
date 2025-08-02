@@ -4,7 +4,7 @@ import { ServerPong, GameStateMessage } from "./ServerPongGame.js";
 interface GameRoom {
 	id: string;
 	game: ServerPong;
-	players: Map<string, { connection: any; lastPing: number }>; // WebSocket connection avec heartbeat
+	players: Map<string, { connection: any; lastPing: number }>;
 	mode: "solo" | "versus" | "multi";
 	createdAt: number;
 	cleanupTimeout?: NodeJS.Timeout;
@@ -38,8 +38,6 @@ export class GameManager {
 			{ websocket: true },
 			(connection, req: FastifyRequest) =>
 			{
-				////console.log("🔌 WebSocket connection attempt...");
-
 				const params = req.params as { gameId: string };
 				const query = req.query as {
 					playerId?: string;
@@ -67,14 +65,8 @@ export class GameManager {
 				// Create a new game if it doesn't exist
 				if (!gameRoom) {
 					const mode = query.mode || "versus";
-					//console.log(`🆕 Creating new game room: ${gameId} (${mode})`);
 					gameRoom = this.createGameRoom(gameId, mode);
-					//console.log(`✅ New game room created: ${gameId} (${mode})`);
-				}
-				else
-				{
-					//console.log(`🔄 Using existing game room: ${gameId}`);
-				}
+ 				}
 
 				// Add the player to the game
 				gameRoom.players.set(playerId, {
@@ -158,7 +150,6 @@ export class GameManager {
 
 				connection.on("close", (code: number, reason: Buffer) =>
 				{
-					//console.log(`👋 Player ${playerId} disconnected from game ${gameId} (code: ${code}, reason: ${reason.toString()})`);
 					this.handlePlayerDisconnect(gameId, playerId);
 				});
 				
@@ -203,14 +194,12 @@ export class GameManager {
 
 			if (isOld || isEmpty)
 			{
-				//console.log(`🧹 Cleaning up old/empty game: ${gameId} (age: ${Math.round((now - gameRoom.createdAt) / 1000)}s, players: ${gameRoom.players.size})`);
 				this.removeGameRoom(gameId);
 			}
 		}
 
 		this.cleanupRateLimit();
 
-		//console.log(`📊 Active games after cleanup: ${this.games.size}`);
 	}
 
 	private checkRateLimit(ip: string): boolean {
@@ -247,7 +236,7 @@ export class GameManager {
 
 	private cleanupDeadConnections() {
 		const now = Date.now();
-		const HEARTBEAT_TIMEOUT = 5 * 60 * 1000; // 5 minutes without ping = connection dead
+		const HEARTBEAT_TIMEOUT = 2 * 60 * 1000;
 
 		for (const [gameId, gameRoom] of this.games) {
 			const playersToRemove: string[] = [];
@@ -257,10 +246,8 @@ export class GameManager {
 
 				if (timeSinceLastPing > HEARTBEAT_TIMEOUT)
 				{
-					//console.log(`💀 Player ${playerId} seems dead (no activity for ${Math.round(timeSinceLastPing / 1000)}s), removing...`);
 					playersToRemove.push(playerId);
 				} else if (playerData.connection.readyState !== 1) {
-					//console.log(`🔌 Player ${playerId} connection not open (state: ${playerData.connection.readyState}), removing...`);
 					playersToRemove.push(playerId);
 				}
 			}
@@ -276,7 +263,6 @@ export class GameManager {
 		const gameRoom = this.games.get(gameId);
 		if (!gameRoom) return;
 
-		// Cancel the cleanup timeout if it exists
 		if (gameRoom.cleanupTimeout) {
 			clearTimeout(gameRoom.cleanupTimeout);
 		}
