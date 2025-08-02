@@ -25,7 +25,7 @@ interface game_state
     right_score: number;
     is_paused: boolean;
     game_running: boolean;
-    game_mode: 'solo' | 'versus';
+    game_mode: 'solo' | 'versus' | 'tournament';
     count_down_active: boolean;
     ia_mode: boolean;
     restart_active: boolean;
@@ -596,10 +596,17 @@ class Pong
 		if (this.state.game_mode === "solo") {
 			this.data.iaMode = true;
 			this.data.multiMode = false;
+			this.data.tournamentMode = false;
 			this.data.player2Id = null;
-		} else {
+		} else if (this.state.game_mode === "versus") {
 			this.data.iaMode = false;
 			this.data.multiMode = true;
+			this.data.tournamentMode = false;
+			this.data.player2Id = null;
+		} else if (this.state.game_mode === "tournament") {
+			this.data.iaMode = false;
+			this.data.multiMode = false;
+			this.data.tournamentMode = true;
 			this.data.player2Id = null;
 		}
 
@@ -609,10 +616,9 @@ class Pong
 		if (this.data.score1 > this.data.score2) {
 			this.data.winnerId = this.data.player1Id;
 		} else {
-			this.data.winnerId = this.data.player2Id; // ou null pour l'IA
+			this.data.winnerId = this.data.player2Id;
 		}
 
-		this.data.tournamentMode = false;
         this.data.played_at = new Date();
 
         // mesure de la duree
@@ -1296,7 +1302,7 @@ class Pong
         {
 
             let new_angle;
-            
+
             if (Math.random() < 0.5)
             {
                 new_angle = -Math.PI/6 + Math.random() * (Math.PI/6); // Entre -30° et 0°
@@ -1304,12 +1310,12 @@ class Pong
             {
                 new_angle = Math.random() * (Math.PI/6); // Entre 0° et 30°
             }
-            
+
             this.ball.angle = new_angle;
             this.ball.ball_dir_x = this.config.ball_speed * Math.cos(this.ball.angle);
             this.ball.ball_dir_y = this.config.ball_speed * Math.sin(this.ball.angle);
         }
-    
+
         this.ball.prev_x = this.ball.ball_x;
         this.ball.prev_y = this.ball.ball_y;
     }
@@ -1572,7 +1578,7 @@ class Pong
                 if (Math.abs(distance) > 200)
                     this.ia.random_move_1 = false;
                 this.ia.ia_debug = false;
-            }            
+            }
             this.ia_ajustement(120, this.ia.random_move_1);
             return ;
         }
@@ -1621,10 +1627,10 @@ class Pong
                 let distance = target_y - center_paddle;
                 this.ia.data = distance;
                 this.ia.ia_debug = false;
-            }  
+            }
             if (this.ia.data > 250)
                 this.ia_ajustement(120, false);
-            else  
+            else
                 this.ia_ajustement_rebond(120);
             return ;
         }
@@ -1673,10 +1679,10 @@ class Pong
                 let distance = target_y - center_paddle;
                 this.ia.data = distance;
                 this.ia.ia_debug = false;
-            }  
+            }
             if (this.ia.data > 250)
                 this.ia_ajustement(120, false);
-            else  
+            else
                 this.ia_ajustement_rebond(120);
             return ;
         }
