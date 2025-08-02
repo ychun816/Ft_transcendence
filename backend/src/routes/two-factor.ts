@@ -10,6 +10,10 @@ import {
 	send2FACodeEmail,
 } from "../services/TwoFactorService.js";
 
+const PORT = process.env.MAIN_PORT || "3002";
+const IP = process.env.PUBLIC_IP || "127.0.0.1";
+
+
 // Only one exported function for all 2FA routes!
 export async function twoFactorRoutes(
 	fastify: FastifyInstance,
@@ -22,7 +26,7 @@ export async function twoFactorRoutes(
 		try {
 			const { userId } = request.params as { userId: string };
 			const { code } = request.body as { code: string };
-			
+
 			const user = await prisma.user.findUnique({
 				where: { id: parseInt(userId) },
 			});
@@ -37,14 +41,14 @@ export async function twoFactorRoutes(
 
 			// Verify the provided 2FA code
 			let isValidCode = false;
-			
+
 			if (user.twoFactorType === "totp" && user.twoFactorSecret) {
 				isValidCode = verifyTOTPCode(user.twoFactorSecret, code);
 			} else if (user.twoFactorType === "email") {
 				// For email 2FA, we could send a code first, but for security
 				// we'll require the current TOTP code if available, or implement email verification
-				return reply.status(400).send({ 
-					error: "Email 2FA disable requires contacting administrator" 
+				return reply.status(400).send({
+					error: "Email 2FA disable requires contacting administrator"
 				});
 			}
 
@@ -65,9 +69,9 @@ export async function twoFactorRoutes(
 				},
 			});
 
-			return reply.send({ 
-				success: true, 
-				message: "2FA successfully disabled" 
+			return reply.send({
+				success: true,
+				message: "2FA successfully disabled"
 			});
 		} catch (error) {
 			console.error("2FA disable error:", error);
@@ -181,7 +185,7 @@ export async function twoFactorRoutes(
 						<p>Once you've added the account to Google Authenticator:</p>
 						<ol>
 							<li>Look at the 6-digit code in the app</li>
-							<li>Go to: <strong>https://localhost:3002/api/2fa/verify-totp-temp/${username}/YOUR_6_DIGIT_CODE</strong></li>
+							<li>Go to: <strong>https://${IP}:${PORT}/api/2fa/verify-totp-temp/${username}/YOUR_6_DIGIT_CODE</strong></li>
 							<li>Replace YOUR_6_DIGIT_CODE with the actual code</li>
 						</ol>
 					</div>
@@ -270,7 +274,7 @@ export async function twoFactorRoutes(
 						<h2>TOTP 2FA Enabled for ${username}</h2>
 						<p>Google Authenticator is now configured and active.</p>
 						<p><strong>Next time you login, you'll need to enter the 6-digit code from Google Authenticator!</strong></p>
-						<p><a href="https://localhost:3002">🔗 Go back to login page</a></p>
+						<p><a href="https://${IP}:${PORT}">🔗 Go back to login page</a></p>
 					</div>
 				</body>
 				</html>

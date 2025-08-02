@@ -12,12 +12,15 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = 5174;
 
+const PUBLIC_IP = process.env.PUBLIC_IP || "127.0.0.1";
+const MAIN_PORT = process.env.MAIN_PORT || "3002";
+
 // Serve static files from dist directory
 app.use(express.static(path.join(__dirname, 'dist')));
 
 // API proxy
 app.use('/api', createProxyMiddleware({
-  target: 'https://localhost:3002',
+  target: `https://${PUBLIC_IP}:${MAIN_PORT}`,
   changeOrigin: true,
   secure: true,
   rejectUnauthorized: false
@@ -53,6 +56,4 @@ const httpsOptions = {
 const server = https.createServer(httpsOptions, app as RequestListener);
 console.log("server", server);
 
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Development server running at https://localhost:${PORT}`);
-});
+server.listen(PORT, '0.0.0.0');

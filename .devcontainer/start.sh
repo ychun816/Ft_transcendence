@@ -85,8 +85,7 @@ EOF
 
     echo
     log_info "Lancement de Docker Compose avec PUBLIC_IP=$detected_ip ..."
-	PUBLIC_IP="$detected_ip" docker compose -f .devcontainer/docker-compose.yml up -d && docker exec -it trans-dev bash
-    # PUBLIC_IP="$detected_ip" docker compose -f .devcontainer/docker-compose.yml up -d && docker exec -it trans-prod bash -c "npm run prod"}
+	PUBLIC_IP="$detected_ip" docker compose -f .devcontainer/docker-compose.yml up -d && docker exec -it trans-dev bash -c "npm run start"
 }
 
 main "$@"

@@ -8,7 +8,6 @@ import {
 	send2FACodeEmail,
 } from "../services/TwoFactorService.js";
 import { extractTokenFromRequest } from "./profile.js";
-// Import the Prometheus metrics
 import { connectedUsers, loginRequests } from "../utils/metrics.js";
 import { logger } from "../utils/logger.js";
 
@@ -169,7 +168,7 @@ export async function handleLogIn(
 
 				const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 				sessionManager.addSession(user.username, user.id, expiresAt);
-
+				console.log("SESSION ADDED !!!!!!!!!");
 				// PROMETHEUS METRICS: Increment connected users count only if user wasn't already connected
 				if (!wasAlreadyConnected) {
 					connectedUsers.set(sessionManager.getOnlineUsers().length);
@@ -183,7 +182,7 @@ export async function handleLogIn(
 
 				return reply.send({
 					success: true,
-					token: token, // Envoyer le JWT au frontend
+					token: token,
 					user: {
 						id: user.id,
 						username: user.username,

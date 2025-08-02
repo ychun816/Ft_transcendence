@@ -28,7 +28,7 @@ export class GlobalNotificationService {
         try {
             const currentUser = sessionStorage.getItem("currentUser");
             const userId = sessionStorage.getItem("userId");
-            
+
             if (currentUser) {
                 this.userData = JSON.parse(currentUser);
                 if (userId) {
@@ -45,9 +45,9 @@ export class GlobalNotificationService {
     }
 
     public connect() {
-        
+
         this.initializeUserData();
-        
+
         if (!this.userData || !this.userData.username) {
             return;
         }
@@ -60,15 +60,15 @@ export class GlobalNotificationService {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const host = window.location.hostname;
             const port = window.location.port || (window.location.protocol === 'https:' ? '443' : '80');
-            
+
             const wsUrl = `${protocol}//${host}:3002/ws/chat?username=${encodeURIComponent(this.userData.username)}&userId=${this.userData.id}`;
-            
+
             this.ws = new WebSocket(wsUrl);
 
             this.ws.onopen = () => {
                 this.isConnected = true;
                 this.reconnectAttempts = 0;
-                
+
                 if (this.reconnectTimeout) {
                     clearTimeout(this.reconnectTimeout);
                     this.reconnectTimeout = null;
@@ -111,7 +111,7 @@ export class GlobalNotificationService {
 
         const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
         console.log(`Scheduling reconnect in ${delay}ms (attempt ${this.reconnectAttempts + 1})`);
-        
+
         this.reconnectTimeout = setTimeout(() => {
             this.reconnectAttempts++;
             this.connect();
@@ -119,7 +119,7 @@ export class GlobalNotificationService {
     }
 
     private handleMessage(data: any) {
-        
+
         let handled = false;
         for (let i = 0; i < this.messageHandlers.length; i++) {
             const handler = this.messageHandlers[i];
@@ -185,7 +185,7 @@ export class GlobalNotificationService {
                 </button>
             </div>
         `;
-        
+
         document.body.appendChild(notificationDiv);
 
         setTimeout(() => {
@@ -229,9 +229,9 @@ export class GlobalNotificationService {
     private handleRedirectToGame(data: any) {
         sessionStorage.setItem('gameRoomId', data.gameRoomId);
         sessionStorage.setItem('gameOpponent', data.opponent);
-        
+
         this.showSuccessMessage(data.message || "Redirecting to game...");
-        
+
         setTimeout(() => {
             import("../router/router.js").then(({ router }) => {
                 router.navigate("/server-game/versus");
@@ -339,18 +339,19 @@ export class GlobalNotificationService {
             clearTimeout(this.reconnectTimeout);
             this.reconnectTimeout = null;
         }
-        
+
         if (this.ws) {
             this.ws.close();
             this.ws = null;
         }
-        
+
         this.isConnected = false;
         this.reconnectAttempts = 0;
     }
 
     public isReady(): boolean {
         return this.isConnected && this.ws?.readyState === WebSocket.OPEN;
+		
     }
 
     public getDebugInfo() {

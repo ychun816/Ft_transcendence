@@ -46,6 +46,7 @@ export const metricsPlugin = async (fastify: FastifyInstance, options: FastifyPl
             return 'Erreur interne du serveur';
         }
     });
+
 };
 
 // Fonction pour mettre à jour manuellement certaines métriques

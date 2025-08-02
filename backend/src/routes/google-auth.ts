@@ -50,7 +50,7 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
             scope: ['profile', 'email'],
             state: 'google_oauth'
         });
-        
+
         reply.redirect(authUrl);
     });
 
@@ -103,7 +103,7 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
             if (!user) {
                 // Create new user
                 const username = email.split('@')[0];
-                
+
                 user = await prisma.user.create({
                     data: {
                         username,
@@ -131,7 +131,7 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
                 // For email 2FA, send code automatically
                 if (user.twoFactorType === 'email') {
                     const { generateEmailCode, send2FACodeEmail } = await import('../services/TwoFactorService.js');
-                    
+
                     const code = generateEmailCode();
                     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
@@ -149,8 +149,8 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
 
                 // Redirect to 2FA verification page with a temporary token
                 const tempToken = jwt.sign(
-                    { 
-                        id: user.id, 
+                    {
+                        id: user.id,
                         username: user.username,
                         email: user.email,
                         temp: true,
@@ -174,16 +174,16 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
                     </body>
                     </html>
                 `;
-                
+
                 return reply.type('text/html').send(twoFAScript);
             }
 
             // Create JWT token (only if 2FA is disabled)
             const token = jwt.sign(
-                { 
-                    id: user.id, 
+                {
+                    id: user.id,
                     username: user.username,
-                    email: user.email 
+                    email: user.email
                 },
                 process.env.COOKIE_SECRET || 'fallback-secret',
                 { expiresIn: '7d' }
@@ -212,7 +212,7 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
                             email: '${user.email}',
                             avatarUrl: '${user.avatarUrl || ''}'
                         }));
-                        
+
                         // Redirect to game page
                         window.location.href = '/game';
                     </script>
@@ -220,7 +220,8 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
                 </body>
                 </html>
             `;
-            
+			// connectedUsers(sessionManager.sessionNumber++)
+
             reply.type('text/html').send(redirectScript);
 
         } catch (error) {
@@ -270,7 +271,7 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
             if (!user) {
                 // Create new user
                 const username = email.split('@')[0];
-                
+
                 user = await prisma.user.create({
                     data: {
                         username,
@@ -298,7 +299,7 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
                 // For email 2FA, send code automatically
                 if (user.twoFactorType === 'email') {
                     const { generateEmailCode, send2FACodeEmail } = await import('../services/TwoFactorService.js');
-                    
+
                     const code = generateEmailCode();
                     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
@@ -325,10 +326,10 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
 
             // Create JWT token (only if 2FA is disabled)
             const token = jwt.sign(
-                { 
-                    id: user.id, 
+                {
+                    id: user.id,
                     username: user.username,
-                    email: user.email 
+                    email: user.email
                 },
                 process.env.COOKIE_SECRET || 'fallback-secret',
                 { expiresIn: '7d' }
@@ -367,9 +368,9 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
             const { tempToken, twoFactorToken } = request.body;
 
             if (!tempToken || !twoFactorToken) {
-                return reply.status(400).send({ 
-                    success: false, 
-                    message: 'Temporary token and 2FA token required' 
+                return reply.status(400).send({
+                    success: false,
+                    message: 'Temporary token and 2FA token required'
                 });
             }
 
@@ -378,16 +379,16 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
             try {
                 decoded = jwt.verify(tempToken, process.env.COOKIE_SECRET || 'fallback-secret');
             } catch (error) {
-                return reply.status(401).send({ 
-                    success: false, 
-                    message: 'Invalid or expired temporary token' 
+                return reply.status(401).send({
+                    success: false,
+                    message: 'Invalid or expired temporary token'
                 });
             }
 
             if (!decoded.temp || !decoded.googleAuth) {
-                return reply.status(401).send({ 
-                    success: false, 
-                    message: 'Invalid temporary token' 
+                return reply.status(401).send({
+                    success: false,
+                    message: 'Invalid temporary token'
                 });
             }
 
@@ -397,15 +398,15 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
             });
 
             if (!user || !user.isTwoFactorEnabled) {
-                return reply.status(404).send({ 
-                    success: false, 
-                    message: 'User not found or 2FA not enabled' 
+                return reply.status(404).send({
+                    success: false,
+                    message: 'User not found or 2FA not enabled'
                 });
             }
 
             // Verify 2FA token based on type
             const { verifyTOTPCode, verifyEmailCode } = await import('../services/TwoFactorService.js');
-            
+
             let is2FAValid = false;
 
             if (user.twoFactorType === 'totp' && user.twoFactorSecret) {
@@ -434,10 +435,10 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
 
             // Create final JWT token
             const token = jwt.sign(
-                { 
-                    id: user.id, 
+                {
+                    id: user.id,
                     username: user.username,
-                    email: user.email 
+                    email: user.email
                 },
                 process.env.COOKIE_SECRET || 'fallback-secret',
                 { expiresIn: '7d' }
@@ -462,6 +463,7 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
                     twoFactorEnabled: user.isTwoFactorEnabled
                 }
             });
+
 
         } catch (error) {
             console.error('Google 2FA verification error:', error);

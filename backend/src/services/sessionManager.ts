@@ -12,8 +12,10 @@ export class SessionManager {
   private activeSessions = new Map<string, ActiveSession>();
   private cleanupInterval: NodeJS.Timeout;
 
+  public sessionNumber: number;
   private constructor() {
-    // Nettoyage automatique toutes les 5 minutes
+	this.sessionNumber = 0;
+	// Nettoyage automatique toutes les 5 minutes
     this.cleanupInterval = setInterval(() => {
       this.cleanupExpiredSessions();
     }, 5 * 60 * 1000);
@@ -26,8 +28,10 @@ export class SessionManager {
     return SessionManager.instance;
   }
 
+
   // Ajouter une session lors du login
   addSession(username: string, userId: number, expiresAt: Date): void {
+	this.sessionNumber++;
     const session: ActiveSession = {
       userId,
       username,
@@ -42,6 +46,7 @@ export class SessionManager {
 
   // Supprimer une session lors du logout
   removeSession(username: string): boolean {
+	this.sessionNumber--;
     const removed = this.activeSessions.delete(username);
     if (removed) {
       console.log(`🔄 Session removed for ${username}, total active: ${this.activeSessions.size}`);
@@ -94,24 +99,7 @@ export class SessionManager {
         cleanedCount++;
       }
     }
-
-    if (cleanedCount > 0) {
-      console.log(`🧹 Cleaned ${cleanedCount} expired sessions`);
-    }
   }
-
-//   // Obtenir les statistiques des sessions
-//   getStats() {
-//     return {
-//       totalActive: this.activeSessions.size,
-//       sessions: Array.from(this.activeSessions.entries()).map(([username, session]) => ({
-//         username,
-//         loginTime: session.loginTime,
-//         lastActivity: session.lastActivity,
-//         expiresAt: session.expiresAt
-//       }))
-//     };
-//   }
 
   // Nettoyer lors de l'arrêt de l'application
   destroy(): void {

@@ -14,12 +14,12 @@ export function createTwoFactorVerifyPage(): HTMLElement {
 		<style>
 			/* Import de la police Orbitron pour le thème rétro */
 			@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-			
+
 			* {
 				font-family: 'Orbitron', monospace;
 			}
 		</style>
-		
+
 		<!-- Champ d'étoiles -->
 		<div class="${classes.starfield}"></div>
 		<div class="absolute top-4 left-4 z-50">
@@ -31,22 +31,22 @@ export function createTwoFactorVerifyPage(): HTMLElement {
 		</div>
 		<!-- Conteneur principal avec effet scan -->
 		<div class="min-h-screen flex flex-col items-center justify-center p-4 ${classes.scanLinesContainer}">
-			
+
 			<!-- Titre principal avec effet néon -->
 			<h1 class="${classes.retroTitle} mb-12">
 				🔐 ${i18n.t('auth.two_factor_title') || 'Two-Factor Verification'}
 			</h1>
-			
+
 			<!-- Panneau de vérification 2FA -->
 			<div class="${classes.retroPanel} rounded-2xl p-8 max-w-md w-full">
 				<form class="space-y-6">
 					<div>
-						<input 
-							type="text" 
-							placeholder="${i18n.t('auth.two_factor_code') || '6-digit code'}" 
-							id="two-factor-token" 
+						<input
+							type="text"
+							placeholder="${i18n.t('auth.two_factor_code') || '6-digit code'}"
+							id="two-factor-token"
 							maxlength="6"
-							required 
+							required
 							class="${classes.tournamentInput} text-center font-mono"
 							autocomplete="one-time-code"
 						>
@@ -58,15 +58,15 @@ export function createTwoFactorVerifyPage(): HTMLElement {
 				<div id="twofa-error" class="text-red-400 mt-4 text-center" style="display:none"></div>
 			</div>
 		</div>
-		
+
 		<div class="absolute top-4 right-4" id="language-switcher-container"></div>
 		`;
-		
+
 		const languageSwitcherContainer = page.querySelector('#language-switcher-container');
 		if (languageSwitcherContainer) {
 			languageSwitcherContainer.appendChild(createLanguageSwitcher());
 		}
-		
+
 		attachEventListeners();
 	};
 
@@ -76,7 +76,7 @@ export function createTwoFactorVerifyPage(): HTMLElement {
 			"#two-factor-token"
 		) as HTMLInputElement;
 		const backToLogin = page.querySelector('#backToLogin');
-		
+
 		if (backToLogin) {
 			backToLogin.addEventListener("click", () => {
 				import("../router/router.js").then(({ router }) => {
@@ -102,7 +102,7 @@ export function createTwoFactorVerifyPage(): HTMLElement {
 	};
 
 	renderContent();
-	
+
 	window.addEventListener("languageChanged", renderContent);
 
 	return page;
@@ -134,9 +134,9 @@ async function send2FACode(page: HTMLDivElement): Promise<void> {
 			const response = await fetch("/api/auth/google/verify-2fa", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ 
+				body: JSON.stringify({
 					tempToken: tempToken,
-					twoFactorToken: code 
+					twoFactorToken: code
 				}),
 			});
 
@@ -147,15 +147,15 @@ async function send2FACode(page: HTMLDivElement): Promise<void> {
 				sessionStorage.setItem("username", data.user.username || "");
 				sessionStorage.removeItem("pending2FAGoogle");
 				sessionStorage.removeItem("googleAuthTempToken");
-				
+
 				await authService.getCurrentUser();
-				
+
 				import("../services/GlobalNotificationService.js").then(({ default: globalNotificationService }) => {
 	                setTimeout(() => {
 	                    globalNotificationService.connect();
 	                }, 1000);
 	            });
-				
+
 				import("../router/router.js").then(({ router }) => {
 					router.navigate("/game");
 				});
@@ -214,13 +214,13 @@ async function send2FACode(page: HTMLDivElement): Promise<void> {
 			sessionStorage.setItem("username", username || "");
 			sessionStorage.removeItem("pending2FAUser");
 			await authService.getCurrentUser();
-			
+
 			import("../services/GlobalNotificationService.js").then(({ default: globalNotificationService }) => {
                 setTimeout(() => {
                     globalNotificationService.connect();
                 }, 1000);
             });
-			
+
 			import("../router/router.js").then(({ router }) => {
 				router.navigate("/home");
 			});

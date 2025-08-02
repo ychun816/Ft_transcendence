@@ -11,7 +11,7 @@ const sendToLogstash = async (logData: any): Promise<void> => {
       '@timestamp': new Date().toISOString(),
       timestamp: new Date().toISOString(),
       service: 'transcendence',
-      environment: process.env.NODE_ENV || 'development'
+      environment: process.env.NODE_ENV || 'production'
     };
 
     const client = new net.Socket();
