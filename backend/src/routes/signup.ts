@@ -10,6 +10,7 @@ import { fileURLToPath } from "url";
 import { pipeline } from "stream/promises";
 import { PROJECT_ROOT } from "../server.js";
 import { createHash } from "crypto";
+import { logger } from "../utils/logger.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -99,6 +100,7 @@ async function parseUserFormData(
 			avatarFile
 		};
 	} catch (error) {
+		logger.error(`Invalid form data format: ${JSON.stringify(error)}`);
 		reply.code(400).send({
 			error: "Invalid form data format."
 		});
@@ -216,6 +218,7 @@ export async function registerNewUser(
 				}
 			}
 		} else {
+			logger.error(`Failed to create account: ${JSON.stringify({ error: checkResult })}`);
 			reply.code(400).send({ error: checkResult });
 			return ;
 		}

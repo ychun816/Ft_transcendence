@@ -3,6 +3,7 @@ import { OAuth2Client } from 'google-auth-library';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import { sessionManager } from "../services/sessionManager.js";
+import { logger } from "../utils/logger.js";
 
 const prisma = new PrismaClient();
 
@@ -234,7 +235,7 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
             reply.type('text/html').send(redirectScript);
 
         } catch (error) {
-            console.error('❌ GOOGLE OAUTH ERROR:', error);
+			logger.error(`❌ GOOGLE OAUTH ERROR: ${JSON.stringify(error)}`);
             reply.redirect('/login?error=oauth_failed');
         }
     });
@@ -363,7 +364,7 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
             });
 
         } catch (error) {
-            console.error('Google token verification error:', error);
+			logger.error(`Google token verification error: ${JSON.stringify(error)}`);
             reply.status(500).send({ success: false, message: 'Token verification failed' });
         }
     });
@@ -488,7 +489,7 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
             });
 
         } catch (error) {
-            console.error('Google 2FA verification error:', error);
+			logger.error(`Google 2FA verification error: ${JSON.stringify(error)}`);
             reply.status(500).send({ success: false, message: 'Internal server error' });
         }
     });

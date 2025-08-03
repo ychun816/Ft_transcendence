@@ -184,7 +184,7 @@ export async function handleLogIn(
 					},
 				});
 			} catch (err) {
-				console.error("Login error:", err);
+				logger.error(`Login error: ${JSON.stringify(err)}`);
 				loginRequests.inc({ status: 'failure' });
 				reply.status(500).send({
 					success: false,
@@ -232,7 +232,7 @@ export async function handleLogIn(
 
 			reply.send(user);
 		} catch (error) {
-			console.error("JWT verification error:", error);
+			logger.error(`JWT verification error: ${JSON.stringify(error)}`);
 			reply.status(401).send({ error: "Invalid token" });
 		}
 	});

@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { Prisma, PrismaClient, User, Match } from "@prisma/client";
 import { extractTokenFromRequest } from "./profile.js";
 import { GameManager } from "../game/GameManager.js";
+import { logger } from "../utils/logger.js";
 
 interface GameDataRequest {
 	players: number;
@@ -46,7 +47,7 @@ export async function registerGameRoute(
 				message: `Game created: ${gameId}`
 			});
 		} catch (error) {
-			console.error('Error creating game:', error);
+			logger.error(`Error creating game: ${JSON.stringify(error)}`);
 			reply.status(500).send({ error: 'Failed to create game' });
 		}
 	});
@@ -66,7 +67,7 @@ export async function registerGameRoute(
 				state: gameState
 			});
 		} catch (error) {
-			console.error('Error getting game state:', error);
+			logger.error(`Error getting game state: ${JSON.stringify(error)}`);
 			reply.status(500).send({ error: 'Failed to get game state' });
 		}
 	});
@@ -92,7 +93,7 @@ export async function registerGameRoute(
 				}
 			});
 		} catch (error) {
-			console.error('Error getting ball position:', error);
+			logger.error(`Error getting ball position:' ${JSON.stringify(error)}`);
 			reply.status(500).send({ error: 'Failed to get ball position' });
 		}
 	});
@@ -115,8 +116,8 @@ export async function registerGameRoute(
 				}
 			});
 		} catch (error) {
-			console.error('Error getting paddle positions:', error);
-			reply.status(500).send({ error: 'Failed to get paddle positions' });
+			logger.error(`Failed to get paddle positions: ${JSON.stringify(error)}`);
+			reply.status(400).send({ error: 'Failed to get paddle positions' });
 		}
 	});
 
@@ -144,8 +145,8 @@ export async function registerGameRoute(
 				}
 			});
 		} catch (error) {
-			console.error('Error getting game score:', error);
-			reply.status(500).send({ error: 'Failed to get game score' });
+			logger.error(`Error getting game score: ${JSON.stringify(error)}`);
+			reply.status(400).send({ error: 'Failed to get game score' });
 		}
 	});
 
@@ -160,7 +161,7 @@ export async function registerGameRoute(
 				totalGames: games.length
 			});
 		} catch (error) {
-			console.error('Error listing games:', error);
+			logger.error(`Error listing games: ${JSON.stringify(error)}`);
 			reply.status(400).send({ error: 'Failed to list games' });
 		}
 	});
@@ -260,7 +261,7 @@ export async function registerGameRoute(
 				gameId: game.id,
 			});
 		} catch (error: any) {
-			console.error("Error while creating match:", error);
+			logger.error(`Error while creating match: ${JSON.stringify(error)}`);
 			reply.status(500).send({
 				error: "Internal server error",
 				details: error.message
