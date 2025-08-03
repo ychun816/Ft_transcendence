@@ -261,7 +261,6 @@ export function createProfilePage(): HTMLElement {
 		editPassword(page);
 
 		getUserInfo().then((data) => {
-			console.log("🔍 getUserInfo response:", data);
 			if (data) {
 				const usernameElem = page.querySelector(
 					"#username"
@@ -270,17 +269,10 @@ export function createProfilePage(): HTMLElement {
 
 				// Add 2FA button conditionally based on account type
 				const twoFAContainer = page.querySelector("#twofa-button-container") as HTMLElement;
-				console.log("🔍 2FA Container found:", !!twoFAContainer);
-				console.log("🔍 User data:", {
-					username: data.username,
-					googleId: data.googleId,
-					hasGoogleId: !!data.googleId
-				});
 
 				if (twoFAContainer) {
 					if (data.googleId) {
 						// Google OAuth user - show informational message instead of button
-						console.log("👤 Google user detected - showing Google 2FA message");
 						twoFAContainer.innerHTML = `
 							<div class="w-full bg-gray-600 text-gray-300 py-2 px-3 sm:px-4 rounded text-xs sm:text-sm text-center">
 								🔐 2FA is managed by Google
@@ -288,7 +280,6 @@ export function createProfilePage(): HTMLElement {
 						`;
 					} else {
 						// Regular user - show 2FA management button
-						console.log("👤 Regular user detected - showing 2FA button");
 						twoFAContainer.innerHTML = `
 							<button id="manage-2fa" class="w-full bg-blue-600 text-white py-2 px-3 sm:px-4 rounded hover:bg-blue-700 text-xs sm:text-sm">
 								🔐 ${i18n.t("profile.manage_2fa") || "Manage Two-Factor Authentication"}
@@ -647,10 +638,8 @@ async function updateDbAvatar(file: File) {
 	});
 	if (response.ok) {
 		const data = await response.json();
-		//console.log("Avatar updated!", data);
 		if (data.avatarPath && typeof data.avatarPath === "string") {
 			const timestampedUrl = `${data.avatarPath}?cb=${Date.now()}`;
-			//console.log("URL with cache busting:", timestampedUrl);
 			return timestampedUrl;
 		} else {
 			console.error("Failed to update avatar");
@@ -684,7 +673,6 @@ async function getMatchHistory() {
 
 		if (response.ok) {
 			const matches = await response.json();
-			//console.log("Match history retrieved!", matches);
 			return matches;
 		} else {
 			console.error("Failed to retrieve match history");
@@ -1213,7 +1201,6 @@ async function getDashboardStats(page: HTMLDivElement) {
 		});
 		if (response.ok) {
 			const stats = await response.json();
-			//console.log('Game stats retrieved!', stats);
 			if (stats.success && stats.iaStats && stats.tournamentStats && stats.multiStats) {
 				return stats;
 			} else {

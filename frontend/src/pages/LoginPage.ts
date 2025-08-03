@@ -24,7 +24,7 @@ const renderContent = () => {
 
 		<!-- Starfield Background -->
 		<div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 bg-[radial-gradient(2px_2px_at_20px_30px,rgb(157,78,221),transparent),radial-gradient(2px_2px_at_40px_70px,rgb(199,125,255),transparent),radial-gradient(1px_1px_at_90px_40px,rgb(157,78,221),transparent),radial-gradient(1px_1px_at_130px_80px,rgb(199,125,255),transparent),radial-gradient(2px_2px_at_160px_30px,rgb(157,78,221),transparent),radial-gradient(1px_1px_at_200px_90px,rgb(199,125,255),transparent),radial-gradient(2px_2px_at_240px_20px,rgb(157,78,221),transparent)] bg-[length:250px_150px] animate-pulse"></div>
-		
+
 		<div class="absolute top-4 left-4 z-50">
 			<div class="login-dropdown">
 				<button class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-white font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full" id="backToGame" data-route="/game">
@@ -32,7 +32,7 @@ const renderContent = () => {
 				</button>
 			</div>
 		</div>
-		
+
 		<!-- Scan lines effect -->
 		<div class="min-h-screen flex flex-col items-center justify-center p-4 relative before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:bottom-0 before:bg-gradient-to-b before:from-transparent before:via-purple-400/10 before:to-transparent before:bg-[length:100%_4px] before:animate-pulse before:pointer-events-none">
 
@@ -219,15 +219,12 @@ async function addActiveSessions(userData: any)
 		);
 
 		ws.onopen = () => {
-			console.log("🔗 WebSocket connected");
 		};
 
 		ws.onclose = () => {
-			console.log("🔌 WebSocket disconnected");
 		};
 
 		ws.onerror = (error) => {
-			console.error("❌ WebSocket error:", error);
 		};
 	}
 	connectWebSocket();
