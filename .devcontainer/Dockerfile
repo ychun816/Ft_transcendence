@@ -11,6 +11,8 @@ COPY package*.json ./
 
 RUN npm install
 
+# Copy all files including entrypoint.sh
+ARG CACHEBUST=1
 COPY . .
 
 EXPOSE 3000
@@ -31,6 +33,8 @@ COPY package*.json ./
 RUN npm ci && \
     npm cache clean --force
 
+# Copy all files including entrypoint.sh
+ARG CACHEBUST=1
 COPY . .
 
 # Générer les certificats SSL automatiquement
@@ -89,4 +93,8 @@ RUN rm -rf backend/src/ && \
 
 EXPOSE 3000
 
+COPY .devcontainer/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["npm", "start"]
