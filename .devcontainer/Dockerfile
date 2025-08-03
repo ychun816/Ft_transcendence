@@ -1,24 +1,24 @@
-# FOR DEV
-FROM node:22-slim AS dev
+# # FOR DEV
+# FROM node:22-slim AS dev
 
-WORKDIR /app
+# WORKDIR /app
 
-RUN apt-get update && \
-apt-get install -y bash git curl procps lsof  iproute2 iputils-ping net-tools && \
-rm -rf /var/lib/apt/lists/*
+# RUN apt-get update && \
+# apt-get install -y bash git curl procps lsof  iproute2 iputils-ping net-tools && \
+# rm -rf /var/lib/apt/lists/*
 
-COPY package*.json ./
+# COPY package*.json ./
 
-RUN npm install
+# RUN npm install
 
-COPY . .
+# COPY . .
 
-EXPOSE 3000
+# EXPOSE 3002
 
-CMD ["bash", "-c", "echo 'Container ready. Run npm run dev manually.' && tail -f /dev/null"]
+# CMD ["bash", "-c", "echo 'Container ready. Run npm run dev manually.' && tail -f /dev/null"]
 
-# FOR PROD
-FROM node:22-slim AS prod
+# FOR PROD AS prod
+FROM node:22-slim
 
 WORKDIR /app
 
@@ -88,7 +88,7 @@ COPY .devcontainer/entrypoint.sh /entrypoint.sh
 
 RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
 
-EXPOSE 3000
+EXPOSE 3002
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["npm", "start"]
