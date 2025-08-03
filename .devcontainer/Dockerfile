@@ -11,8 +11,6 @@ COPY package*.json ./
 
 RUN npm install
 
-# Copy all files including entrypoint.sh
-ARG CACHEBUST=1
 COPY . .
 
 EXPOSE 3000
@@ -33,14 +31,10 @@ COPY package*.json ./
 RUN npm ci && \
     npm cache clean --force
 
-# Copy all files including entrypoint.sh
-ARG CACHEBUST=1
 COPY . .
 
-# Générer les certificats SSL automatiquement
 RUN mkdir -p backend/ssl
 
-# Script de génération SSL intégré
 RUN echo '#!/bin/bash\n\
 DETECTED_IP=$(ip route get 8.8.8.8 | awk "{print \\$7; exit}" 2>/dev/null || echo "127.0.0.1")\n\
 if [[ -z "$DETECTED_IP" ]]; then\n\
@@ -83,7 +77,6 @@ echo "Certificats SSL générés avec IP: $DETECTED_IP"\n\
 
 RUN npm run build
 
-# Garder concurrently pour la production
 RUN rm -rf backend/src/ && \
     rm -rf *.config.js && \
     rm -rf backend/tsconfig.json && \
@@ -91,10 +84,11 @@ RUN rm -rf backend/src/ && \
     npm ci --only=production && \
     npm install concurrently
 
-EXPOSE 3000
-
 COPY .devcontainer/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+
+RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
+
+EXPOSE 3000
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["npm", "start"]
