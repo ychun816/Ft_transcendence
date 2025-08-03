@@ -33,48 +33,49 @@ services:
       - PUBLIC_IP=${PUBLIC_IP}
       - COOKIE_SECRET=${COOKIE_SECRET}
       - SECURITY_KEY=${SECURITY_KEY}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
     restart: unless-stopped
     depends_on:
       - logstash
     networks:
       - app-network
 
-  # prod:
-#     user: "0:0"
-  #   container_name: trans-prod
-  #   build:
-  #     context: ..
-  #     dockerfile: .devcontainer/Dockerfile
-  #     target: prod
-  #   # volumes:
-  #   #   - ..:/app
-  #   # - /app/node_modules
-  #   ports:
-  #     - "${MAIN_PORT}:3000"
-    #   - "${METRICS_PORT}:3001"
-    #   - "${HTTP_REDIRECT_PORT}:8080"
-  #   command: ["npm", "start"]
-    # environment:
-    #   - NODE_ENV=production
-    #   - NODE_ENV=development
-    #   - DEBUG=true
-    #   - LOGSTASH_HOST=${LOGSTASH_HOST}
-    #   - LOGSTASH_PORT=${LOGSTASH_PORT}
-    #   - ELASTIC_URL=${ELASTIC_URL}
-    #   - ELASTIC_USER=${ELASTIC_USER}
-    #   - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-    #   - DATABASE_URL=${DATABASE_URL}
-    #   - MAIN_PORT=${MAIN_PORT}
-    #   - METRICS_PORT=${METRICS_PORT}
-    #   - HTTP_REDIRECT_PORT=${HTTP_REDIRECT_PORT}
-    #   - PUBLIC_IP=${PUBLIC_IP}
-    #   - COOKIE_SECRET=${COOKIE_SECRET}
-    #   - SECURITY_KEY=${SECURITY_KEY}
-  #   depends_on:
-  #     - logstash
-  #   networks:
-  #     - app-network
-  #   restart: unless-stopped
+  prod:
+    user: "0:0"
+    container_name: trans-prod
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+      target: prod
+    env_file:
+      - .env
+    ports:
+      - "${MAIN_PORT}:3002"        # Backend Fastify
+      - "${METRICS_PORT}:3001"     # Métriques
+      - "${HTTP_REDIRECT_PORT}:8080"
+      - "5174:5174"                # Frontend serve.ts
+    environment:
+      - NODE_ENV=production
+      - LOGSTASH_HOST=${LOGSTASH_HOST}
+      - LOGSTASH_PORT=${LOGSTASH_PORT}
+      - ELASTIC_URL=${ELASTIC_URL}
+      - ELASTIC_USER=${ELASTIC_USER}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - DATABASE_URL=${DATABASE_URL}
+      - MAIN_PORT=${MAIN_PORT}
+      - METRICS_PORT=${METRICS_PORT}
+      - HTTP_REDIRECT_PORT=${HTTP_REDIRECT_PORT}
+      - PUBLIC_IP=${PUBLIC_IP}
+      - COOKIE_SECRET=${COOKIE_SECRET}
+      - SECURITY_KEY=${SECURITY_KEY}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+    depends_on:
+      - logstash
+    networks:
+      - app-network
+    restart: unless-stopped
 
 
   elasticsearch:
