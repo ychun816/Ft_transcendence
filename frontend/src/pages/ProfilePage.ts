@@ -271,12 +271,12 @@ export function createProfilePage(): HTMLElement {
 				// Add 2FA button conditionally based on account type
 				const twoFAContainer = page.querySelector("#twofa-button-container") as HTMLElement;
 				console.log("🔍 2FA Container found:", !!twoFAContainer);
-				console.log("🔍 User data:", { 
-					username: data.username, 
-					googleId: data.googleId, 
-					hasGoogleId: !!data.googleId 
+				console.log("🔍 User data:", {
+					username: data.username,
+					googleId: data.googleId,
+					hasGoogleId: !!data.googleId
 				});
-				
+
 				if (twoFAContainer) {
 					if (data.googleId) {
 						// Google OAuth user - show informational message instead of button
@@ -718,32 +718,21 @@ async function displayMatchHistory(page: HTMLDivElement) {
         let gameType;
         let gameTypeColor = "text-gray-400";
 
-        if (match.player2) {
+        if (match.player2)
             opponent = match.player2.username;
-            if (match.remoteMode) {
-                gameType = i18n.t('profile.remote_game') || "Remote";
-                gameTypeColor = "text-blue-400";
-            } else if (match.iaMode) {
-                gameType = i18n.t('profile.ia_games') || "IA";
-                gameTypeColor = "text-red-400";
-            } else if (match.tournamentMode) {
-                gameType = i18n.t('profile.tournament_games') || "Tournament";
-                gameTypeColor = "text-yellow-400";
-            } else if (match.multiMode) {
-                gameType = i18n.t('profile.multiplayer_games') || "Local";
-                gameTypeColor = "text-green-400";
-            } else {
-                gameType = "Unknown";
-            }
-        } else if (match.iaMode) {
-            opponent = "IA";
-            gameType = i18n.t('profile.ia_games') || "IA";
-            gameTypeColor = "text-red-400";
+		if (match.iaMode) {
+			gameType = i18n.t('profile.ia_games') || "IA";
+			gameTypeColor = "text-red-400";
+		} else if (match.tournamentMode) {
+			gameType = i18n.t('profile.tournament_games') || "Tournament";
+			gameTypeColor = "text-yellow-400";
+		} else if (match.multiMode) {
+			gameType = i18n.t('profile.multiplayer_games') || "Multiplayer";
+			gameTypeColor = "text-green-400";
         } else {
-            opponent = "Local";
-            gameType = i18n.t('profile.multiplayer_games') || "Local";
-            gameTypeColor = "text-green-400";
-        }
+			gameType = "Unknown";
+		}
+
 
         const result = match.winnerId === (isPlayer1 ? match.player1Id : match.player2Id)
             ? i18n.t('profile.victory') : i18n.t('profile.defeat');
@@ -771,6 +760,7 @@ async function displayMatchHistory(page: HTMLDivElement) {
 						<tr class="border-b border-gray-600">
 							<th class="p-2 text-left text-sm font-semibold text-gray-300">${i18n.t("profile.date")}</th>
 							<th class="p-2 text-left text-sm font-semibold text-gray-300">${i18n.t("profile.opponent")}</th>
+							<th class="p-2 text-left text-sm font-semibold text-gray-300">${i18n.t("profile.game_mode")}</th>
 							<th class="p-2 text-left text-sm font-semibold text-gray-300">${i18n.t("profile.result")}</th>
 						</tr>
 					</thead>
