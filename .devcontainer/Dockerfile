@@ -26,6 +26,9 @@ RUN apt-get update && \
     apt-get install -y openssl iproute2 && \
     rm -rf /var/lib/apt/lists/*
 
+# Install tsx globally for frontend build
+RUN npm install -g tsx
+
 COPY package*.json ./
 
 RUN npm ci && \
@@ -95,16 +98,25 @@ else\n\
     echo "SSL certificates already exist, skipping generation."\n\
 fi\n\
 \n\
+# Install frontend dependencies and build if dist doesn'\''t exist\n\
+if [ ! -d frontend/dist ]; then\n\
+    echo "Installing frontend dependencies..."\n\
+    cd frontend\n\
+    npm install --include=dev\n\
+    echo "Building frontend..."\n\
+    npm run build\n\
+    cd ..\n\
+    echo "Frontend build completed"\n\
+fi\n\
+\n\
 # Execute the original command\n\
 exec "$@"' > /docker-entrypoint.sh && chmod +x /docker-entrypoint.sh
 
-
-RUN npm run build
+# Build backend only (frontend will be built at runtime)
+RUN npm run build:backend
 
 RUN rm -rf backend/src/ && \
-    rm -rf *.config.js && \
-    rm -rf backend/tsconfig.json && \
-    rm -rf node_modules
+    rm -rf backend/tsconfig.json
 
 EXPOSE 3002
 
