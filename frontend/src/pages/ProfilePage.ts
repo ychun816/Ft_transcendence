@@ -718,20 +718,31 @@ async function displayMatchHistory(page: HTMLDivElement) {
         let gameType;
         let gameTypeColor = "text-gray-400";
 
-        if (match.player2)
+        if (match.player2) {
             opponent = match.player2.username;
-		if (match.iaMode) {
-			gameType = i18n.t('profile.ia_games') || "IA";
-			gameTypeColor = "text-red-400";
-		} else if (match.tournamentMode) {
-			gameType = i18n.t('profile.tournament_games') || "Tournament";
-			gameTypeColor = "text-yellow-400";
-		} else if (match.multiMode) {
-			gameType = i18n.t('profile.multiplayer_games') || "Multiplayer";
-			gameTypeColor = "text-green-400";
+			if (match.iaMode) {
+				gameType = i18n.t('profile.ia_games') || "IA";
+				gameTypeColor = "text-red-400";
+				opponent = "IA";
+			} else if (match.tournamentMode) {
+				gameType = i18n.t('profile.tournament_games') || "Tournament";
+				gameTypeColor = "text-yellow-400";
+			} else if (match.multiMode) {
+				gameType = i18n.t('profile.multiplayer_games') || "Multiplayer";
+				gameTypeColor = "text-green-400";
+				opponent = "Local";
+            } else {
+                gameType = "Unknown";
+            }
+        } else if (match.iaMode) {
+            opponent = "IA";
+            gameType = i18n.t('profile.ia_games') || "IA";
+            gameTypeColor = "text-red-400";
         } else {
-			gameType = "Unknown";
-		}
+            opponent = "Local";
+            gameType = i18n.t('profile.multiplayer_games') || "Local";
+            gameTypeColor = "text-green-400";
+        }
 
 
         const result = match.winnerId === (isPlayer1 ? match.player1Id : match.player2Id)
@@ -775,20 +786,20 @@ async function displayMatchHistory(page: HTMLDivElement) {
         let gameType;
         let gameTypeColor = "text-gray-400";
 
+
         if (match.player2) {
             opponent = match.player2.username;
-            if (match.remoteMode) {
-                gameType = i18n.t('profile.remote_game') || "Remote";
-                gameTypeColor = "text-blue-400";
-            } else if (match.iaMode) {
-                gameType = i18n.t('profile.ia_games') || "IA";
-                gameTypeColor = "text-red-400";
-            } else if (match.tournamentMode) {
-                gameType = i18n.t('profile.tournament_games') || "Tournament";
-                gameTypeColor = "text-yellow-400";
-            } else if (match.multiMode) {
-                gameType = i18n.t('profile.multiplayer_games') || "Local";
-                gameTypeColor = "text-green-400";
+			if (match.iaMode) {
+				gameType = i18n.t('profile.ia_games') || "IA";
+				gameTypeColor = "text-red-400";
+				opponent = "IA";
+			} else if (match.tournamentMode) {
+				gameType = i18n.t('profile.tournament_games') || "Tournament";
+				gameTypeColor = "text-yellow-400";
+			} else if (match.multiMode) {
+				gameType = i18n.t('profile.multiplayer_games') || "Multiplayer";
+				gameTypeColor = "text-green-400";
+				opponent = "Local";
             } else {
                 gameType = "Unknown";
             }
@@ -805,6 +816,7 @@ async function displayMatchHistory(page: HTMLDivElement) {
 		const minutes = Math.floor(match.lasted / 60);
 		const seconds = match.lasted % 60;
 		const gameTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+		//const gameTime = match.lasted;
 
 		const playerScore = isPlayer1 ? match.score1 : match.score2;
 		const opponentScore = isPlayer1 ? match.score2 : match.score1;
@@ -1352,10 +1364,10 @@ async function 	displayGameTime(stats: any)
 		return;
 	} else {
 		const toMinutes = (s: number) => Math.floor(s / 60);
-		const totalMin = toMinutes(totalTime);
-		const iaMin = toMinutes(iaTime);
-		const tournamentMin = toMinutes(tournamentTime);
-		const multiMin = toMinutes(multiTime);
+		const totalMin = totalTime;
+		const iaMin = iaTime;
+		const tournamentMin = tournamentTime;
+		const multiMin = multiTime;
 
 		const iaPercent = totalMin ? (iaMin / totalMin) * 100 : 0;
 		const tournamentPercent = totalMin ? (tournamentMin / totalMin) * 100 : 0;
