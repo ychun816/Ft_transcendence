@@ -1,6 +1,8 @@
 # version fusionne
 services:
 
+# clone JDM au cas ou + comparer mon code sur app vs main actuel
+# google password + prod
 # logger a check apres avoir enlever les consoles logs
 
   dev:
@@ -17,7 +19,7 @@ services:
       - "${MAIN_PORT}:3002"
       - "${METRICS_PORT}:3001"
       - "${HTTP_REDIRECT_PORT}:8080"
-      - "5555:5555"
+      - "${PRISMA_PORT}:5555"
     environment:
       - NODE_ENV=development
       - DEBUG=true
@@ -286,16 +288,19 @@ services:
     ports:
       - "${ALERT_PORT}:9093"
     volumes:
-      - ./../monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
-      - ./../monitoring/alertmanager/templates/email.tmpl:/etc/alertmanager/email.tmpl
+      - ./../monitoring/alertmanager/alertmanager.yml.template:/etc/alertmanager/alertmanager.yml.template:ro
+      - ./../monitoring/alertmanager/templates/email.tmpl:/etc/alertmanager/email.tmpl:ro
       - alertmanager_data:/alertmanager
+      - ./../monitoring/alertmanager/entrypoint.sh:/entrypoint.sh:ro
     environment:
       - ALERT_PORT=${ALERT_PORT}
-    command:
-      - '--config.file=/etc/alertmanager/alertmanager.yml'
-      - '--storage.path=/alertmanager'
-      - '--web.external-url=http://localhost:${ALERT_PORT}'
-      - '--cluster.listen-address='
+      - ALERT_EMAIL=${ALERT_EMAIL}
+      - ALERT_PASSWORD=${ALERT_PASSWORD}
+    entrypoint: ["/entrypoint.sh"]
+      # - '--config.file=/etc/alertmanager/alertmanager.yml'
+      # - '--storage.path=/alertmanager'
+      # - '--web.external-url=http://localhost:${ALERT_PORT}'
+      # - '--cluster.listen-address='
     depends_on:
       - prometheus
     networks:

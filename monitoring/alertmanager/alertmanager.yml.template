@@ -1,8 +1,8 @@
 global:
   smtp_smarthost: 'smtp.gmail.com:587'
-  smtp_from: 'arthurbernard.dev@gmail.com'
-  smtp_auth_username: 'arthurbernard.dev@gmail.com'
-  smtp_auth_password: 'khyw ymab tugm fsss'
+  smtp_from: '__ALERT_EMAIL__'
+  smtp_auth_username: '__ALERT_EMAIL__'
+  smtp_auth_password: '__ALERT_PASSWORD__'
   smtp_require_tls: true
 
 route:
@@ -15,7 +15,7 @@ route:
 receivers:
   - name: 'email-admin'
     email_configs:
-      - to: 'arthurbernard.dev@gmail.com'
+      - to: '__ALERT_EMAIL__'
         headers: { Subject: '{{ template "email.subject" . }}' }
         html: '{{ template "email.body" . }}'
 
