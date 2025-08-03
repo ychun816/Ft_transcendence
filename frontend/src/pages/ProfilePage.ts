@@ -2,7 +2,6 @@ import { i18n } from "../services/i18n.js";
 import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
 import { createTwoFactorSetup } from "../components/TwoFactorSetup.js"; //FOR 2FA
 import { createLogoutSwitcher } from "../components/logoutSwitcher.js";
-import { classes } from "../styles/retroStyles.js";
 import { Chart, registerables } from "chart.js";
 
 async function disable2FA(userId: number) {
@@ -58,6 +57,12 @@ async function manage2FA(page: HTMLDivElement) {
 				const userInfo = await getUserInfo();
 				if (!userInfo || !userInfo.id) {
 					throw new Error("Could not get user information");
+				}
+
+				// Check if user uses Google OAuth
+				if (userInfo.googleId) {
+					alert(i18n.t("profile.google_2fa_disabled") || "Two-Factor Authentication is managed by Google for OAuth accounts. Please use Google's security settings to manage 2FA.");
+					return;
 				}
 
 				// Check current 2FA status
@@ -124,19 +129,19 @@ export function createProfilePage(): HTMLElement {
 			}
 		</style>
 
-		<div class="min-h-screen flex items-center justify-center p-2 sm:p-4 ${classes.scanLinesContainer}">
+		<div class="min-h-screen flex items-center justify-center p-2 sm:p-4 relative before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:bottom-0 before:bg-gradient-to-b before:from-transparent before:via-purple-400/10 before:to-transparent before:bg-[length:100%_4px] before:animate-pulse before:pointer-events-none">
 
-			<div class="${classes.retroPanel} rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto
+			<div class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto
 				flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-10
 				min-h-[95vh] lg:h-[90vh]">
 
 				<div class="flex flex-col gap-4 sm:gap-6 w-full lg:w-1/2 min-h-0">
-					<div class="${classes.retroPanel} rounded-xl sm:rounded-2xl p-4 sm:p-6 w-full flex flex-col items-center flex-shrink-0">
+					<div class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 w-full flex flex-col items-center flex-shrink-0">
 						<header class="w-full mb-4 sm:mb-6">
-							<button class="${classes.backButton} text-sm sm:text-base" data-route="/game">
+							<button class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-white font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full text-sm sm:text-base" data-route="/game">
 								${i18n.t('profile.back')}
 							</button>
-							<h2 class="${classes.sectionTitle} mt-2 sm:mt-4 text-lg sm:text-xl lg:text-2xl">
+							<h2 class="text-3xl font-bold text-purple-300 drop-shadow-[0_0_3px_rgb(187,134,252)] drop-shadow-[0_0_6px_rgb(187,134,252)] drop-shadow-[0_0_9px_rgb(187,134,252)] animate-pulse mt-2 sm:mt-4 text-lg sm:text-xl lg:text-2xl">
 								${i18n.t('profile.my_profile')}
 							</h2>
 						</header>
@@ -144,7 +149,7 @@ export function createProfilePage(): HTMLElement {
 						<main class="w-full flex flex-col items-center">
 							<div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 mb-6 sm:mb-8 w-full">
 								<!-- Avatar avec bordure néon -->
-								<div class="relative w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-full ${classes.neonBorder} overflow-hidden flex-shrink-0">
+								<div class="relative w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-full border-2 border-purple-400 shadow-[0_0_10px_rgb(157,78,221),inset_0_0_10px_rgb(157,78,221),0_0_20px_rgb(157,78,221,0.4)] bg-gradient-to-br from-black via-purple-900/20 to-black overflow-hidden flex-shrink-0">
 									<img src="/default-avatar.png" id="user-avatar" class="w-full h-full object-cover">
 									<button id="edit-avatar" title="${i18n.t('profile.edit_avatar')}"
 										class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
@@ -159,7 +164,7 @@ export function createProfilePage(): HTMLElement {
 
 								<div class="flex-1 w-full text-center sm:text-left">
 									<div class="flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3 mb-3">
-										<h3 id="username" class="text-xl sm:text-2xl font-bold ${classes.neonText} break-all">Username</h3>
+										<h3 id="username" class="text-xl sm:text-2xl font-bold text-purple-300 drop-shadow-[0_0_3px_rgb(187,134,252)] drop-shadow-[0_0_6px_rgb(187,134,252)] drop-shadow-[0_0_9px_rgb(187,134,252)] animate-pulse break-all">Username</h3>
 										<button id="edit-username" title="${i18n.t('profile.edit_username')}"
 											class="bg-purple-400 bg-opacity-20 hover:bg-opacity-40 text-purple-400 font-bold
 											py-1 px-2 rounded-lg border border-purple-400 border-opacity-50 transition-all duration-300
@@ -182,23 +187,21 @@ export function createProfilePage(): HTMLElement {
 										</button>
 									</div>
 
-									<div class="${classes.retroPanel} rounded-lg sm:rounded-xl p-3 sm:p-4 mb-3">
+									<div class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 mb-3">
 										<p id="user-stats" class="text-purple-300 text-xs sm:text-sm font-bold">
 											${i18n.t('profile.games_played_stats', {games: '0', wins: '0', losses: '0'})}
 										</p>
 									</div>
 
-									<div class="w-full">
-										<button id="manage-2fa" class="w-full bg-blue-600 text-white py-2 px-3 sm:px-4 rounded hover:bg-blue-700 text-xs sm:text-sm">
-											🔐 ${i18n.t("profile.manage_2fa") || "Manage Two-Factor Authentication"}
-										</button>
+									<div class="w-full" id="twofa-button-container">
+										<!-- 2FA button will be added here based on account type -->
 									</div>
 								</div>
 							</div>
 						</main>
 					</div>
 
-					<div id="friends-block" class="${classes.retroPanel} rounded-xl sm:rounded-2xl p-4 sm:p-6 w-full flex flex-col flex-1 min-h-0">
+					<div id="friends-block" class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 w-full flex flex-col flex-1 min-h-0">
 						<header class="w-full flex-shrink-0 mb-3 sm:mb-4 flex items-center justify-between">
 							<h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-green-400 drop-shadow-sm animate-pulse">
 								${i18n.t('profile.friends_list')}
@@ -211,9 +214,9 @@ export function createProfilePage(): HTMLElement {
 				</div>
 
 				<div class="flex flex-col gap-4 sm:gap-6 w-full lg:w-1/2 min-h-0">
-					<div id="match-block" class="${classes.retroPanel} rounded-xl sm:rounded-2xl p-4 sm:p-6 w-full flex flex-col flex-1 lg:h-1/2 min-h-0">
+					<div id="match-block" class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 w-full flex flex-col flex-1 lg:h-1/2 min-h-0">
 						<header class="w-full mb-3 sm:mb-4 flex-shrink-0">
-							<h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-purple-400 ${classes.neonText}">
+							<h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-purple-400 text-purple-300 drop-shadow-[0_0_3px_rgb(187,134,252)] drop-shadow-[0_0_6px_rgb(187,134,252)] drop-shadow-[0_0_9px_rgb(187,134,252)] animate-pulse">
 								${i18n.t('profile.match_history')}
 							</h2>
 						</header>
@@ -221,9 +224,9 @@ export function createProfilePage(): HTMLElement {
 						</main>
 					</div>
 
-					<div id="dashboard" class="${classes.retroPanel} rounded-xl sm:rounded-2xl p-4 sm:p-6 w-full flex flex-col flex-1 lg:h-1/2 min-h-0">
+					<div id="dashboard" class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 w-full flex flex-col flex-1 lg:h-1/2 min-h-0">
 						<header class="w-full mb-3 sm:mb-4 flex-shrink-0">
-							<h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-purple-400 ${classes.neonText}">
+							<h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-purple-400 text-purple-300 drop-shadow-[0_0_3px_rgb(187,134,252)] drop-shadow-[0_0_6px_rgb(187,134,252)] drop-shadow-[0_0_9px_rgb(187,134,252)] animate-pulse">
 								${i18n.t('profile.dashboard')}
 							</h2>
 						</header>
@@ -256,14 +259,47 @@ export function createProfilePage(): HTMLElement {
 		editAvatar(page);
 		editUsername(page);
 		editPassword(page);
-		manage2FA(page);
 
 		getUserInfo().then((data) => {
+			console.log("🔍 getUserInfo response:", data);
 			if (data) {
 				const usernameElem = page.querySelector(
 					"#username"
 				) as HTMLElement;
 				if (usernameElem) usernameElem.textContent = data.username;
+
+				// Add 2FA button conditionally based on account type
+				const twoFAContainer = page.querySelector("#twofa-button-container") as HTMLElement;
+				console.log("🔍 2FA Container found:", !!twoFAContainer);
+				console.log("🔍 User data:", { 
+					username: data.username, 
+					googleId: data.googleId, 
+					hasGoogleId: !!data.googleId 
+				});
+				
+				if (twoFAContainer) {
+					if (data.googleId) {
+						// Google OAuth user - show informational message instead of button
+						console.log("👤 Google user detected - showing Google 2FA message");
+						twoFAContainer.innerHTML = `
+							<div class="w-full bg-gray-600 text-gray-300 py-2 px-3 sm:px-4 rounded text-xs sm:text-sm text-center">
+								🔐 2FA is managed by Google
+							</div>
+						`;
+					} else {
+						// Regular user - show 2FA management button
+						console.log("👤 Regular user detected - showing 2FA button");
+						twoFAContainer.innerHTML = `
+							<button id="manage-2fa" class="w-full bg-blue-600 text-white py-2 px-3 sm:px-4 rounded hover:bg-blue-700 text-xs sm:text-sm">
+								🔐 ${i18n.t("profile.manage_2fa") || "Manage Two-Factor Authentication"}
+							</button>
+						`;
+						// Re-attach the event listener for the new button
+						manage2FA(page);
+					}
+				} else {
+					console.error("❌ 2FA Container not found!");
+				}
 				const avatarElem = page.querySelector(
 					"#user-avatar"
 				) as HTMLImageElement;

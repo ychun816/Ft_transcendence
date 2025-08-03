@@ -123,6 +123,32 @@ export async function twoFactorRoutes(
 					return reply.status(404).send({ error: "User not found" });
 				}
 
+				// Prevent Google OAuth users from enabling 2FA
+				if (user.googleId) {
+					const htmlResponse = `
+					<!DOCTYPE html>
+					<html>
+					<head>
+						<title>2FA Not Available</title>
+						<style>
+							body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; text-align: center; }
+							.error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 20px; border-radius: 5px; }
+						</style>
+					</head>
+					<body>
+						<div class="error">
+							<h1>🔐 Two-Factor Authentication Not Available</h1>
+							<p>Two-Factor Authentication is managed by Google for OAuth accounts.</p>
+							<p>Please use Google's security settings to manage your 2FA preferences.</p>
+							<p><a href="https://myaccount.google.com/security">🔗 Go to Google Security Settings</a></p>
+						</div>
+					</body>
+					</html>
+					`;
+					reply.type("text/html");
+					return reply.send(htmlResponse);
+				}
+
 				// Generate TOTP secret
 				const secretObj = generateTOTPSecret(user.username);
 
@@ -307,6 +333,13 @@ export async function twoFactorRoutes(
 					return reply.status(404).send({ error: "User not found" });
 				}
 
+				// Prevent Google OAuth users from enabling 2FA
+				if (user.googleId) {
+					return reply.status(400).send({ 
+						error: "Two-Factor Authentication is managed by Google for OAuth accounts" 
+					});
+				}
+
 				await prisma.user.update({
 					where: { id: user.id },
 					data: {
@@ -353,6 +386,13 @@ export async function twoFactorRoutes(
 				return reply.status(404).send({ error: "User not found" });
 			}
 
+			// Prevent Google OAuth users from enabling 2FA
+			if (user.googleId) {
+				return reply.status(400).send({ 
+					error: "Two-Factor Authentication is managed by Google for OAuth accounts" 
+				});
+			}
+
 			await prisma.user.update({
 				where: { id: user.id },
 				data: {
@@ -385,6 +425,13 @@ export async function twoFactorRoutes(
 
 			if (!user) {
 				return reply.status(404).send({ error: "User not found" });
+			}
+
+			// Prevent Google OAuth users from enabling 2FA
+			if (user.googleId) {
+				return reply.status(400).send({ 
+					error: "Two-Factor Authentication is managed by Google for OAuth accounts" 
+				});
 			}
 
 			const code = generateEmailCode();
@@ -625,6 +672,13 @@ export async function twoFactorRoutes(
 			});
 			if (!user)
 				return reply.status(404).send({ error: "User not found" });
+
+			// Prevent Google OAuth users from enabling 2FA
+			if (user.googleId) {
+				return reply.status(400).send({ 
+					error: "Two-Factor Authentication is managed by Google for OAuth accounts" 
+				});
+			}
 
 			const secretObj = await generateTOTPSecret(user.username);
 			await prisma.user.update({

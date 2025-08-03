@@ -222,6 +222,7 @@ export async function handleLogIn(
 					gamesPlayed: true,
 					wins: true,
 					losses: true,
+					googleId: true,
 				},
 			});
 
