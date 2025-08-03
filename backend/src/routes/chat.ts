@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import "@fastify/websocket";
 import { PrismaClient } from "@prisma/client";
+import { logger } from "../utils/logger.js";
 
 // Store active connections with user information
 export const activeConnections = new Map<
@@ -164,7 +165,7 @@ export default async function chatWebSocketRoutes(
 						);
 				}
 			} catch (error) {
-				console.error("❌ Error processing message:", error);
+				logger.error(`❌ Error processing message: ${JSON.stringify(error)}`);
 				connection.send(
 					JSON.stringify({
 						type: "error",
@@ -187,7 +188,7 @@ export default async function chatWebSocketRoutes(
 		});
 
 		connection.on("error", (error: Error) => {
-			console.error(`❌ WebSocket error for ${username}:`, error);
+			logger.error(`❌ WebSocket error for ${username}:  ${JSON.stringify(error)}`);
 		});
 	});
 
@@ -274,7 +275,7 @@ async function handleDirectMessage(
 			sendToUser(receiverUsername, messageData);
 		}
 	} catch (error) {
-		console.error("❌ Error handling direct message:", error);
+		logger.error(`❌ Error handling direct message:  ${JSON.stringify(error)}`);
 		sendToUser(senderUsername, {
 			type: "error",
 			message: "Failed to send message",
@@ -413,7 +414,7 @@ async function handleGetUserProfile(
 			})
 		);
 	} catch (error) {
-		console.error("❌ Error getting user profile:", error);
+		logger.error(`❌ Error getting user profile:  ${JSON.stringify(error)}`);
 		connection.send(
 			JSON.stringify({
 				type: "error",
@@ -481,7 +482,7 @@ async function handleGetConversations(
 			})
 		);
 	} catch (error) {
-		console.error("❌ Error getting conversations:", error);
+		logger.error(`❌ Error getting conversations:  ${JSON.stringify(error)}`);
 		connection.send(
 			JSON.stringify({
 				type: "error",
@@ -500,7 +501,7 @@ async function handleGetMessages(
 	const { otherUsername } = data;
 
 	if (!otherUsername) {
-		console.error("❌ otherUsername is undefined or null");
+		logger.error(`❌ otherUsername is undefined or null`);
 		connection.send(
 			JSON.stringify({
 				type: "error",
@@ -563,7 +564,7 @@ async function handleGetMessages(
 			})
 		);
 	} catch (error) {
-		console.error("❌ Error getting messages:", error);
+		logger.error(`❌ Error getting messages:"  ${JSON.stringify(error)}`);
 		connection.send(
 			JSON.stringify({
 				type: "error",
@@ -706,7 +707,7 @@ async function handleSendGameInvite(
 			inviteId: gameInvite.id,
 		});
 	} catch (error) {
-		console.error("❌ Error sending game invite:", error);
+		logger.error(`❌ Error sending game invite:  ${JSON.stringify(error)}`);
 		sendToUser(senderUsername, {
 			type: "error",
 			message: "Failed to send game invitation",
@@ -757,7 +758,7 @@ async function handleAcceptGameInvite(
 		// Update the invitation with the game room ID
 		await prisma.gameInvite.update({
 			where: { id: inviteId },
-			data: { 
+			data: {
 				status: "accepted",
 				gameRoomId: gameRoomId
 			},
@@ -780,7 +781,7 @@ async function handleAcceptGameInvite(
 			message: "Game invitation accepted! Redirecting to game...",
 		});
 	} catch (error) {
-		console.error("❌ Error accepting game invite:", error);
+		logger.error(`❌ Error accepting game invite:  ${JSON.stringify(error)}`);
 		sendToUser(username, {
 			type: "error",
 			message: "Failed to accept game invitation",
@@ -855,11 +856,11 @@ async function handleDeclineGameInvite(
 					where: { id: inviteId }
 				});
 			} catch (error) {
-				console.error("Error cleaning up declined invitation:", error);
+				logger.error(`❌ Error cleaning up declined invitation:  ${JSON.stringify(error)}`);
 			}
 		}, 5000); // 5 seconds delay
 	} catch (error) {
-		console.error("❌ Error declining game invite:", error);
+		logger.error(`❌ Error declining game invite:  ${JSON.stringify(error)}`);
 		sendToUser(username, {
 			type: "error",
 			message: "Failed to decline game invitation",
@@ -899,7 +900,7 @@ async function getOnlineUsersData(
 		const users = await Promise.race([usersPromise, timeoutPromise]);
 		return users;
 	} catch (error) {
-		console.error("❌ Error getting online users data:", error);
+		logger.error(`❌ Error getting online users data:  ${JSON.stringify(error)}`);
 		return [];
 	}
 }
@@ -914,7 +915,7 @@ async function handleGetOnlineUsers(
 			prisma,
 			currentUsername
 		);
-		
+
 		connection.send(
 			JSON.stringify({
 				type: "online_users",
@@ -922,7 +923,7 @@ async function handleGetOnlineUsers(
 			})
 		);
 	} catch (error) {
-		console.error("❌ Error handling get online users:", error);
+		logger.error(`❌ Error handling get online users:  ${JSON.stringify(error)}`);
 		connection.send(
 			JSON.stringify({
 				type: "error",

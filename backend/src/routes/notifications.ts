@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { PrismaClient } from "@prisma/client";
 import { sendTournamentNotification } from "./chat.js";
+import { logger } from "../utils/logger.js";
 
 /**
  * Register notification routes for tournament and game notifications
@@ -51,7 +52,7 @@ export async function registerNotificationRoutes(
 				notificationsCreated: notifications.length,
 			});
 		} catch (error) {
-			console.error("❌ Error creating tournament notification:", error);
+			logger.error(`❌ Error creating tournament notification: ${JSON.stringify(error)}`);
 			reply.code(500).send({ error: "Failed to create notification" });
 		}
 	});
@@ -94,7 +95,7 @@ export async function registerNotificationRoutes(
 				notification,
 			});
 		} catch (error) {
-			console.error("❌ Error creating user tournament notification:", error);
+			logger.error(`❌ Error creating user tournament notification: ${JSON.stringify(error)}`);
 			reply.code(500).send({ error: "Failed to create notification" });
 		}
 	});
@@ -104,9 +105,9 @@ export async function registerNotificationRoutes(
 	 */
 	app.post("/api/notifications/tournament/next-game", async (request, reply) => {
 		try {
-			const { player1, player2, message } = request.body as { 
-				player1: string; 
-				player2?: string; 
+			const { player1, player2, message } = request.body as {
+				player1: string;
+				player2?: string;
 				message?: string;
 			};
 
@@ -114,10 +115,10 @@ export async function registerNotificationRoutes(
 				return reply.code(400).send({ error: "Player1 username is required" });
 			}
 
-			const defaultMessage = player2 
+			const defaultMessage = player2
 				? `Your tournament match against ${player2} is ready! Get ready to play Pong.`
 				: `Your next tournament game is ready! Get ready to play Pong.`;
-			
+
 			const notificationMessage = message || defaultMessage;
 
 			// Find player1
@@ -154,7 +155,7 @@ export async function registerNotificationRoutes(
 
 				if (user2) {
 					const player2Message = `Your tournament match against ${player1} is ready! Get ready to play Pong.`;
-					
+
 					const notification2 = await prisma.notification.create({
 						data: {
 							userId: user2.id,
@@ -174,7 +175,7 @@ export async function registerNotificationRoutes(
 				notifications,
 			});
 		} catch (error) {
-			console.error("❌ Error creating tournament game notification:", error);
+			logger.error(`❌ Error creating tournament game notification: ${JSON.stringify(error)}`);
 			reply.code(500).send({ error: "Failed to create notification" });
 		}
 	});
@@ -195,7 +196,7 @@ export async function registerNotificationRoutes(
 
 			reply.code(200).send({ notifications });
 		} catch (error) {
-			console.error("❌ Error getting notifications:", error);
+			logger.error(`❌ Error getting notifications: ${JSON.stringify(error)}`);
 			reply.code(500).send({ error: "Failed to get notifications" });
 		}
 	});
@@ -219,7 +220,7 @@ export async function registerNotificationRoutes(
 
 				reply.code(200).send({ success: true });
 			} catch (error) {
-				console.error("❌ Error marking notification as read:", error);
+				logger.error(`❌ Error marking notification as read: ${JSON.stringify(error)}`);
 				reply
 					.code(500)
 					.send({ error: "Failed to mark notification as read" });
@@ -242,7 +243,7 @@ export async function registerNotificationRoutes(
 
 			reply.code(200).send({ success: true });
 		} catch (error) {
-			console.error("❌ Error marking all notifications as read:", error);
+			logger.error(`❌ Error marking all notifications as read: ${JSON.stringify(error)}`);
 			reply
 				.code(500)
 				.send({ error: "Failed to mark notifications as read" });

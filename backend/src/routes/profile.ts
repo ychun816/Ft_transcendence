@@ -9,6 +9,7 @@ import { createHash } from "crypto";
 import jwt from "jsonwebtoken";
 import { request } from "http";
 import { sessionManager } from "../services/sessionManager.js"
+import { logger } from "../utils/logger.js";
 
 /*
 TO DO:
@@ -42,7 +43,7 @@ export function extractTokenFromRequest(
 		) as any;
 		return { userId: decoded.id, username: decoded.username };
 	} catch (error) {
-		console.error("JWT verification error:", error);
+		logger.error(`JWT verification error: ${JSON.stringify(error)}`);
 		return null;
 	}
 }
@@ -364,7 +365,7 @@ export async function registerProfileRoute(
 				//console.log("Friends: ", user?.friends);
 				reply.status(200).send(user?.friends);
 			} catch (error) {
-				//console.error("Error fetching friends:", error);
+				logger.error(`Error fetching friends: ${JSON.stringify(error)}`);
 				reply.status(500).send({ error: "Internal server error" });
 			}
 		}
