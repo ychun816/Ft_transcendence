@@ -1,20 +1,45 @@
+// {
+//   "compilerOptions": {
+//       "target": "ES2022",
+//       "module": "ESNext",
+//       "moduleResolution": "node",
+//       "outDir": "./dist",
+//       "rootDir": "./src",
+//       "strict": true,
+//       "esModuleInterop": true,
+//       "allowSyntheticDefaultImports": true,
+//       "skipLibCheck": true,
+//       "forceConsistentCasingInFileNames": true,
+//       "typeRoots": [
+//       	"./node_modules/@types",
+//       	"./types"
+//     ]
+//   },
+//   "include": ["src/**/*"],
+//   "exclude": ["prisma", "dist"]
+// }
+
 {
   "compilerOptions": {
-      "target": "ES2022",
-      "module": "ESNext",
-      "moduleResolution": "node",
-      "outDir": "./dist",
-      "rootDir": "./src",
-      "strict": true,
-      "esModuleInterop": true,
-      "allowSyntheticDefaultImports": true,
-      "skipLibCheck": true,
-      "forceConsistentCasingInFileNames": true,
-      "typeRoots": [
-      	"./node_modules/@types",
-      	"./types"
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": false,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "sourceMap": false,
+    "typeRoots": [
+      "./node_modules/@types",
+      "./types"
     ]
   },
   "include": ["src/**/*"],
-  "exclude": ["prisma", "dist"]
+  "exclude": ["prisma", "dist", "node_modules"]
 }
