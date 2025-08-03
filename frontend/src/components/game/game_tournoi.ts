@@ -156,10 +156,10 @@ class Pong
     private keys_pressed: Record<string, boolean> = {};
     private count_down: HTMLDivElement;
     private animation_id: number;
-    private countdown_interval: number | null = null;
-    private restart_timeout: number | null = null;
-    private goal_timeout: number | null = null;
-    private start_timeout: number | null = null;
+    private countdown_interval: ReturnType<typeof setTimeout> | null = null;
+    private restart_timeout: ReturnType<typeof setTimeout> | null = null;
+    private goal_timeout: ReturnType<typeof setTimeout> | null = null;
+    private start_timeout: ReturnType<typeof setTimeout> | null = null;
     private end_message: HTMLElement | null = null;
     private accumulator: number = 0;
     private fixed_timestep: number = 16.67;
@@ -202,7 +202,8 @@ class Pong
             is_paused: false,
             game_running: true,
             count_down_active: false,
-            restart_active: false
+            restart_active: false,
+            game_mode: 'tournament'
         }
 
         this.ball =
@@ -541,7 +542,7 @@ class Pong
 		if (this.data.score1 > this.data.score2) {
 			this.data.winnerId = this.data.player1Id;
 		} else {
-			this.data.winnerId = this.data.player2Id;
+			this.data.winnerId = this.data.player2Id ?? null;
 		}
 
 		this.data.played_at = new Date();
@@ -634,11 +635,11 @@ class Pong
         this.state.restart_active = false;
 
         this.data.id = 0;
-        this.data.player1Id = "default";
-        this.data.ia_mode = false;
-        this.data.tournoi_mode = false;
-        this.data.multi_mode = false;
-        this.data.winnerId = "default";
+        this.data.player1Id = null;
+        this.data.iaMode = false;
+        this.data.tournamentMode = false;
+        this.data.multiMode = false;
+        this.data.winnerId = null;
         this.data.score1 = 0;
         this.data.score2 = 0;
         this.data.played_at = new Date();

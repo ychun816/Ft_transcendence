@@ -737,15 +737,17 @@ export function createGamePage(): HTMLElement {
 			function waitForMatchEnd(callback: (winner: string) => void)
 			{
 				const interval = setInterval(() => {
-					const result = currentGame.check_end_game();
-					if (result === 1) {
-						clearInterval(interval);
-						const winner = currentGame.getPlayer1Name(); // existe que pour game_tournoi
-						callback(winner);
-					} else if (result === 2) {
-						clearInterval(interval);
-						const winner = currentGame.getPlayer2Name(); // existe que pour game_tournoi
-						callback(winner);
+					if (currentGame && 'check_end_game' in currentGame) {
+						const result = currentGame.check_end_game();
+						if (result === 1) {
+							clearInterval(interval);
+							const winner = 'getPlayer1Name' in currentGame ? currentGame.getPlayer1Name() : 'Player 1'; // existe que pour game_tournoi
+							callback(winner);
+						} else if (result === 2) {
+							clearInterval(interval);
+							const winner = 'getPlayer2Name' in currentGame ? currentGame.getPlayer2Name() : 'Player 2'; // existe que pour game_tournoi
+							callback(winner);
+						}
 					}
 				}, 1000);
 			}

@@ -161,10 +161,10 @@ class Pong
     private count_down: HTMLDivElement;
     private ia: ia_interface;
     private animation_id: number;
-    private countdown_interval: number | null = null;
-    private restart_timeout: number | null = null;
-    private goal_timeout: number | null = null;
-    private start_timeout: number | null = null;
+    private countdown_interval: ReturnType<typeof setTimeout> | null = null;
+    private restart_timeout: ReturnType<typeof setTimeout> | null = null;
+    private goal_timeout: ReturnType<typeof setTimeout> | null = null;
+    private start_timeout: ReturnType<typeof setTimeout> | null = null;
     private end_message: HTMLElement | null = null;
     private accumulator: number = 0;
     private fixed_timestep: number = 16.67;

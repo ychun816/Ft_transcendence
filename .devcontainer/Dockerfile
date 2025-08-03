@@ -31,6 +31,9 @@ COPY package*.json ./
 RUN npm ci && \
     npm cache clean --force
 
+
+
+
 COPY . .
 
 RUN mkdir -p backend/ssl
@@ -75,20 +78,14 @@ chmod 600 backend/ssl/*.pem\n\
 echo "Certificats SSL générés avec IP: $DETECTED_IP"\n\
 ' > /tmp/generate-ssl.sh && chmod +x /tmp/generate-ssl.sh && /tmp/generate-ssl.sh
 
+
 RUN npm run build
 
 RUN rm -rf backend/src/ && \
     rm -rf *.config.js && \
     rm -rf backend/tsconfig.json && \
-    rm -rf node_modules && \
-    npm ci --only=production && \
-    npm install concurrently
-
-COPY .devcontainer/entrypoint.sh /entrypoint.sh
-
-RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
+    rm -rf node_modules
 
 EXPOSE 3002
 
-ENTRYPOINT ["/entrypoint.sh"]
 CMD ["npm", "start"]

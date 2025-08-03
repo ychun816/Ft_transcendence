@@ -11,7 +11,7 @@ export class GlobalNotificationService {
     private reconnectAttempts = 0;
     private maxReconnectAttempts = 5;
     private userData: any = null;
-    private messageHandlers: ((data: any) => void)[] = [];
+    private messageHandlers: ((data: any) => void | boolean)[] = [];
 
     private constructor() {
         this.initializeUserData();
@@ -59,7 +59,6 @@ export class GlobalNotificationService {
         try {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const host = window.location.hostname;
-            const port = window.location.port || (window.location.protocol === 'https:' ? '443' : '80');
             
             const wsUrl = `${protocol}//${host}:3002/ws/chat?username=${encodeURIComponent(this.userData.username)}&userId=${this.userData.id}`;
             
@@ -90,7 +89,7 @@ export class GlobalNotificationService {
                 this.scheduleReconnect();
             };
 
-            this.ws.onerror = (error) => {
+            this.ws.onerror = () => {
                 this.isConnected = false;
             };
 

@@ -580,15 +580,15 @@ export function createGamePage(): HTMLElement {
 		const token = sessionStorage.getItem("authToken");
 		if (!token) {
 			//console.log("pas connecte");
-			loginBtn.classList.remove("hidden");
-			chatBtn.classList.add("hidden");
-			profilBtn.classList.add("hidden");
-			logoutBtn.classList.add("hidden");
+			if (loginBtn) loginBtn.classList.remove("hidden");
+			if (chatBtn) chatBtn.classList.add("hidden");
+			if (profilBtn) profilBtn.classList.add("hidden");
+			if (logoutBtn) logoutBtn.classList.add("hidden");
 		} else {
-			loginBtn.classList.add("hidden");
-			chatBtn.classList.remove("hidden");
-			profilBtn.classList.remove("hidden");
-			logoutBtn.classList.remove("hidden");
+			if (loginBtn) loginBtn.classList.add("hidden");
+			if (chatBtn) chatBtn.classList.remove("hidden");
+			if (profilBtn) profilBtn.classList.remove("hidden");
+			if (logoutBtn) logoutBtn.classList.remove("hidden");
 			nameId.classList.remove("hidden");
 			const userId = sessionStorage.getItem("username");
 			nameId.innerText = `${userId}`;
@@ -713,15 +713,15 @@ export function createGamePage(): HTMLElement {
 		const token = sessionStorage.getItem("authToken");
 		if (!token) {
 			//console.log("pas connecte");
-			loginBtn.classList.remove("hidden");
-			chatBtn.classList.add("hidden");
-			profilBtn.classList.add("hidden");
-			logoutBtn.classList.add("hidden");
+			if (loginBtn) loginBtn.classList.remove("hidden");
+			if (chatBtn) chatBtn.classList.add("hidden");
+			if (profilBtn) profilBtn.classList.add("hidden");
+			if (logoutBtn) logoutBtn.classList.add("hidden");
 		} else {
-			loginBtn.classList.add("hidden");
-			logoutBtn.classList.remove("hidden");
-			chatBtn.classList.remove("hidden");
-			profilBtn.classList.remove("hidden");
+			if (loginBtn) loginBtn.classList.add("hidden");
+			if (logoutBtn) logoutBtn.classList.remove("hidden");
+			if (chatBtn) chatBtn.classList.remove("hidden");
+			if (profilBtn) profilBtn.classList.remove("hidden");
 			nameId.classList.remove("hidden");
 			const userId = sessionStorage.getItem("username");
 			nameId.innerText = `${userId}`;
@@ -937,21 +937,23 @@ export function createGamePage(): HTMLElement {
 
 				waitForMatchEnd((winner) => {
 					// Le tournoi est terminé, afficher le bouton retour menu
-					backToMenuBtn.style.display = "block";
+					if (backToMenuBtn) backToMenuBtn.style.display = "block";
 				});
 			}
 
 			function waitForMatchEnd(callback: (winner: string) => void) {
 				const interval = setInterval(() => {
-					const result = currentGame.check_end_game();
-					if (result === 1) {
-						clearInterval(interval);
-						const winner = currentGame.getPlayer1Name(); // existe que pour game_tournoi
-						callback(winner);
-					} else if (result === 2) {
-						clearInterval(interval);
-						const winner = currentGame.getPlayer2Name(); // existe que pour game_tournoi
-						callback(winner);
+					if (currentGame && 'check_end_game' in currentGame) {
+						const result = currentGame.check_end_game();
+						if (result === 1) {
+							clearInterval(interval);
+							const winner = 'getPlayer1Name' in currentGame ? currentGame.getPlayer1Name() : 'Player 1'; // existe que pour game_tournoi
+							callback(winner);
+						} else if (result === 2) {
+							clearInterval(interval);
+							const winner = 'getPlayer2Name' in currentGame ? currentGame.getPlayer2Name() : 'Player 2'; // existe que pour game_tournoi
+							callback(winner);
+						}
 					}
 				}, 1000);
 			}
@@ -961,11 +963,11 @@ export function createGamePage(): HTMLElement {
 				menuLigne.style.display = "none";
 				menuTournoi.style.display = "none";
 				game.style.display = "block";
-				backToMenuBtn.style.display = "none";
-				loginBtn.classList.add("hidden");
-				logoutBtn.classList.add("hidden");
-				profilBtn.classList.add("hidden");
-				chatBtn.classList.add("hidden");
+				if (backToMenuBtn) backToMenuBtn.style.display = "none";
+				if (loginBtn) loginBtn.classList.add("hidden");
+				if (logoutBtn) logoutBtn.classList.add("hidden");
+				if (profilBtn) profilBtn.classList.add("hidden");
+				if (chatBtn) chatBtn.classList.add("hidden");
 				nameId.classList.add("hidden");
 			}
 
@@ -1022,10 +1024,10 @@ export function createGamePage(): HTMLElement {
 			menuLigne.style.display = "none";
 			game.style.display = "block";
 			restart.style.display = "block";
-			loginBtn.classList.add("hidden");
-			logoutBtn.classList.add("hidden");
-			profilBtn.classList.add("hidden");
-			chatBtn.classList.add("hidden");
+			if (loginBtn) loginBtn.classList.add("hidden");
+			if (logoutBtn) logoutBtn.classList.add("hidden");
+			if (profilBtn) profilBtn.classList.add("hidden");
+			if (chatBtn) chatBtn.classList.add("hidden");
 			nameId.classList.add("hidden");
 
 			const token = sessionStorage.getItem("authToken");
@@ -1181,10 +1183,10 @@ export function createGamePage(): HTMLElement {
 			restart.classList.add("hidden");
 			game.style.display = "block";
 			control2.style.display = "block";
-			loginBtn.classList.add("hidden");
-			logoutBtn.classList.add("hidden");
-			profilBtn.classList.add("hidden");
-			chatBtn.classList.add("hidden");
+			if (loginBtn) loginBtn.classList.add("hidden");
+			if (logoutBtn) logoutBtn.classList.add("hidden");
+			if (profilBtn) profilBtn.classList.add("hidden");
+			if (chatBtn) chatBtn.classList.add("hidden");
 			nameId.classList.add("hidden");
 
 			currentGame.start_game_loop();

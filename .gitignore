@@ -14,6 +14,8 @@ dist-ssr
 generated/
 .devcontainer/.env
 backend/.env
+backend/dist
+frontend/dist
 *.env
 *.nfs*
 backend/ssl

@@ -301,9 +301,15 @@ const setupMainServer = async () => {
 
 	// Configuration des fichiers statiques - frontend en second
 	console.log("📁 Enregistrement des fichiers statiques du frontend...");
+	const frontendPath = path.join(__dirname, "../../frontend/dist");
+	console.log("📂 Chemin du frontend:", frontendPath);
+	console.log("📂 Le dossier existe?", fs.existsSync(frontendPath));
+	if (fs.existsSync(frontendPath)) {
+		console.log("📂 Contenu du dossier:", fs.readdirSync(frontendPath));
+	}
 	await app.register(async function (fastify) {
 		await fastify.register(fastifyStatic, {
-			root: path.join(__dirname, "../../frontend/dist"),
+			root: frontendPath,
 			prefix: "/",
 		});
 	});

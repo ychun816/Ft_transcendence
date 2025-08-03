@@ -1,4 +1,4 @@
-import { Page } from "../router/router.js";
+import type { Page } from "../router/router.js";
 import { ServerGame_solo } from "../components/game/ServerPongGame.js";
 import { i18n } from "../services/i18n.js";
 
@@ -19,7 +19,7 @@ export class ServerGameSoloPage implements Page {
 	private currentGame: ServerGame_solo | null = null;
 	private static isInstanceActive: boolean = false;
 	private navigationListener: ((e: Event) => void) | null = null;
-	//private restartListener: (() => void) | null = null;
+	// private restartListener: (() => void) | null = null;
 
 	render(): string {
 		return `
@@ -142,12 +142,6 @@ export class ServerGameSoloPage implements Page {
 			ServerGameSoloPage.isInstanceActive = false; // Libérer le verrou en cas d'erreur
 		}
 
-		// Event listener pour le bouton restart
-		const restartBtn = document.getElementById("restartBtn");
-		if (restartBtn) {
-			this.restartListener = () => this.restartGame();
-			restartBtn.addEventListener("click", this.restartListener);
-		}
 	}
 
 	private async startSoloGame(): Promise<void> {

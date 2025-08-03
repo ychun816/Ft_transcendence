@@ -1,7 +1,8 @@
-// Add these imports at the very top of the file:
-import React from "react";
-import ReactDOM from "react-dom/client";
-import TwoFactorVerifyPage from "../pages/TwoFactorVerifyPage";
+export interface Page {
+    render(): string;
+    onMount?(): void;
+    cleanup?(): void;
+}
 
 class Router {
     private routes: Map<string, () => HTMLElement> = new Map();
@@ -12,7 +13,7 @@ class Router {
 
     constructor() {
         //this.setupRoutes();
-        this.setupProtectedRoutes();
+        this.setupProtectedRoutes();``
         this.handlePopState();
     }
 

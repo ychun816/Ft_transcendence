@@ -64,7 +64,7 @@ export class ServerPongClient {
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
     private ws: WebSocket | null = null;
-    private gameId: string | null = null;
+    private gameId: string | undefined = undefined;
     private gameMode: 'solo' | 'versus' | 'multi' = 'versus';
     private isConnecting: boolean = false;
     
@@ -466,7 +466,7 @@ export class ServerPongClient {
         }
         
         // Réinitialiser les états
-        this.gameId = null;
+        this.gameId = undefined;
         this.gameState = null;
         this.isConnecting = false;
         
@@ -502,7 +502,7 @@ export class ServerPongClient {
         return this.ws !== null && this.ws.readyState === WebSocket.OPEN;
     }
 
-    get currentGameId(): string | null {
+    get currentGameId(): string | undefined {
         return this.gameId;
     }
     
@@ -593,7 +593,7 @@ export class ServerGame_solo {
     }
     
     // Getters pour accéder aux propriétés du client
-    get currentGameId(): string | null {
+    get currentGameId(): string | undefined {
         return this.client.currentGameId;
     }
     

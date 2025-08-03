@@ -156,10 +156,10 @@ class Pong
 	private keys_pressed: Record<string, boolean> = {};
 	private count_down: HTMLDivElement;
 	private animation_id: number;
-	private countdown_interval: number | null = null;
-	private restart_timeout: number | null = null;
-	private goal_timeout: number | null = null;
-	private start_timeout: number | null = null;
+	private countdown_interval: ReturnType<typeof setTimeout> | null = null;
+	private restart_timeout: ReturnType<typeof setTimeout> | null = null;
+	private goal_timeout: ReturnType<typeof setTimeout> | null = null;
+	private start_timeout: ReturnType<typeof setTimeout> | null = null;
 	//private restart_btn: HTMLButtonElement;
 	private end_message: HTMLElement | null = null;
 	private accumulator: number = 0;
@@ -503,7 +503,7 @@ class Pong
 		if (this.data.score1 > this.data.score2) {
 			this.data.winnerId = this.data.player1Id;
 		} else {
-			this.data.winnerId = this.data.player2Id;
+			this.data.winnerId = this.data.player2Id ?? null;
 		}
 
 		this.data.played_at = new Date();
@@ -651,7 +651,7 @@ class Pong
         //console.log("🔄 RESTART demandé");
         
         this.clear_all_timers();
-        this.restart_btn.style.display = 'none';
+        //this.restart_btn.style.display = 'none';
 
         this.state.restart_active = true;
         if (this.end_message)

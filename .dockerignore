@@ -5,7 +5,6 @@ Dockerfile
 .git
 .gitignore
 README.md
-dist
 .vscode
 # .devcontainer est nécessaire pour le build Docker
 # .devcontainer

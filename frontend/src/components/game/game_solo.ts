@@ -2,7 +2,7 @@ import { i18n } from "../../services/i18n.js";
 
 // -------------------------- INTERFACES ------------------------------------
 
-import { json } from "stream/consumers";
+// import { json } from "stream/consumers";
 
 interface game_config
 {
@@ -189,10 +189,10 @@ class Pong
     private count_down: HTMLDivElement;
     private ia: ia_interface;
     private animation_id: number;
-    private countdown_interval: number | null = null;
-    private restart_timeout: number | null = null;
-    private goal_timeout: number | null = null;
-    private start_timeout: number | null = null;
+    private countdown_interval: ReturnType<typeof setTimeout> | null = null;
+    private restart_timeout: ReturnType<typeof setTimeout> | null = null;
+    private goal_timeout: ReturnType<typeof setTimeout> | null = null;
+    private start_timeout: ReturnType<typeof setTimeout> | null = null;
     private end_message: HTMLElement | null = null;
     private accumulator: number = 0;
     private fixed_timestep: number = 16.67;
@@ -642,7 +642,7 @@ class Pong
 		if (this.data.score1 > this.data.score2) {
 			this.data.winnerId = this.data.player1Id;
 		} else {
-			this.data.winnerId = this.data.player2Id;
+			this.data.winnerId = this.data.player2Id ?? null;
 		}
 
         this.data.played_at = new Date();

@@ -15,7 +15,7 @@ async function buildCSS() {
     execSync(command, { cwd: __dirname, stdio: 'inherit' });
     console.log('✓ CSS compiled with Tailwind');
   } catch (error) {
-    console.error('❌ CSS compilation failed:', error.message);
+    console.error('❌ CSS compilation failed:', (error as Error).message );
     throw error;
   }
 }
@@ -24,19 +24,20 @@ const config = {
   entryPoints: ['src/main.ts'],
   bundle: true,
   outdir: 'dist',
-  format: 'esm',
-  platform: 'browser',
+  format: 'esm' as const,
+  platform: 'browser' as const,
   target: 'es2020',
   sourcemap: isDev,
   minify: !isDev,
   tsconfig: 'tsconfig.json',
   loader: {
-    '.css': 'text',
+    '.css': 'text' as const,
   },
   external: [],
   define: {
     'process.env.NODE_ENV': isDev ? '"development"' : '"production"'
-  }
+  },
+  // write: false  // Décommentez pour voir outputFiles dans le résultat
 };
 
 async function copyPublicAssets() {
@@ -82,15 +83,30 @@ async function createHTMLFile() {
 
 async function buildOnce() {
   try {
+    console.log('Creating dist directory...');
     await fs.mkdir('dist', { recursive: true });
+    
+    console.log('Building CSS...');
     await buildCSS();
-    await build(config);
+    
+    console.log('Building JavaScript with esbuild...');
+    const result = await build(config);
+    console.log('Build result:', result);
+    
+    console.log('Creating HTML file...');
     await createHTMLFile();
+    
+    console.log('Copying public assets...');
     await copyPublicAssets();
+    
+    // List files in dist directory
+    const files = await fs.readdir('dist');
+    console.log('Files in dist directory:', files);
+    
     console.log('✓ Build completed successfully');
   } catch (error) {
     console.error('Build failed:', error);
-    process.exit(1);
+    process.exit( 1 );
   }
 }
 

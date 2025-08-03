@@ -13,7 +13,7 @@ export function createLiveChat() {
   `;
   
   const maxChats = 1;
-  const chats = [];
+  const chats: HTMLElement[] = [];
   
   element.appendChild(openChatButton);
   
@@ -31,7 +31,7 @@ export function createLiveChat() {
     chatWindow.style.right = "0";
     
     const closeButton = chatWindow.querySelector('#close-chat');
-    closeButton.addEventListener("click", () => {
+    closeButton?.addEventListener("click", () => {
       element.removeChild(chatWindow);
       chats.splice(chats.indexOf(chatWindow), 1);
     });
