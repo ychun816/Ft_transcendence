@@ -111,9 +111,9 @@ export async function twoFactorRoutes(
 		async (request, reply) => {
 			try {
 				const { username } = request.params as { username: string };
-				console.log(
-					`🔧 TEMP GET - Setting up TOTP 2FA for user: ${username}`
-				);
+				// console.log(
+				// 	`🔧 TEMP GET - Setting up TOTP 2FA for user: ${username}`
+				// );
 
 				const user = await prisma.user.findUnique({
 					where: { username },
@@ -164,9 +164,9 @@ export async function twoFactorRoutes(
 					},
 				});
 
-				console.log(
-					`✅ TEMP GET - TOTP secret generated for ${username}`
-				);
+				// console.log(
+				// 	`✅ TEMP GET - TOTP secret generated for ${username}`
+				// );
 
 				// Return HTML page with QR code and instructions
 				const htmlResponse = `
@@ -177,15 +177,15 @@ export async function twoFactorRoutes(
 					<style>
 						body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
 						.qr-container { text-align: center; margin: 20px 0; }
-						.secret { background: #f5f5f5; padding: 10px; border-radius: 5px; word-break: break-all; }
+						.secret { background: #91c0fdff; padding: 10px; border-radius: 5px; word-break: break-all; }
 						.step { margin: 15px 0; padding: 10px; border-left: 4px solid #007bff; }
 					</style>
 				</head>
 				<body>
-					<h1>🔐 Setup Google Authenticator for ${username}</h1>
+					<h1>SET-UP GOOGLE AUTHENTICATOR FOR : ${username}</h1>
 
 					<div class="step">
-						<h3>📱 Step 1: Download Google Authenticator</h3>
+						<h3>Step 1: Download Google Authenticator</h3>
 						<p>Install Google Authenticator on your phone from:</p>
 						<ul>
 							<li><strong>Android:</strong> Google Play Store</li>
@@ -194,7 +194,7 @@ export async function twoFactorRoutes(
 					</div>
 
 					<div class="step">
-						<h3>📷 Step 2: Scan QR Code</h3>
+						<h3>Step 2: Scan QR Code</h3>
 						<div class="qr-container">
 							<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(secretObj.otpauth_url)}" alt="QR Code">
 						</div>
@@ -203,7 +203,7 @@ export async function twoFactorRoutes(
 					</div>
 
 					<div class="step">
-						<h3>✅ Step 3: Verify Setup</h3>
+						<h3>Step 3: Verify Setup</h3>
 						<p>Once you've added the account to Google Authenticator:</p>
 						<ol>
 							<li>Look at the 6-digit code in the app</li>
@@ -213,7 +213,7 @@ export async function twoFactorRoutes(
 					</div>
 
 					<div class="step">
-						<h3>🧪 Step 4: Test Login</h3>
+						<h3>Step 4: Test Login</h3>
 						<p>After verification, try logging in normally. You'll be asked for the Google Authenticator code!</p>
 					</div>
 				</body>
@@ -242,9 +242,9 @@ export async function twoFactorRoutes(
 					username: string;
 					code: string;
 				};
-				console.log(
-					`🔧 TEMP GET - Verifying TOTP for user: ${username}, code: ${code}`
-				);
+				// console.log(
+				// 	`🔧 TEMP GET - Verifying TOTP for user: ${username}, code: ${code}`
+				// );
 
 				const user = await prisma.user.findUnique({
 					where: { username },
@@ -278,7 +278,7 @@ export async function twoFactorRoutes(
 					},
 				});
 
-				console.log(`✅ TEMP GET - TOTP 2FA enabled for ${username}`);
+				// console.log(`✅ TEMP GET - TOTP 2FA enabled for ${username}`);
 
 				const htmlResponse = `
 				<!DOCTYPE html>
@@ -292,11 +292,11 @@ export async function twoFactorRoutes(
 				</head>
 				<body>
 					<div class="success">
-						<h1>🎉 Success!</h1>
-						<h2>TOTP 2FA Enabled for ${username}</h2>
+						<h1>SUCCESS!!</h1>
+						<h2>TOTP 2FA SUCCESSFULLY ENABLED FOR : ${username}</h2>
 						<p>Google Authenticator is now configured and active.</p>
 						<p><strong>Next time you login, you'll need to enter the 6-digit code from Google Authenticator!</strong></p>
-						<p><a href="https://localhost:3002">🔗 Go back to login page</a></p>
+						<p><a href="https://localhost:3002"> GO BACK TO LOGIN PAGE</a></p>
 					</div>
 				</body>
 				</html>
@@ -321,9 +321,9 @@ export async function twoFactorRoutes(
 		async (request, reply) => {
 			try {
 				const { username } = request.params as { username: string };
-				console.log(
-					`🔧 TEMP GET - Enabling email 2FA for user: ${username}`
-				);
+				// console.log(
+				// 	`🔧 TEMP GET - Enabling email 2FA for user: ${username}`
+				// );
 
 				const user = await prisma.user.findUnique({
 					where: { username },
@@ -352,7 +352,7 @@ export async function twoFactorRoutes(
 					},
 				});
 
-				console.log(`✅ TEMP GET - Email 2FA enabled for ${username}`);
+				// console.log(`✅ TEMP GET - Email 2FA enabled for ${username}`);
 				return reply.send({
 					message: `Email 2FA enabled successfully for ${username}`,
 					user: {
@@ -376,7 +376,7 @@ export async function twoFactorRoutes(
 	fastify.post("/api/2fa/enable-email-temp", async (request, reply) => {
 		try {
 			const { username } = request.body as { username: string };
-			console.log(`🔧 TEMP - Enabling email 2FA for user: ${username}`);
+			// console.log(`🔧 TEMP - Enabling email 2FA for user: ${username}`);
 
 			const user = await prisma.user.findUnique({
 				where: { username },
@@ -405,7 +405,7 @@ export async function twoFactorRoutes(
 				},
 			});
 
-			console.log(`✅ TEMP - Email 2FA enabled for ${username}`);
+			// console.log(`✅ TEMP - Email 2FA enabled for ${username}`);
 			return reply.send({ message: "Email 2FA enabled successfully" });
 		} catch (error) {
 			console.error("Enable email 2FA error:", error);
