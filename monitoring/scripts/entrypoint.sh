@@ -15,8 +15,10 @@ cat /etc/cron.environment
 
 touch /var/log/transcendence-cleanup.log
 touch /var/log/transcendence-cleanup-metrics.log
+touch /var/log/cron.log
 chmod 644 /var/log/transcendence-cleanup.log
 chmod 644 /var/log/transcendence-cleanup-metrics.log
+chmod 644 /var/log/cron.log
 
 echo "Test de l'environnement cron..."
 if [ -f "/etc/cron.environment" ]; then
