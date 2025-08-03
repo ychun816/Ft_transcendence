@@ -1,7 +1,9 @@
 import { i18n } from "../../services/i18n.js";
-import { classes } from "../../styles/retroStyles.js";
+import { gameConfigs, containerStyle, centerLineStyle, dimensions } from "../../styles/pongStyles.js";
 
 // -------------------------- INTERFACES ------------------------------------
+
+import { json } from "stream/consumers";
 
 interface game_config
 {
@@ -100,7 +102,10 @@ interface data_score
     lose_point_down: number;
 }
 
+
+
 // ------------------------ FONCTIONS UTILES -----------------------
+
 
 function get_random_playable_angle(): number
 {
@@ -132,6 +137,7 @@ function create_ID(): number
     return Math.floor(Math.random() * 1_000_001);
 }
 
+
 function random_number(min: number, max: number): number
 {
     let num = 0;
@@ -155,22 +161,29 @@ function calculate_ball_speed(ball: ball_interface): number
     return Math.sqrt(ball.ball_dir_x * ball.ball_dir_x + ball.ball_dir_y * ball.ball_dir_y);
 }
 
+
 function get_time(start_time: DOMHighResTimeStamp): number
 {
   return performance.now() - start_time;
 }
+
 
 function random_bool(): boolean
 {
     return Math.random() < 0.5;
 }
 
+
 // --------------------------- CLASSES -----------------------------
+
 
 class Pong
 {
     private canvas: HTMLCanvasElement;
-    private ctx: CanvasRenderingContext2D;
+    private gameContainer: HTMLDivElement;
+    private ballElement: HTMLDivElement;
+    private leftPaddleElement: HTMLDivElement;
+    private rightPaddleElement: HTMLDivElement;
     private start_time: DOMHighResTimeStamp;
     private config: game_config;
     private state: game_state;
@@ -191,10 +204,10 @@ class Pong
     private data: data_score;
     private player_name: string | null;
 
+
     constructor(canvas : HTMLCanvasElement, mode: 'solo' | 'versus')
     {
         this.canvas = canvas;
-        this.ctx = canvas.getContext("2d")!;
         this.start_time = performance.now();
         this.count_down = document.getElementById("countdowndisplay") as HTMLDivElement;
         this.animation_id = 0;
@@ -312,51 +325,50 @@ class Pong
             lose_point_down: 0,
         }
 
-        // INITIALISER LE CONTAINER HTML
-        this.initializeHTMLGameContainer();
-
+        this.createGameElements();
         this.setup_event();
         this.init_ball_direction();
     }
 
-    // Nouvelle fonction pour initialiser le conteneur HTML
-    initializeHTMLGameContainer(): void {
-        const canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
-        if (!canvas) return;
-
-        // Créer le conteneur de remplacement
-        const gameContainer = document.createElement('div');
-        gameContainer.id = 'game-display-container';
-        gameContainer.className = `
-            relative w-[800px] h-[600px] mx-auto rounded-xl bg-black 
-            ${classes.gameCanvasFrame}
-            overflow-hidden
-        `;
-
-        // Remplacer le canvas
-        if (canvas.parentNode) {
-            canvas.parentNode.replaceChild(gameContainer, canvas);
-        }
-    }
-
-    // Fonction de nettoyage pour revenir au canvas si nécessaire
-    restoreCanvas(): void {
-        const gameContainer = document.getElementById('game-display-container');
-        if (!gameContainer || !gameContainer.parentNode) return;
-
-        // Recréer le canvas
-        const canvas = document.createElement('canvas');
-        canvas.id = 'gameCanvas';
-        canvas.width = 800;
-        canvas.height = 600;
-        canvas.className = 'rounded-xl bg-black w-full h-full';
-
-        // Remplacer le conteneur HTML par le canvas
-        gameContainer.parentNode.replaceChild(canvas, gameContainer);
+    private createGameElements(): void {
+        // Masquer le canvas original
+        this.canvas.style.display = 'none';
         
-        // Réinitialiser le contexte
-        this.canvas = canvas;
-        this.ctx = canvas.getContext("2d")!;
+        // Créer le conteneur du jeu avec les styles fixes
+        this.gameContainer = document.createElement('div');
+        this.gameContainer.className = gameConfigs.solo.container;
+        this.gameContainer.id = 'pong-game-container';
+        
+        // Appliquer les styles CSS-in-JS pour les dimensions fixes
+        Object.assign(this.gameContainer.style, containerStyle);
+        
+        // Créer la ligne centrale
+        const centerLine = document.createElement('div');
+        centerLine.className = gameConfigs.solo.centerLine;
+        Object.assign(centerLine.style, centerLineStyle);
+        
+        // Créer les raquettes
+        this.leftPaddleElement = document.createElement('div');
+        this.leftPaddleElement.className = gameConfigs.solo.leftPaddle;
+        this.leftPaddleElement.id = 'left-paddle';
+        
+        this.rightPaddleElement = document.createElement('div');
+        this.rightPaddleElement.className = gameConfigs.solo.rightPaddle;
+        this.rightPaddleElement.id = 'right-paddle';
+        
+        // Créer la balle
+        this.ballElement = document.createElement('div');
+        this.ballElement.className = gameConfigs.solo.ball;
+        this.ballElement.id = 'pong-ball';
+        
+        // Assembler le jeu
+        this.gameContainer.appendChild(centerLine);
+        this.gameContainer.appendChild(this.leftPaddleElement);
+        this.gameContainer.appendChild(this.rightPaddleElement);
+        this.gameContainer.appendChild(this.ballElement);
+        
+        // Insérer après le canvas
+        this.canvas.parentNode?.insertBefore(this.gameContainer, this.canvas.nextSibling);
     }
 
     setup_event(): void
@@ -367,27 +379,27 @@ class Pong
 
     handle_keydown = (e: KeyboardEvent) =>
     {
-        if (e.key === "ArrowUp" || e.key === "ArrowDown" || 
+        if (e.key === "ArrowUp" || e.key === "ArrowDown" ||
             e.key === "ArrowLeft" || e.key === "ArrowRight" ||
             e.key === "w" || e.key === "W" ||
             e.key === "s" || e.key === "S" ||
             e.code === "Space") {
             e.preventDefault();
         }
-        
+
         this.keys_pressed[e.key] = true;
     };
 
     handle_keyup = (e: KeyboardEvent) =>
     {
-        if (e.key === "ArrowUp" || e.key === "ArrowDown" || 
+        if (e.key === "ArrowUp" || e.key === "ArrowDown" ||
             e.key === "ArrowLeft" || e.key === "ArrowRight" ||
             e.key === "w" || e.key === "W" ||
             e.key === "s" || e.key === "S" ||
             e.code === "Space") {
             e.preventDefault();
         }
-        
+
         this.keys_pressed[e.key] = false;
     };
 
@@ -398,7 +410,6 @@ class Pong
             return;
         }
 
-        this.initializeHTMLGameContainer();
         this.draw(1);
         let countdown = 5;
 
@@ -448,6 +459,7 @@ class Pong
     game_loop(): void
     {
         const current_time = performance.now()
+
         const raw_delta_time = current_time - this.last_frame_time;
         let delta_time;
         if (raw_delta_time > 1000)
@@ -569,6 +581,7 @@ class Pong
 			userId = currentUser.id;
 		}
         this.data.player1Id = userId;
+
         this.data.id = create_ID();
 
 		if (this.state.game_mode === "solo") {
@@ -598,6 +611,7 @@ class Pong
 		}
 
         this.data.played_at = new Date();
+
         let t0 = this.data.game_time;
         let t1 = performance.now();
         this.data.game_time = t1 - t0;
@@ -624,7 +638,6 @@ class Pong
                 multiMode: this.data.multiMode
             }),
         });
-
 		const stats = await fetch(`/api/game/stats?username=${currentUser.username}`, {
 		method: "GET",
 		headers: {
@@ -640,8 +653,6 @@ class Pong
 
     cleanup(): void
     {
-        console.log("🧹 Nettoyage des ressources du jeu...");
-
         this.clear_all_timers();
         this.state.game_running = false;
         this.state.is_paused = true;
@@ -668,18 +679,14 @@ class Pong
             this.end_message.textContent = '';
         }
 
-        const gameContainer = document.getElementById('game-display-container');
-        if (gameContainer) {
-            gameContainer.innerHTML = '';
+        // Nettoyer les éléments Tailwind
+        if (this.gameContainer) {
+            this.gameContainer.remove();
         }
-
-        console.log("✅ Nettoyage terminé");
     }
 
     back_to_menu(): void
     {
-        console.log("🏠 Retour au menu principal...");
-
         this.cleanup();
         this.state.restart_active = false;
         this.state.ia_mode = false;
@@ -696,34 +703,23 @@ class Pong
 
         this.config.ball_speed = 4.5 * (3/2);
         this.config.paddle_speed = 7.5 * (3/2);
-
-        console.log("✅ Retour au menu préparé");
     }
 
     destroy(): void
     {
-        console.log("💥 Destruction de l'instance de jeu...");
-
         this.cleanup();
         document.removeEventListener("keydown", this.handle_keydown);
         document.removeEventListener("keyup", this.handle_keyup);
-
-        this.restoreCanvas();
 
         this.count_down = null as any;
         this.end_message = null;
         this.keys_pressed = {};
         this.state.game_running = false;
-
-        console.log("✅ Instance détruite");
     }
 
     restart(): void
     {
-        console.log("🔄 RESTART demandé");
-
         this.clear_all_timers();
-        this.initializeHTMLGameContainer();
 
         this.state.restart_active = true;
         if (this.end_message)
@@ -747,8 +743,6 @@ class Pong
 
         this.restart_timeout = setTimeout(() =>
         {
-            console.log("🚀 Nouvelle partie");
-
             this.last_frame_time = performance.now();
             this.ball.ball_x = this.config.canvas_width / 2;
             this.ball.ball_y = this.config.canvas_height / 2;
@@ -933,7 +927,6 @@ class Pong
             this.start_time = performance.now();
         }
 
-        // Collision avec le paddle gauche
         if (this.ball.ball_dir_x < 0)
         {
             const leftPaddleRect =
@@ -979,7 +972,6 @@ class Pong
             }
         }
 
-        // Collision avec le paddle droit
         if (this.ball.ball_dir_x > 0)
         {
             const rightPaddleRect =
@@ -1020,7 +1012,6 @@ class Pong
             }
         }
 
-        // Vérifier les buts
         if (this.ball.ball_x < 0 || this.ball.ball_x > this.config.canvas_width)
         {
             this.state.is_paused = true;
@@ -1039,7 +1030,6 @@ class Pong
         this.ball.ball_x = newX;
         this.ball.ball_y = newY;
 
-        // Rebonds sur les murs haut et bas
         if (this.ball.ball_y <= 5 || this.ball.ball_y >= this.config.canvas_height - 5)
         {
             if (this.ball.ball_x <= 70 )
@@ -1102,6 +1092,8 @@ class Pong
             this.draw(1);
             this.start_count_down();
         }, 1500);
+
+        return;
     }
 
     update_ball_dir(side: number): void
@@ -1240,63 +1232,32 @@ class Pong
         }
     }
 
-
     draw(interpolation: number): void
     {
-        let gameContainer = document.getElementById('game-display-container');
-        if (!gameContainer) {
-            this.initializeHTMLGameContainer();
-            gameContainer = document.getElementById('game-display-container');
-            if (!gameContainer) {
-                console.error("Impossible de créer le container de jeu");
-                return;
-            }
-        }
+        if (!this.gameContainer) return;
 
+        // Calcul des coordonnées interpolées
         const interpolated_x = this.ball.prev_x + (this.ball.ball_x - this.ball.prev_x) * interpolation;
         const interpolated_y = this.ball.prev_y + (this.ball.ball_y - this.ball.prev_y) * interpolation;
 
+        // Mise à jour de la position de la balle
+        this.ballElement.style.left = `${interpolated_x}px`;
+        this.ballElement.style.top = `${interpolated_y}px`;
+
+        // Alternance de couleur pour l'effet blink
         const blink = Math.floor(Date.now() / 200) % 2 === 0;
-        const ballColor = blink ? 'bg-yellow-400' : 'bg-purple-400';
-        const ballShadow = blink ? 'shadow-[0_0_25px_rgb(250,204,21)]' : 'shadow-[0_0_25px_rgb(167,139,250)]';
+        if (blink) {
+            this.ballElement.className = gameConfigs.solo.ball;
+        } else {
+            this.ballElement.className = gameConfigs.versus.ball; // Rose pour alternance
+        }
 
-        gameContainer.innerHTML = `
-            <div class="absolute inset-0 w-[800px] h-[600px] bg-gradient-to-b from-gray-900 to-gray-800">
-                
-                <div class="absolute left-1/2 top-0 w-0.5 h-full transform -translate-x-1/2">
-                    <div class="w-full h-full bg-gray-600 opacity-60" 
-                         style="background-image: repeating-linear-gradient(to bottom, rgb(75 85 99) 0px, rgb(75 85 99) 10px, transparent 10px, transparent 25px);">
-                    </div>
-                </div>
-
-                <div class="absolute w-[10px] h-[100px] bg-gradient-to-b from-cyan-400 to-cyan-800 border border-cyan-400"
-                     style="left: 30px; top: ${this.paddle.left_paddle_y}px; box-shadow: 0 0 20px rgb(34 211 238);">
-                </div>
-
-                <div class="absolute w-[10px] h-[100px] bg-gradient-to-b from-purple-400 to-purple-800 border border-purple-400"
-                     style="left: 760px; top: ${this.paddle.right_paddle_y}px; box-shadow: 0 0 20px rgb(147 51 234);">
-                </div>
-
-                <div class="absolute w-5 h-5 rounded-full ${ballColor} ${ballShadow} transform -translate-x-1/2 -translate-y-1/2 transition-all duration-75"
-                     style="left: ${interpolated_x}px; top: ${interpolated_y}px;">
-                    <div class="absolute inset-0 rounded-full ${ballColor} animate-ping opacity-75"></div>
-                </div>
-
-                <div class="absolute inset-0 pointer-events-none">
-                    <div class="w-full h-full opacity-20" 
-                         style="background-image: repeating-linear-gradient(0deg, transparent 0px, rgba(147, 51, 234, 0.1) 1px, transparent 2px, transparent 4px);">
-                    </div>
-                </div>
-
-                <div class="absolute top-2 left-2 w-5 h-5 border-l-2 border-t-2 border-purple-400 shadow-[0_0_10px_rgb(147,51,234)]"></div>
-                <div class="absolute top-2 right-2 w-5 h-5 border-r-2 border-t-2 border-purple-400 shadow-[0_0_10px_rgb(147,51,234)]"></div>
-                <div class="absolute bottom-2 left-2 w-5 h-5 border-l-2 border-b-2 border-purple-400 shadow-[0_0_10px_rgb(147,51,234)]"></div>
-                <div class="absolute bottom-2 right-2 w-5 h-5 border-r-2 border-b-2 border-purple-400 shadow-[0_0_10px_rgb(147,51,234)]"></div>
-            </div>
-        `;
+        // Mise à jour des positions des raquettes
+        this.leftPaddleElement.style.top = `${this.paddle.left_paddle_y}px`;
+        this.rightPaddleElement.style.top = `${this.paddle.right_paddle_y}px`;
     }
 
-// Fonctions IA
+    // Méthodes IA (conservées telles quelles)
     ia_init()
     {
         this.ia.random_move_1 = random_bool();
@@ -1418,7 +1379,7 @@ class Pong
             this.ia.super_flag = false;
             this.ia.ia_debug = true;
         }
-        if (this.ia.move_2 >= (this.ia.counter - this.ia.move_1 - this.ia.depart))
+        if (this.ball.current_rebond >= 2)
         {
             if (this.ia.ia_debug == true)
             {
@@ -1430,9 +1391,9 @@ class Pong
                     this.ia.random_move_2 = false;
             }
             if (this.config.ball_speed > 13)
-                this.ia_ajustement(12, this.ia.random_move_2);
+                this.ia_ajustement(12, false);
             else
-                this.ia_ajustement(8, this.ia.random_move_2);
+                this.ia_ajustement(10, false);
             return ;
         }
     }
@@ -1554,7 +1515,7 @@ class Pong
             this.ia.super_flag = false;
             this.ia.ia_debug = true;
         }
-        if (this.ball.current_rebond >= 2)
+        if (this.ia.move_2 >= (this.ia.counter - this.ia.move_1 - this.ia.depart))
         {
             if (this.ia.ia_debug == true)
             {
@@ -1566,9 +1527,9 @@ class Pong
                     this.ia.random_move_2 = false;
             }
             if (this.config.ball_speed > 13)
-                this.ia_ajustement(12, false);
+                this.ia_ajustement(12, this.ia.random_move_2);
             else
-                this.ia_ajustement(10, false);
+                this.ia_ajustement(8, this.ia.random_move_2);
             return ;
         }
     }
@@ -1811,5 +1772,4 @@ export class Game_solo
             this.current_game.destroy();
         }
     }
-}
-
+} 
