@@ -55,6 +55,7 @@ services:
       - "${METRICS_PORT}:3001"     # Métriques
       - "${HTTP_REDIRECT_PORT}:8080"
       - "5174:5174"                # Frontend serve.ts
+      - "5555:5555"
     environment:
       - NODE_ENV=production
       - LOGSTASH_HOST=${LOGSTASH_HOST}

@@ -350,27 +350,27 @@ class Pong
 
     handle_keydown = (e: KeyboardEvent) =>
     {
-        if (e.key === "ArrowUp" || e.key === "ArrowDown" || 
+        if (e.key === "ArrowUp" || e.key === "ArrowDown" ||
             e.key === "ArrowLeft" || e.key === "ArrowRight" ||
             e.key === "w" || e.key === "W" ||
             e.key === "s" || e.key === "S" ||
             e.code === "Space") {
             e.preventDefault();
         }
-        
+
         this.keys_pressed[e.key] = true;
     };
 
     handle_keyup = (e: KeyboardEvent) =>
     {
-        if (e.key === "ArrowUp" || e.key === "ArrowDown" || 
+        if (e.key === "ArrowUp" || e.key === "ArrowDown" ||
             e.key === "ArrowLeft" || e.key === "ArrowRight" ||
             e.key === "w" || e.key === "W" ||
             e.key === "s" || e.key === "S" ||
             e.code === "Space") {
             e.preventDefault();
         }
-        
+
         this.keys_pressed[e.key] = false;
     };
 
@@ -669,7 +669,7 @@ class Pong
                 score2: this.data.score2,
                 winnerId: this.data.winnerId,
                 playedAt: this.data.played_at,
-                lasted: Math.round(this.data.game_time / 1000 / 60), // En millisecondes
+                lasted: Math.round(this.data.game_time / 1000 / 60),
                 pointsUp: this.data.win_point_up,
                 pointsDown: this.data.win_point_down,
                 iaMode: this.data.iaMode,
