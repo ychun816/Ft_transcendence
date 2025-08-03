@@ -18,7 +18,7 @@ const BCRYPT_ROUNDS = 12;
 interface ParsedUserData {
 	usernameValue: string;
 	passwordValue: string;
-	emailValue?: string;
+	emailValue: string;
 	hashedPassword: string;
 	avatarFile: any | null;
 }
@@ -138,9 +138,17 @@ async function createUser(
 	if (existingUser) {
 		throw new Error("Username already exists");
 	}
-	const timestamp = Date.now();
-	const random = Math.random().toString(36).substring(2, 8);
-	const uniqueEmail = emailValue || `${username}_${timestamp}_${random}@transcendence.local`;
+	//const timestamp = Date.now();
+	//const random = Math.random().toString(36).substring(2, 8);
+	const uniqueEmail = emailValue //|| `${username}_${timestamp}_${random}@transcendence.local`;
+
+	const existingEmail = await prisma.user.findUnique({
+		where: { email: uniqueEmail },
+	});
+
+	if (existingEmail) {
+		throw new Error("Email address already taken.");
+	}
 
 	const user = await prisma.user.create({
 		data: {
@@ -175,14 +183,19 @@ export async function registerNewUser(
 		};
 		//console.log("userInfoForValidation: ", userInfoForValidation);
 		const checkResult = UserSignUpCheck(userInfoForValidation);
+		//console.log("checkResult: ", checkResult);
 		if (checkResult === true){
 			const { usernameValue, hashedPassword, avatarFile, emailValue } =
 				userData;
 			//console.log("AFTER USER SIGNUP CHECK");
 			try {
 				let avatarPath = "";
-				if (avatarFile)
+				if (avatarFile){
+					//console.log("avatarFile: ", avatarFile);
 					avatarPath = await saveAvatar(avatarFile, usernameValue);
+				} else {
+					avatarPath = "/avatars/defaultAvatar.jpg";
+				}
 				const created = await createUser(
 					prisma,
 					usernameValue,
@@ -193,13 +206,13 @@ export async function registerNewUser(
 
 				//console.log("Created user:", created);
 				reply.code(200).send({ success: true });
-			} catch (err: any) {
-				if (err.message === "Username already exists") {
+			} catch (error: any) {
+				if (error.message === "Username already exists") {
 					reply.code(409).send({ error: "Username already exists" });
+				} else if (error.message === "Email address already taken."){
+					reply.code(409).send({ error: "Email address already taken." });
 				} else {
-					reply.code(400).send({
-						error: "Failed to create account. Please try again."
-					});
+					reply.code(400).send({ error: "Failed to create account. Please try again." });
 				}
 			}
 		} else {

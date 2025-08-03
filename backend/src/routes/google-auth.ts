@@ -39,6 +39,10 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
         reply.type('application/javascript').send(js);
     });
 
+    console.log(`🔧 GOOGLE CONFIG - Client ID: ${process.env.GOOGLE_CLIENT_ID ? 'SET' : 'MISSING'}`);
+    console.log(`🔧 GOOGLE CONFIG - Client Secret: ${process.env.GOOGLE_CLIENT_SECRET ? 'SET' : 'MISSING'}`);
+    console.log(`🔧 GOOGLE CONFIG - Callback URL: https://localhost:${MAIN_PORT}/api/auth/google/callback`);
+
     const client = new OAuth2Client(
         process.env.GOOGLE_CLIENT_ID,
         process.env.GOOGLE_CLIENT_SECRET,
@@ -46,12 +50,14 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
     );
 
     fastify.get('/auth/google', async (request: FastifyRequest, reply: FastifyReply) => {
+        console.log(`🚀 GOOGLE AUTH - Starting OAuth flow`);
         const authUrl = client.generateAuthUrl({
             access_type: 'offline',
             scope: ['profile', 'email'],
             state: 'google_oauth'
         });
 
+        console.log(`🔗 GOOGLE AUTH - Redirecting to: ${authUrl}`);
         reply.redirect(authUrl);
     });
 
@@ -61,6 +67,7 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
     }>, reply: FastifyReply) => {
         try {
             const { code, error, state } = request.query;
+            console.log(`🔍 GOOGLE CALLBACK - Received: code=${!!code}, error=${error}, state=${state}`);
 
             if (error) {
                 return reply.redirect('/login?error=oauth_cancelled');
@@ -157,7 +164,7 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
                         temp: true,
                         googleAuth: true
                     },
-                    process.env.COOKIE_SECRET || 'fallback-secret',
+                    process.env.COOKIE_SECRET || "fallback-secret-key",
                     { expiresIn: '10m' }
                 );
 
@@ -179,15 +186,14 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
                 return reply.type('text/html').send(twoFAScript);
             }
 
-            // Create JWT token (only if 2FA is disabled)
+            // Create JWT token (only if 2FA is disabled) - consistent with regular login
             const token = jwt.sign(
                 {
                     id: user.id,
                     username: user.username,
-                    email: user.email
                 },
-                process.env.COOKIE_SECRET || 'fallback-secret',
-                { expiresIn: '7d' }
+                process.env.COOKIE_SECRET || "fallback-secret-key",
+                { expiresIn: "24h" }
             );
 
             // Set secure cookie
@@ -198,7 +204,7 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
                 maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
             });
 
-            // Redirect script for successful login
+            // Redirect script for successful login (only when 2FA is disabled)
             const redirectScript = `
                 <html>
                 <head><title>Connexion réussie</title></head>
@@ -228,7 +234,7 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
             reply.type('text/html').send(redirectScript);
 
         } catch (error) {
-            console.error('Google OAuth error:', error);
+            console.error('❌ GOOGLE OAUTH ERROR:', error);
             reply.redirect('/login?error=oauth_failed');
         }
     });
@@ -327,15 +333,14 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
                 });
             }
 
-            // Create JWT token (only if 2FA is disabled)
+            // Create JWT token (only if 2FA is disabled) - consistent with regular login
             const token = jwt.sign(
                 {
                     id: user.id,
                     username: user.username,
-                    email: user.email
                 },
-                process.env.COOKIE_SECRET || 'fallback-secret',
-                { expiresIn: '7d' }
+                process.env.COOKIE_SECRET || "fallback-secret-key",
+                { expiresIn: "24h" }
             );
 
             // Set secure cookie
@@ -380,7 +385,7 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
             // Verify the temporary token
             let decoded: any;
             try {
-                decoded = jwt.verify(tempToken, process.env.COOKIE_SECRET || 'fallback-secret');
+                decoded = jwt.verify(tempToken, process.env.COOKIE_SECRET || "fallback-secret-key");
             } catch (error) {
                 return reply.status(401).send({
                     success: false,
@@ -425,35 +430,50 @@ export default async function googleAuthRoutes(fastify: FastifyInstance) {
                 });
             }
 
-            // Clear email 2FA code after successful verification
+            // Clear email 2FA code after successful verification and set connected status
             if (user.twoFactorType === 'email') {
                 await prisma.user.update({
                     where: { id: user.id },
                     data: {
                         twoFactorCode: null,
                         twoFactorCodeExpires: null,
+                        connected: true,
+                    },
+                });
+            } else {
+                // For TOTP, just update connected status
+                await prisma.user.update({
+                    where: { id: user.id },
+                    data: {
+                        connected: true,
                     },
                 });
             }
 
-            // Create final JWT token
+            // Create final JWT token (consistent with regular login)
             const token = jwt.sign(
                 {
                     id: user.id,
                     username: user.username,
-                    email: user.email
                 },
-                process.env.COOKIE_SECRET || 'fallback-secret',
-                { expiresIn: '7d' }
+                process.env.COOKIE_SECRET || "fallback-secret-key",
+                { expiresIn: "24h" }
             );
 
             // Set secure cookie
             reply.setCookie('authToken', token, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
+                secure: false, // Disabled for local development
                 sameSite: 'lax',
                 maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
             });
+
+            // Add session to session manager for consistency with regular login
+            const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+            const { sessionManager } = await import('../services/sessionManager.js');
+            sessionManager.addSession(user.username, user.id, expiresAt);
+
+            console.log(`✅ GOOGLE 2FA - Session created for ${user.username}`);
 
             reply.send({
                 success: true,

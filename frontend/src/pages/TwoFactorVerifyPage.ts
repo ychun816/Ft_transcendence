@@ -1,7 +1,6 @@
 import { i18n } from "../services/i18n.js";
 import { AuthService } from "../middleware/auth.js";
 import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
-import { classes } from "../styles/retroStyles.js";
 
 const authService = new AuthService();
 
@@ -21,24 +20,24 @@ export function createTwoFactorVerifyPage(): HTMLElement {
 		</style>
 		
 		<!-- Champ d'étoiles -->
-		<div class="${classes.starfield}"></div>
+		<div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 bg-[radial-gradient(2px_2px_at_20px_30px,rgb(157,78,221),transparent),radial-gradient(2px_2px_at_40px_70px,rgb(199,125,255),transparent),radial-gradient(1px_1px_at_90px_40px,rgb(157,78,221),transparent),radial-gradient(1px_1px_at_130px_80px,rgb(199,125,255),transparent),radial-gradient(2px_2px_at_160px_30px,rgb(157,78,221),transparent),radial-gradient(1px_1px_at_200px_90px,rgb(199,125,255),transparent),radial-gradient(2px_2px_at_240px_20px,rgb(157,78,221),transparent)] bg-[length:250px_150px] animate-pulse"></div>
 		<div class="absolute top-4 left-4 z-50">
 			<div class="login-dropdown">
-				<button class="${classes.backButton}" id="backToLogin" data-route="/login">
+				<button class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-white font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full" id="backToLogin" data-route="/login">
 					← ${i18n.t('common.back')}
 				</button>
 			</div>
 		</div>
 		<!-- Conteneur principal avec effet scan -->
-		<div class="min-h-screen flex flex-col items-center justify-center p-4 ${classes.scanLinesContainer}">
+		<div class="min-h-screen flex flex-col items-center justify-center p-4 relative before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:bottom-0 before:bg-gradient-to-b before:from-transparent before:via-purple-400/10 before:to-transparent before:bg-[length:100%_4px] before:animate-pulse before:pointer-events-none">
 			
 			<!-- Titre principal avec effet néon -->
-			<h1 class="${classes.retroTitle} mb-12">
+			<h1 class="text-6xl font-black text-transparent bg-gradient-to-r from-purple-400 via-purple-300 to-purple-400 bg-clip-text text-center drop-shadow-neon-purple animate-pulse mb-12">
 				🔐 ${i18n.t('auth.two_factor_title') || 'Two-Factor Verification'}
 			</h1>
 			
 			<!-- Panneau de vérification 2FA -->
-			<div class="${classes.retroPanel} rounded-2xl p-8 max-w-md w-full">
+			<div class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-2xl p-8 max-w-md w-full">
 				<form class="space-y-6">
 					<div>
 						<input 
@@ -47,11 +46,11 @@ export function createTwoFactorVerifyPage(): HTMLElement {
 							id="two-factor-token" 
 							maxlength="6"
 							required 
-							class="${classes.tournamentInput} text-center font-mono"
+							class="bg-gradient-to-br from-black to-purple-900/20 border-2 border-purple-400 text-purple-300 shadow-[0_0_10px_rgb(157,78,221,0.4),inset_0_0_10px_rgb(157,78,221,0.2)] focus:border-purple-300 focus:shadow-[0_0_20px_rgb(157,78,221),inset_0_0_20px_rgb(157,78,221,0.3)] focus:outline-none px-4 py-2 rounded-lg w-full text-center font-bold text-center font-mono"
 							autocomplete="one-time-code"
 						>
 					</div>
-					<button type="submit" id="verify-btn" class="${classes.actionButton} w-full text-xl py-4">
+					<button type="submit" id="verify-btn" class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-purple-300 font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full w-full text-xl py-4">
 						<span class="relative z-10">✨ ${i18n.t('auth.verify_and_login') || 'Verify & Login'}</span>
 					</button>
 				</form>
@@ -192,12 +191,15 @@ async function send2FACode(page: HTMLDivElement): Promise<void> {
 	}
 
 	try {
-		verifyBtn.disabled = true;
-		verifyBtn.innerHTML = `
-			<span class="relative z-10 ${classes.neonText}">
-				${i18n.t("auth.verifying") || "Verifying..."}
-			</span>
-		`;
+		const verifyBtn = page.querySelector("#verify-btn") as HTMLButtonElement;
+		if (verifyBtn) {
+			verifyBtn.disabled = true;
+			verifyBtn.innerHTML = `
+				<span class="relative z-10 text-purple-300 drop-shadow-[0_0_3px_rgb(187,134,252)] drop-shadow-[0_0_6px_rgb(187,134,252)] drop-shadow-[0_0_9px_rgb(187,134,252)] animate-pulse">
+					${i18n.t("auth.verifying") || "Verifying..."}
+				</span>
+			`;
+		}
 
 		console.log(`📤 2FA FRONTEND - Sending request to /api/2fa/verify`);
 		const response = await fetch("/api/2fa/verify", {
@@ -237,12 +239,15 @@ async function send2FACode(page: HTMLDivElement): Promise<void> {
 			errorDiv.style.display = "block";
 		}
 	} finally {
-		verifyBtn.disabled = false;
-		verifyBtn.innerHTML = `
-			<span class="relative z-10 ${classes.neonText}">
-				${i18n.t("auth.verify_and_login") || "Verify & Login"}
-			</span>
-			<div class="absolute inset-0 bg-gradient-to-r from-purple-400/10 via-purple-400/20 to-purple-400/10 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
-		`;
+		const verifyBtn = page.querySelector("#verify-btn") as HTMLButtonElement;
+		if (verifyBtn) {
+			verifyBtn.disabled = false;
+			verifyBtn.innerHTML = `
+				<span class="relative z-10 text-purple-300 drop-shadow-[0_0_3px_rgb(187,134,252)] drop-shadow-[0_0_6px_rgb(187,134,252)] drop-shadow-[0_0_9px_rgb(187,134,252)] animate-pulse">
+					${i18n.t("auth.verify_and_login") || "Verify & Login"}
+				</span>
+				<div class="absolute inset-0 bg-gradient-to-r from-purple-400/10 via-purple-400/20 to-purple-400/10 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
+			`;
+		}
 	}
 }

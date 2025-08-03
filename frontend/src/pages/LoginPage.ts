@@ -2,7 +2,6 @@ import { AuthService } from "../middleware/auth.js";
 import { i18n } from "../services/i18n.js";
 import { errorNotif } from "../services/errorNotification.js";
 import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
-import { classes } from "../styles/retroStyles.js";
 import { getUserInfo } from "./ChatPage.js";
 
 // Créer une instance locale (pas de singleton)
@@ -10,7 +9,7 @@ const authService = new AuthService();
 
 export function createLoginPage(): HTMLElement {
 	const page = document.createElement("div");
-	page.className = "min-h-screen bg-gray-900 text-white font-mono overflow-hidden";
+	page.className = "min-h-screen bg-gray-900 text-white font-mono overflow-hidden animate-fade-in";
 
 const renderContent = () => {
 		page.innerHTML = `
@@ -23,21 +22,25 @@ const renderContent = () => {
 			}
 		</style>
 
-		<div class="${classes.starfield}"></div>
+		<!-- Starfield Background -->
+		<div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 bg-[radial-gradient(2px_2px_at_20px_30px,rgb(157,78,221),transparent),radial-gradient(2px_2px_at_40px_70px,rgb(199,125,255),transparent),radial-gradient(1px_1px_at_90px_40px,rgb(157,78,221),transparent),radial-gradient(1px_1px_at_130px_80px,rgb(199,125,255),transparent),radial-gradient(2px_2px_at_160px_30px,rgb(157,78,221),transparent),radial-gradient(1px_1px_at_200px_90px,rgb(199,125,255),transparent),radial-gradient(2px_2px_at_240px_20px,rgb(157,78,221),transparent)] bg-[length:250px_150px] animate-pulse"></div>
+		
 		<div class="absolute top-4 left-4 z-50">
 			<div class="login-dropdown">
-				<button class="${classes.backButton}" id="backToGame" data-route="/game">
+				<button class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-white font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full" id="backToGame" data-route="/game">
 					← ${i18n.t('game.back')}
 				</button>
 			</div>
 		</div>
-		<div class="min-h-screen flex flex-col items-center justify-center p-4 ${classes.scanLinesContainer}">
+		
+		<!-- Scan lines effect -->
+		<div class="min-h-screen flex flex-col items-center justify-center p-4 relative before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:bottom-0 before:bg-gradient-to-b before:from-transparent before:via-purple-400/10 before:to-transparent before:bg-[length:100%_4px] before:animate-pulse before:pointer-events-none">
 
-			<h1 class="${classes.retroTitle} mb-12">
+			<h1 class="text-6xl font-black text-transparent bg-gradient-to-r from-purple-400 via-purple-300 to-purple-400 bg-clip-text text-center drop-shadow-neon-purple animate-pulse mb-12">
 				🔐 ${i18n.t('auth.login_title')}
 			</h1>
 
-			<div class="${classes.retroPanel} rounded-2xl p-8 max-w-md w-full">
+			<div class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-2xl p-8 max-w-md w-full">
 				<form class="space-y-6">
 					<div>
 						<input
@@ -57,7 +60,7 @@ const renderContent = () => {
 							class="w-full px-4 py-3 rounded-lg bg-slate-700 border-2 border-slate-500 text-white text-lg font-semibold placeholder-slate-300 focus:bg-slate-600 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/30 hover:border-slate-400 transition-all duration-300"
 						>
 					</div>
-					<button type="submit" id="login-btn" class="${classes.actionButton} w-full text-xl py-4">
+					<button type="submit" id="login-btn" class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-purple-300 font-bold py-4 px-8 rounded-lg w-full text-xl transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full">
 						<span class="relative z-10">✨ ${i18n.t('common.login')}</span>
 					</button>
 				</form>
@@ -71,7 +74,7 @@ const renderContent = () => {
 						</div>
 					</div>
 
-					<button type="button" id="google-signin-btn" class="${classes.gameModeButton} w-full flex items-center justify-center gap-3">
+					<button type="button" id="google-signin-btn" class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-purple-300 font-bold py-4 px-8 rounded-xl w-full flex items-center justify-center gap-3 transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full">
 						<svg class="w-5 h-5" viewBox="0 0 24 24">
 							<path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
 							<path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -81,7 +84,7 @@ const renderContent = () => {
 						<span class="relative z-10">${i18n.t('auth.google_signin')}</span>
 					</button>
 				</div>
-				<button type="button" id="register-btn" class="${classes.gameModeButton} w-full mt-6">
+				<button type="button" id="register-btn" class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-purple-300 font-bold py-4 px-8 rounded-xl w-full mt-6 transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full">
 					<span class="relative z-10">📝 ${i18n.t('common.register')}</span>
 				</button>
 			</div>
@@ -395,7 +398,7 @@ function show2FAInput(page: HTMLDivElement): void {
 	twoFactorInput.id = 'two-factor-token';
 	twoFactorInput.placeholder = i18n.t('auth.two_factor_code') || '6-digit code';
 	twoFactorInput.maxLength = 6;
-	twoFactorInput.className = 'neon-input text-center font-mono';
+	twoFactorInput.className = 'bg-gray-900/70 border border-purple-400/50 rounded-lg text-white px-4 py-3 w-full text-center font-mono transition-all duration-300 focus:outline-none focus:border-purple-300 focus:shadow-neon-purple placeholder-gray-500';
 	twoFactorInput.required = true;
 
 	// Only allow digits

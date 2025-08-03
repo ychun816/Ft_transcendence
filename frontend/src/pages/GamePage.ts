@@ -3,7 +3,6 @@ import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
 import { Game_solo } from "../components/game/game_solo.js";
 import { Game_ligne } from "../components/game/game_ligne.js";
 import { Game_tournoi } from "../components/game/game_tournoi.js";
-import { classes } from "../styles/retroStyles.js";
 
 // Function to notify all users about tournament match start
 async function notifyAllUsersAboutTournamentMatch(player1: string, player2: string, matchType: "first" | "second" | "final") {
@@ -78,16 +77,16 @@ export function createGamePage(): HTMLElement {
 		</style>
 
 		<!-- Conteneur principal avec effet scan -->
-		<div class="min-h-screen flex flex-col items-center justify-center p-4 ${classes.scanLinesContainer}">
+		<div class="min-h-screen flex flex-col items-center justify-center p-4 relative before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:bottom-0 before:bg-gradient-to-b before:from-transparent before:via-purple-400/10 before:to-transparent before:bg-[length:100%_4px] before:animate-pulse before:pointer-events-none">
 			<!-- Bouton LOG-IN en haut à gauche -->
 			<div class="absolute top-4 left-4 z-50">
 				<div class="login-dropdown">
-					<button id="loginBtn" class="${classes.backButton}">
+					<button id="loginBtn" class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-white font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full">
 						<span class="relative z-10">
 						${i18n.t('game.connexion')}
 						</span>
 					</button>
-					<button id="logoutBtn" class="${classes.backButton} text-red-300">
+					<button id="logoutBtn" class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-white font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full text-red-300">
 						<span class="relative z-10">
 						${i18n.t('game.deco')}
 						</span>
@@ -95,41 +94,41 @@ export function createGamePage(): HTMLElement {
 				</div>
 			</div>
 			<!-- TITRE tout en haut, centré -->
-			<h2 id="nameId" class="${classes.nametitle} absolute top-4 left-1/2 transform -translate-x-1/2 z-40"></h2>
+			<h2 id="nameId" class="text-2xl font-bold text-purple-300 drop-shadow-[0_0_3px_rgb(187,134,252)] drop-shadow-[0_0_6px_rgb(187,134,252)] drop-shadow-[0_0_9px_rgb(187,134,252)] animate-pulse absolute top-4 left-1/2 transform -translate-x-1/2 z-40"></h2>
 			<!-- BOUTONS profil/chat centrés -->
 			<div class="absolute top-0 flex flex-col items-center justify-center gap-4 mt-20">
 				<div class="flex gap-4">
-					<button class="${classes.backButton}" id="profilBtn">
+					<button class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-white font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full" id="profilBtn">
 						${i18n.t('game.profile')}
 					</button>
-					<button class="${classes.backButton}" id="chatBtn">
+					<button class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-white font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full" id="chatBtn">
 						CHAT
 					</button>
 				</div>
 			</div>
 
 			<!-- Titre principal avec effet néon -->
-			<h1 class="${classes.retroTitle} mb-12">
+			<h1 class="text-6xl font-black text-transparent bg-gradient-to-r from-purple-400 via-purple-300 to-purple-400 bg-clip-text text-center drop-shadow-neon-purple animate-pulse mb-12">
 				🏓 RETRO PONG
 			</h1>
 
 			<!-- Menu principal -->
-			<div id="menu" class="${classes.retroPanel} rounded-2xl p-8">
-				<h2 class="${classes.sectionTitle}">
+			<div id="menu" class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-2xl p-8">
+				<h2 class="text-3xl font-bold text-purple-300 drop-shadow-[0_0_3px_rgb(187,134,252)] drop-shadow-[0_0_6px_rgb(187,134,252)] drop-shadow-[0_0_9px_rgb(187,134,252)] animate-pulse">
 				${i18n.t('game.game_mode')}
 				</h2>
 				<div class="flex flex-col gap-6">
-					<button id="localBtn" class="${classes.gameModeButton}">
+					<button id="localBtn" class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-purple-300 font-bold py-4 px-8 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full">
 						<span class="relative z-10">
 						${i18n.t('game.local_mode')}
 						</span>
 					</button>
-					<button id="ligneBtn" class="hidden ${classes.gameModeButton}">
+					<button id="ligneBtn" class="hidden bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-purple-300 font-bold py-4 px-8 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full">
 						<span class="relative z-10">
 						${i18n.t('game.line_mode')}
 						</span>
 					</button>
-					<button id="serverGameBtn" class="${classes.gameModeButton}" data-route="/server-game">
+					<button id="serverGameBtn" class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-purple-300 font-bold py-4 px-8 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full" data-route="/server-game">
 						<span class="relative z-10">
 						${i18n.t('game.server_side_pong')}
 						</span>
@@ -137,92 +136,92 @@ export function createGamePage(): HTMLElement {
 				</div>
 			</div>
 			<div>
-				<p id="multiError" class="mt-4 ${classes.errorMessage} hidden">
+				<p id="multiError" class="mt-4 text-red-400 text-lg font-bold drop-shadow-[0_0_5px_rgb(239,68,68)] animate-pulse hidden">
 					${i18n.t('game.mess_line_err')}
 				</p>
 			</div>
 
 			<!-- Menu local -->
-			<div id="menu_local" class="hidden ${classes.retroPanel} rounded-2xl p-8">
-				<button id="backToMainBtn" class="mb-6 ${classes.backButton}">
+			<div id="menu_local" class="hidden bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-2xl p-8">
+				<button id="backToMainBtn" class="mb-6 bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-white font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full">
 					${i18n.t('chat.back')}
 				</button>
-				<h2 class="${classes.sectionTitle}">
+				<h2 class="text-3xl font-bold text-purple-300 drop-shadow-[0_0_3px_rgb(187,134,252)] drop-shadow-[0_0_6px_rgb(187,134,252)] drop-shadow-[0_0_9px_rgb(187,134,252)] animate-pulse">
 				${i18n.t('game.mode_local')}
 				</h2>
 				<div class="flex flex-col gap-6">
-					<button id="soloBtn" class="${classes.gameModeButton}">
+					<button id="soloBtn" class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-purple-300 font-bold py-4 px-8 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full">
 						🤖 SOLO (VS IA)
 					</button>
-					<button id="versusBtn" class="${classes.gameModeButton}">
+					<button id="versusBtn" class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-purple-300 font-bold py-4 px-8 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full">
 						👥 VERSUS (1v1)
 					</button>
-					<button id="multiBtn" class="${classes.gameModeButton}">
+					<button id="multiBtn" class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-purple-300 font-bold py-4 px-8 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full">
 						${i18n.t('game.multi')}
 					</button>
-					<button id="tournoiBtn" class="${classes.gameModeButton}">
+					<button id="tournoiBtn" class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-purple-300 font-bold py-4 px-8 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full">
 						${i18n.t('game.tournament')}
 					</button>
 				</div>
 			</div>
 
 			<!-- Menu en ligne -->
-			<div id="menu_ligne" class="hidden ${classes.retroPanel} rounded-2xl p-8">
-				<button id="backToMainBtn2" class="mb-6 ${classes.backButton}">
+			<div id="menu_ligne" class="hidden bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-2xl p-8">
+				<button id="backToMainBtn2" class="mb-6 bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-white font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full">
 					${i18n.t('chat.back')}
 				</button>
-				<h2 class="${classes.sectionTitle}">
+				<h2 class="text-3xl font-bold text-purple-300 drop-shadow-[0_0_3px_rgb(187,134,252)] drop-shadow-[0_0_6px_rgb(187,134,252)] drop-shadow-[0_0_9px_rgb(187,134,252)] animate-pulse">
 				${i18n.t('game.mode_line')}
 				</h2>
 				<div class="flex flex-col gap-6">
-					<button id="solo_ligneBtn" class="${classes.gameModeButton}">
+					<button id="solo_ligneBtn" class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-purple-300 font-bold py-4 px-8 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full">
 						👥 VERSUS (1v1)
 					</button>
-					<button id="multiBtn" class="${classes.gameModeButton}">
+					<button id="multiBtn" class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-purple-300 font-bold py-4 px-8 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full">
 						${i18n.t('game.multi')}
 					</button>
 				</div>
 			</div>
 
 			<!-- Interface Tournoi -->
-			<div id="menu_tournoi" class="hidden ${classes.retroPanel} rounded-2xl p-8">
-				<button id="backToMainBtn3" class="mb-6 ${classes.backButton}">
+			<div id="menu_tournoi" class="hidden bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-2xl p-8">
+				<button id="backToMainBtn3" class="mb-6 bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-white font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full">
 					${i18n.t('chat.back')}
 				</button>
-				<h2 class="text-3xl font-bold ${classes.neonText} mb-8 text-center">
+				<h2 class="text-3xl font-bold text-purple-300 drop-shadow-[0_0_3px_rgb(187,134,252)] drop-shadow-[0_0_6px_rgb(187,134,252)] drop-shadow-[0_0_9px_rgb(187,134,252)] animate-pulse mb-8 text-center">
 					${i18n.t('game.tournament')}
 				</h2>
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 					${[1,2,3,4].map(i => `
-					<div class="${classes.playerPanel}">
-						<div class="${classes.playerAvatar} text-2xl ${classes.neonText}">
+					<div class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-xl p-4 text-center flex flex-col items-center gap-3">
+						<div class="w-16 h-16 rounded-full border-2 border-purple-400 shadow-[0_0_10px_rgb(157,78,221),inset_0_0_10px_rgb(157,78,221),0_0_20px_rgb(157,78,221,0.4)] bg-gradient-to-br from-black via-purple-900/20 to-black flex items-center justify-center mb-2 text-2xl text-purple-300 drop-shadow-[0_0_3px_rgb(187,134,252)] drop-shadow-[0_0_6px_rgb(187,134,252)] drop-shadow-[0_0_9px_rgb(187,134,252)] animate-pulse">
 							P${i}
 						</div>
-						<input type="text" placeholder="${i}" class="${classes.tournamentInput}">
+						<input type="text" placeholder="${i}" class="bg-gradient-to-br from-black to-purple-900/20 border-2 border-purple-400 text-purple-300 shadow-[0_0_10px_rgb(157,78,221,0.4),inset_0_0_10px_rgb(157,78,221,0.2)] focus:border-purple-300 focus:shadow-[0_0_20px_rgb(157,78,221),inset_0_0_20px_rgb(157,78,221,0.3)] focus:outline-none px-4 py-2 rounded-lg w-full text-center font-bold">
 					</div>`).join("")}
 				</div>
 				<div class="mt-8 text-center">
-					<button id="startTournoiMatchmaking" class="hidden ${classes.actionButton}">
+					<button id="startTournoiMatchmaking" class="hidden bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-purple-300 font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full">
 						${i18n.t('game.valid_name')}
 					</button>
-					<p id="tournoiError" class="mt-4 ${classes.errorMessage} hidden">
+					<p id="tournoiError" class="mt-4 text-red-400 text-lg font-bold drop-shadow-[0_0_5px_rgb(239,68,68)] animate-pulse hidden">
 						${i18n.t('game.mess_valid_err')}
 					</p>
-					<p id="tournoimess" class="m-8 text-purple-300 text-lg font-bold hidden ${classes.neonText}">
+					<p id="tournoimess" class="m-8 text-purple-300 text-lg font-bold hidden text-purple-300 drop-shadow-[0_0_3px_rgb(187,134,252)] drop-shadow-[0_0_6px_rgb(187,134,252)] drop-shadow-[0_0_9px_rgb(187,134,252)] animate-pulse">
 					</p>
-					<button id="startTournoi" class="hidden ${classes.actionButton}">
+					<button id="startTournoi" class="hidden bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-purple-300 font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full">
 						${i18n.t('game.start_tournament')}
 					</button>
 				</div>
 			</div>
 
 			<!-- Interface 1v1 ligne -->
-			<div id="menu1v1" class="hidden ${classes.retroPanel} rounded-2xl p-8">
-				<div class="${classes.onlineInterface}" style="height: 45vh; max-width: 900px; width: 75%;">
+			<div id="menu1v1" class="hidden bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-2xl p-8">
+				<div class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-2xl p-6" style="height: 45vh; max-width: 900px; width: 75%;">
 					<div class="flex h-full">
 						<!-- Bouton retour en haut à gauche -->
 						<div class="flex flex-col justify-start">
-							<button id="backToMainBtn4" class="${classes.backButton}">
+							<button id="backToMainBtn4" class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-white font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full">
 								${i18n.t('chat.back')}
 							</button>
 						</div>
@@ -231,9 +230,9 @@ export function createGamePage(): HTMLElement {
 						<div class="flex-1 ml-8 flex gap-8">
 							<!-- Colonne de gauche : Liste d'amis -->
 							<div class="flex flex-col h-full" style="width: 350px;">
-								<div class="${classes.friendsPanel}">
+								<div class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-xl p-4 h-full flex flex-col">
 									<header class="w-full flex-shrink-0 mb-4 flex items-center justify-between">
-										<h2 class="text-2xl font-bold text-green-400 ${classes.neonText}">Liste d'amis</h2>
+										<h2 class="text-2xl font-bold text-green-400 text-purple-300 drop-shadow-[0_0_3px_rgb(187,134,252)] drop-shadow-[0_0_6px_rgb(187,134,252)] drop-shadow-[0_0_9px_rgb(187,134,252)] animate-pulse">Liste d'amis</h2>
 										<button class="bg-green-400/20 hover:bg-green-400/40 text-green-400 rounded-full p-2 transition-all duration-300 w-8 h-8 flex items-center justify-center">
 											<span class="text-lg font-bold">+</span>
 										</button>
@@ -242,10 +241,10 @@ export function createGamePage(): HTMLElement {
 									<main class="w-full flex-1 overflow-y-auto">
 										<div class="space-y-3">
 											<!-- Amis en ligne -->
-											<div class="${classes.friendItem}">
+											<div class="bg-black/80 border border-purple-400/30 rounded-lg p-3 transition-all duration-300 hover:border-purple-300 hover:shadow-neon-purple-sm">
 												<div class="flex items-center justify-between">
 													<div class="flex items-center">
-														<span class="${classes.statusOnline}"></span>
+														<span class="w-3 h-3 rounded-full bg-green-400 shadow-[0_0_6px_rgb(34,197,94)] mr-2"></span>
 														<span class="text-green-400 font-semibold">Alex_Gaming</span>
 													</div>
 													<button class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
@@ -254,10 +253,10 @@ export function createGamePage(): HTMLElement {
 												</div>
 											</div>
 
-											<div class="${classes.friendItem}">
+											<div class="bg-black/80 border border-purple-400/30 rounded-lg p-3 transition-all duration-300 hover:border-purple-300 hover:shadow-neon-purple-sm">
 												<div class="flex items-center justify-between">
 													<div class="flex items-center">
-														<span class="${classes.statusOnline}"></span>
+														<span class="w-3 h-3 rounded-full bg-green-400 shadow-[0_0_6px_rgb(34,197,94)] mr-2"></span>
 														<span class="text-green-400 font-semibold">PongMaster</span>
 													</div>
 													<button class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
@@ -266,10 +265,10 @@ export function createGamePage(): HTMLElement {
 												</div>
 											</div>
 
-											<div class="${classes.friendItem}">
+											<div class="bg-black/80 border border-purple-400/30 rounded-lg p-3 transition-all duration-300 hover:border-purple-300 hover:shadow-neon-purple-sm">
 												<div class="flex items-center justify-between">
 													<div class="flex items-center">
-														<span class="${classes.statusOnline}"></span>
+														<span class="w-3 h-3 rounded-full bg-green-400 shadow-[0_0_6px_rgb(34,197,94)] mr-2"></span>
 														<span class="text-green-400 font-semibold">RetroGamer</span>
 													</div>
 													<button class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
@@ -279,20 +278,20 @@ export function createGamePage(): HTMLElement {
 											</div>
 
 											<!-- Amis hors ligne -->
-											<div class="${classes.friendItem} opacity-60">
+											<div class="bg-black/80 border border-purple-400/30 rounded-lg p-3 transition-all duration-300 hover:border-purple-300 hover:shadow-neon-purple-sm opacity-60">
 												<div class="flex items-center justify-between">
 													<div class="flex items-center">
-														<span class="${classes.statusOffline}"></span>
+														<span class="w-3 h-3 rounded-full bg-gray-500 mr-2"></span>
 														<span class="text-gray-400 font-semibold">CyberPong</span>
 													</div>
 													<span class="text-gray-500 text-sm">Hors ligne</span>
 												</div>
 											</div>
 
-											<div class="${classes.friendItem} opacity-60">
+											<div class="bg-black/80 border border-purple-400/30 rounded-lg p-3 transition-all duration-300 hover:border-purple-300 hover:shadow-neon-purple-sm opacity-60">
 												<div class="flex items-center justify-between">
 													<div class="flex items-center">
-														<span class="${classes.statusOffline}"></span>
+														<span class="w-3 h-3 rounded-full bg-gray-500 mr-2"></span>
 														<span class="text-gray-400 font-semibold">NeonPlayer</span>
 													</div>
 													<span class="text-gray-500 text-sm">Hors ligne</span>
@@ -307,7 +306,7 @@ export function createGamePage(): HTMLElement {
 							<div class="flex-1 h-full flex flex-col">
 								<!-- En-tête -->
 								<div class="text-center mb-8">
-									<h1 class="text-4xl font-bold text-cyan-400 ${classes.neonText} mb-2">1v1 EN LIGNE</h1>
+									<h1 class="text-4xl font-bold text-cyan-400 text-purple-300 drop-shadow-[0_0_3px_rgb(187,134,252)] drop-shadow-[0_0_6px_rgb(187,134,252)] drop-shadow-[0_0_9px_rgb(187,134,252)] animate-pulse mb-2">1v1 EN LIGNE</h1>
 									<p class="text-blue-400 text-lg">Préparez-vous pour le combat !</p>
 								</div>
 
@@ -315,15 +314,15 @@ export function createGamePage(): HTMLElement {
 								<div class="flex-1 flex items-center justify-center">
 									<div class="flex flex-col items-center gap-6 w-full max-w-md">
 										<!-- Joueur 1 -->
-										<div class="${classes.playerCard} text-center w-full">
+										<div class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-xl p-4 text-center w-full">
 											<div class="flex items-center gap-4">
-												<div class="w-16 h-16 rounded-full border-4 border-cyan-400/50 ${classes.neonBorder} overflow-hidden bg-gray-700 flex-shrink-0">
+												<div class="w-16 h-16 rounded-full border-4 border-cyan-400/50 border-2 border-purple-400 shadow-[0_0_10px_rgb(157,78,221),inset_0_0_10px_rgb(157,78,221),0_0_20px_rgb(157,78,221,0.4)] bg-gradient-to-br from-black via-purple-900/20 to-black overflow-hidden bg-gray-700 flex-shrink-0">
 													<div class="w-full h-full flex items-center justify-center">
 														<span class="text-cyan-400 text-lg font-bold">P1</span>
 													</div>
 												</div>
 												<div class="flex-1">
-													<h3 class="text-xl font-bold text-cyan-400 ${classes.neonText} mb-1">Joueur 1</h3>
+													<h3 class="text-xl font-bold text-cyan-400 text-purple-300 drop-shadow-[0_0_3px_rgb(187,134,252)] drop-shadow-[0_0_6px_rgb(187,134,252)] drop-shadow-[0_0_9px_rgb(187,134,252)] animate-pulse mb-1">Joueur 1</h3>
 													<div class="bg-gray-700/50 p-2 rounded-lg border border-cyan-400/30">
 														<p class="text-cyan-400 text-xs">Prêt à jouer</p>
 													</div>
@@ -331,15 +330,15 @@ export function createGamePage(): HTMLElement {
 											</div>
 										</div>
 										<!-- Joueur 2 -->
-										<div class="${classes.playerCard} text-center w-full">
+										<div class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-xl p-4 text-center w-full">
 											<div class="flex items-center gap-4">
-												<div class="w-16 h-16 rounded-full border-4 border-purple-400/50 ${classes.neonBorder} overflow-hidden bg-gray-700 flex-shrink-0">
+												<div class="w-16 h-16 rounded-full border-4 border-purple-400/50 border-2 border-purple-400 shadow-[0_0_10px_rgb(157,78,221),inset_0_0_10px_rgb(157,78,221),0_0_20px_rgb(157,78,221,0.4)] bg-gradient-to-br from-black via-purple-900/20 to-black overflow-hidden bg-gray-700 flex-shrink-0">
 													<div class="w-full h-full flex items-center justify-center">
 														<span class="text-purple-400 text-lg font-bold">P2</span>
 													</div>
 												</div>
 												<div class="flex-1">
-													<h3 class="text-xl font-bold text-purple-400 ${classes.neonText} mb-1">Joueur 2</h3>
+													<h3 class="text-xl font-bold text-purple-400 text-purple-300 drop-shadow-[0_0_3px_rgb(187,134,252)] drop-shadow-[0_0_6px_rgb(187,134,252)] drop-shadow-[0_0_9px_rgb(187,134,252)] animate-pulse mb-1">Joueur 2</h3>
 													<div class="bg-gray-700/50 p-2 rounded-lg border border-purple-400/30">
 														<p class="text-purple-400 text-xs">En attente...</p>
 													</div>
@@ -356,24 +355,24 @@ export function createGamePage(): HTMLElement {
 			<!-- Zone de jeu -->
 			<div id="game" class="hidden w-full max-w-6xl">
 				<!-- Bouton retour -->
-				<button id="backToMenuBtn" class="mb-6 ${classes.backButton}">
+				<button id="backToMenuBtn" class="mb-6 bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-white font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full">
 					${i18n.t('chat.back')}
 				</button>
 
 				<!-- Bouton restart -->
-				<button id="restartBtn" class="hidden mb-6 mx-auto ${classes.actionButton}">
+				<button id="restartBtn" class="hidden mb-6 mx-auto bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-purple-300 font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full">
 					${i18n.t('game.new_game')}
 				</button>
 
 				<!-- Tableau de score -->
-				<div id="scoreboard" class="${classes.scoreboardPanel} rounded-2xl p-6 mb-6">
+				<div id="scoreboard" class="bg-gradient-to-br from-black via-purple-900/20 to-black border-2 border-purple-400 shadow-[0_0_20px_rgb(157,78,221,0.6),inset_0_0_20px_rgb(157,78,221,0.3)] rounded-2xl p-6 mb-6">
 					<div class="grid grid-cols-2 gap-8 text-center">
-						<div class="${classes.retroPanel} rounded-xl p-4">
+						<div class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-xl p-4">
 							<p id="scoreP1" class="text-2xl font-bold text-purple-300">
 							${i18n.t('game.player_1')}
 							</p>
 						</div>
-						<div class="${classes.retroPanel} rounded-xl p-4">
+						<div class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-xl p-4">
 							<p id="scoreP2" class="text-2xl font-bold text-purple-300">
 							${i18n.t('game.player_2')}
 							</p>
@@ -382,42 +381,42 @@ export function createGamePage(): HTMLElement {
 				</div>
 
 				<!-- Canvas avec cadre futuriste -->
-				<div class="relative ${classes.gameCanvasFrame} rounded-2xl mx-auto" style="width: 800px; height: 600px;">
+				<div class="relative bg-black/95 border-4 border-purple-400 shadow-[0_0_30px_rgb(157,78,221,0.8),inset_0_0_30px_rgb(157,78,221,0.4)] rounded-2xl mx-auto" style="width: 800px; height: 600px;">
 					<canvas id="gameCanvas" width="800" height="600" class="rounded-xl bg-black w-full h-full"></canvas>
 					<!-- Indicateurs de coin -->
-					<div class="absolute top-2 left-2 ${classes.cornerIndicator} border-l-2 border-t-2"></div>
-					<div class="absolute top-2 right-2 ${classes.cornerIndicator} border-r-2 border-t-2"></div>
-					<div class="absolute bottom-2 left-2 ${classes.cornerIndicator} border-l-2 border-b-2"></div>
-					<div class="absolute bottom-2 right-2 ${classes.cornerIndicator} border-r-2 border-b-2"></div>
+					<div class="absolute top-2 left-2 w-4 h-4 border-purple-400 shadow-[0_0_5px_rgb(157,78,221)] border-l-2 border-t-2"></div>
+					<div class="absolute top-2 right-2 w-4 h-4 border-purple-400 shadow-[0_0_5px_rgb(157,78,221)] border-r-2 border-t-2"></div>
+					<div class="absolute bottom-2 left-2 w-4 h-4 border-purple-400 shadow-[0_0_5px_rgb(157,78,221)] border-l-2 border-b-2"></div>
+					<div class="absolute bottom-2 right-2 w-4 h-4 border-purple-400 shadow-[0_0_5px_rgb(157,78,221)] border-r-2 border-b-2"></div>
 				</div>
 
 				<!-- Compte à rebours -->
-				<div id="countdowndisplay" class="text-6xl font-bold ${classes.neonText} mt-8 text-center"></div>
+				<div id="countdowndisplay" class="text-6xl font-bold text-purple-300 drop-shadow-[0_0_3px_rgb(187,134,252)] drop-shadow-[0_0_6px_rgb(187,134,252)] drop-shadow-[0_0_9px_rgb(187,134,252)] animate-pulse mt-8 text-center"></div>
 
 				<!-- Message de fin de partie -->
-				<div id="endMessage" class="text-2xl font-bold ${classes.neonText} mt-8 text-center">
+				<div id="endMessage" class="text-2xl font-bold text-purple-300 drop-shadow-[0_0_3px_rgb(187,134,252)] drop-shadow-[0_0_6px_rgb(187,134,252)] drop-shadow-[0_0_9px_rgb(187,134,252)] animate-pulse mt-8 text-center">
 				</div>
-				<button id="nextMatchBtn" class="hidden m-6 mx-auto ${classes.actionButton}">
+				<button id="nextMatchBtn" class="hidden m-6 mx-auto bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-purple-300 font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full">
 					${i18n.t('game.next_game')}
 				</button>
-				<button id="finalMatchBtn" class="hidden m-6 mx-auto ${classes.actionButton}">
+				<button id="finalMatchBtn" class="hidden m-6 mx-auto bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-purple-300 font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full">
 					${i18n.t('game.final')}
 				</button>
 
 				<!-- Contrôles -->
-				<div id="control_1" class="hidden ${classes.controlPanel} mt-8">
+				<div id="control_1" class="hidden bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-2xl p-6 mt-8">
 					<h3 class="text-xl font-bold text-purple-300 mb-4 text-center">
 					${i18n.t('game.control')}
 					</h3>
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
-						<div class="${classes.controlItem}">
+						<div class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-lg p-4 text-center">
 							<p id="control_player_1" class="text-purple-300 font-semibold">
 							${i18n.t('game.p1')}
 							</p>
 							<p id="control_player_1_command" class="text-sm text-gray-300">
 							W / S</p>
 						</div>
-						<div class="${classes.controlItem}">
+						<div class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-lg p-4 text-center">
 							<p id="control_player_2" class="text-purple-300 font-semibold">
 							${i18n.t('game.p1')}
 							</p>
@@ -428,30 +427,30 @@ export function createGamePage(): HTMLElement {
 					</div>
 				</div>
 
-				<div id="control_2" class="hidden ${classes.controlPanel} mt-8">
+				<div id="control_2" class="hidden bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-2xl p-6 mt-8">
 					<h3 class="text-xl font-bold text-purple-300 mb-4 text-center">
 					${i18n.t('game.control')}
 					</h3>
 					<div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
-						<div class="${classes.controlItem}">
+						<div class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-lg p-4 text-center">
 							<p class="text-purple-300 font-semibold">
 							${i18n.t('game.p1')}
 							</p>
 							<p class="text-sm text-gray-300">W / S</p>
 						</div>
-						<div class="${classes.controlItem}">
+						<div class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-lg p-4 text-center">
 							<p class="text-purple-300 font-semibold">
 							${i18n.t('game.p2')}
 							</p>
 							<p class="text-sm text-gray-300">J / M</p>
 						</div>
-						<div class="${classes.controlItem}">
+						<div class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-lg p-4 text-center">
 							<p class="text-purple-300 font-semibold">
 							${i18n.t('game.p3')}
 							</p>
 							<p class="text-sm text-gray-300">9 / 6</p>
 						</div>
-						<div class="${classes.controlItem}">
+						<div class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-lg p-4 text-center">
 							<p class="text-purple-300 font-semibold">
 							${i18n.t('game.p4')}
 							</p>

@@ -68,7 +68,8 @@
     "build": "npm run build:frontend && npm run build:backend",
     "build:backend": "npx prisma generate --schema=./backend/prisma/schema.prisma && cd backend && tsc",
     "build:frontend": "cd frontend && npm install && npm run build",
-    "start": "npx prisma generate --schema=./backend/prisma/schema.prisma && cd backend && node dist/server.js"
+    "start": "npx prisma generate --schema=./backend/prisma/schema.prisma && cd backend && node dist/server.js",
+    "prod": "npm run start"
   },
   "keywords": [],
   "author": "",

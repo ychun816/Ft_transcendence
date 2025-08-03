@@ -1,7 +1,5 @@
 import { i18n } from "../services/i18n.js";
 import { createLanguageSwitcher } from "../components/LanguageSwitcher.js";
-import { classes } from "../styles/retroStyles.js";
-import { createNeonContainer } from "../styles/neonTheme.js";
 
 export function createChatPage(): HTMLElement {
 	const page = document.createElement("div");
@@ -19,26 +17,26 @@ export function createChatPage(): HTMLElement {
 			</style>
 
 			<!-- Champ d'étoiles -->
-			<div class="${classes.starfield}"></div>
+			<div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 bg-[radial-gradient(2px_2px_at_20px_30px,rgb(157,78,221),transparent),radial-gradient(2px_2px_at_40px_70px,rgb(199,125,255),transparent),radial-gradient(1px_1px_at_90px_40px,rgb(157,78,221),transparent),radial-gradient(1px_1px_at_130px_80px,rgb(199,125,255),transparent),radial-gradient(2px_2px_at_160px_30px,rgb(157,78,221),transparent),radial-gradient(1px_1px_at_200px_90px,rgb(199,125,255),transparent),radial-gradient(2px_2px_at_240px_20px,rgb(157,78,221),transparent)] bg-[length:250px_150px] animate-pulse"></div>
 
 			<div class="absolute top-4 right-4 z-50" id="language-switcher-container"></div>
 
 			<!-- Main Chat Container -->
-			<div class="${classes.retroPanel} rounded-2xl p-8 max-w-7xl w-full h-[80vh] flex flex-col fade-in slide-up">
+			<div class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-2xl p-8 max-w-7xl w-full h-[80vh] flex flex-col fade-in slide-up">
 				<header class="w-full flex items-center gap-4 mb-6">
-					<button class="${classes.backButton}" data-route="/game">
+					<button class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-white font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full" data-route="/game">
 						← ${i18n.t("chat.back")}
 					</button>
-					<h2 class="${classes.retroTitle} text-3xl">
+					<h2 class="text-6xl font-black text-transparent bg-gradient-to-r from-purple-400 via-purple-300 to-purple-400 bg-clip-text text-center drop-shadow-neon-purple animate-pulse text-3xl">
 						💬 ${i18n.t("chat.title")}
 					</h2>
 				</header>
 
 				<main class="flex-1 flex gap-4 min-h-0">
 					<!-- Online Users Panel -->
-					<div class="w-1/4 ${classes.retroPanel} rounded-xl flex flex-col min-h-0">
+					<div class="w-1/4 bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-xl flex flex-col min-h-0">
 						<div class="p-4 border-b-2 border-purple-400/30">
-							<h3 class="${classes.neonText} font-bold text-lg">
+							<h3 class="text-purple-300 drop-shadow-[0_0_3px_rgb(187,134,252)] drop-shadow-[0_0_6px_rgb(187,134,252)] drop-shadow-[0_0_9px_rgb(187,134,252)] animate-pulse font-bold text-lg">
 								👥 ${i18n.t("chat.online_users")}
 							</h3>
 						</div>
@@ -51,9 +49,9 @@ export function createChatPage(): HTMLElement {
 					</div>
 
 					<!-- Conversations Panel -->
-					<div class="w-1/3 ${classes.retroPanel} rounded-xl flex flex-col min-h-0">
+					<div class="w-1/3 bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-xl flex flex-col min-h-0">
 						<div class="p-4 border-b-2 border-purple-400/30">
-							<h3 class="${classes.neonText} font-bold text-lg">
+							<h3 class="text-purple-300 drop-shadow-[0_0_3px_rgb(187,134,252)] drop-shadow-[0_0_6px_rgb(187,134,252)] drop-shadow-[0_0_9px_rgb(187,134,252)] animate-pulse font-bold text-lg">
 								💭 ${i18n.t("chat.conversations")}
 							</h3>
 						</div>
@@ -63,23 +61,23 @@ export function createChatPage(): HTMLElement {
 					</div>
 
 					<!-- Chat Area -->
-					<div class="flex-1 ${classes.retroPanel} rounded-xl flex flex-col min-h-0">
+					<div class="flex-1 bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-xl flex flex-col min-h-0">
 						<div class="p-4 border-b-2 border-purple-400/30" id="chat-header">
-							<h3 class="${classes.neonText} font-bold text-lg">
+							<h3 class="text-purple-300 drop-shadow-[0_0_3px_rgb(187,134,252)] drop-shadow-[0_0_6px_rgb(187,134,252)] drop-shadow-[0_0_9px_rgb(187,134,252)] animate-pulse font-bold text-lg">
 								💬 ${i18n.t("chat.select_conversation")}
 							</h3>
 						</div>
 						<div class="flex-1 p-4 overflow-y-auto" id="chat-messages">
 							<!-- Messages will appear here -->
 						</div>
-						<div class="${classes.retroPanel} border-t-2 border-purple-400/30 p-4 flex gap-2">
+						<div class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm border-t-2 border-purple-400/30 p-4 flex gap-2">
 							<input
 								type="text"
 								placeholder="${i18n.t("chat.type_message")}"
 								id="message-input"
-								class="${classes.tournamentInput} flex-1"
+								class="bg-gradient-to-br from-black to-purple-900/20 border-2 border-purple-400 text-purple-300 shadow-[0_0_10px_rgb(157,78,221,0.4),inset_0_0_10px_rgb(157,78,221,0.2)] focus:border-purple-300 focus:shadow-[0_0_20px_rgb(157,78,221),inset_0_0_20px_rgb(157,78,221,0.3)] focus:outline-none px-4 py-2 rounded-lg w-full text-center font-bold flex-1"
 							>
-							<button id="send-message" class="${classes.actionButton}">
+							<button id="send-message" class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-purple-300 font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full">
 								📤 ${i18n.t("chat.send")}
 							</button>
 						</div>
@@ -88,7 +86,13 @@ export function createChatPage(): HTMLElement {
 			</div>
 		`;
 
-		page.innerHTML = createNeonContainer(content);
+		page.innerHTML = `
+			<div class="min-h-screen bg-gray-900 text-white font-mono overflow-hidden">
+				<div class="min-h-screen flex flex-col items-center justify-center p-4 relative before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:bottom-0 before:bg-gradient-to-b before:from-transparent before:via-purple-400/10 before:to-transparent before:bg-[length:100%_4px] before:animate-pulse before:pointer-events-none">
+					${content}
+				</div>
+			</div>
+		`;
 
 		// Add language switcher
 		const languageSwitcherContainer = page.querySelector(
@@ -119,11 +123,11 @@ export function createChatPage(): HTMLElement {
 
 	if (!username) {
 		page.innerHTML = `
-				<div class="min-h-screen flex items-center justify-center p-4 scan-lines relative">
-					<div class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-8 border border-red-400 border-opacity-30 neon-border max-w-md w-full text-center">
-						<h2 class="text-xl font-bold text-red-400 neon-text mb-4">${i18n.t("common.error")}</h2>
+				<div class="min-h-screen flex items-center justify-center p-4 relative before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:bottom-0 before:bg-gradient-to-b before:from-transparent before:via-purple-400/10 before:to-transparent before:bg-[length:100%_4px] before:animate-pulse before:pointer-events-none">
+					<div class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-2xl p-8 border border-red-400 border-opacity-30 max-w-md w-full text-center">
+						<h2 class="text-xl font-bold text-purple-300 drop-shadow-[0_0_3px_rgb(187,134,252)] drop-shadow-[0_0_6px_rgb(187,134,252)] drop-shadow-[0_0_9px_rgb(187,134,252)] animate-pulse mb-4">${i18n.t("common.error")}</h2>
 						<p class="text-gray-300">${i18n.t("chat.login_required")}</p>
-						<button class="bg-gradient-to-r from-red-400 from-opacity-30 to-orange-400 to-opacity-30 hover:from-red-400 hover:from-opacity-50 hover:to-orange-400 hover:to-opacity-50 text-white font-bold py-2 px-4 rounded-lg border border-red-400 border-opacity-50 transition-all duration-300 transform hover:scale-105 mt-4" data-route="/login">${i18n.t("chat.login_link")}</button>
+						<button class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-white font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full mt-4" data-route="/login">${i18n.t("chat.login_link")}</button>
 					</div>
 				</div>
 			`;
@@ -171,11 +175,11 @@ export function createChatPage(): HTMLElement {
 			.catch((error) => {
 				console.error("❌ Failed to get user info:", error);
 				page.innerHTML = `
-					<div class="min-h-screen flex items-center justify-center p-4 scan-lines relative">
-						<div class="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-8 border border-red-400 border-opacity-30 neon-border max-w-md w-full text-center">
-							<h2 class="text-xl font-bold text-red-400 neon-text mb-4">${i18n.t("common.error")}</h2>
+					<div class="min-h-screen flex items-center justify-center p-4 relative before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:bottom-0 before:bg-gradient-to-b before:from-transparent before:via-purple-400/10 before:to-transparent before:bg-[length:100%_4px] before:animate-pulse before:pointer-events-none">
+						<div class="bg-black/95 border-2 border-purple-400 shadow-neon-purple-lg backdrop-blur-sm rounded-2xl p-8 border border-red-400 border-opacity-30 max-w-md w-full text-center">
+							<h2 class="text-xl font-bold text-purple-300 drop-shadow-[0_0_3px_rgb(187,134,252)] drop-shadow-[0_0_6px_rgb(187,134,252)] drop-shadow-[0_0_9px_rgb(187,134,252)] animate-pulse mb-4">${i18n.t("common.error")}</h2>
 							<p class="text-gray-300">${i18n.t("chat.user_info_error")}</p>
-							<button class="bg-gradient-to-r from-red-400 from-opacity-30 to-orange-400 to-opacity-30 hover:from-red-400 hover:from-opacity-50 hover:to-orange-400 hover:to-opacity-50 text-white font-bold py-2 px-4 rounded-lg border border-red-400 border-opacity-50 transition-all duration-300 transform hover:scale-105 mt-4" data-route="/login">${i18n.t("chat.reconnect_link")}</button>
+							<button class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/50 text-white font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-neon-purple hover:border-purple-300 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-purple-400/40 before:to-transparent before:transition-all before:duration-500 hover:before:left-full mt-4" data-route="/login">${i18n.t("chat.reconnect_link")}</button>
 						</div>
 					</div>
 				`;
@@ -334,6 +338,16 @@ function initializeChat(page: HTMLElement, userData: any) {
 					return true;
 				case "user_unblocked_you":
 					usersWhoBlockedMe.delete(data.username);
+					showBlockedMessage(data.username, false, true);
+					if (currentConversation === data.username) {
+						if (globalNotificationService && globalNotificationService.isReady()) {
+							globalNotificationService.sendMessage({
+								type: "get_messages",
+								otherUsername: data.username,
+							});
+						}
+					}
+					loadConversations();
 					return true;
 				default:
 					return false;
@@ -478,7 +492,6 @@ function initializeChat(page: HTMLElement, userData: any) {
 			return;
 		}
 
-		console.log(`👤 Adding user ${user.username} to online list`);
 
 		const existingUser = onlineUsersList.querySelector(
 			`[data-username="${user.username}"]`

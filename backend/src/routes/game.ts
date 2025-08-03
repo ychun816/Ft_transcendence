@@ -71,7 +71,6 @@ export async function registerGameRoute(
 		}
 	});
 
-	// Obtenir seulement la position de la balle
 	app.get("/api/game/:gameId/ball", async (request, reply) => {
 		try {
 			const { gameId } = request.params as { gameId: string };
@@ -98,7 +97,6 @@ export async function registerGameRoute(
 		}
 	});
 
-	// Obtenir seulement les positions des paddles
 	app.get("/api/game/:gameId/paddles", async (request, reply) => {
 		try {
 			const { gameId } = request.params as { gameId: string };
