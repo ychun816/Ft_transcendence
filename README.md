@@ -2,6 +2,8 @@
 
 **Team:** [Transcende_me_if_you_can](https://github.com/Canybardeloton/Transcende_me_if_you_can)
 
+---
+
 <p align="center">
   
 ![Docker](https://img.shields.io/badge/Docker-Learned-C5A3E8?style=flat&logo=docker&logoColor=white) <!-- pastel purple -->
@@ -13,6 +15,8 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Learned-E1BEE7?style=flat&logo=postgresql&logoColor=white) <!-- pastel lavender -->
 ![HashiCorp Vault](https://img.shields.io/badge/Vault-Learned-B2DFDB?style=flat&logo=vault&logoColor=white) <!-- pastel teal -->
 </p>
+
+---
 
 ## 📑 Table of Contents
 
@@ -690,6 +694,7 @@ http://localhost:3000/api/2fa/verify-totp-temp/userr/2fanumber
 # View logs
 docker-
 ```
+
 
 
 
