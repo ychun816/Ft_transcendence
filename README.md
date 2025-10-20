@@ -1,5 +1,7 @@
 # 🎮 Ft_transcendence - User Management & 2FA Authentication Module
 
+[Team: Transcende_me_if_you_can](https://github.com/Canybardeloton/Transcende_me_if_you_can)
+
 <p align="center">
   
 ![Docker](https://img.shields.io/badge/Docker-Learned-C5A3E8?style=flat&logo=docker&logoColor=white) <!-- pastel purple -->
@@ -666,6 +668,21 @@ curl -X POST https://localhost:3000/api/auth/logout \
 
 ### Docker Commands
 
+To run the docker:
+
+1. Download "Dev Container" from Microsoft on Vs Code
+2. Make sure your port 3000 is free
+3. Inside VsCode, ctrl shift P to open menu & type Dev Container, (rebuild) reopen in container.
+4. Now you inside the container, BE CAREFUL WITH THIS, every you will do inside your container is also done in your repo on your computer, its a bind mount so make sure what you do.
+5. For exemple load 2 VsCode, connect one with the container & open another one in VsCode via your folder, everything you type in VsCode will appear in the other one.
+6. To run server: ```npm run dev```
+7. Run the script if you want to reset docker images & containers, be aware, this script will remove all the Docker environment.
+```
+https://localhost:3000/api/2fa/setup-totp-temp/user
+
+http://localhost:3000/api/2fa/verify-totp-temp/userr/2fanumber
+```
+
 ```bash
 # Remove all Docker images and containers (USE WITH CAUTION)
 ./reset_docker.sh
@@ -673,6 +690,8 @@ curl -X POST https://localhost:3000/api/auth/logout \
 # View logs
 docker-
 ```
+
+
 
 
 
