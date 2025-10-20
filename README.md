@@ -2,12 +2,14 @@
 
 <p align="center">
   
-![Python](https://img.shields.io/badge/Python-Learned-FFD4B2?style=flat&logo=python&logoColor=white) <!-- pastel orange -->
-![Git](https://img.shields.io/badge/Git-Learned-BFEFFF?style=flat&logo=git&logoColor=white) <!-- pastel blue -->
-![Linux](https://img.shields.io/badge/Linux-Learned-FFC4D6?style=flat&logo=linux&logoColor=white) <!-- pastel pink -->
 ![Docker](https://img.shields.io/badge/Docker-Learned-C5A3E8?style=flat&logo=docker&logoColor=white) <!-- pastel purple -->
-![Machine Learning](https://img.shields.io/badge/Machine%20Learning-Learned-FFF1A8?style=flat&logoColor=white) <!-- pastel yellow -->
-
+![TypeScript](https://img.shields.io/badge/TypeScript-Learned-BFEFFF?style=flat&logo=typescript&logoColor=white) <!-- pastel blue -->
+![NestJS](https://img.shields.io/badge/NestJS-Learned-FFC4D6?style=flat&logo=nestjs&logoColor=white) <!-- pastel pink -->
+![JWT](https://img.shields.io/badge/JWT-Learned-FFD4B2?style=flat&logo=jsonwebtokens&logoColor=white) <!-- pastel orange -->
+![2FA](https://img.shields.io/badge/2FA-Learned-FFF1A8?style=flat&logo=google-authenticator&logoColor=white) <!-- pastel yellow -->
+![Security](https://img.shields.io/badge/Security-Learned-C8E6C9?style=flat&logo=security&logoColor=white) <!-- pastel green -->
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Learned-E1BEE7?style=flat&logo=postgresql&logoColor=white) <!-- pastel lavender -->
+![HashiCorp Vault](https://img.shields.io/badge/Vault-Learned-B2DFDB?style=flat&logo=vault&logoColor=white) <!-- pastel teal -->
 </p>
 
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
@@ -678,5 +680,6 @@ curl -X POST https://localhost:3000/api/auth/logout \
 # View logs
 docker-
 ```
+
 
 
