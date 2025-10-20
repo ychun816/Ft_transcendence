@@ -12,13 +12,6 @@
 ![HashiCorp Vault](https://img.shields.io/badge/Vault-Learned-B2DFDB?style=flat&logo=vault&logoColor=white) <!-- pastel teal -->
 </p>
 
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)
-![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
-![2FA](https://img.shields.io/badge/2FA-4285F4?style=for-the-badge&logo=google-authenticator&logoColor=white)
-![Security](https://img.shields.io/badge/Security-FF6B6B?style=for-the-badge&logo=security&logoColor=white)
-
 ## 📑 Table of Contents
 
 - [About / Project Overview](#-about--project-overview)
@@ -680,6 +673,7 @@ curl -X POST https://localhost:3000/api/auth/logout \
 # View logs
 docker-
 ```
+
 
 
 
