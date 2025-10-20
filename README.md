@@ -1,6 +1,6 @@
 # 🎮 Ft_transcendence - User Management & 2FA Authentication Module
 
-[Team: Transcende_me_if_you_can](https://github.com/Canybardeloton/Transcende_me_if_you_can)
+**Team:** [Transcende_me_if_you_can](https://github.com/Canybardeloton/Transcende_me_if_you_can)
 
 <p align="center">
   
@@ -690,6 +690,7 @@ http://localhost:3000/api/2fa/verify-totp-temp/userr/2fanumber
 # View logs
 docker-
 ```
+
 
 
 
