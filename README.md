@@ -1,5 +1,15 @@
 # 🎮 Ft_transcendence - User Management & 2FA Authentication Module
 
+<p align="center">
+  
+![Python](https://img.shields.io/badge/Python-Learned-FFD4B2?style=flat&logo=python&logoColor=white) <!-- pastel orange -->
+![Git](https://img.shields.io/badge/Git-Learned-BFEFFF?style=flat&logo=git&logoColor=white) <!-- pastel blue -->
+![Linux](https://img.shields.io/badge/Linux-Learned-FFC4D6?style=flat&logo=linux&logoColor=white) <!-- pastel pink -->
+![Docker](https://img.shields.io/badge/Docker-Learned-C5A3E8?style=flat&logo=docker&logoColor=white) <!-- pastel purple -->
+![Machine Learning](https://img.shields.io/badge/Machine%20Learning-Learned-FFF1A8?style=flat&logoColor=white) <!-- pastel yellow -->
+
+</p>
+
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)
@@ -667,15 +677,6 @@ curl -X POST https://localhost:3000/api/auth/logout \
 
 # View logs
 docker-
+```
 
----
 
-<p align="center">
-  
-![Python](https://img.shields.io/badge/Python-Learned-FFD4B2?style=flat&logo=python&logoColor=white) <!-- pastel orange -->
-![Git](https://img.shields.io/badge/Git-Learned-BFEFFF?style=flat&logo=git&logoColor=white) <!-- pastel blue -->
-![Linux](https://img.shields.io/badge/Linux-Learned-FFC4D6?style=flat&logo=linux&logoColor=white) <!-- pastel pink -->
-![Docker](https://img.shields.io/badge/Docker-Learned-C5A3E8?style=flat&logo=docker&logoColor=white) <!-- pastel purple -->
-![Machine Learning](https://img.shields.io/badge/Machine%20Learning-Learned-FFF1A8?style=flat&logoColor=white) <!-- pastel yellow -->
-
-</p>
